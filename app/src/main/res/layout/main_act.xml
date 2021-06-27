@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	tools:context=".MainAct.MainAct">
+
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent">
+
+		<Button
+			android:id="@+id/btn_perms"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Click here until there is no permission left to authorize" />
+
+		<Button
+			android:id="@+id/btn_device_admin"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Open the Device Administrators list" />
+
+		<Space
+			android:layout_width="match_parent"
+			android:layout_height="31dp" />
+
+		<EditText
+			android:id="@+id/txt_to_speech"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:ems="10"
+			android:hint="Enter text to speak"
+			android:inputType="textPersonName"
+			android:text="This is an example."
+			android:autofillHints="" />
+
+		<Button
+			android:id="@+id/btn_speak_min"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Speak (min priority)" />
+
+		<Button
+			android:id="@+id/btn_speak_high"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Speak (high priority)" />
+
+		<Button
+			android:id="@+id/btn_skip_speech"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Skip current speech" />
+
+		<Space
+			android:layout_width="match_parent"
+			android:layout_height="31dp" />
+
+		<EditText
+			android:id="@+id/txt_to_send"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:ems="10"
+			android:hint="Text to send to the assistant"
+			android:inputType="textPersonName"
+			android:importantForAutofill="no"
+			android:focusable="true"
+			android:focusableInTouchMode="true"
+			android:focusedByDefault="true" />
+
+		<Button
+			android:id="@+id/btn_send_text"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Send text" />
+
+		<Space
+			android:layout_width="match_parent"
+			android:layout_height="31dp" />
+
+		<Button
+			android:id="@+id/btn_tests"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="For testing" />
+
+	</LinearLayout>
+
+</ScrollView>

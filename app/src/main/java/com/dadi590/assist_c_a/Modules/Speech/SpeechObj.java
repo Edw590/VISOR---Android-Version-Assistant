@@ -1,0 +1,89 @@
+package com.dadi590.assist_c_a.Modules.Speech;
+
+import android.media.AudioManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * <p>Each speech is an instance of this class.</p>
+ */
+public class SpeechObj {
+
+	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
+	// SYSTEM_ENFORCED so we can't the change the volume: "Yeah, it will always play at max volume since this stream is
+	// intended mainly for camera shutter sounds in markets where they have legal requirements saying that
+	// people shouldn't be able to mute/attenuate the shutter sound and go around taking photos of other people
+	// without their knowledge." - StackOverflow
+	// EDIT: Or not... At least with Lollipop 5.1 and Oreo 8.1. Maybe only in Japanese phones which is where the
+	// above is applied (said in another comment).
+	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
+	// system-dependent, and ALARM seems to always have high priority, possibly.
+	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_RING;
+	private static final int AUD_STREAM_PRIORITY_OTHERS = AudioManager.STREAM_RING;
+	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
+	// Also don't change to MUSIC, for the same reason.
+	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
+	// Just let everything on ALARM (except with connected headphones).
+	// Easier and always works (alarms have top priority even over Do Not Disturb, at least on Oreo 8.1).
+	// EDIT: It's now on RING for us to be able to change the volume easily, as opposite to ALARM (which I will leave
+	// with CRITICAL, since it's to be spoken at full volume always.
+	// Leave on RING since this way the volume can be set independently of the music playing. On headphones such thing
+	// can't be done independently though. Pity.
+	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
+	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
+	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.
+
+	static final int DEFAULT_AUDIO_STREAM = -3234;
+
+	final String utterance_id;
+	final Runnable runnable;
+	@NonNull String speech; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
+	final int audio_stream;
+
+	/**
+	 * <p>Main class constructor.</p>
+	 *
+	 *  @param utterance_id the utterance ID of the speech
+	 * @param speech what to speak
+	 * @param current_speech_obj if the instance being created is for the {@link Speech2#current_speech_obj} - the
+	 *                           audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value
+	 * @param runnable the {@link Runnable} connected to the speech
+	 */
+	SpeechObj(final String utterance_id, final @NotNull String speech, final boolean current_speech_obj,
+			  @Nullable final Runnable runnable) {
+		this.utterance_id = utterance_id;
+		this.runnable = runnable;
+		this.speech = speech;
+
+		if (current_speech_obj) {
+			audio_stream = DEFAULT_AUDIO_STREAM;
+		} else {
+			final int priority = UtilsSpeech2.getSpeechPriority(utterance_id);
+			if (priority == Speech2.PRIORITY_CRITICAL) {
+				audio_stream = AUD_STREAM_PRIORITY_CRITICAL;
+			} else if (priority == Speech2.PRIORITY_HIGH) {
+				audio_stream = AUD_STREAM_PRIORITY_HIGH;
+			} else {
+				if (UtilsGeneral.areExtSpeakersOn()) {
+					audio_stream = AUD_STREAM_HEADPHONES;
+				} else {
+					audio_stream = AUD_STREAM_PRIORITY_OTHERS;
+				}
+			}
+		}
+	}
+
+	@NonNull
+	@Override
+	public final String toString() {
+		@NonNls final String ret_value = "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + speech + "\", "
+				+ runnable + "\", " + audio_stream + "]";
+		return ret_value;
+	}
+}

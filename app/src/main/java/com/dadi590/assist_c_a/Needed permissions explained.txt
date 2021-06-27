@@ -1,0 +1,66 @@
+------------Normal permissions------------
+
+android.permission.RECEIVE_BOOT_COMPLETED
+- Start the app at device boot
+
+android.permission.FOREGROUND_SERVICE
+- Run the Main Service (and any other(s)) in foreground as of API something
+
+android.permission.ACCESS_NOTIFICATION_POLICY
+- To be able to change the Interruption Filter
+
+
+------------Dangerous permissions------------
+
+android.permission.RECEIVE_SMS
+- Receive SMS
+
+android.permission.RECORD_AUDIO
+- Record audio
+
+android.permission.WRITE_EXTERNAL_STORAGE
+- Write to the external storage
+
+android.permission.READ_PHONE_STATE
+- To get phone state changes for PhoneCallProcessor
+
+android.permission.READ_CALL_LOG
+- To get the number that comes with the phone state change, as stated in Android Developers website
+
+android.permission.READ_CONTACTS
+- To read the phone contacts (so the assistant can know who is calling)
+
+
+------------Privileged apps' permissions------------
+
+android.permission.CAPTURE_AUDIO_OUTPUT
+android.permission.CAPTURE_MEDIA_OUTPUT
+android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
+- To be able to record from any source desired
+
+android.permission.READ_PRECISE_PHONE_STATE
+- To receive changes of the phone state with precise phone states, as opposite to the more generic ones from
+  android.permission.READ_PHONE_STATE
+
+
+------------Custom permissions------------
+
+com.dadi590.assist_c_a.permission.INT_RECEIVERS
+- This permission is for the entire app to communicate inside itself (internally). sendBroadcast() sends to all apps, so
+  they must hold this permission to receive the broadcast (which they can only hold if they're signed with my signature)
+
+com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS
+- This permission exists for no other app to be able to communicate with this one, in the components that declare this
+  permission (or that inherit it), except if it's some other app developed by me (same signature)
+
+
+------------SuperSU permission------------
+
+android.permission.ACCESS_SUPERUSER
+- From https://su.chainfire.eu/#updates-permission:
+  "X.4. ACCESS_SUPERUSER permission DEPRECATED
+  Due to changes in Android 5.0 Lollipop, this permission has been deprecated and is completely ignored from SuperSU
+  v2.30 onwards
+  From SuperSU version 1.20 and onwards, the android.permission.ACCESS_SUPERUSER permission is declared by SuperSU."
+
+  So it's a SuperSU deprecated permission, but leave it here anyways. Could be useful in some case.

@@ -1,0 +1,74 @@
+plugins {
+	id 'com.android.application'
+}
+
+android {
+	signingConfigs {
+		release {
+			final def propsFile = rootProject.file('PERSONAL_FILES_EOG\\signing_legion_android.SECRET')
+			final def props = new Properties()
+
+			props.load(new FileInputStream(propsFile))
+			storeFile = file(props['storeFilePath'])
+			storePassword = props['storePassword']
+			keyAlias = props['keyAlias']
+			keyPassword = props['keyPassword']
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+
+	The minimum version will be kept on API 15 in case there's some emergency and it's needed to use on an old phone and
+	that way at least the minimum can be used, hopefully.
+
+	The target version will be kept at 23, since that may unlock security limitations imposed if the target SDK is newer,
+	like as of API 28, some internal/hidden classes and methods can no longer be used.
+	Change it to a newer one to test with Play Store standards only.
+	Do NOT put it below API 23, or the app will not be able to check/request run-time permissions!
+
+	Versions for which the app was developed (developing to a version implies testing on that version):
+		- Lollipop 5.1, API 22 --> until [still on it]
+		- Oreo 8.1, API 27 --> until [still on it]
+
+	*/
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	compileSdkVersion 29
+	buildToolsVersion "30.0.3"
+
+	defaultConfig {
+		applicationId "com.dadi590.assist_c_a"
+		minSdkVersion 15
+		targetSdkVersion 23
+		versionCode 1
+		versionName "1.0"
+
+		signingConfig signingConfigs.release
+
+		multiDexEnabled true
+	}
+
+	buildTypes {
+		debug {
+			signingConfig signingConfigs.release
+		}
+		release {
+			minifyEnabled true
+			shrinkResources true
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+		}
+	}
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+}
+
+dependencies {
+
+	implementation 'androidx.appcompat:appcompat:1.3.0'
+	implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+	implementation 'org.jetbrains:annotations:15.0'
+	implementation "androidx.multidex:multidex:2.0.1"
+}

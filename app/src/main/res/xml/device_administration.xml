@@ -1,0 +1,6 @@
+<device-admin>
+	<uses-policies>
+		<force-lock />
+	</uses-policies>
+</device-admin>
+<!-- https://developers.google.com/android/work/device-admin-deprecation for deprecated policies -->

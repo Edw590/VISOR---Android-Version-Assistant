@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.dadi590.assist_c_a"
+	android:targetSandboxVersion="2"
+	android:installLocation="internalOnly"
+	coreApp="true">
+	<!-- Note: never tested this as a coreApp, but I'll leave it here anyways (hopefully the declaration works, even
+	though Android Studio doesn't recognize it -->
+
+	<!-- Normal permissions -->
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
+	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
+	<!-- Dangerous permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
+	<uses-permission android:name="android.permission.RECEIVE_SMS" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.READ_CALL_LOG" />
+	<uses-permission android:name="android.permission.READ_CONTACTS" />
+	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
+
+	<!-- Privileged apps' permissions (only by having the app installed in /system/priv-app) -->
+	<!-- For some of these permissions to work, hidden/internal APIs must be used to compile the app -->
+	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT" />
+	<uses-permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT" />
+	<uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
+
+	<!-- SuperSU permission -->
+	<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+
+
+	<!-- Declaration of custom permissions -->
+	<permission android:name="com.dadi590.assist_c_a.permission.INT_RECEIVERS" android:protectionLevel="signature"/>
+	<permission android:name="com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS" android:protectionLevel="signature"/>
+
+
+	<!-- todo INSTALL THE APP AS SYSTEM-ONLY, -REMOVE THE ROOT- PERMISSION, AND FIX ALL THE ERRORS!!!!!!!!! -->
+	<!-- todo FORCE THE APP TO GRANT ITS OWN PERMISSIONS EACH SOME TIME WITH ROOT OR WITH SOME SYSTEM METHOD!!!!!!!! -->
+
+
+	<application
+		android:label="@string/app_name"
+		android:icon="@drawable/dadi_empresas_inc__transparent"
+		android:roundIcon="@drawable/dadi_empresas_inc__transparent"
+		android:theme="@style/AppTheme"
+		android:appCategory="productivity"
+		android:directBootAware="true"
+		android:usesNonSdkApi="true"
+		android:name="androidx.multidex.MultiDexApplication"
+		android:resizeableActivity="true"
+
+		android:allowClearUserData="true"
+
+		android:allowClearUserDataOnFailedRestore="false"
+		android:persistent="true"
+		android:allowAudioPlaybackCapture="false"
+		android:allowBackup="false"
+		android:cantSaveState="true"
+		android:fullBackupContent="false"
+		android:fullBackupOnly="false"
+		android:hasFragileUserData="true"
+		android:useEmbeddedDex="true"
+		android:vmSafeMode="true"
+		android:extractNativeLibs="false"
+		android:requiredForAllUsers="false"
+		android:usesCleartextTraffic="false"
+		android:permission="com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS">
+		<!-- ^^^^ The attributes above and below the blank line are for maximum app security, hopefully ^^^^ -->
+		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
+		without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
+
+		<activity android:name="com.dadi590.assist_c_a.MainAct.MainAct"
+			android:directBootAware="true"
+			android:autoRemoveFromRecents="true"
+			android:permission=""
+			android:noHistory="false">
+			<!--android:excludeFromRecents="true"-->
+			<!-- The only external order that can supposedly be given to the app is to this activity and nothing else.
+			That's the reason of permission="", so any app can start this app, but cannot do anything with any of the
+			other components of the app -->
+			<!-- Don't think about putting noHistory to true, since it will stop the app from being able to request
+			runtime permissions -->
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.LAUNCHER" />
+
+				<action android:name="android.intent.action.VIEW" />
+			</intent-filter>
+		</activity>
+		<!--<activity android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr"
+			android:directBootAware="true"
+			android:showOnLockScreen="true"
+			android:showForAllUsers="true"
+			android:turnScreenOn="true"
+			android:autoRemoveFromRecents="true"
+			android:excludeFromRecents="true" />-->
+
+		<service android:name="com.dadi590.assist_c_a.MainSrv"
+			android:directBootAware="true"
+			android:enabled="true" />
+
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv"
+			android:directBootAware="true"
+			android:enabled="true">
+			<intent-filter android:priority="1000">
+				<!-- ALWAYS REGISTER ACTIONS INSTEAD OF DECLARING THEM TO AVOID ISSUES WITH REGISTER-ONLY ACTIONS -->
+				<!-- Also, all actions need to be sent with the Main Service started and not with it stopped, so why
+				not register them all anyways -->
+
+
+				<!-- Except these below, which need to be sent before the Main Service is started... -->
+				<action android:name="android.intent.action.USER_PRESENT" />
+				<action android:name="android.intent.action.USER_UNLOCKED" />
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+				<action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+				<action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+				<action android:name="android.intent.action.QUICKBOOT_POWERON" />
+				<!-- About QUICKBOOT_POWERON: "This is broadcast that you don’t find in the official Android
+				documentation. It’s sent on some devices and emulators when the device is restarted only." - StackOverflow -->
+				<!-- Why all those BOOT and USER actions? Refer to IntentWhatToDo.intentWhatToDo(). -->
+
+
+				<!-- ALWAYS REGISTER ACTIONS INSTEAD OF DECLARING THEM TO AVOID ISSUES WITH REGISTER-ONLY ACTIONS -->
+				<!-- Also, all actions need to be sent with the Main Service started and not with it stopped, so why
+				not register them all anyways -->
+			</intent-filter>
+		</receiver>
+		<receiver android:name=".BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
+			android:permission="android.permission.BIND_DEVICE_ADMIN"
+			android:directBootAware="true"
+			android:enabled="true">
+			<meta-data android:name="android.app.device_admin"
+				android:resource="@xml/device_administration" />
+
+			<intent-filter android:priority="1000">
+				<action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+				<action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+				<action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+			</intent-filter>
+		</receiver>
+	</application>
+
+</manifest>
