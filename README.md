@@ -1,4 +1,5 @@
 
+
 # LEGION - Android Assistant [Client]
 
 ## Introduction
@@ -18,7 +19,7 @@ I should also note this: I'm making this app to "think" it's a God. It's suppose
 
 ## Current modules
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do:
-- Audio Recorder --> Does what it says - records audio from a given audio source (like phone calls, microphone...).
+- Audio Recorder --> Does what it says - records audio from a given audio source (like phone calls, microphone...). The audio will be recorded completely in background and in a very good quality (for me, at least). No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record audio, currently just write "start" on the text to send box, and to stop, write "stop" (at least until the Executor module is ready again).
 - Battery Processor --> Processes the device battery level and warns if it's outside of normal ranges. For now, at least, 5% or below, extremely low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (always keep it from 20% to 80%); 100%, battery completely charged.
 - Protected Lock Screen --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 2.3 - it would lock users out of the normal one and let them do exactly nothing until they inserted the correct code or, in case Internet connection was available, the device was removed out of the protected mode in ESET's Anti-Theft website.
 - Speech module --> Gets the assistant to speak. There's the old version too, but that's only because I didn't want to delete it. This new one can have customizable speech priorities (as oposite to the first one, which could only have 2, and still not as well as the new one can) and skip currently speaking speeches. The old one I used for a year. This is the one I've been using which is much better. This is the module which has given me the most work so far xD. Some important notes here:
