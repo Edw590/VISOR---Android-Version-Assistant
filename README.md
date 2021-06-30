@@ -39,6 +39,9 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 ## Note for compiling the app
 In order to compile this app, you need to have hidden/internal classes available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here.
 
+## Ideas that I have for the app
+Just have a look on the "Ideas file.txt".
+
 ## Final notes
 Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School in a very boring class for me (Philosophy) in 2016/2017. Thought why not keep using it, so I have some company name to put on stuff xD.
 
