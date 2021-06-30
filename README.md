@@ -17,6 +17,8 @@ I should also note this: I'm making this app to "think" it's a God. It's suppose
 
 The app "supports" API 15 at minimum (that's Android 4.0.3). The reason it's because I like to support as many devices as I can - I'm only testing the app on Lollipop 5.1 and on Oreo 8.1 with my 2 phones though. Other Android versions only with the emulator, and more rarely.
 
+The app is also supposed to be able to work with root abilities and system permissions. The prefered way to install the app is with root permissions and installed as a system app (absolute control XD). Though, all functionality, if possible to work without any of those, will be done. The app must work without them perfectly, but if some features are ONLY available with root and/or system permissions, they will be added. So to have full functionality, install it that way.
+
 ## Current modules
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
 - **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded completely in background and in a very good quality (for me, at least). No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, currently just write "start" on the text to send box, and to stop, write "stop".
