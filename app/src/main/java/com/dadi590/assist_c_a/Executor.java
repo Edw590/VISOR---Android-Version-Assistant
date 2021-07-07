@@ -1,8 +1,8 @@
 package com.dadi590.assist_c_a;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NonNls;
 
 public class Executor {
 
@@ -32,19 +32,19 @@ public class Executor {
 	 * <br>
 	 * <p>Note: this is supposed to be called only by Main Service's process.</p>
 	 *
-	 * @param sentence_str <u>[String]</u> --> same as {@link #task(Context, String, boolean, boolean)}
-	 * @param partial_results <u>[boolean]</u> --> same as {@link #task(Context, String, boolean, boolean)}
-	 * @param only_returning <u>[boolean]</u> --> same as {@link #task(Context, String, boolean, boolean)}
+	 * @param sentence_str <u>[String]</u> --> same as {@link #task(String, boolean, boolean)}
+	 * @param partial_results <u>[boolean]</u> --> same as {@link #task(String, boolean, boolean)}
+	 * @param only_returning <u>[boolean]</u> --> same as {@link #task(String, boolean, boolean)}
 	 *
-	 * @return <u>[int]</u> --> same as {@link #task(Context, String, boolean, boolean)}
+	 * @return <u>[int]</u> --> same as {@link #task(String, boolean, boolean)}
 	 */
-	public final int sendTask(@NonNull final Context context, @NonNull final String sentence_str,
+	public final int sendTask(@NonNull final String sentence_str,
 							  final boolean partial_results, final boolean only_returning) {
 		if (!only_returning) {
 			//UtilsGeneral.alterar_volume_fala(context, UtilsGeneral.VOLUME_MEDIO);
 		}
 
-		return task(context, sentence_str, partial_results, only_returning);
+		return task(sentence_str, partial_results, only_returning);
 
         /*if (!only_returning) {
             UtilsGeneral.alterar_volume_fala(context, UtilsGeneral.VOLUME_ANTERIOR);
@@ -77,7 +77,7 @@ public class Executor {
 	 *
 	 * @return one of the constants
 	 */
-	private int task(final Context context, @org.jetbrains.annotations.NonNls final String sentence_str,
+	private int task(@NonNls final String sentence_str,
 					 final boolean partial_results, final boolean only_returning) {
 		return 0;
 	}

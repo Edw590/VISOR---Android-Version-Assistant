@@ -3,11 +3,16 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.PowerManager;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.GlobalUtils.ExtClasses.SystemAppChecker;
+import com.dadi590.assist_c_a.GlobalUtils.External.SystemAppChecker;
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv;
 
 import java.io.File;
@@ -70,26 +75,24 @@ public final class UtilsApp {
 
     /**
      * Deletes the app cache.
-     *
-     * @param context a context
      */
-    public static void deleteAppCache(@NonNull final Context context) {
-        final File dir = context.getCacheDir();
+    public static void deleteAppCache() {
+        final File dir = UtilsGeneral.getContext().getCacheDir();
         UtilsGeneral.deletePath(dir);
     }
 
     /**
      * <p>Checks if an app is installed on the device or not.</p>
      *
-     * @param context a context
      * @param packageName The name of the package of the app to be checked
      *
      * @return true if the app is installed, false otherwise
      */
-    public static boolean isAnAppInstalled(@NonNull final Context context, @NonNull final String packageName) {
-        final PackageManager packageManager = context.getPackageManager();
+    public static boolean isAnAppInstalled(@NonNull final String packageName) {
+        final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
         try {
             packageManager.getPackageInfo(packageName, 0);
+
             return true;
         } catch (final PackageManager.NameNotFoundException e) {
             return false;
@@ -99,13 +102,12 @@ public final class UtilsApp {
     /**
      * <p>Checks if an installed app is enabled or not. Check if the app is installed before calling this function.</p>
      *
-     * @param context a context
      * @param packageName the name of the package of the app to be checked
      *
      * @return true if the app is installed, false otherwise
      */
-    public static boolean isAppEnabled(@NonNull final Context context, @NonNull final String packageName) {
-        final PackageManager packageManager = context.getPackageManager();
+    public static boolean isAppEnabled(@NonNull final String packageName) {
+        final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
         final int appEnabledSetting = packageManager.getApplicationEnabledSetting(packageName);
 
         return appEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
@@ -125,13 +127,11 @@ public final class UtilsApp {
      * <p>- {@link #SYSTEM_WITH_UPDATES} --> returned if the app is a system app with updates</p>
      * <p><u>---CONSTANTS---</u></p>
      *
-     * @param context a context
-     *
      * @return one of the constants
      */
-    public static int appInstallationType(@NonNull final Context context) {
-        if (SystemAppChecker.isSystemApp(context)) {
-            if (SystemAppChecker.isSystemUpdatedAppByFLAG(context)) {
+    public static int appInstallationType() {
+        if (SystemAppChecker.isSystemApp()) {
+            if (SystemAppChecker.isSystemUpdatedAppByFLAG()) {
                 System.out.println("---------------SYSTEM WITH UPDATES---------------");
                 return SYSTEM_WITH_UPDATES;
             } else {
@@ -147,11 +147,10 @@ public final class UtilsApp {
     /**
      * <p>Checks if the app is a Device Administrator.</p>
      *
-     * @param context a context
-     *
      * @return true if it's a Device Administrator, false otherwise
      */
-    public static boolean isDeviceAdmin(@NonNull final Context context) {
+    public static boolean isDeviceAdmin() {
+        final Context context = UtilsGeneral.getContext();
         final DevicePolicyManager mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         final ComponentName mAdminName = new ComponentName(context, DeviceAdminRecv.class);
 

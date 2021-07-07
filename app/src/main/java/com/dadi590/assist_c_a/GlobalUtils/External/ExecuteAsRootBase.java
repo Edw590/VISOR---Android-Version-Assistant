@@ -1,4 +1,4 @@
-package com.dadi590.assist_c_a.GlobalUtils.ExtClasses;
+package com.dadi590.assist_c_a.GlobalUtils.External;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

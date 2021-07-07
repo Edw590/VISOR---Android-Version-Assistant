@@ -1,5 +1,6 @@
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,13 +52,13 @@ public class MainRegBroadcastRecv {
 		// Volume changes
 		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
 
-		UtilsGeneral.getMainAppContext().registerReceiver(mainRegBroadcastReceiver, intentFilter);
+		UtilsGeneral.getContext().registerReceiver(mainRegBroadcastReceiver, intentFilter);
 	}
 
 	private final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			UtilsIntentWhatToDo.intentWhatToDo(UtilsGeneral.getMainAppContext(), intent);
+		public void onReceive(@NonNull final Context context, final Intent intent) {
+			UtilsIntentWhatToDo.intentWhatToDo(intent);
 		}
 	};
 }

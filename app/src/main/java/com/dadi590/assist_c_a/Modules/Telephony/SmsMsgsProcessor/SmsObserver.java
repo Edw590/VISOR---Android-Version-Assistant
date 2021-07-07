@@ -28,7 +28,7 @@ public class SmsObserver extends ContentObserver {
 		readSms();
 	}
 
-	private void readSms(Context context){
+	private void readSms(){
 		Uri uriSMS = Uri.parse("content://sms");
 		Cursor cur = context.getContentResolver().query(uriSMS, null, null, null, "_id");
 

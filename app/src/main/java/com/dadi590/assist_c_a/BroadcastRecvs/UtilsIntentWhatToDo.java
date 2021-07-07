@@ -7,6 +7,7 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -29,11 +30,10 @@ final class UtilsIntentWhatToDo {
 	/**
 	 * Method to call to decide what to do with the given intent.
 	 *
-	 * @param context a context
 	 * @param intent the intent to process
 	 */
-	static void intentWhatToDo(@Nullable final Context context, @Nullable final Intent intent) {
-		if (context == null || intent == null || intent.getAction() == null) {
+	static void intentWhatToDo(@Nullable final Intent intent) {
+		if (/*context == null ||*/ intent == null || intent.getAction() == null) {
 			return;
 		}
 
@@ -44,7 +44,7 @@ final class UtilsIntentWhatToDo {
 
 			/////////////////////////////////////
 			// Power
-			case Intent.ACTION_USER_PRESENT:
+			/*case Intent.ACTION_USER_PRESENT:
 			case Intent.ACTION_USER_UNLOCKED:
 			case "com.htc.intent.action.QUICKBOOT_POWERON":
 			case "android.intent.action.QUICKBOOT_POWERON":
@@ -61,10 +61,14 @@ final class UtilsIntentWhatToDo {
 				// app through an intent instead of internal code (faster and easier, I think). If not because of being
 				// locked and screen off, then get it to do something else before shutting down and detect that with an
 				// intent action to restart the app promptly.
-				UtilsServices.startMainSrv(context);
+				UtilsPermissions.wrapperRequestPerms(null, false);
+				UtilsServices.startService(MainSrv.class, true);
 
 				break;
-			}
+
+				Not used - all attempts to start the Main Service are in MainBroadcastRecv right in onReceive, so ANY
+				detection tries to start the Main Service.
+			}*/
 			case CONSTS.ACTION_HTC_QCK_POFF:
 			case CONSTS.ACTION_ANDR_QCK_POFF:
 			case Intent.ACTION_SHUTDOWN: {
@@ -72,14 +76,10 @@ final class UtilsIntentWhatToDo {
 
 				if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
 					final String speak = "Fast shut down detected.";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String speak = "Shut down detected.";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				}
 				// Note: must be very small speeches, since the phone will shut down fast.
 
@@ -90,9 +90,7 @@ final class UtilsIntentWhatToDo {
 
 				// Might only work if it's a system app (not tested) - doesn't seem to work as normal app
 				final String speak = "Reboot detected.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
 				// Note: must be a very small speech, since the phone will shut down fast.
 
 
@@ -102,7 +100,7 @@ final class UtilsIntentWhatToDo {
 			/////////////////////////////////////
 			// SMS and phone calls
 			case CONSTS.ACTION_SMS_RECEIVED_ALL_API: {
-				SmsMsgsProcessor.smsMsgsProcessor(context, intent);
+				SmsMsgsProcessor.smsMsgsProcessor(intent);
 
 				break;
 			}
@@ -112,20 +110,18 @@ final class UtilsIntentWhatToDo {
 					// permissions (which I must, to receive the EXTRA_INCOMING_NUMBER), will make the app receive 2
 					// broadcasts. One with and one without the EXTRA_INCOMING_NUMBER (the one without comes from the
 					// READ_PHONE_STATE permission.
-					if (MainSrv.getPhoneCallsProcessor() != null) {
-						// This below is to link the EXTRA_STATEs to the CALL_STATEs.
-						final LinkedHashMap<String, Integer> map_EXTRA_STATE_CALL_STATE = new LinkedHashMap<>(0);
-						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_RINGING, TelephonyManager.CALL_STATE_RINGING);
-						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_IDLE, TelephonyManager.CALL_STATE_IDLE);
-						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_OFFHOOK, TelephonyManager.CALL_STATE_OFFHOOK);
+					// This below is to link the EXTRA_STATEs to the CALL_STATEs.
+					final LinkedHashMap<String, Integer> map_EXTRA_STATE_CALL_STATE = new LinkedHashMap<>(0);
+					map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_RINGING, TelephonyManager.CALL_STATE_RINGING);
+					map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_IDLE, TelephonyManager.CALL_STATE_IDLE);
+					map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_OFFHOOK, TelephonyManager.CALL_STATE_OFFHOOK);
 
-						final String state = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
-						final String phoneNumber = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
-						MainSrv.getPhoneCallsProcessor().phoneNumRecv(context, map_EXTRA_STATE_CALL_STATE.get(state),
-								phoneNumber, false);
-						// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
-						// guess, unless the call states are updated to include a new one or something.
-					}
+					final String state = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
+					final String phoneNumber = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+					MainSrv.getPhoneCallsProcessor().phoneNumRecv(map_EXTRA_STATE_CALL_STATE.get(state),
+							phoneNumber, false);
+					// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
+					// guess, unless the call states are updated to include a new one or something.
 				}
 
 				break;
@@ -144,23 +140,17 @@ final class UtilsIntentWhatToDo {
 			/////////////////////////////////////
 			// Battery
 			case Intent.ACTION_BATTERY_CHANGED: {
-				if (MainSrv.getBatteryProcessor() != null) {
-					MainSrv.getBatteryProcessor().processBatteryLvlChg(intent);
-				}
+				MainSrv.getBatteryProcessor().processBatteryLvlChg(intent);
 
 				break;
 			}
 			case Intent.ACTION_POWER_CONNECTED: {
-				if (MainSrv.getBatteryProcessor() != null) {
-					MainSrv.getBatteryProcessor().processBatteryPwrChg(true);
-				}
+				MainSrv.getBatteryProcessor().processBatteryPwrChg(true);
 
 				break;
 			}
 			case Intent.ACTION_POWER_DISCONNECTED: {
-				if (MainSrv.getBatteryProcessor() != null) {
-					MainSrv.getBatteryProcessor().processBatteryPwrChg(false);
-				}
+				MainSrv.getBatteryProcessor().processBatteryPwrChg(false);
 
 				break;
 			}
@@ -176,10 +166,8 @@ final class UtilsIntentWhatToDo {
 			/////////////////////////////////////
 			// Volume changes
 			case AudioManager.VOLUME_CHANGED_ACTION: {
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
-							Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
-				}
+				MainSrv.getSpeech2().setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+						Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
 			}
 		}
 	}

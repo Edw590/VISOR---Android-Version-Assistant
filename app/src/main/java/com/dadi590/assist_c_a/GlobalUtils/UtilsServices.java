@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -29,83 +28,101 @@ public final class UtilsServices {
 	}
 
 	/**
-	 * <p>Restarts a service by terminating it's PID (thus forcing the shut down) and starting it normally.</p>
+	 * <p>Restarts a service by either terminating it's PID (thus forcing the shut down), or stopping it normally;
+	 * then starts it again normally (unless it was already started, like by the system).</p>
 	 *
-	 * @param context a context
 	 * @param service_class the class of the service to restart
+	 * @param force_restart true to force stopping the service, false to stop normally
 	 */
-	public static void forceRestartService(@NonNull final Context context, @NonNull final Class<?> service_class) {
-		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(context, service_class));
-		startService(context, service_class);
+	public static void restartService(@NonNull final Class<?> service_class, final boolean force_restart) {
+		if (force_restart) {
+			UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(service_class));
+		} else {
+			stopService(service_class);
+		}
+		startService(service_class);
 	}
 
 	/**
-	 * <p>Starts a service.</p>
+	 * <p>Stops a service.</p>
 	 *
-	 * @param context a context
-	 * @param service_class the class of the service to start
+	 * @param service_class the class of the service to stop
 	 */
-	public static void startService(@NonNull final Context context, @NonNull final Class<?> service_class) {
+	public static void stopService(@NonNull final Class<?> service_class) {
+		final Context context = UtilsGeneral.getContext();
 		final Intent intent = new Intent(context, service_class);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			context.startForegroundService(intent);
-		} else {
-			context.startService(intent);
+		context.stopService(intent);
+	}
+
+	/**
+	 * <p>Starts a service without additional parameters in case it's already running.</p>
+	 *
+	 *  @param service_class the class of the service to start
+	 */
+	public static void startService(@NonNull final Class<?> service_class) {
+		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
+		// the global variables declared on the service. Currently, that would mean instantiate the Speech again, for
+		// example. It shouldn't. If this doesn't happen, you can put the parameter back to check if it's running or not.
+		// While you don't see about that, it will only start if it's not already running.
+
+		if (!isServiceRunning(service_class)) {
+			final Context context = UtilsGeneral.getContext();
+			final Intent intent = new Intent(context, service_class);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				context.startForegroundService(intent);
+			} else {
+				context.startService(intent);
+			}
 		}
 	}
 
 	/**
-	 * Starts the Main Service if it hasn't already been started.
+	 * <p>Checks if the given service is running.</p>
+	 * <br>
+	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app!</p>
 	 *
-	 * @param context a context
+	 * @param service_class the class of the service to check
+	 *
+	 * @return true if the service is running, false otherwise
 	 */
-	public static void startMainSrv(@NonNull final Context context) {
-		// Check if the Main Service is active or not
+	public static boolean isServiceRunning(@NonNull final Class<?> service_class) {
 		boolean service_active = false;
-		final ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-		final String main_srv_class = MainSrv.class.toString().split(" ")[1];
+		final ActivityManager manager = (ActivityManager) UtilsGeneral.getContext()
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		final String srv_class = service_class.getName();
+
 		for (final ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if (main_srv_class.equals(service.service.getClassName())) {
+			if (srv_class.equals(service.service.getClassName())) {
 				service_active = true;
 				break;
 			}
 		}
-		// If not active, start it
-		if (!service_active) {
-			final Intent Main_Service = new Intent(context, MainSrv.class);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				context.startForegroundService(Main_Service);
-			} else {
-				context.startService(Main_Service);
-			}
-		}
+
+		return service_active;
 	}
 
 	public static final int TYPE_FOREGROUND = 0;
 	/**
 	 * <p>Returns a {@link Notification} with the given title and content text.</p>
-	 * <br>
-	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #TYPE_FOREGROUND} --> for {@code notification_type}: a notification for a foreground service</p>
-	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param context a context
-	 * @param notification_type one of the constants
+	 * @param notificationInfo an instance of {@link ObjectClasses.NotificationInfo}
+	 *
 	 * @return the {@link Notification}
 	 */
 	@NonNull
-	public static Notification getNotification(@NonNull final Context context, final int notification_type) {
+	public static Notification getNotification(@NonNull final ObjectClasses.NotificationInfo notificationInfo) {
+		final Context context = UtilsGeneral.getContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			final String title = "Main notification";
-			createNotificationChannel(context, notification_type, GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND, title, "");
+			createNotificationChannel(notificationInfo.notification_type, notificationInfo.channel_id,
+					notificationInfo.channel_name, notificationInfo.channel_description);
 		}
-		final NotificationCompat.Builder builder = new NotificationCompat.Builder(context,
-				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND);
-		builder.setContentTitle(GL_CONSTS.ASSISTANT_NAME + " Systems running");
-		builder.setContentText("");
+
+		final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notificationInfo.channel_id);
+		builder.setContentTitle(notificationInfo.notification_title);
+		builder.setContentText(notificationInfo.notification_content);
 		builder.setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
 		builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
-		//builder.setContentIntent(pendingIntent);
+		builder.setContentIntent(notificationInfo.notif_content_intent);
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			builder.setSmallIcon(R.drawable.dadi_empresas_inc);
 			builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
@@ -116,28 +133,25 @@ public final class UtilsServices {
 			builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
 					R.drawable.dadi_empresas_inc));
 		}
-		if (notification_type == TYPE_FOREGROUND) {
+		if (notificationInfo.notification_type == TYPE_FOREGROUND) {
 			builder.setOngoing(true);
 			builder.setPriority(NotificationCompat.PRIORITY_MIN);
 		}
+
 		return builder.build();
 	}
 
 	/**
-	 * <p>Creates a channel for notifications.</p>
+	 * <p>Creates a channel for notifications, required as of {@link Build.VERSION_CODES#O}.</p>
 	 *
-	 * @param context a context
-	 * @param notification_type same as in {@link #getNotification(Context, int)}
+	 * @param notification_type same as in {@link #getNotification(ObjectClasses.NotificationInfo)} )}
 	 * @param channel_id the ID of the channel
 	 * @param ch_name the name of the channel
-	 * @param ch_description the descrption of the channel
+	 * @param ch_description the description of the channel
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.O)
-	private static void createNotificationChannel(final Context context, final int notification_type,
-												  final String channel_id, final String ch_name,
-												  final String ch_description) {
-		// Create the NotificationChannel, but only on API 26+ because
-		// the NotificationChannel class is new and not in the support library
+	private static void createNotificationChannel(final int notification_type, final String channel_id,
+												  final String ch_name, final String ch_description) {
 		String chName = ch_name;
 		if (chName.isEmpty()) {
 			// If it's an empty string, an error will be thrown. A space works.
@@ -151,7 +165,8 @@ public final class UtilsServices {
 		channel.setDescription(ch_description);
 		// Register the channel with the system; you can't change the importance
 		// or other notification behaviors after this
-		final NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+		final NotificationManager notificationManager = UtilsGeneral.getContext()
+				.getSystemService(NotificationManager.class);
 		try {
 			notificationManager.createNotificationChannel(channel);
 		} catch (final IllegalArgumentException ignored) {

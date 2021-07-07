@@ -1,7 +1,6 @@
 package com.dadi590.assist_c_a.Modules.Telephony;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -11,6 +10,8 @@ import android.telephony.PhoneNumberUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -56,14 +57,13 @@ public final class UtilsTelephony {
 	 * <p>- {@link #CONTENT_URI_ERROR} --> returned if a wrong value was used the parameter {@code location_search}</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param context a context
 	 * @param number the phone number of the contact
 	 * @param location_search location where to look for the contact
 	 *
 	 * @return the name of the contact or one of the constants
 	 */
 	@NonNull
-	public static String getNameFromNum(@NonNull final Context context, @NonNull final String number,
+	public static String getNameFromNum(@NonNull final String number,
 										final int location_search) {
 		final Uri uri_to_use;
 		switch (location_search) {
@@ -79,7 +79,7 @@ public final class UtilsTelephony {
 				return CONTENT_URI_ERROR;
 		}
 
-		final ContentResolver contentResolver = context.getContentResolver();
+		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
 		final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null);
 
 		int num_matches = 0;
@@ -213,17 +213,19 @@ public final class UtilsTelephony {
 	 * an alphanumeric number (like PayPal), it will return a string to warn it's a alphanumeric number. Will also warn
 	 * about multiple matches on the number.</p>
 	 *
-	 * @param context a context
 	 * @param number the number of the contact
 	 *
 	 * @return what the assistant should say
 	 */
 	@NonNull
-	public static String getWhatToSayAboutNumber(@NonNull final Context context, @NonNls @NonNull final String number) {
-		final String ret = getNameFromNum(context, number, ALL_CONTACTS);
+	public static String getWhatToSayAboutNumber(@NonNls @NonNull final String number) {
+		final String ret = getNameFromNum(number, ALL_CONTACTS);
 		if (ret.equals(NO_MATCHES)) {
 			if (PhoneNumberUtils.isGlobalPhoneNumber(number)) {
-				// In case it's a phone number, separate each digit and spell.
+				// In case it's a phone number, separate each digit and spell. So +351123456789 will be rewritten as
+				// + 3 5 1 1 2 3 4 5 6 7 8 9. Instead of saying 23 trillions and 47 billions (lol), it will say number by
+				// number. This is in case the TTS engine doesn't recognize the number pattern (Ivona for Android doesn't
+				// recognize Portugal numbers, for example, but recognizes US numbers - don't care anymore then).
 				return number.replace("", " ").trim();
 			} else {
 				// In case the "number" is "PayPal", for example, don't spell. Instead, warn about it and say the name
@@ -247,14 +249,12 @@ public final class UtilsTelephony {
 	 * <p>- {@link #NO_CALLS_DETECTED} --> returned if no calls were detected on the phone</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param context a context
-	 *
 	 * @return a String[] of 2 indexes: in index 0 the phone number, in index 1 one of the {@link CallLog.Calls#TYPE}s
 	 * of the call. On both indexes at the same time only might be one of the constants.
 	 */
 	@NonNull
-	public static String[] getLastCall(@NonNull final Context context) {
-		final ContentResolver contentResolver = context.getContentResolver();
+	public static String[] getLastCall() {
+		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
 		final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null);
 
 		if (cursor == null) {
@@ -276,13 +276,12 @@ public final class UtilsTelephony {
 	/**
 	 * <p>Gets the {@link CallLog.Calls#TYPE} of the last call of the given phone number.</p>
 	 *
-	 * @param context a context
 	 * @param number the phone number
 	 *
 	 * @return one of the {@link CallLog.Calls#TYPE}s of call
 	 */
-	public static int getTypeLastCallByNum(@NonNull final Context context, @NonNull final String number) {
-		final ContentResolver contentResolver = context.getContentResolver();
+	public static int getTypeLastCallByNum(@NonNull final String number) {
+		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
 		final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null);
 
 		if (cursor == null) {
@@ -300,7 +299,7 @@ public final class UtilsTelephony {
 		return -1;
 	}
 
-    /*public static void getCallLogs(Context contexto) {
+    /*public static void getCallLogs() {
         ContentResolver cr = contexto.getContentResolver();
         Cursor c = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, null);
 

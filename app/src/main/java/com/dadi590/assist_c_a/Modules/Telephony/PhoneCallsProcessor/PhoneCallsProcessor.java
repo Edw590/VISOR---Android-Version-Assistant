@@ -58,17 +58,15 @@ public class PhoneCallsProcessor {
 
 	/**
 	 * <p>Receives the state and phone number of a call and gets it ready to be processed by
-	 * {@link #whatToDo(Context, NumAndPhase)}.</p>
+	 * {@link #whatToDo(NumAndPhase)}.</p>
 	 *
-	 * @param context a context
 	 * @param state one of the {@code CALL_STATE}s in {@link TelephonyManager} or one of the {@code PRECISE_CALL_STATE}s
 	 *                 in {@link PreciseCallState}
 	 * @param phoneNumber the phone number retrieved directly from the extra of the intent
 	 * @param precise_call_state true if it's a {@link PreciseCallState}, false if it's a {@link TelephonyManager} call
 	 *                              state
 	 */
-	public final void phoneNumRecv(@NonNull final Context context, final int state, @Nullable final String phoneNumber,
-								   final boolean precise_call_state) {
+	public final void phoneNumRecv(final int state, @Nullable final String phoneNumber, final boolean precise_call_state) {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println(phoneNumber);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
@@ -78,24 +76,23 @@ public class PhoneCallsProcessor {
 			// Also don't forget there was some deprecated thing and PhoneStateListener should be used instead. Look
 			// for that in the hidden/internal APIs here.
 			final NumAndPhase sub_ret = new NumAndPhase(phoneNumber, state);
-			whatToDo(context, sub_ret);
+			whatToDo(sub_ret);
 		} else {
-			final NumAndPhase[] ret = getCallPhase(context, state, phoneNumber);
+			final NumAndPhase[] ret = getCallPhase(state, phoneNumber);
 			if (ret == null) {
 				return;
 			}
 			for (final NumAndPhase sub_ret : ret) {
-				whatToDo(context, sub_ret);
+				whatToDo(sub_ret);
 			}
 		}
 	}
 
 	/**
 	 * <p>Decides what the assistant should say to warn about the detected call.</p>
-	 *  @param context a context
 	 * @param sub_ret the sub_ret variable from {@link #PhoneCallsProcessor()}
 	 */
-	private static void whatToDo(final Context context, final NumAndPhase sub_ret) {
+	private static void whatToDo(final NumAndPhase sub_ret) {
 		if (sub_ret == null) {
 			return;
 		}
@@ -107,16 +104,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					@NonNls final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-					if (MainSrv.getSpeech2() != null) {
 						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(context, number);
+					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ".";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -126,16 +119,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					@NonNls final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(context, number);
+					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -144,15 +133,11 @@ public class PhoneCallsProcessor {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(context, number);
+					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					if (MainSrv.getSpeech2() != null) {
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
-					}
+					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 				}
 				break;
 			}
@@ -192,7 +177,6 @@ public class PhoneCallsProcessor {
 	 * in parenthesis for FINISHED applies here).</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param context a context
 	 * @param state {@link TelephonyManager#CALL_STATE_IDLE}, {@link TelephonyManager#CALL_STATE_RINGING}, or
 	 * {@link TelephonyManager#CALL_STATE_OFFHOOK}
 	 * @param incomingNumber phone number that came with the state change
@@ -202,8 +186,7 @@ public class PhoneCallsProcessor {
 	 * be in the actual event order. If a call was lost before another was answered, then the order will be exactly that
 	 */
 	@Nullable
-	private NumAndPhase[] getCallPhase(@NonNull final Context context, final int state,
-									  @Nullable final String incomingNumber) {
+	private NumAndPhase[] getCallPhase(final int state, @Nullable final String incomingNumber) {
 		final String BETTER_CALL_STATE_OUTGOING = "BETTER_CALL_STATE_OUTGOING";
 		final String BETTER_CALL_STATE_INCOMING = "BETTER_CALL_STATE_INCOMING";
 		final String BETTER_CALL_STATE_WAITING = "BETTER_CALL_STATE_WAITING";
@@ -394,7 +377,7 @@ public class PhoneCallsProcessor {
 							continue;
 						}
 
-						final int type_call = UtilsTelephony.getTypeLastCallByNum(context, calls_state.get(i).get(0));
+						final int type_call = UtilsTelephony.getTypeLastCallByNum(calls_state.get(i).get(0));
 						if (type_call == CallLog.Calls.INCOMING_TYPE || type_call == CallLog.Calls.MISSED_TYPE) {
 							System.out.println(mapCallLogToCALL_PHASE.get(type_call) + " -> " +
 									calls_state.get(calls_state.size() - 1).get(0));
@@ -462,7 +445,7 @@ public class PhoneCallsProcessor {
 				}
 
 				calls_state.clear();
-				return final_return.toArray(new NumAndPhase[0]);
+				return final_return.toArray(new NumAndPhase[15]); // 15 things at most, hopefully
 				//break;
 			}
 		}

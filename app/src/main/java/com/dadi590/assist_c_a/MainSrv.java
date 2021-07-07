@@ -4,12 +4,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv;
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
@@ -47,6 +49,9 @@ public class MainSrv extends Service {
 	// */
 	/*@Nullable
 	public static AudioManager getAudioManager() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class, true);
+
 		return (AudioManager) main_app_context.getSystemService(AUDIO_SERVICE);
 	}*/
 
@@ -54,47 +59,69 @@ public class MainSrv extends Service {
 
 	// Do NOT put @NonNull on the returning values. If the service has not started OR CRASHED, everything will return
 	// null!!!
+	// EDIT: actually, since I started using UtilsGeneral.getContext(), all seems to work just fine. With getSpeech(),
+	// all works fine as long as I don't return null. If I return the instance, the service starts normally. I'll just
+	// leave it on NonNull. This probably also works because I instantiate everything on the declaration now (because
+	// of UtilsGeneral.getContext() being always available).
 
 	///**.
 	// * @return the main process' Application Context
 	// */
 	//@Nullable
 	//public static Context getMainAppContext() {
+	//	UtilsPermissions.wrapperRequestPerms(null, false);
+	//	UtilsServices.startService(MainSrv.class, true);
+	//
 	//	return main_app_context;
 	//}
 	/**.
 	 * @return the global {@link Speech2} instance
 	 */
-	@Nullable
+	@NonNull
 	public static Speech2 getSpeech2() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
 		return speech2;
 	}
 	/**.
 	 * @return the global {@link AudioRecorder} instance
 	 */
-	@Nullable
+	@NonNull
 	public static AudioRecorder getAudioRecorder() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
 		return audioRecorder;
 	}
 	/**.
 	 * @return the global {@link MainBroadcastRecv} instance
 	 */
-	@Nullable
+	@NonNull
 	public static MainRegBroadcastRecv getMainRegBroadcastRecv() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
 		return mainRegBroadcastRecv;
 	}
 	/**.
 	 * @return the global {@link PhoneCallsProcessor} instance
 	 */
-	@Nullable
+	@NonNull
 	public static PhoneCallsProcessor getPhoneCallsProcessor() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
 		return phoneCallsProcessor;
 	}
 	/**.
 	 * @return the global {@link BatteryProcessor} instance
 	 */
-	@Nullable
+	@NonNull
 	public static BatteryProcessor getBatteryProcessor() {
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
 		return batteryProcessor;
 	}
 
@@ -107,11 +134,19 @@ public class MainSrv extends Service {
 
 		// Do this only once, when the service is created and while it's not destroyed
 
-		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(
-				UtilsGeneral.getMainAppContext(), UtilsServices.TYPE_FOREGROUND));
+		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
+				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND,
+				"Main notification",
+				"",
+				UtilsServices.TYPE_FOREGROUND,
+				GL_CONSTS.ASSISTANT_NAME + " Systems running",
+				"",
+				null
+		);
+		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
 		// Clear the app cache as soon as it starts not to take unnecessary space
-		UtilsApp.deleteAppCache(UtilsGeneral.getMainAppContext());
+		UtilsApp.deleteAppCache();
 
 		// Before anything else, start the speech module since the assistant must be able to speak.
 		// Don't forget inside the speech module there's a function that executes all important things right after
@@ -129,6 +164,11 @@ public class MainSrv extends Service {
 	@Override
 	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
 		// Do this below every time the service is started/resumed/whatever
+
+		// Do NOT put ANYTHING here!!!
+		// MANY places starting this service don't check if it's already started or not, so this method will be called
+		// many times randomly. Put everything on onCreate() which is called only if the service was not running and
+		// was just started.
 
 		return START_STICKY;
 	}

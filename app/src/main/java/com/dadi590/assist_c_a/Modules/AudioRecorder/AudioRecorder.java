@@ -31,9 +31,7 @@ public class AudioRecorder {
 		if (start) {
 			if (recording) {
 				final String speak = "Already on it sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 			} else {
 				final Runnable runnable = () -> {
 					startRecording(audioSource, false);
@@ -44,22 +42,16 @@ public class AudioRecorder {
 					}*/
 				};
 				final String speak = "Starting now, sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, runnable);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, runnable);
 			}
 		} else {
 			if (recording) {
 				stopRecording();
 				final String speak = "Stopped, sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 			} else {
 				final String speak = "Already stopped, sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		}
 	}
@@ -93,15 +85,13 @@ public class AudioRecorder {
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		final File file;
 		if (check_recording_possible) {
-			file = new File(UtilsGeneral.getMainAppContext().getCacheDir(), aud_src_tmp_file);
+			file = new File(UtilsGeneral.getContext().getCacheDir(), aud_src_tmp_file);
 		} else {
 			file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
 		}
 		if (file == null) {
 			final String speak = "Error 1 sir.";
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-			}
+			MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 
 			recording = false;
 
@@ -124,9 +114,7 @@ public class AudioRecorder {
 			recorder = null;
 			if (!check_recording_possible) {
 				final String speak = "Error 2 sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
 
@@ -144,9 +132,7 @@ public class AudioRecorder {
 			recorder = null;
 			if (!check_recording_possible) {
 				final String speak = "Error 3 sir.";
-				if (MainSrv.getSpeech2() != null) {
-					MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-				}
+				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
 

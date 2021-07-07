@@ -2,7 +2,7 @@
 
 :: CHANGE THESE
 set app_package=com.dadi590.assist_c_a
-set dir_app_name=Assist_C_A
+set dir_app_name=DADi590_Assist_C_A
 ::set MAIN_ACTIVITY=MainAct.MainAct
 
 set ADB="adb.exe"
@@ -15,7 +15,7 @@ set apk_target_dir=%path_sysapp%/%dir_app_name%
 set apk_target_sys=%apk_target_dir%/%apk_name%
 
 :: Delete previous APK
-::del %apk_host% --> Não pode ser apagado se o Android Studio já gerou um novo (ler abaixo o que comentei)
+::del %apk_host% --> Can't be deleted if Android Studio has already generated a new one (read below what I commented)
 
 :: Compile the APK: you can adapt this for production build, flavors, etc.
 ::call gradlew assembleDebug --> I let Android Studio do this with Gradle-aware Make

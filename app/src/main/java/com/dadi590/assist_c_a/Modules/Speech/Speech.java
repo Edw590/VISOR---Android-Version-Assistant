@@ -1,6 +1,5 @@
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import android.content.Context;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -83,20 +82,18 @@ public class Speech {
 
 	/**
 	 * Main class constructor.
-	 *
-	 * @param context a context
 	 */
-	public Speech(@NonNull final Context context) {
+	public Speech() {
 		speech_audio_stream = AudioManager.STREAM_NOTIFICATION;
 
-		tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
 				System.out.println("GGGGGGGGGGGGGGGGGGGGGGGG");
 				if (status == TextToSpeech.SUCCESS) {
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					AfterTtsInit.afterTtsInit();//context);
+					AfterTtsReady.afterTtsReady();//context);
 				} else {
                     // If he can't talk, won't be too much useful... So exit with an error to indicate something is very
                     // wrong and must be fixed as soon as possible.

@@ -14,13 +14,13 @@
 			android:id="@+id/btn_perms"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="Click here until there is no permission left to authorize" />
+			android:text="Click here until there is nothing left to authorize/enable" />
 
 		<Button
 			android:id="@+id/btn_device_admin"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="Open the Device Administrators list" />
+			android:text="Open the Device Admins list (for testing only)" />
 
 		<Space
 			android:layout_width="match_parent"

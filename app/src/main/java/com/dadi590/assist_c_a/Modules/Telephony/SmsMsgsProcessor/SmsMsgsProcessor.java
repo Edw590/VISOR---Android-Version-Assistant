@@ -28,10 +28,9 @@ public final class SmsMsgsProcessor {
 	/**
 	 * <p>Main class function.</p>
 	 *
-	 * @param context a context
 	 * @param intent the intent
 	 */
-	public static void smsMsgsProcessor(@NonNull final Context context, @NonNull final Intent intent) {
+	public static void smsMsgsProcessor(@NonNull final Intent intent) {
 		final Bundle bundle = intent.getExtras();
 		if (bundle == null) {
 			// Put some warning here. No extras in a message intent --> ???
@@ -77,15 +76,11 @@ public final class SmsMsgsProcessor {
 
 		if (UtilsTelephony.isPrivateNumber(sender)) {
 			final String speak = "Sir, attention! New message from a private number!";
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
-			}
+			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		} else {
-			final String number_name = UtilsTelephony.getWhatToSayAboutNumber(context, sender);
+			final String number_name = UtilsTelephony.getWhatToSayAboutNumber(sender);
 			@NonNls final String speak = "Sir, new message from " + number_name + ".";
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
-			}
+			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}
 }

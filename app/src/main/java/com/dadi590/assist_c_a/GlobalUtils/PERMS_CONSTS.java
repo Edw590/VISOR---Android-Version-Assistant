@@ -1,4 +1,4 @@
-package com.dadi590.assist_c_a.MainAct;
+package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.Manifest;
 import android.os.Build;
@@ -29,7 +29,7 @@ final class PERMS_CONSTS {
 			{Manifest.permission.FOREGROUND_SERVICE, String.valueOf(Build.VERSION_CODES.P)},
 			{Manifest.permission.MODIFY_AUDIO_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
 	};*/
-	private static final String[][] danger_perms_list = {
+	static final String[][] danger_perms_list = {
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECORD_AUDIO, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(Build.VERSION_CODES.DONUT)},
@@ -48,5 +48,5 @@ final class PERMS_CONSTS {
 			{Manifest.permission.CAPTURE_AUDIO_OUTPUT, String.valueOf(Build.VERSION_CODES.KITKAT)},
 	};*/
 
-	static final String[][][] list_of_perms_lists = {danger_perms_list};
+	//static final String[][][] list_of_perms_lists = {danger_perms_list};
 }

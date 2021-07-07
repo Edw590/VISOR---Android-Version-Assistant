@@ -49,15 +49,15 @@ public final class EPackageManager {
 			throws PackageManager.NameNotFoundException {
 		final IPackageManager iPackageManager = getIPackageManager();
 		try {
-			final PackageInfo ret_value = iPackageManager.getPackageInfo(packageName, flags,
-					UserHandle.getUserId(Process.myUid())); // Hopefully this is the user ID the method wants.
+			// Hopefully this is the user ID the method wants.
+			final PackageInfo ret_value = iPackageManager.getPackageInfo(packageName, flags, UserHandle.myUserId());
 			if (ret_value == null) {
 				// I tested with a random string and the result was null. So I'm guessing this is the correct
 				// implementation for when the package doesn't exist (check if the result is null or not and throw the
 				// exception).
 				throw new PackageManager.NameNotFoundException(packageName);
 			}
-			return iPackageManager.getPackageInfo(packageName, flags, UserHandle.getUserId(Process.myUid()));
+			return iPackageManager.getPackageInfo(packageName, flags, UserHandle.myUserId());
 		} catch (final RemoteException e) {
 			throw e.rethrowFromSystemServer();
 		}

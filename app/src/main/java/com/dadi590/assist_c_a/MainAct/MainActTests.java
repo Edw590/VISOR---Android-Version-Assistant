@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 
 import com.android.internal.telephony.ITelephony;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.lang.reflect.Method;
 
@@ -23,14 +24,19 @@ import static android.content.Context.TELEPHONY_SERVICE;
 /**
  * Class only for testing purposes on the Main Activity.
  */
-public class MainActTests {
+final class MainActTests {
+
+	/**
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private MainActTests() {
+	}
 
 	/**
 	 * <p>Method only for testing purposes.</p>
-	 *
-	 * @param context
 	 */
-	static void for_tests(Context context) {
+	static void for_tests() {
+		final Context context = UtilsGeneral.getContext();
 		// Prepare to work with the Device Policy Manager
 		/*final DevicePolicyManager mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
 		final ComponentName mDeviceAdmin = new ComponentName(context, Recetor_Administracao_Dispositivo.class);

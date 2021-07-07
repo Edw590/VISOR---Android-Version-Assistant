@@ -1,7 +1,10 @@
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -10,17 +13,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.Executor;
+import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.MainSrv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
 import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
@@ -65,13 +72,48 @@ public class Speech2 {
 	public Speech2() {
 		readyArrayLists();
 
-		tts = new TextToSpeech(UtilsGeneral.getMainAppContext(), new TextToSpeech.OnInitListener() {
+		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
 				if (status == TextToSpeech.SUCCESS) {
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					AfterTtsInit.afterTtsInit();
+					// todo Improve this here... Not cool if the engine is uninstalled. Put it restarting only in the
+					//  first time IN CASE it needs.
+					// Also test if this is actually working... You didn't get to test that.
+					if (!GL_CONSTS.PREFERRED_TTS_ENGINE.equals(tts.getCurrentEngine())) {
+						final Context context = UtilsGeneral.getContext();
+						final Intent intent = new Intent(context, MainSrv.class);
+						final int pendingIntentId = 123456;
+						final PendingIntent pendingIntent = PendingIntent.getService(context, pendingIntentId, intent,
+								PendingIntent.FLAG_CANCEL_CURRENT);
+						final AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+						mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000L, pendingIntent);
+						System.exit(0);
+					}
+
+					// For testing only to see info about each engine available.
+					/*System.out.println("JJJJJJJJJJJJj");
+					for (final TextToSpeech.EngineInfo engine : tts.getEngines()) {
+						System.out.println(engine.name);
+						System.out.println(engine.label);
+						System.out.println(engine.priority);
+						System.out.println(engine.system);
+					}*/
+					// Set the TTS voice. With the app as a system app, it seems the app might start even before the
+					// system has all voices ready, because the app starts using a Brazilian voice (???). So this fixes
+					// it.
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+						final Set<Voice> voices = tts.getVoices();
+						for (final Voice voice : voices) {
+							if (GL_CONSTS.PREFERRED_TTS_VOICE.equals(voice.getName())) {
+								tts.setVoice(voice);
+								break;
+							}
+						}
+					}
+
+					AfterTtsReady.afterTtsReady();
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
 					// wrong and must be fixed as soon as possible.
@@ -81,7 +123,7 @@ public class Speech2 {
 					// todo Send an email about this and put a notification on the phone!!!
 				}
 			}
-		});
+		}, GL_CONSTS.PREFERRED_TTS_ENGINE);
 	}
 
 	//////////////////////////////////////
@@ -444,14 +486,14 @@ public class Speech2 {
 	 * priority), and also requests audio focus (if {@link AudioManager#getRingerMode()} != NORMAL).</p>
 	 */
 	private void setVolumeDndFocus() {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getMainAppContext()
+		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 				.getSystemService(Context.AUDIO_SERVICE);
 		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) == PRIORITY_CRITICAL) {
 			audioFocus(true);
 
 			// Set Do Not Disturb
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getMainAppContext()
+				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
 						.getSystemService(Context.NOTIFICATION_SERVICE);
 				if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALARMS) {
 					volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
@@ -520,7 +562,7 @@ public class Speech2 {
 				}
 			}
 			if (carry_on) {
-				final AudioManager audioManager = (AudioManager) UtilsGeneral.getMainAppContext()
+				final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 						.getSystemService(Context.AUDIO_SERVICE);
 				if (audioManager.getStreamVolume(volumeDndObj.audio_stream) != volumeDndObj.old_volume) {
 					try {
@@ -539,7 +581,7 @@ public class Speech2 {
 		// Reset Do Not Disturb
 		if (volumeDndObj.old_interruption_filter != VolumeDndObj.DEFAULT_VALUE) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getMainAppContext()
+				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
 						.getSystemService(Context.NOTIFICATION_SERVICE);
 				if (notificationManager.isNotificationPolicyAccessGranted()) {
 					// Only reset if the interruption mode was not changed while the assistant was speaking.
@@ -564,7 +606,7 @@ public class Speech2 {
 	 * @param request true to request the audio focus, false to abandon the audio focus
 	 */
 	final void audioFocus(final boolean request) {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getMainAppContext()
+		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 				.getSystemService(Context.AUDIO_SERVICE);
 		if (audioManager != null) {
 			final int priority = UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id);
@@ -676,7 +718,7 @@ public class Speech2 {
 		// If it's not null, check the ringer mode, which must be NORMAL, otherwise the assistant will not speak -
 		// unless the speech is a CRITICAL one.
 		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL) {
-			final AudioManager audioManager = (AudioManager) UtilsGeneral.getMainAppContext()
+			final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 					.getSystemService(Context.AUDIO_SERVICE);
 			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
 				System.out.println("+++++++++++++++++++++++++++++++++++++++");

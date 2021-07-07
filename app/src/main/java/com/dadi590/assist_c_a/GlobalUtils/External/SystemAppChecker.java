@@ -1,11 +1,11 @@
-package com.dadi590.assist_c_a.GlobalUtils.ExtClasses;
+package com.dadi590.assist_c_a.GlobalUtils.External;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import androidx.annotation.NonNull;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
  * question</a> on StackOverflow, more precisely <a href="https://stackoverflow.com/a/48029011/8228163">this answer</a>,
  * by <a href="https://stackoverflow.com/users/28557/vinayak-bevinakatti">this person</a> (Vinayak Bevinakatti) - now
  * adapted to this app.</p>
- * <p>Except {@link #isSystemUpdatedAppByFLAG(Context)} which I took from somewhere else, and
- * {@link #isSystemApp(Context)}, which I made.</p>
+ * <p>Except {@link #isSystemUpdatedAppByFLAG()} which I took from somewhere else, and
+ * {@link #isSystemApp()}, which I made.</p>
  *
  * @author Vinayak Bevinakatti and others
  */
@@ -38,29 +38,26 @@ public final class SystemAppChecker {
     /**
      * Checks if an app is a system app.
      *
-     * @param context a context
-     *
-     * @return an OR operation on {@link #isSystemAppByFLAG(Context)}, {@link #isSystemAppByPM(Context)},
-     * {@link #isSystemPreloaded(Context)} and {@link #isSystemSigned(Context)}
+     * @return an OR operation on {@link #isSystemAppByFLAG()}, {@link #isSystemAppByPM()},
+     * {@link #isSystemPreloaded()} and {@link #isSystemSigned()}
      */
-    public static boolean isSystemApp(@NonNull final Context context) {
-        return SystemAppChecker.isSystemAppByFLAG(context) || SystemAppChecker.isSystemAppByPM(context) ||
-                SystemAppChecker.isSystemPreloaded(context) || SystemAppChecker.isSystemSigned(context);
+    public static boolean isSystemApp() {
+        return SystemAppChecker.isSystemAppByFLAG() || SystemAppChecker.isSystemAppByPM() ||
+                SystemAppChecker.isSystemPreloaded() || SystemAppChecker.isSystemSigned();
     }
 
     /**
      * Checks if a system app has been updated or not.
      *
-     * @param context a context
-     *
      * @return {@code true} if the app is a system app and has been updated.
      */
-    public static boolean isSystemUpdatedAppByFLAG(@NonNull final Context context) {
+    public static boolean isSystemUpdatedAppByFLAG() {
         try {
+            final Context context = UtilsGeneral.getContext();
             final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
             if (ai != null && (ai.flags & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
                 // Conjunction of FLAG_UPDATED_SYSTEM_APP and isSystemAppByFLAG()
-                return isSystemAppByFLAG(context);
+                return isSystemAppByFLAG();
             }
         } catch (final PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -71,11 +68,9 @@ public final class SystemAppChecker {
     /**
      * Check if system app by 'pm' command-line program.
      *
-     * @param context a context
-     *
      * @return {@code true} if package is a system app.
      */
-    private static boolean isSystemAppByPM(@NonNull final Context context) {
+    private static boolean isSystemAppByPM() {
         final ProcessBuilder builder = new ProcessBuilder("pm", "list", "packages", "-s");
         final Process process;
         try {
@@ -103,18 +98,17 @@ public final class SystemAppChecker {
         // An exception appears on API 15 on the emulator with process.destroy(): libcore.io.ErrnoException, but there's
         // no problem with it, since the program continues the execution to the return statement below.
 
-        return systemApps.contains(context.getPackageName());
+        return systemApps.contains(UtilsGeneral.getContext().getPackageName());
     }
 
     /**
      * Check if application is preloaded.
      *
-     * @param context a context
-     *
      * @return {@code true} if package is preloaded.
      */
-    private static boolean isSystemPreloaded(@NonNull final Context context) {
+    private static boolean isSystemPreloaded() {
         try {
+            final Context context = UtilsGeneral.getContext();
             final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), 0);
             if (ai.sourceDir.startsWith("/system/app/") || ai.sourceDir.startsWith("/system/priv-app/")) {
@@ -129,13 +123,12 @@ public final class SystemAppChecker {
     /**
      * Check if the app is system signed or not.
      *
-     * @param context a context
-     *
      * @return {@code true} if application is signed by system certificate,
      *         otherwise {@code false}
      */
-    private static boolean isSystemSigned(@NonNull final Context context) {
+    private static boolean isSystemSigned() {
         try {
+            final Context context = UtilsGeneral.getContext();
             // Note: EPackageManager.GET_SIGNATURES is a problem below Android 4.4 KitKat only (no problem, I guess).
 
             // Get packageinfo for target application
@@ -156,12 +149,11 @@ public final class SystemAppChecker {
     /**
      * Check if application is installed in the device's system image.
      *
-     * @param context a context
-     *
      * @return {@code true} if package is a system app.
      */
-    private static boolean isSystemAppByFLAG(@NonNull final Context context) {
+    private static boolean isSystemAppByFLAG() {
         try {
+            final Context context = UtilsGeneral.getContext();
             final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), 0);
             // Check if FLAG_SYSTEM or FLAG_UPDATED_SYSTEM_APP are set.

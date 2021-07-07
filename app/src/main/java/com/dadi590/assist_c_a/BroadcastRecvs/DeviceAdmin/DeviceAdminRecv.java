@@ -6,7 +6,10 @@ import android.content.Intent;
 
 import android.annotation.NonNull;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.Modules.ProtectedLockScr.UtilsProtectedLockScr;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 
 /**
@@ -19,17 +22,14 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	@Override
 	public final void onEnabled(@NonNull final Context context, @NonNull final Intent intent) {
 		super.onEnabled(context, intent);
-		//final ComponentName componentName = new ComponentName(context, DeviceAdminRecv.class);
-		//final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(DEVICE_POLICY_SERVICE);
-		//devicePolicyManager.setStatusBarDisabled(componentName, true);
-		// todo Not working ^^^^^
 
-		// The assistant may not be able to speak speak, but he'll try anyways to warn the user of any changes (try/catch).
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
+		// The assistant may not be able to speak speak (service not working or whatever), but he'll try anyways to warn
+		// the user of any changes (try/catch).
 		try {
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(CONSTS.SPEAK_ENABLED, Speech2.NO_ADDITIONAL_COMMANDS, PRIORITY_ADMIN_ENABLED,
-						null);
-			}
+			MainSrv.getSpeech2().speak(CONSTS.SPEAK_ENABLED, Speech2.NO_ADDITIONAL_COMMANDS, PRIORITY_ADMIN_ENABLED, null);
 		} catch (final Throwable ignored) {
 		}
 	}
@@ -37,20 +37,23 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	@NonNull
 	@Override
 	public final CharSequence onDisableRequested(@NonNull final Context context, @NonNull final Intent intent) {
-		UtilsDeviceAdmin.startProtectedLockScr(context);
+		super.onDisableRequested(context, intent);
 
-		// The assistant may not be able to speak speak, but he'll try anyways to warn the user of any changes (try/catch).
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
 
+		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
+
+		// The assistant may not be able to speak speak (service not working or whatever), but he'll try anyways to warn
+		// the user of any changes (try/catch).
 		try {
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(CONSTS.RET_STR_DISABLE_REQUESTED, Speech2.NO_ADDITIONAL_COMMANDS,
-						Speech2.PRIORITY_HIGH, null);
-			}
+			MainSrv.getSpeech2().speak(CONSTS.RET_STR_DISABLE_REQUESTED, Speech2.NO_ADDITIONAL_COMMANDS,
+					Speech2.PRIORITY_HIGH, null);
 			// Why PRIORITY_CRITICAL? Because onDisabled() also has it, so they have the same priority. And onDisabled()
 			// skips this speech in case it's being spoken, so it's all good.
 			// EDIT: it's on HIGH now. Why CRITICAL... Critical thing is when it's disabled. If the user is just
 			// checking something, they don't need to have the phone screaming. If CRITICAL is to be set again, don't
-			// forget of skipping this speech because onDisabled() has top priority since the app will shut down.
+			// forget of skipping this speech because onDisabled() has top priority since the app might shut down.
 		} catch (final Throwable ignored) {
 		}
 
@@ -59,26 +62,32 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 	@Override
 	public final void onDisabled(@NonNull final Context context, @NonNull final Intent intent) {
-		super.onDisabled(context, intent);
+		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED.)
 
-		UtilsDeviceAdmin.startProtectedLockScr(context);
+		UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
 
-		// The assistant may not be able to speak speak, but he'll try anyways to warn the user of any changes (try/catch).
+		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
+		// The assistant may not be able to speak speak (service not working or whatever), but he'll try anyways to warn
+		// the user of any changes (try/catch).
 		try {
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(CONSTS.SPEAK_DISABLED, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_CRITICAL,
-						null);
-				// Why PRIORITY_CRITICAL? Refer to CONSTS.SPEAK_DISABLED.
+			MainSrv.getSpeech2().speak(CONSTS.SPEAK_DISABLED, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_CRITICAL,
+					null);
+			// Why PRIORITY_CRITICAL? Refer to CONSTS.SPEAK_DISABLED.
+			// todo HE'LL SPEAK AND LEAVE THE PHONE WITH THE DO NOT DISTURB AND THE MAX VOLUME IF IT'S STOPPED IN
+			//  THE MIDDLE!!!!!! How do you fix that.....? You don't, right? xD Cool. No idea.
+			// GET THE SECONDARY APP RESETTING IT!!! (The one which will restart this one...)
 
-				// This below is in case the administrator mode was enabled, but was disabled right after. The assistant
-				// would still say the administrator mode is enabled after saying it was disable --> wtf. This fixes that.
-				final String admin_enabled_speech_id = MainSrv.getSpeech2().getSpeechIdBySpeech(CONSTS.SPEAK_ENABLED,
-						PRIORITY_ADMIN_ENABLED, true);
-				if (admin_enabled_speech_id != null) {
-					MainSrv.getSpeech2().removeSpeechById(admin_enabled_speech_id);
-				}
+			// This below is in case the administrator mode was enabled, but was disabled right after. The assistant
+			// would still say the administrator mode is enabled after saying it was disable --> wtf. This fixes that.
+			final String admin_enabled_speech_id = MainSrv.getSpeech2().getSpeechIdBySpeech(CONSTS.SPEAK_ENABLED,
+					PRIORITY_ADMIN_ENABLED, true);
+			if (admin_enabled_speech_id != null) {
+				MainSrv.getSpeech2().removeSpeechById(admin_enabled_speech_id);
 			}
+
+			// todo This is not removing the speech, I think.....
 		} catch (final Throwable ignored) {
 		}
 	}

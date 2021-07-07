@@ -11,6 +11,9 @@
  * opposite to I of Internal of Android's internal classes, like {@link android.media.IAudioService} (that's not
  * actually true - the I is from Interface, but it works).</p>
  * <br>
+ * <p>No idea why I wanted to know this, but I wrote down to document it here so here it goes: getOpPackageName()
+ * returns "com.dadi590.assist_c_a" on Lollipop.</p>
+ * <br>
  * <p><strong>NOT IN USE while {@link android.app.AppGlobals#getInitialApplication()}.getApplicationContext() works!!!
  * </strong></p>
  */

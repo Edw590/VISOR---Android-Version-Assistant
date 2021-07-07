@@ -103,9 +103,7 @@ public final class UtilsMedia {
 		} else {
 			@NonNls final String speak = "There was a problem creating the media file in the external storage as " +
 					"it is not mounted.";
-			if (MainSrv.getSpeech2() != null) {
-				MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
-			}
+			MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 		}
 
 		return null;
