@@ -66,6 +66,9 @@ public class Speech2 {
 	private boolean is_speaking = false;
 	private boolean focus_volume_done = false;
 
+	AudioAttributes audioAttributes = null; // No problem in being null, since it will only be used if TTS loaded
+	// correctly - and if it did, then audioAttributes was initialized decently.
+
 	/**
 	 * Main class constructor.
 	 */
@@ -78,8 +81,9 @@ public class Speech2 {
 				if (status == TextToSpeech.SUCCESS) {
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
+					// If the preferred engine is not ready when the app starts on boot, wait a bit and restart the app
 					// todo Improve this here... Not cool if the engine is uninstalled. Put it restarting only in the
-					//  first time IN CASE it needs.
+					//  first time in case it needs.
 					// Also test if this is actually working... You didn't get to test that.
 					if (!GL_CONSTS.PREFERRED_TTS_ENGINE.equals(tts.getCurrentEngine())) {
 						final Context context = UtilsGeneral.getContext();
@@ -100,10 +104,10 @@ public class Speech2 {
 						System.out.println(engine.priority);
 						System.out.println(engine.system);
 					}*/
-					// Set the TTS voice. With the app as a system app, it seems the app might start even before the
-					// system has all voices ready, because the app starts using a Brazilian voice (???). So this fixes
-					// it.
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						// Set the TTS voice. With the app as a system app, it seems the app might start even before the
+						// system has all voices ready, because the app starts using a Brazilian voice (???). So this fixes
+						// it.
 						final Set<Voice> voices = tts.getVoices();
 						for (final Voice voice : voices) {
 							if (GL_CONSTS.PREFERRED_TTS_VOICE.equals(voice.getName())) {
@@ -111,6 +115,24 @@ public class Speech2 {
 								break;
 							}
 						}
+
+						// Set the audio attributes to use
+						final AudioAttributes.Builder builder = new AudioAttributes.Builder();
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+							builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
+						}
+						builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+						builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
+						//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
+						// track plays it uses the System (Ringer) volume as the master volume control. Not the media
+						// volume as I would expect." (this is about setting that flag - changes the audio stream).
+						// That's to be changed depending on the speech priority only and the enforcing of the audio is
+						// done manually though DND, volume, and the stream. So don't set this flag.
+						audioAttributes = builder.build();
+						//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
+						// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
+						// speaking and it's interrupted - but onDone is never called, only onStop().
+						// Which means, if it doesn't work well in one case, don't enable.
 					}
 
 					AfterTtsReady.afterTtsReady();
@@ -538,12 +560,13 @@ public class Speech2 {
 	}
 
 	/**
-	 * <p>Resets the old volume of the used stream in case the user didn't change it - if they did, then the volume will
-	 * not be reset.</p>
+	 * <p>Resets the old volume of the used stream in case the user didn't change it, the audio focus and Do Not
+	 * Disturb (DND).</p>
 	 */
 	final void resetVolumeDndFocus() {
 		setResetWillChangeVolume(false);
 
+		// Reset the audio focus
 		audioFocus(false);
 
 		// Reset the volume
@@ -627,20 +650,6 @@ public class Speech2 {
 				}
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-					builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-						builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
-					}
-					if (priority == PRIORITY_CRITICAL) {
-						builder.setUsage(AudioAttributes.USAGE_ALARM);
-						builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
-					} else if (priority == PRIORITY_HIGH) {
-						builder.setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT);
-					} else {
-						builder.setUsage(AudioAttributes.USAGE_ASSISTANT);
-					}
-					final AudioAttributes audioAttributes = builder.build();
 					audioFocusRequest = new AudioFocusRequest.Builder(duration_hint)
 							.setAudioAttributes(audioAttributes)
 							.build();
@@ -713,6 +722,7 @@ public class Speech2 {
 			}
 		}
 
+		boolean skip_speech = false;
 
 		// If the Audio Manager instance is null, something wrong happened with the Main Service, so speak anyways.
 		// If it's not null, check the ringer mode, which must be NORMAL, otherwise the assistant will not speak -
@@ -722,16 +732,20 @@ public class Speech2 {
 					.getSystemService(Context.AUDIO_SERVICE);
 			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
 				System.out.println("+++++++++++++++++++++++++++++++++++++++");
+				System.out.println(current_speech_obj.utterance_id);
 				System.out.println(current_speech_obj.runnable);
 				if (current_speech_obj.runnable != null) {
 					current_speech_obj.runnable.run();
 				}
 
 				skipCurrentSpeech();
+				skip_speech = true;
 			}
 		}
 
-		is_speaking = true;
+		if (!skip_speech) {
+			is_speaking = true;
+		}
 	}
 
 	/**

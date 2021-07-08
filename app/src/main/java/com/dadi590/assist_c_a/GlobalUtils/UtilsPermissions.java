@@ -122,7 +122,8 @@ public final class UtilsPermissions {
 		// If it's not to force permissions, then either it's to request them normally or to just check them.
 		if (!force_permissions) {
 			if (request && !perms_to_request.isEmpty()) {
-				ActivityCompat.requestPermissions(activity, perms_to_request.toArray(new String[25]), 0);
+				// Keep 0 in the String initialization, or there will be null values --> can't be
+				ActivityCompat.requestPermissions(activity, perms_to_request.toArray(new String[0]), 0);
 			}
 
 			for (final String[] permission : PERMS_CONSTS.danger_perms_list) {

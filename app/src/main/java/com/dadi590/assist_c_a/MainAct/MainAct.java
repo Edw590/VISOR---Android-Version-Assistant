@@ -74,6 +74,10 @@ public class MainAct extends AppCompatActivity {
 		findViewById(R.id.btn_tests).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
+				// BUTTON FOR TESTING
+				// BUTTON FOR TESTING
+				// BUTTON FOR TESTING
+
 				final Intent intent = new Intent(MainAct.this, ProtectedLockScr.class);
 				startActivity(intent);
 
@@ -87,12 +91,16 @@ public class MainAct extends AppCompatActivity {
 						"android.permission.PACKAGE_VERIFICATION_AGENT"));
 
 				//MainActTests.for_tests();
+
+				// BUTTON FOR TESTING
+				// BUTTON FOR TESTING
+				// BUTTON FOR TESTING
 			}
 		});
 		findViewById(R.id.btn_perms).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
-				int missing_autorizations = 0;
+				int missing_authorizations = 0;
 
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 					final String speak = "No manual permission authorizations needed below Android Marshmallow.";
@@ -107,14 +115,14 @@ public class MainAct extends AppCompatActivity {
 					final NotificationManager mNotificationManager = (NotificationManager)
 							getSystemService(Context.NOTIFICATION_SERVICE);
 					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
-						missing_autorizations++;
+						missing_authorizations++;
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
 						startActivity(intent);
 					}
 
 					// Check if the app can draw system overlays and open the settings screen if not
 					if (!Settings.canDrawOverlays(UtilsGeneral.getContext())) {
-						missing_autorizations++;
+						missing_authorizations++;
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 								Uri.parse("package:" + getPackageName()));
 						startActivity(intent);
@@ -124,7 +132,7 @@ public class MainAct extends AppCompatActivity {
 					final PowerManager powerManager = (PowerManager) UtilsGeneral.getContext()
 							.getSystemService(Context.POWER_SERVICE);
 					if (!powerManager.isIgnoringBatteryOptimizations(UtilsGeneral.getContext().getPackageName())) {
-						missing_autorizations++;
+						missing_authorizations++;
 						final Intent intent = new Intent();
 						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 						intent.setData(Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
@@ -135,17 +143,17 @@ public class MainAct extends AppCompatActivity {
 				//Mete-o a verificar estas coisas na inicialização da app também... Mas só verificar, não pedir.
 
 				if (!UtilsApp.isDeviceAdmin()) {
-					missing_autorizations++;
+					missing_authorizations++;
 					startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
 							"com.android.settings.DeviceAdminSettings")));
 				}
 
 				@NonNls final String speak;
-				if (missing_autorizations == 0) {
+				if (missing_authorizations == 0) {
 					speak = "No authorizations left to grant.";
 				} else {
 					speak = "Warning - Not all authorizations have been granted to the application! Number of " +
-							"authorizations left to grant: " + missing_autorizations + ".";
+							"authorizations left to grant: " + missing_authorizations + ".";
 				}
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
 			}
