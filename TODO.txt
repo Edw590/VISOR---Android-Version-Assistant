@@ -59,6 +59,9 @@ the phone (like on BV9500). See here:
 https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/hardware/usb/UsbManager.java,
 a função setCurrentFunctions().
 
+Maybe a bad idea, because then anyone can access the phone files. Think about that. In any case, do this for PLS to put
+the phone in charging mode every as-soon-as-possible.
+
 ------------------------------------------------------------------------------------------------------------------------
 
 Se you enable Safe Boot, the app won't turn on... Isn't it supposed to start? Direct Boot Aware...? Fix that.
@@ -150,3 +153,54 @@ If I put the volume low before speaking so it's not heard very much, he won't ca
 
 "Carl is sleeping, speak lower / be quiet" --> Then he memorizes that Carl is sleeping and only when I tell him Carl is
 has awake, the assistant will get back to normal volume or gets back speaking.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Test if you can stop the app with Debugging enabled through ADB or something, specially with the PLS enabled.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Get the app connecting to ANY open Wi-Fi networks while the Anti-Theft is enabled. Check the connection. Doesn't work,
+next network (there are the networks which require signing in, so next to one that doesn't).
+
+------------------------------------------------------------------------------------------------------------------------
+
+Take a look at PACKAGE_VERIFICATION_AGENT ;-) --> seems to transform the app in a Verifier app... Grant runtime
+permissions...?
+Also take a look at BIND_PACKAGE_VERIFIER.
+GRANT_RUNTIME_PERMISSIONS has "verifier" protection level since only Marshmallow MR1. The first release doesn't have
+verifier in the protection level. So try to get the app as an "installer" instead.
+
+There's another one interesting too: USE_INSTALLER_V2.
+
+Actually... Just root the BV9500 and test if by just installing the app as a system app it becomes an Installer. If not,
+try to add the PACKAGE_VERIFICAR_AGENT permission. If it's not a Verifier still, try to put the BIND_PACKAGE_VERIFIER
+where the INCOMING_EXT_COMMS is. If still not, try to add USE_INSTALLER_V2 to see if it does anything (probably not,
+since it's only granted to Signature or Verifier apps).
+
+------------------------------------------------------------------------------------------------------------------------
+
+Put the function that handles exceptions of the entire app logging them to some file or whatever and update the function
+documentation to say what it does exactly.
+
+------------------------------------------------------------------------------------------------------------------------
+
+If it's for the app to be persistent, then the app itself must have a way of restarting internally, since from outside
+it can't - unless it's some other system app that orders so through forceStopPackage() -, because it's not being able to
+update... (Android Studio can't kill it, as a start.)
+
+------------------------------------------------------------------------------------------------------------------------
+
+The system overlay of the PLS is not working on BV9500.... Why....?
+
+------------------------------------------------------------------------------------------------------------------------
+
+Make a boot and shut down animation for the assistant and make it being always checking if it's there (SHA-something?).
+Make have an initial part, the loop, and then a final part.
+
+Make also one for the shut down. A very fast one. Something.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
+example. Find out how to do that.
