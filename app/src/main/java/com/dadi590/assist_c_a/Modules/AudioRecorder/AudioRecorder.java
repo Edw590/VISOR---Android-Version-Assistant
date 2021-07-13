@@ -2,12 +2,12 @@ package com.dadi590.assist_c_a.Modules.AudioRecorder;
 
 import android.media.MediaRecorder;
 
+import androidx.annotation.Nullable;
+
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public class AudioRecorder {
 
-	private @Nullable MediaRecorder recorder = null;
+	@Nullable private MediaRecorder recorder = null;
 	private boolean recording = false;
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";

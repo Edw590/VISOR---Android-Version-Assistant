@@ -16,9 +16,9 @@ import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.MainSrv;
@@ -26,8 +26,6 @@ import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.R;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-
-import org.jetbrains.annotations.NonNls;
 
 import java.util.Locale;
 
@@ -79,16 +77,14 @@ public class MainAct extends AppCompatActivity {
 				// BUTTON FOR TESTING
 
 				final Intent intent = new Intent(MainAct.this, ProtectedLockScr.class);
-				startActivity(intent);
+				//startActivity(intent);
 
-				UtilsPermissions.wrapperRequestPerms(null, false);
-
-				System.out.println(ContextCompat.checkSelfPermission(UtilsGeneral.getContext(),
-						"android.permission.GRANT_RUNTIME_PERMISSIONS"));
-				System.out.println(ContextCompat.checkSelfPermission(UtilsGeneral.getContext(),
-						"android.permission.INTERACT_ACROSS_USERS_FULL"));
-				System.out.println(ContextCompat.checkSelfPermission(UtilsGeneral.getContext(),
-						"android.permission.PACKAGE_VERIFICATION_AGENT"));
+				System.out.println(UtilsShell.getAccessRights("", true));
+				System.out.println(UtilsShell.getAccessRights("/oe", true));
+				System.out.println(UtilsShell.getAccessRights("/oem", true));
+				System.out.println(UtilsShell.getAccessRights("/", true));
+				System.out.println(UtilsShell.getAccessRights("/system", true));
+				System.out.println(UtilsShell.getAccessRights("/storage/emulated/0", true));
 
 				//MainActTests.for_tests();
 
@@ -148,7 +144,7 @@ public class MainAct extends AppCompatActivity {
 							"com.android.settings.DeviceAdminSettings")));
 				}
 
-				@NonNls final String speak;
+				final String speak;
 				if (missing_authorizations == 0) {
 					speak = "No authorizations left to grant.";
 				} else {

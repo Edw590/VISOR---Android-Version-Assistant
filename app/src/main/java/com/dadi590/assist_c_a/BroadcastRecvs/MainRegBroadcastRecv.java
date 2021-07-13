@@ -1,6 +1,6 @@
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -57,7 +57,7 @@ public class MainRegBroadcastRecv {
 
 	private final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(@NonNull final Context context, final Intent intent) {
+		public void onReceive(final Context context, final Intent intent) {
 			UtilsIntentWhatToDo.intentWhatToDo(intent);
 		}
 	};

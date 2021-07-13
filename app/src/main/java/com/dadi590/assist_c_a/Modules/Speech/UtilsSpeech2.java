@@ -4,8 +4,6 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
-import org.jetbrains.annotations.NonNls;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +33,7 @@ final class UtilsSpeech2 {
 	private static String getUtteranceIdPrefix(final int priority) {
 		// The generation of a random string MUST NOT have the following characters on it: "_" and "-", as they're used
 		// as prefix to differentiate different priorities of speeches.
-		@NonNls final String utterance_id_prefix = UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
+		final String utterance_id_prefix = UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
 
 		return utterance_id_prefix;
 	}
@@ -66,7 +64,7 @@ final class UtilsSpeech2 {
 	 * @return the generated utterance ID
 	 */
 	static String generateUtteranceId(final int priority) {
-		@NonNls final String utterance_id_prefix = getUtteranceIdPrefix(priority);
+		final String utterance_id_prefix = getUtteranceIdPrefix(priority);
 		return utterance_id_prefix + UtilsGeneral.generateRandomString(LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
 	}
 

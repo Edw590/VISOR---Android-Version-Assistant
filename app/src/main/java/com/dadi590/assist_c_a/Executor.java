@@ -2,8 +2,6 @@ package com.dadi590.assist_c_a;
 
 import androidx.annotation.NonNull;
 
-import org.jetbrains.annotations.NonNls;
-
 public class Executor {
 
 	// Note: this is not being used at the time.
@@ -77,7 +75,7 @@ public class Executor {
 	 *
 	 * @return one of the constants
 	 */
-	private int task(@NonNls final String sentence_str,
+	private int task(final String sentence_str,
 					 final boolean partial_results, final boolean only_returning) {
 		return 0;
 	}

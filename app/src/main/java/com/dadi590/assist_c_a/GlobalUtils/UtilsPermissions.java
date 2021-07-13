@@ -12,8 +12,6 @@ import androidx.core.content.PermissionChecker;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 
-import org.jetbrains.annotations.NonNls;
-
 import java.util.ArrayList;
 
 /**
@@ -40,7 +38,7 @@ public final class UtilsPermissions {
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		} else {
-			@NonNls final String speak = "Warning - not all permissions have been granted to the application! Number " +
+			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 		}
@@ -78,7 +76,7 @@ public final class UtilsPermissions {
 
 		if (request) {
 			for (final String[] permission : PERMS_CONSTS.danger_perms_list) {
-				@NonNls final String perm_name = permission[0];
+				final String perm_name = permission[0];
 
 				// If the permission exists on the device API level...
 				if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {
@@ -127,7 +125,7 @@ public final class UtilsPermissions {
 			}
 
 			for (final String[] permission : PERMS_CONSTS.danger_perms_list) {
-				@NonNls final String perm_name = permission[0];
+				final String perm_name = permission[0];
 
 				// If the permission exists on the device API level...
 				if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {

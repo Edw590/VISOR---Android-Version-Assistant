@@ -7,9 +7,6 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
-
 /**
  * <p>Each speech is an instance of this class.</p>
  */
@@ -25,7 +22,7 @@ public class SpeechObj {
 	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
 	// system-dependent, and ALARM seems to always have high priority, possibly.
 	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_RING;
-	private static final int AUD_STREAM_PRIORITY_OTHERS = AudioManager.STREAM_RING;
+	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_RING;
 	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
 	// Also don't change to MUSIC, for the same reason.
 	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
@@ -55,7 +52,7 @@ public class SpeechObj {
 	 *                           audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value
 	 * @param runnable the {@link Runnable} connected to the speech
 	 */
-	SpeechObj(final String utterance_id, final @NotNull String speech, final boolean current_speech_obj,
+	SpeechObj(final String utterance_id, @NonNull final String speech, final boolean current_speech_obj,
 			  @Nullable final Runnable runnable) {
 		this.utterance_id = utterance_id;
 		this.runnable = runnable;
@@ -73,7 +70,7 @@ public class SpeechObj {
 				if (UtilsGeneral.areExtSpeakersOn()) {
 					audio_stream = AUD_STREAM_HEADPHONES;
 				} else {
-					audio_stream = AUD_STREAM_PRIORITY_OTHERS;
+					audio_stream = AUD_STREAM_PRIORITY_OTHERS_SPEAKERS;
 				}
 			}
 		}
@@ -82,8 +79,7 @@ public class SpeechObj {
 	@NonNull
 	@Override
 	public final String toString() {
-		@NonNls final String ret_value = "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + speech + "\", "
+		return "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + speech + "\", "
 				+ runnable + "\", " + audio_stream + "]";
-		return ret_value;
 	}
 }

@@ -1,10 +1,10 @@
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
-import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
@@ -18,7 +18,7 @@ import com.dadi590.assist_c_a.MainSrv;
 public class MainBroadcastRecv extends BroadcastReceiver {
 
 	@Override
-	public final void onReceive(@NonNull final Context context, @Nullable final Intent intent) {
+	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

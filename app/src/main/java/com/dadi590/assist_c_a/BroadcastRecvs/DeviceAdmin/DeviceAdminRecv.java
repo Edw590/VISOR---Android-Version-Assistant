@@ -4,7 +4,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
@@ -20,7 +20,8 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	static final int PRIORITY_ADMIN_ENABLED = Speech2.PRIORITY_MEDIUM;
 
 	@Override
-	public final void onEnabled(@NonNull final Context context, @NonNull final Intent intent) {
+	public final void onEnabled(@android.annotation.NonNull final Context context,
+								@android.annotation.NonNull final Intent intent) {
 		super.onEnabled(context, intent);
 
 		UtilsPermissions.wrapperRequestPerms(null, false);
@@ -36,7 +37,8 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 	@NonNull
 	@Override
-	public final CharSequence onDisableRequested(@NonNull final Context context, @NonNull final Intent intent) {
+	public final CharSequence onDisableRequested(@android.annotation.NonNull final Context context,
+												 @android.annotation.NonNull final Intent intent) {
 		super.onDisableRequested(context, intent);
 
 		UtilsPermissions.wrapperRequestPerms(null, false);
@@ -47,7 +49,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 		// The assistant may not be able to speak speak (service not working or whatever), but he'll try anyways to warn
 		// the user of any changes (try/catch).
 		try {
-			MainSrv.getSpeech2().speak(CONSTS.RET_STR_DISABLE_REQUESTED, Speech2.NO_ADDITIONAL_COMMANDS,
+			MainSrv.getSpeech2().speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.NO_ADDITIONAL_COMMANDS,
 					Speech2.PRIORITY_HIGH, null);
 			// Why PRIORITY_CRITICAL? Because onDisabled() also has it, so they have the same priority. And onDisabled()
 			// skips this speech in case it's being spoken, so it's all good.
@@ -61,7 +63,8 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	}
 
 	@Override
-	public final void onDisabled(@NonNull final Context context, @NonNull final Intent intent) {
+	public final void onDisabled(@android.annotation.NonNull final Context context,
+								 @android.annotation.NonNull final Intent intent) {
 		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED.)
 
 		UtilsPermissions.wrapperRequestPerms(null, false);

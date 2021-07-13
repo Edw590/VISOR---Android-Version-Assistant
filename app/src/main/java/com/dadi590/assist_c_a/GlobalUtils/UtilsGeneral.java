@@ -13,11 +13,10 @@ import com.dadi590.assist_c_a.GlobalUtils.External.ExecuteAsRootBase;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 
-import org.jetbrains.annotations.NonNls;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Random;
@@ -92,7 +91,7 @@ public final class UtilsGeneral {
 		final String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		final String lower = upper.toLowerCase(Locale.ROOT);
 		final String digits = "0123456789";
-		@NonNls final String alphanum = upper + lower + digits;
+		final String alphanum = upper + lower + digits;
 
 		final Random random = new SecureRandom();
 		final char[] symbols = alphanum.toCharArray();
@@ -127,14 +126,14 @@ public final class UtilsGeneral {
 				break;
 			}
 			case (ExecuteAsRootBase.ROOT_DENIED): {
-				@NonNls final String speak = "WARNING! Root access was denied on this device! Some features may not " +
+				final String speak = "WARNING! Root access was denied on this device! Some features may not " +
 						"be available!";
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 
 				break;
 			}
 			case (ExecuteAsRootBase.ROOT_UNAVAILABLE): {
-				@NonNls final String speak = "Attention! The device is not rooted! Some features may not be available!";
+				final String speak = "Attention! The device is not rooted! Some features may not be available!";
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 
 				break;
@@ -227,6 +226,30 @@ public final class UtilsGeneral {
 
 		someHiddenMethod.invoke(null, "some important string")
 		*/
+	}
+
+	/**
+	 * <p>Convert a byte array to printable characters in a string.</p>
+	 * <p>Note: all bytes except null will be attempted to be printed, all based on the platform's default charset (on
+	 * Android is always the UTF-8 charset).</p>
+	 *
+	 * @param byte_array the byte array
+	 *
+	 * @return a string containing printable characters representative of the provided bytes
+	 */
+	@NonNull
+	public static String convertBytes2Printable(@NonNull final byte[] byte_array) {
+		final byte[] new_array = new byte[byte_array.length];
+		int new_length = 0;
+		for (final byte _byte : byte_array) {
+			// Allow all possible characters except the null character to be printed
+			if ((int) _byte != 0) {
+				new_array[new_length] = _byte;
+				new_length++;
+			}
+		}
+		// The default charset on Android is always UTF-8 as stated in the method documentation, so all is ok
+		return new String(new_array, 0, new_length, Charset.defaultCharset());
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

@@ -3,8 +3,6 @@ package com.dadi590.assist_c_a.Modules.Speech;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
-import org.jetbrains.annotations.NonNls;
-
 /**
  * <p>Same as in {@link #afterTtsReady()}.</p>
  */
@@ -24,7 +22,7 @@ final class AfterTtsReady {
 
 		switch (UtilsApp.appInstallationType()) {
 			case UtilsApp.SYSTEM_WITHOUT_UPDATES: {
-				@NonNls final String speak = "WARNING - Installed as system application but without updates. Only " +
+				final String speak = "WARNING - Installed as system application but without updates. Only " +
 						"emergency code commands will be available.";
 				// todo Is it so? Even on Marshmallow and above with extractNativeLibs=false...? Test that.
 				//  Remember the user who said you could "potentially" emulate loading from the APK itself? Try that
@@ -34,7 +32,7 @@ final class AfterTtsReady {
 				break;
 			}
 			case UtilsApp.NORMAL: {
-				@NonNls final String speak = "WARNING - Installed as normal application! System features may not be " +
+				final String speak = "WARNING - Installed as normal application! System features may not be " +
 						"available.";
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				break;
@@ -42,7 +40,7 @@ final class AfterTtsReady {
 		}
 
 		if (!UtilsApp.isDeviceAdmin()) {
-			@NonNls final String speak = "WARNING - The application is not a Device Administrator! Some security " +
+			final String speak = "WARNING - The application is not a Device Administrator! Some security " +
 					"features may not be available.";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 		}
@@ -77,7 +75,7 @@ final class AfterTtsReady {
 		// The Main Service is completely ready, so it warns about it so we can start speaking to it (very useful in
 		// case the screen gets broken, for example).
 		// It's also said in top priority so the user can know immediately (hopefully) that the assistant is ready.
-		@NonNls final String speak = "Ready, sir.";
+		final String speak = "Ready, sir.";
 		MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 	}
 }

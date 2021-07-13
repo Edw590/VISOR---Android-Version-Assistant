@@ -13,7 +13,6 @@ import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 
-import org.jetbrains.annotations.NonNls;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -102,11 +101,11 @@ public class PhoneCallsProcessor {
 			case (PreciseCallState.PRECISE_CALL_STATE_INCOMING):
 			case (CALL_PHASE_RINGING_NEW): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
-					@NonNls final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
+					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
 						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
+					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ".";
 					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
@@ -117,11 +116,11 @@ public class PhoneCallsProcessor {
 			case (PreciseCallState.PRECISE_CALL_STATE_WAITING):
 			case (CALL_PHASE_RINGING_WAITING): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
-					@NonNls final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
+					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
 					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
+					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
 					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
@@ -135,7 +134,7 @@ public class PhoneCallsProcessor {
 					final String speak = "Missed call from a private number.";
 					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 				} else {
-					@NonNls final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
+					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
 					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 				}

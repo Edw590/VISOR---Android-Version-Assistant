@@ -12,7 +12,6 @@ import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 
-import org.jetbrains.annotations.NonNls;
 
 /**
  * <p>Processes all SMS messages sent by and to the phone.</p>
@@ -79,7 +78,7 @@ public final class SmsMsgsProcessor {
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		} else {
 			final String number_name = UtilsTelephony.getWhatToSayAboutNumber(sender);
-			@NonNls final String speak = "Sir, new message from " + number_name + ".";
+			final String speak = "Sir, new message from " + number_name + ".";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}

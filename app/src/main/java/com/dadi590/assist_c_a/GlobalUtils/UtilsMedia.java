@@ -2,11 +2,10 @@ package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.os.Environment;
 
+import androidx.annotation.Nullable;
+
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -44,8 +43,9 @@ public final class UtilsMedia {
 	 *
 	 * @return the {@link File} in case it was possible to generate a file, null otherwise
 	 */
-	public static @Nullable File getOutputMediaFile(final int media_type){
-		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+	@Nullable
+	public static File getOutputMediaFile(final int media_type){
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			String folder = GL_CONSTS.MEDIA_FOLDER;
 			switch (media_type) {
 				case AUDIO: {
@@ -77,7 +77,7 @@ public final class UtilsMedia {
 			}
 
 			// Create a media file name
-			@NonNls final String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+			final String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 					.format(System.currentTimeMillis());
 			File mediaFile = null;
 			switch (media_type) {
@@ -101,7 +101,7 @@ public final class UtilsMedia {
 
 			return mediaFile;
 		} else {
-			@NonNls final String speak = "There was a problem creating the media file in the external storage as " +
+			final String speak = "There was a problem creating the media file in the external storage as " +
 					"it is not mounted.";
 			MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
 		}

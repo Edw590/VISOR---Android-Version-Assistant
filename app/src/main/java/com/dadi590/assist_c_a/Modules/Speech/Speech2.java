@@ -44,7 +44,8 @@ import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
 public class Speech2 {
 
 	TextToSpeech tts;
-	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(0);
+	// If more permissions are ever needed, well, here's a 10 in case I forget to update the number (possible).
+	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
 	SpeechObj current_speech_obj = new SpeechObj("", "", true, null);
 	private String last_thing_said = "";
 	@Nullable private AudioFocusRequest audioFocusRequest = null;
@@ -713,15 +714,6 @@ public class Speech2 {
 		//  indexes == null multiple times there
 		current_speech_obj = arrays_speech_objs.get(Objects.requireNonNull(indexes)[0]).get(indexes[1]);
 
-		if (!focus_volume_done) {
-			setVolumeDndFocus();
-			if (!speeches_on_lists) {
-				if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) {
-					stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
-				}
-			}
-		}
-
 		boolean skip_speech = false;
 
 		// If the Audio Manager instance is null, something wrong happened with the Main Service, so speak anyways.
@@ -743,7 +735,19 @@ public class Speech2 {
 			}
 		}
 
+
 		if (!skip_speech) {
+			// If it's to speak, prepare the app to speak.
+
+			if (!focus_volume_done) {
+				setVolumeDndFocus();
+				if (!speeches_on_lists) {
+					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
+						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
+					}
+				}
+			}
+
 			is_speaking = true;
 		}
 	}

@@ -13,8 +13,6 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
-import org.jetbrains.annotations.NonNls;
-
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -69,7 +67,7 @@ public final class UtilsTelephony {
 		switch (location_search) {
 			case ALL_CONTACTS:
 				uri_to_use = ContactsContract.Contacts.CONTENT_URI;
-				// This seems to give the contacts of the entire phone: SIM card, phone storage and acounts like Google,
+				// This seems to give the contacts of the entire phone: SIM card, phone storage and accounts like Google,
 				// Whatsapp...
 				break;
 			case CONTACTS_SIM:
@@ -133,6 +131,7 @@ public final class UtilsTelephony {
 				cursor.close();
 			}
 		} else if (location_search == CONTACTS_SIM) {
+			// Leave it even being "always true" - until another location is added... Might prevent bugs.
 			while (cursor.moveToNext()) {
 				final String name = cursor.getString(cursor.getColumnIndex("name"));
 				//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
@@ -141,7 +140,7 @@ public final class UtilsTelephony {
                 System.out.println("Phone Number: " + phoneNo);*/
 
 				if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-					// Nota: os métodos compareStrictly() só estão disponíveis com as classes escondidas/internas ativadas (ver código-fonte --> @UnsupportedAppUsage).
+					// Note: the compareStrictly() methods are only available with the hidden/internal classes showing
                     /*System.out.println("---Name: " + name);
                     System.out.println("---Number: " + phoneNo);*/
 					boolean already_found = false;
@@ -218,7 +217,7 @@ public final class UtilsTelephony {
 	 * @return what the assistant should say
 	 */
 	@NonNull
-	public static String getWhatToSayAboutNumber(@NonNls @NonNull final String number) {
+	public static String getWhatToSayAboutNumber(@NonNull final String number) {
 		final String ret = getNameFromNum(number, ALL_CONTACTS);
 		if (ret.equals(NO_MATCHES)) {
 			if (PhoneNumberUtils.isGlobalPhoneNumber(number)) {
@@ -233,7 +232,7 @@ public final class UtilsTelephony {
 				return "an alphanumeric number: " + number;
 			}
 		} else if (ret.equals(MULTIPLE_MATCHES)) {
-			return "Attention - Multiple matches on " + number;
+			return "Attention - Multiple matches on " + number.replace("", " ").trim();
 		}
 
 		return ret;

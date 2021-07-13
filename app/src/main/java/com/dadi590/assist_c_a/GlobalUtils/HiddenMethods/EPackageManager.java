@@ -1,6 +1,6 @@
 package com.dadi590.assist_c_a.GlobalUtils.HiddenMethods;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;

@@ -245,7 +245,7 @@ public class ProtectedLockScr extends AppCompatActivity {
 		}
 
 		@Override
-		public final boolean onInterceptTouchEvent(@NonNull final MotionEvent ev) {
+		public final boolean onInterceptTouchEvent(@Nullable final MotionEvent ev) {
 			//Log.v("customViewGroup", "**********Intercepted");
 			return true;
 		}

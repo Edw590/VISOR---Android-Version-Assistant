@@ -8,8 +8,6 @@ import androidx.annotation.NonNull;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 
-import org.jetbrains.annotations.NonNls;
-
 /**
  * <p>Processes changes in the battery levels or on battery power mode.</p>
  */
@@ -36,12 +34,12 @@ public class BatteryProcessor {
 
 		if (power_connected) {
 			if (last_detected_percent > PERCENT_MAX) {
-				@NonNls final String speak = "Battery already above " + PERCENT_MAX + "%. Please disconnect the charger.";
+				final String speak = "Battery already above " + PERCENT_MAX + "%. Please disconnect the charger.";
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_LOW, null);
 			}
 		} else {
 			if (last_detected_percent < PERCENT_MIN) {
-				@NonNls final String speak = "Battery still below " + PERCENT_MIN + "%. Please reconnect the charger.";
+				final String speak = "Battery still below " + PERCENT_MIN + "%. Please reconnect the charger.";
 				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_LOW, null);
 			}
 		}
@@ -101,12 +99,12 @@ public class BatteryProcessor {
 			// If the battery percentage is VERY_LOW and the last percentage detected is greater than VERY_LOW (meaning
 			// it just detected the change), warn about it. If the last detected percentage is less or equal than
 			// VERY_LOW, then it already detected and warned about it.
-			@NonNls final String speak = "WARNING! EXTREMELY LOW BATTERY OF " + battery_percentage + "% REACHED! " +
+			final String speak = "WARNING! EXTREMELY LOW BATTERY OF " + battery_percentage + "% REACHED! " +
 					"Please connect the charger now!";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
 		} else if (battery_percentage < PERCENT_LOW && last_detected_percent >= PERCENT_LOW) {
 			// Else in the same manner the LOW level.
-			@NonNls final String speak = "ATTENTION! Below " + PERCENT_MIN + "% of battery reached. Please connect " +
+			final String speak = "ATTENTION! Below " + PERCENT_MIN + "% of battery reached. Please connect " +
 					"the charger.";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		}
@@ -117,13 +115,13 @@ public class BatteryProcessor {
 	 *
 	 * @param battery_percentage the current battery percentage
 	 */
-	private void processCharging(@NonNls final int battery_percentage) {
+	private void processCharging(final int battery_percentage) {
 		// Since I'm putting >= in the if statements, must be from greatest level to the lowest one.
 		if (battery_percentage == 100 && last_detected_percent < 100) {
-			@NonNls final String speak = "Attention! Device fully charge! Please disconnect the charger.";
+			final String speak = "Attention! Device fully charge! Please disconnect the charger.";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_LOW, null);
 		} else if (battery_percentage > PERCENT_MAX && last_detected_percent <= PERCENT_MAX) {
-			@NonNls final String speak = "Attention! Above " + PERCENT_MAX + "% of battery reached! Please " +
+			final String speak = "Attention! Above " + PERCENT_MAX + "% of battery reached! Please " +
 					"disconnect the charger.";
 			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
 		}

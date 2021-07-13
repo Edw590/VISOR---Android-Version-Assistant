@@ -12,8 +12,6 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.Executor;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
-import org.jetbrains.annotations.NonNls;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +41,7 @@ public class Speech {
 	private final List<Runnable> runnables = new ArrayList<>(10);
 	String current_speech_id = "";
 	private String last_thing_said = "";
-	@NonNls private final ArrayList<String> speeches = new ArrayList<>(25);
+	private final ArrayList<String> speeches = new ArrayList<>(25);
 	private final int speech_audio_stream;
 
 	//////////////////////////////////////
@@ -180,7 +178,7 @@ public class Speech {
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
-		@NonNls final String currently_speaking_speech_ID;
+		final String currently_speaking_speech_ID;
 		if (speech_mode == TextToSpeech.QUEUE_FLUSH) {
 			final int length = LENGTH_UTTERANCE_ID - EMERGENCY_ID_PREFIX.length();
 			currently_speaking_speech_ID = EMERGENCY_ID_PREFIX + UtilsGeneral.generateRandomString(length);

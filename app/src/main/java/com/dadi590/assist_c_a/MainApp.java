@@ -3,6 +3,7 @@ package com.dadi590.assist_c_a;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.multidex.MultiDex;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
@@ -18,6 +19,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * so you can just run normal threads doing what you need to."</p>
  * <p>"No, persistent applies only to your process. Your Application.onCreate() will be called, but services that called
  * stopSelf() are not automatically restarted."</p>
+ * <p>So it seems Android will restart the process by calling only {@link android.app.Application#onCreate()} if the
+ * main app process goes down.</p>
  */
 public class MainApp extends android.app.Application {
 
@@ -59,7 +62,7 @@ public class MainApp extends android.app.Application {
 	}
 
 	@Override
-	protected final void attachBaseContext(final Context base) { // No idea if base can be null or not, so no annotation
+	protected final void attachBaseContext(@Nullable final Context base) {
 		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}

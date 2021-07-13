@@ -2,7 +2,7 @@
 
 :: CHANGE THESE
 set app_package=com.dadi590.assist_c_a
-set dir_app_name=DADi590_Assist_C_A
+set dir_app_name=%app_package%
 ::set MAIN_ACTIVITY=MainAct.MainAct
 
 set ADB="adb.exe"
