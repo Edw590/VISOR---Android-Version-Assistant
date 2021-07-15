@@ -1,3 +1,24 @@
+/*
+ * Copyright 2021 DADi590
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.Manifest;
@@ -37,6 +58,9 @@ final class PERMS_CONSTS {
 			{Manifest.permission.READ_CALL_LOG, String.valueOf(Build.VERSION_CODES.JELLY_BEAN)},
 			// todo {Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
 			{Manifest.permission.READ_CONTACTS, String.valueOf(Build.VERSION_CODES.BASE)},
+			{Manifest.permission.ACCESS_COARSE_LOCATION, String.valueOf(Build.VERSION_CODES.BASE)},
+			{Manifest.permission.ACCESS_FINE_LOCATION, String.valueOf(Build.VERSION_CODES.BASE)},
+			{Manifest.permission.ACCESS_BACKGROUND_LOCATION, String.valueOf(Build.VERSION_CODES.Q)},
 	};
 	/*private static final String[][] sys_perms_list = {
 			{Manifest.permission.REBOOT, String.valueOf(Build.VERSION_CODES.BASE)},

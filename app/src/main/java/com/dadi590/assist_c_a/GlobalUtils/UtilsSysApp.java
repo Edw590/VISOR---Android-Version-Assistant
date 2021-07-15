@@ -1,11 +1,30 @@
-package com.dadi590.assist_c_a.GlobalUtils.External;
+/*
+ * Copyright 2021 DADi590
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,23 +35,13 @@ import java.util.regex.Pattern;
 
 /**
  * <p>Checks if an app is a system app. Also checks in case it's a system app, if it's an updated app or not.</p>
- * <br>
- * <p>Class gotten from
- * <a href="https://stackoverflow.com/questions/8784505/how-do-i-check-if-an-app-is-a-non-system-app-in-android">this
- * question</a> on StackOverflow, more precisely <a href="https://stackoverflow.com/a/48029011/8228163">this answer</a>,
- * by <a href="https://stackoverflow.com/users/28557/vinayak-bevinakatti">this person</a> (Vinayak Bevinakatti) - now
- * adapted to this app.</p>
- * <p>Except {@link #isSystemUpdatedAppByFLAG()} which I took from somewhere else, and
- * {@link #isSystemApp()}, which I made.</p>
- *
- * @author Vinayak Bevinakatti and others
  */
-public final class SystemAppChecker {
+public final class UtilsSysApp {
 
     /**
      * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
      */
-    private SystemAppChecker() {
+    private UtilsSysApp() {
     }
 
     /**
@@ -42,8 +51,8 @@ public final class SystemAppChecker {
      * {@link #isSystemPreloaded()} and {@link #isSystemSigned()}
      */
     public static boolean isSystemApp() {
-        return SystemAppChecker.isSystemAppByFLAG() || SystemAppChecker.isSystemAppByPM() ||
-                SystemAppChecker.isSystemPreloaded() || SystemAppChecker.isSystemSigned();
+        return UtilsSysApp.isSystemAppByFLAG() || UtilsSysApp.isSystemAppByPM() ||
+                UtilsSysApp.isSystemPreloaded() || UtilsSysApp.isSystemSigned();
     }
 
     /**
@@ -51,7 +60,7 @@ public final class SystemAppChecker {
      *
      * @return {@code true} if the app is a system app and has been updated.
      */
-    public static boolean isSystemUpdatedAppByFLAG() {
+    public static boolean isSystemUpdatedAppByFlag() {
         try {
             final Context context = UtilsGeneral.getContext();
             final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
@@ -59,8 +68,7 @@ public final class SystemAppChecker {
                 // Conjunction of FLAG_UPDATED_SYSTEM_APP and isSystemAppByFLAG()
                 return isSystemAppByFLAG();
             }
-        } catch (final PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (final PackageManager.NameNotFoundException ignored) {
         }
         return false;
     }
@@ -109,13 +117,11 @@ public final class SystemAppChecker {
     private static boolean isSystemPreloaded() {
         try {
             final Context context = UtilsGeneral.getContext();
-            final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(), 0);
+            final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
             if (ai.sourceDir.startsWith("/system/app/") || ai.sourceDir.startsWith("/system/priv-app/")) {
                 return true;
             }
-        } catch (final PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (final PackageManager.NameNotFoundException ignored) {
         }
         return false;
     }
@@ -129,20 +135,22 @@ public final class SystemAppChecker {
     private static boolean isSystemSigned() {
         try {
             final Context context = UtilsGeneral.getContext();
-            // Note: EPackageManager.GET_SIGNATURES is a problem below Android 4.4 KitKat only (no problem, I guess).
 
-            // Get packageinfo for target application
+            // Note: GET_SIGNATURES is a problem below Android 4.4 KitKat only (no problem, I guess - not many will be
+            // using below KitKat anyways).
+
+            // Get package info for target application
             final PackageInfo targetPkgInfo = context.getPackageManager().getPackageInfo(
                     context.getPackageName(), PackageManager.GET_SIGNATURES);
-            // Get packageinfo for system package
+            // Get package info for system package
             final PackageInfo sys = context.getPackageManager().getPackageInfo(
                     "android", PackageManager.GET_SIGNATURES);
-            // Match both packageinfo for there signatures
+            // Match both package info for their signatures
             return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
                     .equals(targetPkgInfo.signatures[0]));
-        } catch (final PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (final PackageManager.NameNotFoundException ignored) {
         }
+
         return false;
     }
 
@@ -157,13 +165,14 @@ public final class SystemAppChecker {
             final ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), 0);
             // Check if FLAG_SYSTEM or FLAG_UPDATED_SYSTEM_APP are set.
-            if (ai != null
-                    && (ai.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
-                return true;
+            if (ai != null) {
+                if ((ai.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
+                    return true;
+                }
             }
-        } catch (final PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (final PackageManager.NameNotFoundException ignored) {
         }
+
         return false;
     }
 }

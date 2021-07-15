@@ -10,7 +10,7 @@ android.permission.ACCESS_NOTIFICATION_POLICY
 - To be able to change the Interruption Filter
 
 android.permission.EXPAND_STATUS_BAR
-- To be able to collapse the status bar
+- To be able to collapse the status bar for the PLS
 
 android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 - So the app can still work even in battery optimization modes, like Ultra Power Saver Mode in Samsung smartphones
@@ -18,13 +18,13 @@ android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 ------------Dangerous permissions------------
 
 android.permission.RECEIVE_SMS
-- Receive SMS
+- Warn about new SMS
 
 android.permission.RECORD_AUDIO
-- Record audio
+- Allow the user to put the app recording audio
 
 android.permission.WRITE_EXTERNAL_STORAGE
-- Write to the external storage
+- Write files to the external storage
 
 android.permission.READ_PHONE_STATE
 - To get phone state changes for PhoneCallProcessor
@@ -35,28 +35,40 @@ android.permission.READ_CALL_LOG
 android.permission.READ_CONTACTS
 - To read the phone contacts (so the assistant can know who is calling or sending the message)
 
-------------Privileged apps' permissions------------
-
-android.permission.CAPTURE_AUDIO_OUTPUT
-android.permission.CAPTURE_MEDIA_OUTPUT
-android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
-- To be able to record from any audio source desired
-
-android.permission.READ_PRECISE_PHONE_STATE
-- To receive changes of the phone state with precise phone states, as opposite to the more generic ones from
-  android.permission.READ_PHONE_STATE
-
-android.permission.LOCK_DEVICE
-- To be able to lock the device even without the app being a Device Administrator (only from Android 11 onwards though)
-
-android.permission.GRANT_RUNTIME_PERMISSIONS
-- To be able to grant runtime permissions --> which means force permissions to be granted
+android.permission.ACCESS_COARSE_LOCATION
+android.permission.ACCESS_FINE_LOCATION
+android.permission.ACCESS_BACKGROUND_LOCATION
+- For the alarms system to know where the user is at the moment to fire the alarm at the right time
 
 ------------AppOps permissions------------
 
 android.permission.SYSTEM_ALERT_WINDOW
 - To be able to draw a window above everything to block status and virtual buttons bar access with the Protected Lock
 Screen
+
+------------Privileged apps' permissions------------
+
+android.permission.CAPTURE_AUDIO_OUTPUT
+android.permission.CAPTURE_MEDIA_OUTPUT
+android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
+- To be able to record audio from any audio source desired
+
+android.permission.READ_PRECISE_PHONE_STATE
+- To receive changes of the phone state with precise phone states, as opposite to the more generic ones from
+  android.permission.READ_PHONE_STATE
+
+android.permission.LOCK_DEVICE
+- To be able to lock the device even without the app being a Device Administrator (only from Android 11 onwards)
+
+------------Verifier permissions------------
+
+android.permission.GRANT_RUNTIME_PERMISSIONS
+- To be able to grant runtime permissions --> which means force permissions to be granted
+
+------------Installer permissions------------
+
+android.permission.INTERACT_ACROSS_USERS_FULL
+- To be able to grant runtime permissions for all users from inside any user
 
 ------------Custom permissions------------
 

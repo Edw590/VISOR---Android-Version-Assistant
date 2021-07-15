@@ -1,21 +1,36 @@
-package com.dadi590.assist_c_a.GlobalUtils.External;
+/*
+ * Copyright 2021 DADi590
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import android.text.AutoGrowArray;
+package com.dadi590.assist_c_a.GlobalUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,12 +41,12 @@ import java.util.List;
  *
  * @author Muzikant
  */
-public final class ExecuteAsRootBase {
+public final class UtilsRoot {
 
     /**
      * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
      */
-    private ExecuteAsRootBase() {
+    private UtilsRoot() {
     }
 
     public static final int ROOT_AVAILABLE = 0;
@@ -72,32 +87,23 @@ public final class ExecuteAsRootBase {
             final boolean exitSu;
             if (currUid == null) {
                 retval = ROOT_DENIED;
-                //retval = ROOT_UNAVAILABLE;
                 exitSu = false;
-                //Log.d("ROOT", "Can't get root access or denied by user");
             } else if (currUid.contains("uid=0")) {
                 retval = ROOT_AVAILABLE;
                 exitSu = true;
-                //Log.d("ROOT", "Root access granted");
             } else {
                 retval = ROOT_DENIED;
                 exitSu = true;
-                //Log.d("ROOT", "Root access rejected: " + currUid);
             }
 
             if (exitSu) {
                 dataOutputStream.writeBytes("exit\n");
                 dataOutputStream.flush();
             }
-            suProcess.waitFor();
-            suProcess.destroy();
-        } catch (final IOException | InterruptedException ignored) {
-            // Can't get root !
-            // Probably broken pipe exception on trying to write to output stream (os) after su failed, meaning that the
-            // device is not rooted
 
+            suProcess.waitFor();
+        } catch (final IOException | InterruptedException ignored) {
             retval = ROOT_UNAVAILABLE;
-            //Log.d("ROOT", "Root access rejected [" + e.getClass().getName() + "] : " + e.getMessage());
         }
 
         return retval;
@@ -146,7 +152,7 @@ public final class ExecuteAsRootBase {
             if (!command.isEmpty()) { // Empty or null
                 if ("su".equals(command) || command.startsWith("su ")) { // "su", "su ", "su    "....
                     // If one of the lines is the root request line...
-                    if (ExecuteAsRootBase.rootCommandsAvailability() == ExecuteAsRootBase.ROOT_AVAILABLE) {
+                    if (UtilsRoot.rootCommandsAvailability() == UtilsRoot.ROOT_AVAILABLE) {
                         su_required = true;
                     } else {
                         // ... and the app doesn't have root access permission, return error
@@ -243,64 +249,4 @@ public final class ExecuteAsRootBase {
             this.error_no_root = error_no_root;
         }
     }
-
-    /*public final boolean execute()
-    {
-        boolean retval = false;
-
-        try
-        {
-            ArrayList<String> commands = getCommandsToExecute();
-            if (null != commands && commands.size() > 0)
-            {
-                Process suProcess = Runtime.getRuntime().exec("su");
-
-                DataOutputStream os = new DataOutputStream(suProcess.getOutputStream());
-
-                // Execute commands that require root access
-                for (String currCommand : commands)
-                {
-                    os.writeBytes(currCommand + "\n");
-                    os.flush();
-                }
-
-                os.writeBytes("exit\n");
-                os.flush();
-
-                try
-                {
-                    int suProcessRetval = suProcess.waitFor();
-                    if (255 != suProcessRetval)
-                    {
-                        // Root access granted
-                        retval = true;
-                    }
-                    else
-                    {
-                        // Root access denied
-                        retval = false;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.e("ROOT", "Error executing root action", ex);
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            Log.w("ROOT", "Can't get root access", ex);
-        }
-        catch (SecurityException ex)
-        {
-            Log.w("ROOT", "Can't get root access", ex);
-        }
-        catch (Exception ex)
-        {
-            Log.w("ROOT", "Error executing internal operation", ex);
-        }
-
-        return retval;
-    }
-    protected abstract ArrayList<String> getCommandsToExecute();*/
 }
