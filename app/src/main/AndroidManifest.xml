@@ -75,7 +75,9 @@
 
 	<!-- Declaration of custom permissions -->
 	<permission android:name="com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS" android:protectionLevel="signature"/>
+	<!--
 	<permission android:name="com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS" android:protectionLevel="signature"/>
+	-->
 
 
 	<!-- todo INSTALL THE APP AS SYSTEM-ONLY, -REMOVE THE ROOT- PERMISSION, AND FIX ALL THE ERRORS!!!!!!!!! -->
@@ -110,11 +112,17 @@
 		android:requiredForAllUsers="false"
 		android:usesCleartextTraffic="false"
 		android:resizeableActivity="false"
-		android:permission="com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS">
+		android:permission="android.permission.BIND_DEVICE_ADMIN">
 		<!-- ^^^^ The attributes above and below the blank line are for maximum app security, hopefully -->
 		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
-		without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
+		 without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
 		<!-- resizeableActivity must be false because of the Protected Lock Screen - divide the screen in 2? Nah... -->
+		<!-- BIND_DEVICE_ADMIN is because of security issues below Android Lollipop 5.0 with custom permission. See
+		 these 2: https://stackoverflow.com/questions/18573139/programmatically-alter-manifest-android-custom-permissions
+		 and https://commonsware.com/blog/2014/02/12/vulnerabilities-custom-permissions.html. So no custom permission
+		 now - it's a system-signature permission, so it comes installed with Android. No problem then. Only the system
+		 can start this app. Nothing else. Could be bad with custom ROMs though. This will be fixed decently some other
+		 time. -->
 
 		<activity android:name="com.dadi590.assist_c_a.MainAct.MainAct"
 			android:directBootAware="true"

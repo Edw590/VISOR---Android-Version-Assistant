@@ -83,10 +83,11 @@ public class Speech2 {
 
 	public static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndObj.DEFAULT_VALUE; // Both must be different
 	private int stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
-	private long will_change_volume = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
+	private long assist_changed_volume_time = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
+	private boolean assist_will_change_volume = false;
 	private boolean user_changed_volume = false;
 	private boolean is_speaking = false;
-	private boolean focus_volume_done = false;
+	private boolean focus_volume_dnd_done = false;
 
 	AudioAttributes audioAttributes = null; // No problem in being null, since it will only be used if TTS loaded
 	// correctly - and if it did, then audioAttributes was initialized decently.
@@ -181,23 +182,58 @@ public class Speech2 {
 		return last_thing_said;
 	}
 	/**
-	 * <p>Sets {@link #user_changed_volume}[1] to true in case the changed volume equals the audio stream currently
-	 * being used to speak.</p>
+	 * <p>Sets {@link #user_changed_volume} to true in case the audio stream of the changed volume equals the audio
+	 * stream currently being used to speak.</p>
+	 * <p>It's also a bit smarter than that, as the assistant itself changes the volume sometimes to speak. This function
+	 * attempts to differentiate both volume changes (user vs assistant).</p>
 	 *
 	 * @param audio_stream the audio stream of which the volume changed
 	 */
 	public final void setUserChangedVolumeTrue(final int audio_stream) {
-		if (is_speaking && System.currentTimeMillis() >= will_change_volume + VOLUME_CHANGE_INTERVAL) {
-			// Detect user changes only after some time after the assistant changed the volume to speak, since the first
-			// volume change to be detected would be the assistant himself changing the volume. This way we wait until
-			// the broadcasts for the assistant volume change are received and only after those we start detecting
-			// actual user changes of volume (pity there's no way of getting the package which changed the volume...).
-			// Also detect only if the assistant is speaking.
-			if (audio_stream == volumeDndObj.audio_stream) {
-				// Reset the volume changed time as soon as the assistant detects the user changed the volume - set once
-				// to true is enough. Also reset only if the stream is the correct one, because the system broadcasts
-				// multiple streams at once, and only one of them may be the one we're looking for.
-				setResetWillChangeVolume(false);
+		// Detect user changes only after some time after the assistant changed the volume to speak, since the first
+		// volume change to be detected would be the assistant himself changing the volume - in case he changed the
+		// volume (otherwise the first and next changes will be user changes). This way we wait until the broadcasts for
+		// the assistant volume change are received and only after those we start detecting actual user changes of volume
+		// (pity there's no way of getting the package which changed the volume or something... - only complicates things).
+		// Also, detect only if the assistant is speaking, of course.
+
+		final boolean carry_on;
+		if (is_speaking) {
+			carry_on = true;
+			// If the assistant is speaking, check the audio stream always. Though...
+			if (assist_will_change_volume) {
+				if (System.currentTimeMillis() <= assist_changed_volume_time + VOLUME_CHANGE_INTERVAL) {
+					if ((volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && audio_stream == volumeDndObj.audio_stream)
+							|| (audio_stream == current_speech_obj.audio_stream)) {
+						// ... if the assistant will change the volume and it's detected here a volume change before
+						// the maximum allowed waiting time for the assistant to change the volume, and the audio stream
+						// of that change is the audio stream currently being used, reset the will change volume variables.
+						setResetWillChangeVolume(false);
+					}
+					// Else, it was one of the various volume change broadcasts made by the system. Keep waiting for the
+					// broadcast with the correct audio stream volume change.
+
+					return;
+				} else {
+					// Else, if the assistant will change the volume but the first volume change detection was after
+					// the maximum allowed waiting period, reset the will change volume variables and check anyways.
+					// This, as a start, shouldn't happen. But if it does, assume it's a user change, and assume there
+					// was some error and the assistant didn't get to change the volume.
+					setResetWillChangeVolume(false);
+				}
+			}
+		} else {
+			// If the assistant is not speaking, discard any volume changes.
+			carry_on = false;
+		}
+
+		if (carry_on) {
+			if ((volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && audio_stream == volumeDndObj.audio_stream)
+					|| (audio_stream == current_speech_obj.audio_stream)) {
+				// As soon as a user volume change is detected, set the variable to true to indicate the user changed
+				// the volume.
+				// Also reset only if the stream is the correct one, because the system broadcasts multiple streams at
+				// once, and only one of them may be the one we're looking for.
 				user_changed_volume = true;
 			}
 		}
@@ -546,12 +582,12 @@ public class Speech2 {
 					notificationManager.setInterruptionFilter(volumeDndObj.new_interruption_filter);
 				}
 			}
-
-			setResetWillChangeVolume(true);
 			// Set the volume
 			volumeDndObj.audio_stream = current_speech_obj.audio_stream;
 			volumeDndObj.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
 			volumeDndObj.new_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+
+			setResetWillChangeVolume(true);
 
 			audioManager.setStreamVolume(current_speech_obj.audio_stream, volumeDndObj.new_volume,
 					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
@@ -566,11 +602,11 @@ public class Speech2 {
 				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
 				final int new_volume = max_volume / 2;
 				if (current_volume < new_volume) {
-					setResetWillChangeVolume(true);
-
 					volumeDndObj.audio_stream = current_speech_obj.audio_stream;
 					volumeDndObj.old_volume = current_volume;
 					volumeDndObj.new_volume = new_volume;
+
+					setResetWillChangeVolume(true);
 
 					audioManager.setStreamVolume(current_speech_obj.audio_stream, new_volume,
 							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
@@ -578,7 +614,7 @@ public class Speech2 {
 			}
 		}
 
-		focus_volume_done = true;
+		focus_volume_dnd_done = true;
 	}
 
 	/**
@@ -597,9 +633,10 @@ public class Speech2 {
 			if (stream_active_before_begin_all_speeches == volumeDndObj.audio_stream) {
 				stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
 				// If the user changed the volume user while the assistant was speaking, reset only if the stream
-				// was already being used (the user raises the volume because it was too low to hear the assistant,
-				// and had nothing playing - then the assistant lowers it again after finishing evenwith the user
-				// having raised it to hear the assistant better at first next time --> ???). This fixes that.
+				// was already being used before the assistant started to speak (the user raises the volume because it
+				// was too low to hear the assistant, and had nothing playing - then the assistant lowers it again after
+				// finishing, even with the user having raised it to hear the assistant better at first next time --> ???).
+				// This fixes that.
 				carry_on = true;
 			} else {
 				if (!user_changed_volume) {
@@ -639,8 +676,7 @@ public class Speech2 {
 
 		volumeDndObj.setDefaultValues();
 
-		user_changed_volume = false;
-		focus_volume_done = false;
+		focus_volume_dnd_done = false;
 	}
 
 	/**
@@ -701,18 +737,18 @@ public class Speech2 {
 	};
 
 	/**
-	 * <p>Sets or resets the variable {@link #will_change_volume} to default values.</p>
-	 * <br>
-	 * <p>Sets to {@link System#currentTimeMillis()} and resets to
-	 * {code {@link Long#MAX_VALUE} - {@link #VOLUME_CHANGE_INTERVAL}}.</p>
+	 * <p>Sets or resets the variables {@link #assist_changed_volume_time} and {@link #assist_changed_volume_time} to
+	 * default values.</p>
 	 *
 	 * @param set true to set, false to reset
 	 */
 	private void setResetWillChangeVolume(final boolean set) {
 		if (set) {
-			will_change_volume = System.currentTimeMillis();
+			assist_changed_volume_time = System.currentTimeMillis();
+			assist_will_change_volume = true;
 		} else {
-			will_change_volume = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
+			assist_will_change_volume = false;
+			assist_changed_volume_time = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
 		}
 	}
 
@@ -760,7 +796,7 @@ public class Speech2 {
 		if (!skip_speech) {
 			// If it's to speak, prepare the app to speak.
 
-			if (!focus_volume_done) {
+			if (!focus_volume_dnd_done) {
 				setVolumeDndFocus();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
@@ -794,7 +830,7 @@ public class Speech2 {
 			// The check below must be here because on API 24 and above, both onBeginSynthesis() and onStart() are
 			// called, and the rightBeforeSpeaking() function must be called only once as soon as possible before the
 			// speech beginning (which is on onStart() for API 23 and below, and onBeginSynthesis() for API 24 and above).
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+			if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
 				rightBeforeSpeaking(utteranceId);
 			}
 		}
@@ -906,8 +942,21 @@ public class Speech2 {
 
 				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
-				if (volumeDndObj.audio_stream != audio_stream) {
-					resetVolumeDndFocus();
+				// Also, check if the assistant changed the volume at all. If it didn't, don't reset anything (that's
+				// checked by verifying if the audio stream is the DEFAULT_VALUE or not).
+				if (volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && volumeDndObj.audio_stream != audio_stream) {
+					if (focus_volume_dnd_done) {
+						resetVolumeDndFocus();
+					}
+					if (assist_will_change_volume) {
+						// Just to be sure, in case there was an error and the assistant didn't change the volume after
+						// saying it would, or in case the volume changed broadcast was not detected - it would still
+						// be waiting to detect it. With this here, not anymore.
+						setResetWillChangeVolume(false);
+					}
+					// The audio stream is changing, so if the user had changed the previous stream's volume, they
+					// didn't change the new one's.
+					user_changed_volume = false;
 				}
 
 				speakInternal(speech, NO_ADDITIONAL_COMMANDS, speech_priority, utterance_id, audio_stream, runnable);
@@ -942,7 +991,17 @@ public class Speech2 {
 		speeches_on_lists = false;
 		is_speaking = false;
 
-		// If there are no more speeches, reset the stream volume and abandon the audio focus.
-		resetVolumeDndFocus();
+		// Since there are no more speeches, reset the stream volume and abandon the audio focus.
+		if (focus_volume_dnd_done) {
+			resetVolumeDndFocus();
+		}
+
+		if (assist_will_change_volume) {
+			// Same reason than on speechTreatment().
+			setResetWillChangeVolume(false);
+		}
+
+		// Doesn't matter if the user changed the volume or not if all the speeches have been finished.
+		user_changed_volume = false;
 	}
 }

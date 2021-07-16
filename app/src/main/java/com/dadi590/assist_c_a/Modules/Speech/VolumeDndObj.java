@@ -32,8 +32,8 @@ class VolumeDndObj {
 	/**
 	 * <p>Default value for all the attributes of the object.</p>
 	 * <br>
-	 * <p>Can't be a possible value for any of:</p>
-	 * <p>- Any of the {@code STREAM_} constants defined in {@link AudioManager}</p>
+	 * <p>Can't be a possible value of any of:</p>
+	 * <p>- The {@code STREAM_} constants defined in {@link AudioManager}</p>
 	 * <p>- The parameters of {@link AudioManager#setStreamVolume(int, int, int)}</p>
 	 * <p>- The return of {@link AudioManager#getStreamVolume(int)}</p>
 	 * <p>- The parameter of {@link NotificationManager#setInterruptionFilter(int)}</p>

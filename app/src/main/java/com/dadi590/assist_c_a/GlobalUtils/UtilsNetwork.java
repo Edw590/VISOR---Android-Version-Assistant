@@ -66,22 +66,28 @@ public final class UtilsNetwork {
 		// It will calculate the sum and sum of squares of the first 5 elements of the time_values list (5 seemed a good
 		// number), and then will check if any of those first 5 elements is an outlier inside that 5-elements list, and
 		// if any is an outlier, it will be removed from the time_values list.
+		// If the time values are [2, 20, 18, 16, 34, 129, 21, 23], the average of the first values will still be near
+		// the supposed value (between 16 and 20). If I put 4, it will come down to 14 (wrong). If it's less, even
+		// worse will get. More than that, could catch the 129, which I don't see appearing in the first 5 elements on
+		// some tests.
+		final int first_n_elements = 5;
 		double sum = 0.0;
 		double sum_squares = 0.0;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < first_n_elements; i++) {
 			final double value = time_values.get(i);
 			sum += value;
 			sum_squares += value * value;
 		}
 		boolean any_outlier = false;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < first_n_elements; i++) {
 			if (UtilsMath.isOutlier(time_values.get(i), sum, sum_squares, 5, accuracy_parameter)) {
 				any_outlier = true;
 				time_values.remove(i);
+				i--;
 			}
 		}
 
-		int summed_elements = 5;
+		int summed_elements = first_n_elements;
 		if (any_outlier) {
 			// Reset the variables since now it will calculate again the new sum and sum of squares (in case there was an
 			// outlier and it was removed from the original list). This will be used as the starting parameters for the
@@ -89,7 +95,7 @@ public final class UtilsNetwork {
 			sum = 0.0;
 			sum_squares = 0.0;
 			summed_elements = 0;
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < first_n_elements; i++) {
 				final double value = time_values.get(i);
 				summed_elements++;
 				sum += value;

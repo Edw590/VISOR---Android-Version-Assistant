@@ -15,6 +15,10 @@ android.permission.EXPAND_STATUS_BAR
 android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 - So the app can still work even in battery optimization modes, like Ultra Power Saver Mode in Samsung smartphones
 
+android.permission.INTERNET
+- So the app can ping devices on the same network to attempt to get the distance between the device where the app is
+  installed and the other devices (to locate the app device inside a building - very useful for the alarms system)
+
 ------------Dangerous permissions------------
 
 android.permission.RECEIVE_SMS
@@ -70,15 +74,18 @@ android.permission.GRANT_RUNTIME_PERMISSIONS
 android.permission.INTERACT_ACROSS_USERS_FULL
 - To be able to grant runtime permissions for all users from inside any user
 
-------------Custom permissions------------
+
+------------My permissions------------
 
 com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS
 - This permission is for the entire app to communicate inside itself (internally). sendBroadcast() sends to all apps, so
   they must hold this permission to receive the broadcast (which they can only hold if they're signed with my signature)
 
+@Unused_temporarily - read below the declaration of the application tag on the manifest
 com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS
 - This permission exists for no other app to be able to communicate with this one, in the components that declare this
-  permission (or that inherit it), except if it's some other app developed by me (same signature)
+  permission (or that inherit it), except if it's some other app developed by me (same signature) - the reason of being
+  on android:permission of the application tag.
 
 
 ------------SuperSU permission------------
