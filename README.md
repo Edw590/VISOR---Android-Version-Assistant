@@ -60,15 +60,15 @@ After that, currently just click on the permissions button and accept everything
 I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
 
-### License
-This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
-
 ## About
+### Roadmap
+Have a look on the "TODO.txt" file.
+
 ### Project status
 Ongoing, but possibly slowly, since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
 
-### Roadmap
-Have a look on the "TODO.txt" file.
+### License
+This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
 
 ## Support
 If you have any questions, just create an Issue here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/issues.
