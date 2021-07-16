@@ -1,5 +1,15 @@
 # LEGION - A real assistant [Android/Client]
 
+Index:
+- [Introduction](#introduction)
+- [Explanation of the assistant](#explanation-of-the-assistant)
+- [Current modules](#current-modules)
+- [Getting started using the app](#getting-started-using-the-app)
+- [Have any questions?](#have-any-questions)
+- [Ideas I have for the app](#ideas-i-have-for-the-app)
+- [Notes to compile the app](#notes-to-compile-the-app)
+- [Final notes](#final-notes)
+
 ## Introduction
 Hi all. This is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby). As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
 I've now finally decided to make it public, after vastly improving its coding style (<3 IntelliJ's Inspections...) and translating the code to English (was in Portuguese, even though speeches and recognition were already in English).
@@ -37,11 +47,17 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about it. It will warn about incoming calls, waiting calls and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection (which shall be improved some time - could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 
-## Note for compiling the app
-In order to compile this app, you need to have hidden/internal classes available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
+## Getting started using the app
+Currently, just install it, click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not stealing anything, so you can accept anything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only record audio is manual for now).
+
+## Have any questions?
+If you have any questions, just create an Issue here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/issues.
 
 ## Ideas I have for the app
 Have a look on the "TODO.txt" file.
+
+## Notes to compile the app
+In order to compile this app, you need to have hidden/internal classes available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
 
 ## Final notes
 Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School when I bought a CASIO fx-CG20 and it asked for a company name. So I made this one up xD. Thought why not keep using it, so I have some company name to put on stuff xD.
