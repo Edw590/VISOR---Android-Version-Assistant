@@ -7,10 +7,10 @@ Table of Contents:
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
 - - [Compile the app](#compile-the-app)
-- - [License](#license)
 - [About](#about)
-- - [Project status](#project-status)
 - - [Roadmap](#roadmap)
+- - [Project status](#project-status)
+- - [License](#license)
 - [Support](#support)
 - [Final notes](#final-notes)
 
