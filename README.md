@@ -10,7 +10,7 @@
 - [About](#about)
 - - [Roadmap](#roadmap)
 - - [Project status](#project-status)
-- - [License](#license)
+- - [License](#-license)
 - [Support](#support)
 - [Final notes](#final-notes)
 
