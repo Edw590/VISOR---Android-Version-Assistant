@@ -35,6 +35,7 @@
 	<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 	<uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous permissions (runtime permissions - those that need to be explicitly granted by the user)  -->

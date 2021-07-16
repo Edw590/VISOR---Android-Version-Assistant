@@ -21,11 +21,9 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 
-import android.content.Context;
-
 /**
  * <p>A class to be used as an "multi-type array" for the returning value of
- * {@link PhoneCallsProcessor#getCallPhase(Context, int, String)}.</p>
+ * {@link PhoneCallsProcessor#getCallPhase(int, String)}.</p>
  */
 class NumAndPhase {
 

@@ -32,11 +32,10 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
-
 import com.android.internal.telephony.ITelephony;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 
 import java.lang.reflect.Method;
 
@@ -139,19 +138,19 @@ final class MainActTests {
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 		}
-		final int protectionLevel = ContextCompat.checkSelfPermission(context, "android.permission.UPDATE_APP_OPS_STATS");
+		final boolean protectionLevel = UtilsPermissions.checkSelfPermission("android.permission.UPDATE_APP_OPS_STATS");
 
 		System.out.println("------------------------");
 		System.out.println(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
 		System.out.println(ApplicationInfo.FLAG_SYSTEM);
 		System.out.println("---");
 		System.out.println(protectionLevel);
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.MODIFY_PHONE_STATE"));
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.CALL_PRIVILEGED"));
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.REBOOT"));
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.SHUTDOWN"));
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_SUPERUSER"));
-		System.out.println(ContextCompat.checkSelfPermission(context, "android.permission.NETWORK_SETTINGS"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.MODIFY_PHONE_STATE"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.CALL_PRIVILEGED"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.REBOOT"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.SHUTDOWN"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.ACCESS_SUPERUSER"));
+		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.NETWORK_SETTINGS"));
 		System.out.println("------------------------");
 
             /*Gestor_camara gestor_camara = MainSrv.obter_gestor_camara();

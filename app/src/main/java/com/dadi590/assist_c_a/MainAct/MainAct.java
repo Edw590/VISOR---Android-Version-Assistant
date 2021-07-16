@@ -26,8 +26,6 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -41,16 +39,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNetwork;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -109,6 +107,12 @@ public class MainAct extends AppCompatActivity {
 				System.out.println(UtilsShell.getAccessRights("/", true));
 				System.out.println(UtilsShell.getAccessRights("/system", true));
 				System.out.println(UtilsShell.getAccessRights("/storage/emulated/0", true));
+
+				System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPP");
+				UtilsNetwork.getAveragePingRTT("192.168.1.254");
+				//List<String> commands = new ArrayList<>(1);
+				//commands.add("ping -c 50 -i 0.5 -n -s 56 -t 1 -v 192.168.1.254");
+				//System.out.println(UtilsGeneral.convertBytes2Printable(UtilsShell.executeShellCmd(commands).output_stream));
 
 				//MainActTests.for_tests();
 

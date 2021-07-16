@@ -25,10 +25,10 @@ import android.media.MediaRecorder;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv;
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
+import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +160,7 @@ public class AudioRecorder {
 			recording = false;
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
-			/*int permission_status = ContextCompat.checkSelfPermission(context, Manifest.permission.CAPTURE_AUDIO_OUTPUT);
+			/*int permission_status = UtilsPermissions.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT);
             if (permission_status == EPackageManager.PERMISSION_GRANTED) {
                 return UtilsGeneral.FONTE_INDISPONIVEL;
             } else {

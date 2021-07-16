@@ -23,12 +23,13 @@ package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.PermissionChecker;
+import androidx.core.content.ContextCompat;
 
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -102,7 +103,7 @@ public final class UtilsPermissions {
 				// If the permission exists on the device API level...
 				if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {
 					// If the permission has not been granted already...
-					if (PermissionChecker.checkSelfPermission(context, perm_name) != PermissionChecker.PERMISSION_GRANTED) {
+					if (!checkSelfPermission(perm_name)) {
 						if (force_permissions) {
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 								// This below needs the GRANT_RUNTIME_PERMISSIONS permission, which has
@@ -125,7 +126,7 @@ public final class UtilsPermissions {
 									num_forced_error_perms++;
 								}
 
-								if (PermissionChecker.checkSelfPermission(context, perm_name) != PermissionChecker.PERMISSION_GRANTED) {
+								if (!checkSelfPermission(perm_name)) {
 									num_not_granted_perms++;
 								}
 							}
@@ -150,7 +151,7 @@ public final class UtilsPermissions {
 
 				// If the permission exists on the device API level...
 				if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {
-					if (PermissionChecker.checkSelfPermission(context, perm_name) != PermissionChecker.PERMISSION_GRANTED) {
+					if (!checkSelfPermission(perm_name)) {
 						num_not_granted_perms++;
 					}
 				}
@@ -201,5 +202,17 @@ public final class UtilsPermissions {
 		}
 
 		return new int[]{0, 0, 0};
+	}
+
+	/**
+	 * <p>Same as in {@link ContextCompat#checkSelfPermission(Context, String)}.</p>
+	 * <p>It just takes less space on a code line (no need to provide a Context instance nor check an int parameter).</p>
+	 *
+	 * @param permission Same as in {@link ContextCompat#checkSelfPermission(Context, String)}.
+	 *
+	 * @return true if the app has the permission, false otherwise
+	 */
+	public static boolean checkSelfPermission(@NonNull final String permission) {
+		return ContextCompat.checkSelfPermission(UtilsGeneral.getContext(), permission) == PackageManager.PERMISSION_GRANTED;
 	}
 }
