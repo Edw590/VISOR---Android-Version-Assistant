@@ -1,6 +1,6 @@
 # LEGION - A real assistant [Android/Client]
 
-Table of Contents:
+## Table of Contents
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
 - [Current modules (features)](#current-modules-features)
