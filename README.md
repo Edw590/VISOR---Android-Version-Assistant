@@ -56,18 +56,18 @@ Install the app either as a perfectly normal app, or as a system app. Grant it r
 After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only record audio is manual for now).
 
 ## For developers
-### Compile the app
+### - Compile the app
 I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
 
 ## About
-### Roadmap
+### - Roadmap
 Have a look on the "TODO.txt" file.
 
-### Project status
+### - Project status
 Ongoing, but possibly slowly, since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
 
-### License
+### - License
 This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
 
 ## Support
