@@ -204,3 +204,8 @@ Make also one for the shut down. A very fast one. Something.
 
 Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
 example. Find out how to do that.
+
+-------
+
+When someone calls that it's not on the contacts, use some web service to check who might be/is calling.
+Like some hospital or other public numbers.
