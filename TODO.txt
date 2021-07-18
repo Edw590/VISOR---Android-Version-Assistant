@@ -209,3 +209,6 @@ example. Find out how to do that.
 
 When someone calls that it's not on the contacts, use some web service to check who might be/is calling.
 Like some hospital or other public numbers.
+
+At least get the country from the number, and maybe the region a telephone number is from
+(like +351 248 ... ... is from a region or city or something, and 254 is from somewhere else).
