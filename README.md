@@ -71,7 +71,9 @@ Ongoing, but possibly slowly, since I'm a student, so I may not have that much t
 This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
 
 ## Support
-If you have any questions, just create an Issue here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/issues.
+If you have any questions, try the options below:
+- Create an Issue here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/issues
+- Create a Discussion here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/discussions
 
 ## Final notes
 Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School when I bought a CASIO fx-CG20 and it asked for a company name. So I made this one up xD. Thought why not keep using it, so I have some company name to put on stuff xD.
