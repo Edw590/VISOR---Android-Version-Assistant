@@ -10,9 +10,10 @@ assignees: ''
 <!--
 [Issue; Type: 4; Version: 1.0;]
 
+Also, do NOT delete this!!!
 #############################################################################
-                                                                         WARNING!
-                   IGNORING THE TEMPLATE MIGHT RESULT IN ISSUE CLOSED AS INCOMPLETE
+                                WARNING!
+      IGNORING THE TEMPLATE MIGHT RESULT IN ISSUE CLOSED AS INCOMPLETE
 #############################################################################
 
 That's later, when/if I need to put a BOT taking care of these things. For now it's all manually checked by me. But follow the template anyways.
