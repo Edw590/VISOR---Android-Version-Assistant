@@ -10,13 +10,7 @@ assignees: DADi590
 <!--
 [Issue; Type: 2; Version: 1.0;]
 
-Also, do NOT delete this!!!
-#############################################################################
-                                WARNING!
-      IGNORING THE TEMPLATE MIGHT RESULT IN ISSUE CLOSED AS INCOMPLETE
-#############################################################################
-
-That's later, when/if I need to put a BOT taking care of these things. For now it's all manually checked by me. But follow the template anyways.
+Do NOT delete/change anything inside < ! - - and - - >!!!
 -->
 
 **Is your feature request related to a problem? Please describe.** <!--[Title;]-->
