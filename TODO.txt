@@ -212,3 +212,14 @@ Like some hospital or other public numbers.
 
 At least get the country from the number, and maybe the region a telephone number is from
 (like +351 248 ... ... is from a region or city or something, and 254 is from somewhere else).
+
+------
+
+[Someone calls] / "He's not available at the moment" / "When will he be available then?"
+/ "When will you be available, sir?" / "In 2 hours" / "He'll be available i 2 hours"
+
+Or...
+
+"Are you not answering the call? Would you like me to say something?"
+/ "Yes. I'm washing my teeth now, can't answer" / [And the assistant
+would say that, either on ca or SMS message]
