@@ -205,7 +205,7 @@ Make also one for the shut down. A very fast one. Something.
 Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
 example. Find out how to do that.
 
--------
+------------------------------------------------------------------------------------------------------------------------
 
 When someone calls that it's not on the contacts, use some web service to check who might be/is calling.
 Like some hospital or other public numbers.
@@ -213,7 +213,7 @@ Like some hospital or other public numbers.
 At least get the country from the number, and maybe the region a telephone number is from
 (like +351 248 ... ... is from a region or city or something, and 254 is from somewhere else).
 
-------
+------------------------------------------------------------------------------------------------------------------------
 
 [Someone calls] / "He's not available at the moment" / "When will he be available then?"
 / "When will you be available, sir?" / "In 2 hours" / "He'll be available i 2 hours"
@@ -223,3 +223,8 @@ Or...
 "Are you not answering the call? Would you like me to say something?"
 / "Yes. I'm washing my teeth now, can't answer" / [And the assistant
 would say that, either on ca or SMS message]
+
+------------------------------------------------------------------------------------------------------------------------
+
+Have a list of all bought food, store the validity of the food, and keep warning if it's going to pass or not. Like, a
+few days before it ends.
