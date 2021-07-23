@@ -228,3 +228,7 @@ would say that, either on ca or SMS message]
 
 Have a list of all bought food, store the validity of the food, and keep warning if it's going to pass or not. Like, a
 few days before it ends.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Block phone numbers.
