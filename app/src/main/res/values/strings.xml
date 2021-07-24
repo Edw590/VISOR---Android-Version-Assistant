@@ -22,9 +22,4 @@
 <resources>
 	<string name="app_name">LEGION (Android)</string>
 	<string name="app_description">LEGION (Android version)</string>
-
-	<string name="perm_INCOMING_EXT_COMMS">Used to allow that only apps developed by me can communicate with this app.
-	</string>
-	<string name="perm_INTERNAL_RECEIVERS">Used internally so that different parts of the app can communicate with each
-		other.</string>
 </resources>

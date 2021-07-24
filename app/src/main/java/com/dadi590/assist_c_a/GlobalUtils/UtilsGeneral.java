@@ -258,7 +258,7 @@ public final class UtilsGeneral {
 	 * @return a string containing printable characters representative of the provided bytes
 	 */
 	@NonNull
-	public static String convertBytes2Printable(@NonNull final byte[] byte_array) {
+	public static String convertBytesToPrintable(@NonNull final byte[] byte_array) {
 		final byte[] new_array = new byte[byte_array.length];
 		int new_length = 0;
 		for (final byte _byte : byte_array) {

@@ -71,7 +71,7 @@ public final class UtilsShell {
 		}
 
 		assert commands_output != null; // Just want the warning out. It won't be null if the "su" command is not there.
-		return UtilsGeneral.convertBytes2Printable(commands_output.output_stream);
+		return UtilsGeneral.convertBytesToPrintable(commands_output.output_stream);
 	}
 
 	/*public static boolean createFile(@NonNull final String complete_name) {
@@ -104,7 +104,7 @@ public final class UtilsShell {
 	 * <p>- The function will input "exit\n" as the last command in case the command to execute su was issued (resulting
 	 * in an infinite wait for it).</p>
 	 * <p>- The return values are byte arrays. To get the printable form of them, use
-	 * {@link UtilsGeneral#convertBytes2Printable(byte[])}.</p>
+	 * {@link UtilsGeneral#convertBytesToPrintable(byte[])}.</p>
 	 *
 	 * @param commands_list list of commands to execute, each in a new index
 	 *
