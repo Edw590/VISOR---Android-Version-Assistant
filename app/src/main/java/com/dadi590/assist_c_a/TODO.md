@@ -241,3 +241,6 @@ disable the entire app and warn which app has that permission. Detect that right
 extended Application class. To disable the entire app without storing a value, maybe put the check everywhere where the
 Main Service is started (inside the function that starts it). Something like that. The app must only work if it's the
 only one declaring the permissions.
+
+Also, because of KitKat and below's possibility of exploitation of signing certificates, do NOT put the app broadcasting
+stuff using the permission. Or do, but warn people about it. Or put the app with minSdkVersion of 21...

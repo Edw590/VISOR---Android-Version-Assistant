@@ -40,12 +40,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -114,8 +112,7 @@ public class ProtectedLockScr extends AppCompatActivity {
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		// Lock the device immediately.
 		UtilsDeviceAdmin.lockDevice();
@@ -149,16 +146,14 @@ public class ProtectedLockScr extends AppCompatActivity {
 
 		// Do this below every time the activity is started/resumed/whatever
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 	}
 
 	@Override
 	protected final void onStop() {
 		super.onStop();
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 	}
 
 	/**

@@ -27,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.multidex.MultiDex;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
@@ -51,8 +50,7 @@ public class MainApp extends android.app.Application {
 
 		// To do exactly when the app's main process starts
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		// Setup handler for uncaught exceptions
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {

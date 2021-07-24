@@ -73,13 +73,6 @@
 	<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
 
 
-	<!-- Declaration of custom permissions -->
-	<permission android:name="com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS" android:protectionLevel="signature"/>
-	<!--
-	<permission android:name="com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS" android:protectionLevel="signature"/>
-	-->
-
-
 	<!-- todo INSTALL THE APP AS SYSTEM-ONLY, -REMOVE THE ROOT- PERMISSION, AND FIX ALL THE ERRORS!!!!!!!!! -->
 	<!-- todo FORCE THE APP TO GRANT ITS OWN PERMISSIONS EACH SOME TIME WITH ROOT OR WITH SOME SYSTEM METHOD!!!!!!!! -->
 
@@ -111,29 +104,35 @@
 		android:extractNativeLibs="false"
 		android:requiredForAllUsers="false"
 		android:usesCleartextTraffic="false"
-		android:resizeableActivity="false"
-		android:permission="android.permission.BIND_DEVICE_ADMIN">
+		android:resizeableActivity="false">
 		<!-- ^^^^ The attributes above and below the blank line are for maximum app security, hopefully -->
 		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
 		 without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
 		<!-- resizeableActivity must be false because of the Protected Lock Screen - divide the screen in 2? Nah... -->
-		<!-- BIND_DEVICE_ADMIN is because of security issues below Android Lollipop 5.0 with custom permission. See
+		<!-- BIND_DEVICE_ADMIN is because of security issues below Android Lollipop 5.0 with custom permissions. See
 		 these 2: https://stackoverflow.com/questions/18573139/programmatically-alter-manifest-android-custom-permissions
 		 and https://commonsware.com/blog/2014/02/12/vulnerabilities-custom-permissions.html. So no custom permission
 		 now - it's a system-signature permission, so it comes installed with Android. No problem then. Only the system
 		 can start this app. Nothing else. Could be bad with custom ROMs though. This will be fixed decently some other
 		 time. -->
 
+		<!-- Below, everything I can has exported=false, so nothing outside this app can reach those components.
+		 Do NOT rely on custom permissions to ensure that only the app can call reach components. That may not be
+		 always true, like on KitKat and below because of the FakeID vulnerability and a custom permissions security
+		 vulnerability. So that means, if the app is to support those (currently, yes), then it can NOT rely on custom
+		 permissions for anything important (or anything at all). -->
+
 		<activity android:name="com.dadi590.assist_c_a.MainAct.MainAct"
+			android:exported="true"
 			android:directBootAware="true"
 			android:autoRemoveFromRecents="true"
 			android:permission="">
 			<!--android:excludeFromRecents="true"-->
 			<!-- The only external order that can supposedly be given to the app is to this activity and nothing else.
-			That's the reason of permission="", so any app can start this app, but cannot do anything with any of the
-			other components of the app -->
+			 That's the reason of permission="", so any app can start this app, but cannot do anything with any of the
+			 other components of the app -->
 			<!-- Don't think about putting noHistory to true, since it will stop the app from being able to request
-			runtime permissions -->
+			 runtime permissions -->
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.DEFAULT" />
@@ -143,6 +142,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr"
+			android:exported="false"
 			android:directBootAware="true"
 			android:showOnLockScreen="true"
 			android:showForAllUsers="true"
@@ -150,25 +150,26 @@
 			android:autoRemoveFromRecents="true"
 			android:excludeFromRecents="true"
 			android:process=":A" />
-		<!-- Keep turnScreenOn false. On BV9500 with the app as a system app, at least, it was making the screen being
-		 always On, even after I would click on the Power button -> I'd like to be able to turn off the screen... -->
+			<!-- Keep turnScreenOn false. On BV9500 (tested with the app as a system app, at least), it was making the
+			 screen being always On, even after I would press the Power button -> I'd like to be able to turn off the
+			 screen... -->
 
 		<!-- Persistence only applies to services in the default application process. If any <service> tag includes an
 		"android:process" attribute that causes it to run in a separate process, that process will NOT be persistent. -->
-		<!-- Means do NOT put the process tag in the Main Service!!! -->
 		<service android:name="com.dadi590.assist_c_a.MainSrv"
+			android:exported="false"
 			android:directBootAware="true"
-			android:enabled="true"
 			android:foregroundServiceType="location" />
+			<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
+			android:exported="false"
 			android:directBootAware="true"
-			android:enabled="true"
 			android:process=":AA" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
+			android:exported="true"
 			android:permission="android.permission.BIND_DEVICE_ADMIN"
-			android:directBootAware="true"
-			android:enabled="true">
+			android:directBootAware="true">
 			<meta-data android:name="android.app.device_admin"
 				android:resource="@xml/device_administration" />
 
@@ -179,12 +180,12 @@
 			</intent-filter>
 		</receiver>
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv"
+			android:exported="true"
 			android:directBootAware="true"
-			android:enabled="true"
 			android:permission=""
 			tools:ignore="UnprotectedSMSBroadcastReceiver">
 			<!-- android:permission="" so anyone can send broadcasts for this to detect. It's only used to start the
-			Main Service anyways (doesn't do anything with the broadcast, so no security holes). -->
+			Main Service anyways (doesn't do anything with the received intent, so no security holes). -->
 			<intent-filter android:priority="1000">
 				<!-- DO NOT USE THIS TO ACTUALLY DECIDE WHAT TO DO WITH STUFF!!! USE THE REGISTERED BROADCASTS FOR
 				THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN

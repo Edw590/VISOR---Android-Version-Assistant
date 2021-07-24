@@ -23,6 +23,7 @@ package com.dadi590.assist_c_a.MainAct;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -63,9 +64,8 @@ public class MainAct extends AppCompatActivity {
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
-		final int perms_left = UtilsPermissions.wrapperRequestPerms(null, false)[1];
+		final int perms_left = UtilsServices.startMainService()[1];
 		UtilsPermissions.warnPermissions(perms_left, false);
-		UtilsServices.startService(MainSrv.class);
 
 		setButtonsClickListeners();
 
@@ -80,8 +80,7 @@ public class MainAct extends AppCompatActivity {
 
 		// Do this below every time the activity is started/resumed/whatever
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 	}
 
 	/**
@@ -97,6 +96,9 @@ public class MainAct extends AppCompatActivity {
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
+
+				final BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
+				BTAdapter.startDiscovery();
 
 				final Intent intent = new Intent(MainAct.this, ProtectedLockScr.class);
 				//startActivity(intent);
@@ -233,7 +235,6 @@ public class MainAct extends AppCompatActivity {
 	protected final void onStop() {
 		super.onStop();
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 	}
 }

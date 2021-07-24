@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,10 +33,10 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -96,6 +97,22 @@ public final class UtilsServices {
 				context.startService(intent);
 			}
 		}
+	}
+
+	/**
+	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
+	 * <p>What it does:</p>
+	 * <p>- Attempts to force all permissions to be granted;</p>
+	 * <p>- Starts the Main Service.</p>
+	 *
+	 * @return same as in {@link UtilsPermissions#wrapperRequestPerms(Activity, boolean)}
+	 */
+	@NonNull
+	public static int[] startMainService() {
+		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
+		UtilsServices.startService(MainSrv.class);
+
+		return ret;
 	}
 
 	/**

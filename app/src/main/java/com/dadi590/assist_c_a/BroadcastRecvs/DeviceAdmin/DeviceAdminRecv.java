@@ -27,7 +27,6 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.UtilsProtectedLockScr;
@@ -45,8 +44,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 								@android.annotation.NonNull final Intent intent) {
 		super.onEnabled(context, intent);
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		// The assistant may not be able to speak speak (service not working or whatever), but he'll try anyways to warn
 		// the user of any changes (try/catch).
@@ -62,8 +60,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 												 @android.annotation.NonNull final Intent intent) {
 		super.onDisableRequested(context, intent);
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
@@ -88,8 +85,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 								 @android.annotation.NonNull final Intent intent) {
 		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED.)
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 

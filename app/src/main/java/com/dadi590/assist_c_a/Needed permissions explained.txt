@@ -75,19 +75,6 @@ android.permission.INTERACT_ACROSS_USERS_FULL
 - To be able to grant runtime permissions for all users from inside any user
 
 
-------------My permissions------------
-
-com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS
-- This permission is for the entire app to communicate inside itself (internally). sendBroadcast() sends to all apps, so
-  they must hold this permission to receive the broadcast (which they can only hold if they're signed with my signature)
-
-@Unused_temporarily - read below the declaration of the application tag on the manifest
-com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS
-- This permission exists for no other app to be able to communicate with this one, in the components that declare this
-  permission (or that inherit it), except if it's some other app developed by me (same signature) - the reason of being
-  on android:permission of the application tag.
-
-
 ------------SuperSU permission------------
 
 android.permission.ACCESS_SUPERUSER

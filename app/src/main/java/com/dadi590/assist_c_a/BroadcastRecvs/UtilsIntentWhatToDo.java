@@ -21,19 +21,16 @@
 
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.MainSrv;
-import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
 
 import java.util.LinkedHashMap;
 
@@ -177,18 +174,12 @@ final class UtilsIntentWhatToDo {
 			}
 
 			/////////////////////////////////////
-			// Lock screen - for testing
-			/*case Intent.ACTION_SCREEN_OFF: {
-				final Intent intent1 = new Intent(context, ProtectedLockScr.class);
-				intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				context.startActivity(intent1);
-			}*/
-
-			/////////////////////////////////////
 			// Volume changes
 			case AudioManager.VOLUME_CHANGED_ACTION: {
 				MainSrv.getSpeech2().setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
 						Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
+
+				break;
 			}
 		}
 	}

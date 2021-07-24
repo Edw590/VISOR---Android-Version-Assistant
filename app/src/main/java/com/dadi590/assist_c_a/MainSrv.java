@@ -32,13 +32,12 @@ import com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv;
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
-import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
-import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
+import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 
 /**
  * The main {@link Service} of the application - MainService.
@@ -100,8 +99,7 @@ public class MainSrv extends Service {
 	 */
 	@NonNull
 	public static Speech2 getSpeech2() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		return speech2;
 	}
@@ -110,8 +108,7 @@ public class MainSrv extends Service {
 	 */
 	@NonNull
 	public static AudioRecorder getAudioRecorder() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		return audioRecorder;
 	}
@@ -120,8 +117,7 @@ public class MainSrv extends Service {
 	 */
 	@NonNull
 	public static MainRegBroadcastRecv getMainRegBroadcastRecv() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		return mainRegBroadcastRecv;
 	}
@@ -130,8 +126,7 @@ public class MainSrv extends Service {
 	 */
 	@NonNull
 	public static PhoneCallsProcessor getPhoneCallsProcessor() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		return phoneCallsProcessor;
 	}
@@ -140,8 +135,7 @@ public class MainSrv extends Service {
 	 */
 	@NonNull
 	public static BatteryProcessor getBatteryProcessor() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		return batteryProcessor;
 	}

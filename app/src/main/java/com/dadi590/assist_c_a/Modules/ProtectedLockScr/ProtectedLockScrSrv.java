@@ -32,16 +32,13 @@ import android.os.IBinder;
 import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
-
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.MainSrv;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -75,8 +72,7 @@ public class ProtectedLockScrSrv extends Service {
 		);
 		startForeground(GL_CONSTS.NOTIF_ID_PLS_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startMainService();
 
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_USER_PRESENT);
@@ -93,8 +89,7 @@ public class ProtectedLockScrSrv extends Service {
 	private final BroadcastReceiver localBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			UtilsPermissions.wrapperRequestPerms(null, false);
-			UtilsServices.startService(MainSrv.class);
+			UtilsServices.startMainService();
 
 			if (intent == null || intent.getAction() == null) {
 				return;
@@ -185,8 +180,7 @@ public class ProtectedLockScrSrv extends Service {
 			while (locked) {
 				UtilsProtectedLockScr.showPLS(intentPLS);
 
-				UtilsPermissions.wrapperRequestPerms(null, false);
-				UtilsServices.startService(MainSrv.class);
+				UtilsServices.startMainService();
 
 				try {
 					Thread.sleep(1000L);

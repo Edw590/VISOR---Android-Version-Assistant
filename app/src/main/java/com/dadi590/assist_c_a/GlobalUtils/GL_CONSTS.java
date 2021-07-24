@@ -21,8 +21,6 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
-import androidx.annotation.NonNull;
-
 import com.dadi590.assist_c_a.R;
 
 import java.io.File;
@@ -59,7 +57,7 @@ public final class GL_CONSTS {
 	public static final String ASSISTANT_NAME_WO_DOTS = ASSISTANT_NAME.replaceAll("\\.", "");
 
 	// Permission strings
-	public static final String ASSIST_C_A_RECV_PERM = "com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS";
+	//public static final String ASSIST_C_A_RECV_PERM = "com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS";
 
 	// Services
 	public static final int NOTIF_ID_MAIN_SRV_FOREGROUND = 1;

@@ -174,7 +174,7 @@ public final class UtilsShell {
 						break;
 					}
 				}
-				// Way of converting to bytes, since ArrayList won't let me convert for a primitive type
+				// Way of converting to bytes, since ArrayList won't let me convert to a primitive type
 				final int storage_array_size = storage_array.size();
 				final byte[] ret_array = new byte[storage_array_size];
 				for (int j = 0; j < storage_array_size; j++) {

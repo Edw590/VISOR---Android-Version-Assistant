@@ -25,12 +25,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.MainSrv;
 
 /**
  * <p>The {@link BroadcastReceiver} to be used to start the Main Service with ANY broadcast detection --> do NOT use to
@@ -43,8 +40,7 @@ public class MainBroadcastRecv extends BroadcastReceiver {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				UtilsPermissions.wrapperRequestPerms(null, false);
-				UtilsServices.startService(MainSrv.class);
+				UtilsServices.startMainService();
 			}
 		}).start();
 
