@@ -24,6 +24,7 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -170,5 +171,19 @@ public final class UtilsApp {
         final ComponentName mAdminName = new ComponentName(context, DeviceAdminRecv.class);
 
         return mDPM.isAdminActive(mAdminName);
+    }
+
+    /**
+     * <p>Sends a broadcast that can only be received by components inside this application (which means, an internal
+     * broadcast to the app).</p>
+     * <p>To do this, this method sets {@link Intent#setPackage(String)} to this package's name automatically.</p>
+     *
+     *  @param intent the intent to use with the broadcast
+     */
+    public static void sendInternalBroadcast(@NonNull final Intent intent) {
+        final Context context = UtilsGeneral.getContext();
+        intent.setPackage(context.getPackageName());
+
+        context.sendBroadcast(intent);
     }
 }

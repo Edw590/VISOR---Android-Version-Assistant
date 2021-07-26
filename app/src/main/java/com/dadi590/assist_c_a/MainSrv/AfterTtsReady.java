@@ -19,10 +19,11 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Speech;
+package com.dadi590.assist_c_a.MainSrv;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 /**
  * <p>Same as in {@link #afterTtsReady()}.</p>
@@ -49,13 +50,13 @@ final class AfterTtsReady {
 				//  Remember the user who said you could "potentially" emulate loading from the APK itself? Try that
 				//  below Marshmallow... Maybe read the APK? Or extract it to memory and load from memory? (always from
 				//  memory, preferably)
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				break;
 			}
 			case UtilsApp.NORMAL: {
 				final String speak = "WARNING - Installed as normal application! System features may not be " +
 						"available.";
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				break;
 			}
 		}
@@ -63,7 +64,7 @@ final class AfterTtsReady {
 		if (!UtilsApp.isDeviceAdmin()) {
 			final String speak = "WARNING - The application is not a Device Administrator! Some security " +
 					"features may not be available.";
-			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 		}
 
 		/*if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
@@ -97,6 +98,6 @@ final class AfterTtsReady {
 		// case the screen gets broken, for example).
 		// It's also said in top priority so the user can know immediately (hopefully) that the assistant is ready.
 		final String speak = "Ready, sir.";
-		MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+		UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 	}
 }

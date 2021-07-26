@@ -21,8 +21,12 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import android.content.Intent;
+
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.util.ArrayList;
@@ -47,16 +51,12 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a prefix for the speech utterance ID based on the speech priority.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, int, Runnable)}
+	 * @param priority same as in {@link Speech2#speak(String, int, int, Integer)}
 	 *
 	 * @return the prefix to add to the beginning of the utterance ID
 	 */
 	private static String getUtteranceIdPrefix(final int priority) {
-		// The generation of a random string MUST NOT have the following characters on it: "_" and "-", as they're used
-		// as prefix to differentiate different priorities of speeches.
-		final String utterance_id_prefix = UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
-
-		return utterance_id_prefix;
+		return UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
 	}
 
 	/**
@@ -64,7 +64,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @param utteranceId the utterance ID of the speech to be analyzed
 	 *
-	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Runnable)}.
+	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Integer)}.
 	 * In case an empty string is given, the lowest priority will be returned.
 	 */
 	static int getSpeechPriority(final String utteranceId) {
@@ -80,11 +80,14 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a random utterance ID with the prefix for the given priority.</p>
 	 *
-	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Runnable)}
+	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Integer)}
 	 *
 	 * @return the generated utterance ID
 	 */
 	static String generateUtteranceId(final int priority) {
+		// The generation of a random string must NOT have the following characters on it: "_" and "-", as they're used
+		// as prefix to differentiate different priorities of speeches.
+
 		final String utterance_id_prefix = getUtteranceIdPrefix(priority);
 		return utterance_id_prefix + UtilsGeneral.generateRandomString(LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
 	}
@@ -95,7 +98,7 @@ final class UtilsSpeech2 {
 	 * <p>This method will return the ID of the <em>first</em> occurrence only in case there are multiple speeches with
 	 * the same string.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, int, Runnable)}
+	 * @param priority same as in {@link Speech2#speak(String, int, int, Integer)}
 	 * @param speech the speech string to search the array for
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
 	 *
@@ -109,7 +112,7 @@ final class UtilsSpeech2 {
 
 		final int array_speech_objs_size = array_speech_objs.size();
 		for (int i = 0; i < array_speech_objs_size; i++) {
-			if (array_speech_objs.get(i).speech.equals(speech)) {
+			if (array_speech_objs.get(i).txt_to_speak.equals(speech)) {
 				return array_speech_objs.get(i).utterance_id;
 			}
 		}
@@ -142,5 +145,16 @@ final class UtilsSpeech2 {
 		}
 
 		return null;
+	}
+
+	/**
+	 * <p>Broadcast the {@code after_speaking_code} through {@link GL_BC_CONSTS#ACTION_SPEECH2_AFTER_SPEAK_CODE}.</p>
+	 *
+	 * @param code the code to broadcast
+	 */
+	static void broadcastAfterSpeakCode(final int code) {
+		final Intent intent = new Intent(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE);
+		intent.putExtra(GL_BC_CONSTS.EXTRA_SPEECH2_AFTER_SPEAK_CODE, code);
+		UtilsApp.sendInternalBroadcast(intent);
 	}
 }

@@ -19,10 +19,13 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a;
+package com.dadi590.assist_c_a.MainSrv;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 
 import androidx.annotation.NonNull;
@@ -30,9 +33,11 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv;
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
+import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
@@ -53,11 +58,15 @@ public class MainSrv extends Service {
 	//private static Context main_app_context = null; - disabled while using UtilsGeneral.getMainAppContext()
 
 	// Modules instances
-	private static final Speech2 speech2 = new Speech2();
 	private static final AudioRecorder audioRecorder = new AudioRecorder();
 	private static final PhoneCallsProcessor phoneCallsProcessor = new PhoneCallsProcessor();
 	private static final MainRegBroadcastRecv mainRegBroadcastRecv = new MainRegBroadcastRecv();
 	private static final BatteryProcessor batteryProcessor = new BatteryProcessor();
+
+	// Services to start in order
+	private static final Class[] services_to_start = {
+			Speech2.class,
+	};
 
 	//////////////////////////////////////
 
@@ -94,15 +103,6 @@ public class MainSrv extends Service {
 	//
 	//	return main_app_context;
 	//}
-	/**.
-	 * @return the global {@link Speech2} instance
-	 */
-	@NonNull
-	public static Speech2 getSpeech2() {
-		UtilsServices.startMainService();
-
-		return speech2;
-	}
 	/**.
 	 * @return the global {@link AudioRecorder} instance
 	 */
@@ -174,6 +174,14 @@ public class MainSrv extends Service {
 		// Initialization of all the assistant's modules, after the service was successfully started (means that
 		// main_app_context is ready to be used wherever it's needed) along with the speech module.
 		//audioRecorder = new AudioRecorder();
+
+		// Register the receiver before the speech module is started
+		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+
+		// Start services in background - no restrictions, since the Main Service is already in foreground
+		for (final Class service : services_to_start) {
+			UtilsServices.startService(service, false);
+		}
 	}
 
 	@Override
@@ -187,6 +195,27 @@ public class MainSrv extends Service {
 
 		return START_STICKY;
 	}
+
+	/**
+	 * <p>The sole purpose of this register is detect when the speech module is ready so the Main Service can start
+	 * everything else.</p>
+	 */
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			if (/*context == null ||*/ intent == null || intent.getAction() == null) {
+				return;
+			}
+
+			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv");
+			System.out.println(intent.getAction());
+
+			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_READY)) {
+				AfterTtsReady.afterTtsReady();
+				UtilsGeneral.getContext().unregisterReceiver(this);
+			}
+		}
+	};
 
 	@Override
 	@Nullable

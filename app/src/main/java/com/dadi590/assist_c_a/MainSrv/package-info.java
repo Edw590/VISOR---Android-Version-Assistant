@@ -19,18 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Speech;
-
-import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-
-import java.util.HashMap;
-
 /**
- * <p>An instantiated class to serve as a multi-type array for the {@link TextToSpeech} speak() methods.</p>
+ * <p>Everything directly related with the Main Service.</p>
  */
-class TtsParamsObj {
-
-	final Bundle bundle = new Bundle(2);
-	final HashMap<String, String> hashmap = new HashMap<>(3);
-}
+package com.dadi590.assist_c_a.MainSrv;

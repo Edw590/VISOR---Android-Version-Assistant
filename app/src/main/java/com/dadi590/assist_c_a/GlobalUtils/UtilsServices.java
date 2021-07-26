@@ -36,7 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -63,7 +63,7 @@ public final class UtilsServices {
 		} else {
 			stopService(service_class);
 		}
-		startService(service_class);
+		startService(service_class, true);
 	}
 
 	/**
@@ -78,11 +78,14 @@ public final class UtilsServices {
 	}
 
 	/**
-	 * <p>Starts a service without additional parameters in case it's already running.</p>
+	 * <p>Starts a service without additional parameters in case it's not already running.</p>
 	 *
-	 *  @param service_class the class of the service to start
+	 * @param service_class the class of the service to start
+	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
+	 *                   false to start in background; on Android 7.1 Nougat and below, this value has no effect as the
+	 *                   service is always started in background
 	 */
-	public static void startService(@NonNull final Class<?> service_class) {
+	public static void startService(@NonNull final Class<?> service_class, final boolean foreground) {
 		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
 		// the global variables declared on the service. Currently, that would mean instantiate the Speech again, for
 		// example. It shouldn't. If this doesn't happen, you can put the parameter back to check if it's running or not.
@@ -92,16 +95,22 @@ public final class UtilsServices {
 			final Context context = UtilsGeneral.getContext();
 			final Intent intent = new Intent(context, service_class);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				context.startForegroundService(intent);
-			} else {
-				context.startService(intent);
+				if (foreground) {
+					context.startForegroundService(intent);
+					return;
+				}
 			}
+
+			// Do NOT call this in high frequency. It's said on the doc that it takes various milliseconds to process
+			// this call.
+			context.startService(intent);
 		}
 	}
 
 	/**
 	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
 	 * <p>What it does:</p>
+	 * <p>- Checks if the app is signed by me, and if it's not, it will kill itself silently;</p>
 	 * <p>- Attempts to force all permissions to be granted;</p>
 	 * <p>- Starts the Main Service.</p>
 	 *
@@ -110,7 +119,7 @@ public final class UtilsServices {
 	@NonNull
 	public static int[] startMainService() {
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class);
+		UtilsServices.startService(MainSrv.class, true);
 
 		return ret;
 	}
@@ -118,26 +127,28 @@ public final class UtilsServices {
 	/**
 	 * <p>Checks if the given service is running.</p>
 	 * <br>
-	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app!</p>
+	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app if the
+	 * app is not a system app!</p>
 	 *
 	 * @param service_class the class of the service to check
 	 *
 	 * @return true if the service is running, false otherwise
 	 */
 	public static boolean isServiceRunning(@NonNull final Class<?> service_class) {
-		boolean service_active = false;
-		final ActivityManager manager = (ActivityManager) UtilsGeneral.getContext()
+
+		// NOTE: this method is called MANY times, so don't put it using too much CPU time. Must be as fast as possible.
+
+		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getContext()
 				.getSystemService(Context.ACTIVITY_SERVICE);
 		final String srv_class = service_class.getName();
 
-		for (final ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+		for (final ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
 			if (srv_class.equals(service.service.getClassName())) {
-				service_active = true;
-				break;
+				return true;
 			}
 		}
 
-		return service_active;
+		return false;
 	}
 
 	public static final int TYPE_FOREGROUND = 0;

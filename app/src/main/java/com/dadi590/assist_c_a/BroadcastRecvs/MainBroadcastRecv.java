@@ -37,12 +37,7 @@ public class MainBroadcastRecv extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				UtilsServices.startMainService();
-			}
-		}).start();
+		UtilsServices.startMainService();
 
 		/*
 		UtilsIntentWhatToDo.intentWhatToDo(intent);

@@ -15,7 +15,7 @@ Make it a smart alarm system. If you're leaving home, he can warn you about it; 
 remind you of what to buy; if you just woke up, he can remind you of doing various things...
 
 
-## Speech
+## Speech recognition
 
 onEndOfSpeech is always called. onError and onResults are nto. How to know when the recognition finished completely? -
 StackOverflow
@@ -43,12 +43,12 @@ Test all the call receiver... I don't kno if it's well implemented or not (calls
 
 Stop the phone from charging when it gets to 80% and get back to charge on 79%
 
-PUT THE APP RESETING THE NORMAL CHARGING BEFORE THE PHONE SHUTS DOWN ---OR THE APP IS UNINSTALLED--- OR IT'S DEAETH!!!!!
+PUT THE APP RESETTING THE NORMAL CHARGING BEFORE THE PHONE SHUTS DOWN ---OR THE APP IS UNINSTALLED--- OR IT'S DEATH!!!!!
 
 
 ## App uninstallation
 
-Detect the app uninstalltion
+Detect the app uninstallation
 
 https://stackoverflow.com/questions/18692571/how-can-an-app-detect-that-its-going-to-be-uninstalled
 
@@ -60,11 +60,15 @@ the user, requested from the app and with the user on camera and digital print t
 to recognize a specific voice (though, even still - put the other 2 on this).
 
 
-## Audio Recorder
+## Separate processes
 
 Put AudioRecorder on a separate processes and the Main Service too, in order to, in case there's some error on Main
 Service, AudioRecorder will still be recording. Important things should be put in separate processes. The Protected
 LockScreen is another example. The Speech module maybe too. What was left would stay in Main Service's process.
+
+EDIT: maybe not that good idea. If the main process is killed, everything will be killed anyways. If it's only one,
+well, why would anyone only stop one process and not the entire app? So keep everything on the main process. If the app
+is installed as system app and is persistent, the system will keep it always running no matter what, so cool enough.
 
 
 ## USB Mode
@@ -126,28 +130,6 @@ while detects the Normal mode.
 ## Automated speeches
 
 Good morning sir. It's 23 ºC and it's a cloudy morning/afternoon/night. It will be hot today. It's not raining.
-
-
-## Audio Recorder
-
-If you didn't fix that (probably not), try to put the phone's Audio Recorder recording, and then the assistant. He'll
-say "Error 3 sir." twice. It's possible that it's related with asynchronous tasks. The "Starting now, sir." speech is
-put to be spoken from the Runnable to enable to recording. This is the created thread in onDone's callback - haven't him
-yet deleted "Starting now, sir." from the speeches list, he's already enabling the audio recording. But the error comes,
-and that's put on the list before the other one leaves, or something like that. Don't know what happens in that case.
-So as this becomes a mess, it's to put broadcasts on this thing.
-
-As soon as it gets to a callback of speak(), that callback won't call any code. It sends a broadcast (or something
-better) to the main thread to execute that. Don't even know if the broadcast is then on the main thread, but ok. Find
-some way of putting the code being executed on the main thread or on which the Speech or the Main Service are being
-executed and not in a new one created by speak(), or this will only be threads and threads and when there are Runnables
-involved, it becomes a mess.
-
-See that of AIDL or something better than sending a broadcast, for example, no idea.
-
-Maybe in last resort, you could start a service with an input which was the Runnable you wanted to execute, and that
-service would call the Speech again, for example. But no idea if it's a greate idea. Doesn't fix the part where all
-that's not from the Speech, being on the main thread. It's just an idea.
 
 
 ## Emergency SMS messages
@@ -232,15 +214,3 @@ Make also one for the shut down. A very fast one. Something.
 
 Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
 example. Find out how to do that.
-
-
-## Custom permissions security
-
-Put the app detecting if there's another app with the same custom permissions already declared, and in that case,
-disable the entire app and warn which app has that permission. Detect that right when the app starts - means in the
-extended Application class. To disable the entire app without storing a value, maybe put the check everywhere where the
-Main Service is started (inside the function that starts it). Something like that. The app must only work if it's the
-only one declaring the permissions.
-
-Also, because of KitKat and below's possibility of exploitation of signing certificates, do NOT put the app broadcasting
-stuff using the permission. Or do, but warn people about it. Or put the app with minSdkVersion of 21...

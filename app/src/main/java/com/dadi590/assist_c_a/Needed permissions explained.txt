@@ -19,6 +19,11 @@ android.permission.INTERNET
 - So the app can ping devices on the same network to attempt to get the distance between the device where the app is
   installed and the other devices (to locate the app device inside a building - very useful for the alarms system)
 
+android.permission.BLUETOOTH
+android.permission.BLUETOOTH_ADMIN
+android.permission.BLUETOOTH_SCAN
+- So the app can discover nearby Bluetooth devices. Useful currently to detect the relative location of the device
+
 ------------Dangerous permissions------------
 
 android.permission.RECEIVE_SMS
@@ -73,6 +78,33 @@ android.permission.GRANT_RUNTIME_PERMISSIONS
 
 android.permission.INTERACT_ACROSS_USERS_FULL
 - To be able to grant runtime permissions for all users from inside any user
+
+
+------------My permissions------------
+
+@Deprecated - if I declare the permissions, if any app uninstalls this app, installs some app that declares these
+permissions, and then the user attempts to install this app on Lollipop and above, they won't be able to, since they'll
+get a duplicate permissions error. So no custom permissions. Safer, I guess.
+
+These permissions, whatever they do, are just for precautions. They'll be used to be more sure of something, but the
+app will NOT rely on them. Some other method will be made to do whatever they were supposed to do if there weren't
+vulnerabilities on them.
+
+com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS
+- This permission is to ensure that no other app receives internal communications of this app through broadcasts.
+  Communication with other apps developed by me will be handled some other way, since this one is vulnerable.
+
+  Note that there may be vulnerabilities and other apps could get the broadcasts. But still, this should make it harder.
+  It's just a precaution, because all broadcasts are sent with a requirement that this must be the app receiving them.
+
+com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS
+- This permission exists for no other app to be able to communicate with this one, in the components that declare this
+  permission (or that inherit it). Communication with other apps developed by me will be handled some other way, since
+  this one is vulnerable.
+
+  Note that there may be vulnerabilities and other apps could communicate with this one. Though, this is just as
+  a precaution, because all internal components will be prepared to handle exactly no communications from outside, and
+  all external components will be made sure they know how to handle whatever comes to them, being it trusted or not.
 
 
 ------------SuperSU permission------------

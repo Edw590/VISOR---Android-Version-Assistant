@@ -112,7 +112,7 @@ public class Speech {
 				if (status == TextToSpeech.SUCCESS) {
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					AfterTtsReady.afterTtsReady();//context);
+					//AfterTtsReady.afterTtsReady();//context);
 				} else {
                     // If he can't talk, won't be too much useful... So exit with an error to indicate something is very
                     // wrong and must be fixed as soon as possible.

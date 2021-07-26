@@ -41,13 +41,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsNetwork;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
-import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.R;
 
 import java.util.Locale;
@@ -97,21 +96,24 @@ public class MainAct extends AppCompatActivity {
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
 
+				//UtilsLocationRelative.startIndRelDistance();
+
 				final BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
-				BTAdapter.startDiscovery();
+				System.out.println("HHHHHHHHHHHHH");
+				System.out.println(BTAdapter.startDiscovery());
 
 				final Intent intent = new Intent(MainAct.this, ProtectedLockScr.class);
 				//startActivity(intent);
 
-				System.out.println(UtilsShell.getAccessRights("", true));
-				System.out.println(UtilsShell.getAccessRights("/oe", true));
-				System.out.println(UtilsShell.getAccessRights("/oem", true));
-				System.out.println(UtilsShell.getAccessRights("/", true));
-				System.out.println(UtilsShell.getAccessRights("/system", true));
-				System.out.println(UtilsShell.getAccessRights("/storage/emulated/0", true));
+				//System.out.println(UtilsShell.getAccessRights("", true));
+				//System.out.println(UtilsShell.getAccessRights("/oe", true));
+				//System.out.println(UtilsShell.getAccessRights("/oem", true));
+				//System.out.println(UtilsShell.getAccessRights("/", true));
+				//System.out.println(UtilsShell.getAccessRights("/system", true));
+				//System.out.println(UtilsShell.getAccessRights("/storage/emulated/0", true));
 
-				System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPP");
-				UtilsNetwork.getAveragePingRTT("192.168.1.254");
+				//System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPP");
+				//UtilsNetwork.getAveragePingRTT("192.168.1.254");
 				//List<String> commands = new ArrayList<>(1);
 				//commands.add("ping -c 50 -i 0.5 -n -s 56 -t 1 -v 192.168.1.254");
 				//System.out.println(UtilsGeneral.convertBytes2Printable(UtilsShell.executeShellCmd(commands).output_stream));
@@ -130,7 +132,7 @@ public class MainAct extends AppCompatActivity {
 
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 					final String speak = "No manual permission authorizations needed below Android Marshmallow.";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 				} else {
 					// Request all missing permissions
 					final int perms_left = UtilsPermissions.wrapperRequestPerms(MainAct.this, true)[1];
@@ -181,7 +183,7 @@ public class MainAct extends AppCompatActivity {
 					speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 							"authorizations left to grant: " + missing_authorizations + ".";
 				}
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		});
 		findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {
@@ -196,14 +198,14 @@ public class MainAct extends AppCompatActivity {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_LOW, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_LOW, null);
 			}
 		});
 		findViewById(R.id.btn_speak_high).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				// Leave PRIORITY_HIGH there because CRITICAL will get the volume in the maximum, and this is probably
 				// just to test if the priority implementation is working.
 			}
@@ -226,7 +228,7 @@ public class MainAct extends AppCompatActivity {
 		findViewById(R.id.btn_skip_speech).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
-				MainSrv.getSpeech2().skipCurrentSpeech();
+				UtilsSpeech2BC.skipCurrentSpeech();
 			}
 		});
 	}

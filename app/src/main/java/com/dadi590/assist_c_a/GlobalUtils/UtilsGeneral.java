@@ -30,8 +30,8 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -140,7 +140,7 @@ public final class UtilsGeneral {
 			case (UtilsRoot.ROOT_AVAILABLE): {
 				if (warn_root_available) {
 					final String speak = "Root access available on the device.";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 				}
 
 				break;
@@ -148,13 +148,13 @@ public final class UtilsGeneral {
 			case (UtilsRoot.ROOT_DENIED): {
 				final String speak = "WARNING! Root access was denied on this device! Some features may not " +
 						"be available!";
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 
 				break;
 			}
 			case (UtilsRoot.ROOT_UNAVAILABLE): {
 				final String speak = "Attention! The device is not rooted! Some features may not be available!";
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
 
 				break;
 			}

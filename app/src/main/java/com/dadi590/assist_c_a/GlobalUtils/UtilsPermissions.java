@@ -31,8 +31,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.util.ArrayList;
 
@@ -57,12 +57,12 @@ public final class UtilsPermissions {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "All permissions have been successfully granted to the application.";
-				MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 		}
 	}
 

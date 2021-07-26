@@ -39,7 +39,7 @@ import java.util.Objects;
 /**
  * <p>App signing certificate-related utilities.</p>
  */
-final class UtilsCertificates {
+public final class UtilsCertificates {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -93,6 +93,7 @@ final class UtilsCertificates {
 			try {
 				MessageDigest.getInstance(hashing_algorithm[0]);
 				hashing_algorithm_to_use = hashing_algorithm;
+				break;
 			} catch (final NoSuchAlgorithmException ignored) {
 				// Will never happen. I'm checking all methods. If NONE is available, wow. Someone must have deeply
 				// modified the ROM or something.

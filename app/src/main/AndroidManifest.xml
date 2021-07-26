@@ -36,6 +36,9 @@
 	<uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.BLUETOOTH"/>
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+	<uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
@@ -71,6 +74,11 @@
 
 	<!-- SuperSU permission -->
 	<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+
+
+	<uses-feature
+		android:name="android.hardware.telephony"
+		android:required="false" />
 
 
 	<!-- todo INSTALL THE APP AS SYSTEM-ONLY, -REMOVE THE ROOT- PERMISSION, AND FIX ALL THE ERRORS!!!!!!!!! -->
@@ -148,23 +156,24 @@
 			android:showForAllUsers="true"
 			android:turnScreenOn="false"
 			android:autoRemoveFromRecents="true"
-			android:excludeFromRecents="true"
-			android:process=":A" />
+			android:excludeFromRecents="true" />
 			<!-- Keep turnScreenOn false. On BV9500 (tested with the app as a system app, at least), it was making the
 			 screen being always On, even after I would press the Power button -> I'd like to be able to turn off the
 			 screen... -->
 
 		<!-- Persistence only applies to services in the default application process. If any <service> tag includes an
 		"android:process" attribute that causes it to run in a separate process, that process will NOT be persistent. -->
-		<service android:name="com.dadi590.assist_c_a.MainSrv"
+		<service android:name="com.dadi590.assist_c_a.MainSrv.MainSrv"
 			android:exported="false"
 			android:directBootAware="true"
 			android:foregroundServiceType="location" />
 			<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
 			android:exported="false"
-			android:directBootAware="true"
-			android:process=":AA" />
+			android:directBootAware="true" />
+		<service android:name="com.dadi590.assist_c_a.Modules.Speech.Speech2"
+			android:exported="false"
+			android:directBootAware="true" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:exported="true"

@@ -33,7 +33,6 @@ import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.android.internal.telephony.ITelephony;
-import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 
@@ -106,7 +105,7 @@ final class MainActTests {
 
 			final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
 			intent.putExtra("state", true);
-			context.sendBroadcast(intent, GL_CONSTS.ASSIST_C_A_RECV_PERM);
+			//context.sendBroadcast(intent, GL_CONSTS.ASSIST_C_A_RECV_PERM);
 		} catch (final RuntimeException e) {
 			e.printStackTrace();
 			Toast.makeText(context, "Exception occured during Airplane Mode ON", Toast.LENGTH_LONG).show();

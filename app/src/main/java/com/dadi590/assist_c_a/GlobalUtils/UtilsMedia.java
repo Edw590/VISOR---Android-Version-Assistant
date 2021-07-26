@@ -25,8 +25,8 @@ import android.os.Environment;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -124,7 +124,7 @@ public final class UtilsMedia {
 		} else {
 			final String speak = "There was a problem creating the media file in the external storage as " +
 					"it is not mounted.";
-			MainSrv.getSpeech2().speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 		}
 
 		return null;

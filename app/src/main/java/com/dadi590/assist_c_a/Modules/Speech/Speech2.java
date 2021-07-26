@@ -24,14 +24,18 @@ package com.dadi590.assist_c_a.Modules.Speech;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -40,9 +44,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.Executor;
+import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.MainSrv.MainSrv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +68,7 @@ import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
  * <p>This fixes a bug described on a note in the end of {@link Speech#speak(String, int, boolean, Runnable)} and,
  * hopefully, any other bugs related with how {@link TextToSpeech} is implemented in the various devices.</p>
  */
-public class Speech2 {
+public class Speech2 extends Service {
 
 	TextToSpeech tts;
 	// If more permissions are ever needed, well, here's a 10 in case I forget to update the number (possible).
@@ -81,7 +87,7 @@ public class Speech2 {
 	// 750ms at most. I think this time it should be enough...
 	private static final long VOLUME_CHANGE_INTERVAL = 750L;
 
-	public static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndObj.DEFAULT_VALUE; // Both must be different
+	private static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndObj.DEFAULT_VALUE; // Both must be different
 	private int stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
 	private long assist_changed_volume_time = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
 	private boolean assist_will_change_volume = false;
@@ -92,10 +98,11 @@ public class Speech2 {
 	AudioAttributes audioAttributes = null; // No problem in being null, since it will only be used if TTS loaded
 	// correctly - and if it did, then audioAttributes was initialized decently.
 
-	/**
-	 * Main class constructor.
-	 */
-	public Speech2() {
+
+	@Override
+	public final void onCreate() {
+		super.onCreate();
+
 		readyArrayLists();
 
 		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
@@ -158,7 +165,8 @@ public class Speech2 {
 						// Which means, if it doesn't work well in one case, don't enable.
 					}
 
-					AfterTtsReady.afterTtsReady();
+					registerReceiver();
+					UtilsApp.sendInternalBroadcast(new Intent(GL_BC_CONSTS.ACTION_SPEECH2_READY));
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
 					// wrong and must be fixed as soon as possible.
@@ -171,6 +179,13 @@ public class Speech2 {
 		}, GL_CONSTS.PREFERRED_TTS_ENGINE);
 	}
 
+	@Override
+	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+		// Do this below every time the service is started/resumed/whatever
+
+		return START_STICKY;
+	}
+
 	//////////////////////////////////////
 	// Getters
 
@@ -178,7 +193,7 @@ public class Speech2 {
 	 * @return the variable {@link #last_thing_said}
 	 */
 	@NonNull
-	public final String getLastThingSaid() {
+	final String getLastThingSaid() {
 		return last_thing_said;
 	}
 	/**
@@ -189,7 +204,7 @@ public class Speech2 {
 	 *
 	 * @param audio_stream the audio stream of which the volume changed
 	 */
-	public final void setUserChangedVolumeTrue(final int audio_stream) {
+	final void setUserChangedVolumeTrue(final int audio_stream) {
 		// Detect user changes only after some time after the assistant changed the volume to speak, since the first
 		// volume change to be detected would be the assistant himself changing the volume - in case he changed the
 		// volume (otherwise the first and next changes will be user changes). This way we wait until the broadcasts for
@@ -248,7 +263,7 @@ public class Speech2 {
 	 *
 	 * @return true if the speech has been removed successfully, false if the utterance ID is not on the queues
 	 */
-	public final boolean removeSpeechById(@NonNull final String utteranceId) {
+	final boolean removeSpeechById(@NonNull final String utteranceId) {
 		final int[] indexes = UtilsSpeech2.getSpeechIndexesFromId(utteranceId, arrays_speech_objs);
 		if (indexes == null) {
 			// Should not happen when called from inside the Speech class if the Speech is well implemented
@@ -258,10 +273,12 @@ public class Speech2 {
 		// This variable below is for, hopefully, faster access than being getting the array every time.
 		final SpeechObj speechObj = arrays_speech_objs.get(indexes[0]).get(indexes[1]);
 
-		if (speechObj.runnable != null) {
-			speechObj.runnable.run();
+		// If there's an ID of a Runnable to run after the speech is finished, send the broadcast that that Runnable
+		// can be ran.
+		if (speechObj.after_speaking != null) {
+			UtilsSpeech2.broadcastAfterSpeakCode(speechObj.after_speaking);
 		}
-		last_thing_said = speechObj.speech;
+		last_thing_said = speechObj.txt_to_speak;
 		// Here below must be the original array, so it can be modified
 		arrays_speech_objs.get(indexes[0]).remove(indexes[1]);
 
@@ -273,7 +290,7 @@ public class Speech2 {
 	 *
 	 * @return same as in {@link TextToSpeech#stop()}
 	 */
-	public final int skipCurrentSpeech() {
+	final int skipCurrentSpeech() {
 		return ttsStop(true);
 	}
 
@@ -291,14 +308,14 @@ public class Speech2 {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param speech the speech string to search the arrays for
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, int, Runnable)} or the constant. If it's the
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, int, Integer)} or the constant. If it's the
 	 *                           constant, then the parameter {@code low_to_high} will be completely ignored
 	 * @param low_to_high true to search from lower priority arrays to higher ones, false to do the opposite
 	 *
 	 * @return the ID of the found speech
 	 */
 	@Nullable
-	public final String getSpeechIdBySpeech(@NonNull final String speech, final int speech_priority,
+	final String getSpeechIdBySpeech(@NonNull final String speech, final int speech_priority,
 											final boolean low_to_high) {
 		if (speech_priority == UNKNOWN_PRIORITY) {
 			final int arrays_speech_objs_size = arrays_speech_objs.size();
@@ -326,7 +343,7 @@ public class Speech2 {
 
 	public static final int NO_ADDITIONAL_COMMANDS = 0;
 	public static final int EXECUTOR_SOMETHING_SAID = 1;
-	// Below, high values for return values not to be confused with TextToSpeech.speak() methods' current return values
+	// Below, high values for return values to not be confused with TextToSpeech.speak() methods' current return values
 	// and any other values that might arise.
 	public static final int SPEECH_ON_LIST = 3234_0;
 	public static final int CUR_SPEECH_STOPPED = 3234_1;
@@ -353,9 +370,8 @@ public class Speech2 {
 	 * Do Not Disturb setting and only then will proceed to the other 2 things. The volume will also be set to the
 	 * maximum the chosen audio stream can handle.</p>
 	 * <br>
-	 * <p>If AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, exactly nothing will be done except
-	 * run {@code after_speaking}. This means that the speech will be completely aborted, but the given {@link Runnable}
-	 * will still be executed.</p>
+	 * <p>If {@code AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL}, exactly nothing will be done (the
+	 * speech will be completely aborted), except broadcast {@code after_speaking}.
 	 * <br>
 	 * <p>All the {@code PRIORITY_} constants except {@link #PRIORITY_USER_ACTION} are to be used only for speeches that
 	 * are not a response to a user action, for example automated tasks or broadcast receivers.</p>
@@ -372,11 +388,11 @@ public class Speech2 {
 	 * speeches. Note 2: this doesn't care if the speech was skipped by the user. That would need to get the program
 	 * waiting until the speech gets actually spoken or skipped to know what happened - not a good idea.</p>
 	 * <br>
-	 * <p>- {@link #PRIORITY_LOW} --> for {@code priority}: low priority speech</p>
-	 * <p>- {@link #PRIORITY_MEDIUM} --> for {@code priority}: medium priority speech</p>
-	 * <p>- {@link #PRIORITY_USER_ACTION} --> for {@code priority}: medium-high priority speech</p>
-	 * <p>- {@link #PRIORITY_HIGH} --> for {@code priority}: high priority speech</p>
-	 * <p>- {@link #PRIORITY_CRITICAL} --> for {@code priority}: critical priority speech</p>
+	 * <p>- {@link #PRIORITY_LOW} --> for {@code speech_priority}: low priority speech</p>
+	 * <p>- {@link #PRIORITY_MEDIUM} --> for {@code speech_priority}: medium priority speech</p>
+	 * <p>- {@link #PRIORITY_USER_ACTION} --> for {@code speech_priority}: medium-high priority speech</p>
+	 * <p>- {@link #PRIORITY_HIGH} --> for {@code speech_priority}: high priority speech</p>
+	 * <p>- {@link #PRIORITY_CRITICAL} --> for {@code speech_priority}: critical priority speech</p>
 	 * <br>
 	 * <p>- {@link #SPEECH_ON_LIST} --> for the returning value: if the speech was put on the list of to-speak speeches</p>
 	 * <p>- {@link #CUR_SPEECH_STOPPED} --> for the returning value: in case the speech had a higher priority than the
@@ -388,36 +404,45 @@ public class Speech2 {
 	 * @param txt_to_speak what to speak
 	 * @param additional_command one of the constants
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
-	 * @param after_speaking code to execute after finishing speaking
+	 * @param after_speaking a unique reference which will be broadcast as soon as the speech is finished (for example,
+	 *                       a unique reference to a {@link Runnable} which is detected by a receiver and which will
+	 *                       execute the Runnable that corresponds to the reference; or null, if nothing is required
+	 *                       to be done after the speech finishes
 	 *
 	 * @return same as in {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
 	 * being spoken immediately; one of the constants otherwise.
 	 */
-	public final int speak(@NonNull final String txt_to_speak, final int additional_command,
-						   final int speech_priority, @Nullable final Runnable after_speaking) {
-		return speakInternal(txt_to_speak, additional_command, speech_priority, null, 3234, after_speaking);
+	final int speak(@NonNull final String txt_to_speak, final int additional_command, final int speech_priority,
+					@Nullable final Integer after_speaking) {
+		return speakInternal(txt_to_speak, additional_command, speech_priority, null, AUDIO_STREAM_UNUSED,
+				after_speaking);
 	}
 
+	private static final int AUDIO_STREAM_UNUSED = 3234;
 	/**
-	 * <p>Same as in {@link #speak(String, int, int, Runnable)}, but with additional parameters to be used only
+	 * <p>Same as in {@link #speak(String, int, int, Integer)}, but with additional parameters to be used only
 	 * internally to the class - this is the main speak() method.</p>
+	 * <br>
+	 * <p><u>---CONSTANTS---</u></p>
+	 * <p>- {@link #AUDIO_STREAM_UNUSED} --> for {@code audio_stream}: if the parameter is not to be used, used this
+	 * value as a standard value</p>
+	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, int, Runnable)}
-	 * @param additional_command same as in {@link #speak(String, int, int, Runnable)}
-	 * @param priority same as in {@link #speak(String, int, int, Runnable)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, int, Integer)}
+	 * @param additional_command same as in {@link #speak(String, int, int, Integer)}
+	 * @param priority same as in {@link #speak(String, int, int, Integer)}
 	 * @param utterance_id the utterance ID to be used to re-register the given speech in case it's already in the lists,
 	 *                     null if it's not already in the lists
-	 * @param audio_stream the audio stream to use in case the given speech is already in the lists - will be used if
-	 *                     {@code utterance_id} parameter is != null. Put 3234 if it's not to be used, as a standard
-	 *                     value
-	 * @param after_speaking same as in {@link #speak(String, int, int, Runnable)}
+	 * @param audio_stream the audio stream to use in case the given speech is already in the lists - will only be used
+	 *                     if {@code utterance_id} parameter is != null; or one of the constants
+	 * @param after_speaking same as in {@link #speak(String, int, int, Integer)}
 	 *
-	 * @return same as in {@link #speak(String, int, int, Runnable)}
+	 * @return same as in {@link #speak(String, int, int, Integer)}
 	 */
 	private int speakInternal(final String txt_to_speak, final int additional_command,
 							  final int priority, @Nullable final String utterance_id,
-							  final int audio_stream, @Nullable final Runnable after_speaking) {
+							  final int audio_stream, @Nullable final Integer after_speaking) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
@@ -471,9 +496,9 @@ public class Speech2 {
 	 * <p>Sends the specified string to {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)}.</p>
 	 * <br>
-	 * <p>Attention: not to be called except from inside {@link #speak(String, int, int, Runnable)}.</p>
+	 * <p>Attention: not to be called except from inside {@link #speak(String, int, int, Integer)}.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, int, Runnable)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, int, Integer)}
 	 * @param utterance_id the utterance ID to register the speech
 	 * @param audio_stream the audio stream to be used to speak the speech
 	 *
@@ -521,14 +546,14 @@ public class Speech2 {
 			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
 				final SpeechObj speechObj = correct_sub_array.get(i);
 
-				if (speechObj.speech.startsWith(WAS_SAYING_PREFIX_1)) {
-					final String new_speech = speechObj.speech.substring(WAS_SAYING_PREFIX_1.length());
-					arrays_speech_objs.get(priority).get(i).speech = WAS_SAYING_PREFIX_2 + new_speech;
-				} else if (speechObj.speech.startsWith(WAS_SAYING_PREFIX_2)) {
-					final String new_speech = speechObj.speech.substring(WAS_SAYING_PREFIX_2.length());
-					arrays_speech_objs.get(priority).get(i).speech = WAS_SAYING_PREFIX_3 + new_speech;
-				} else if (!speechObj.speech.startsWith(WAS_SAYING_PREFIX_3)) {
-					arrays_speech_objs.get(priority).get(i).speech = WAS_SAYING_PREFIX_1 + speechObj.speech;
+				if (speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_1)) {
+					final String new_speech = speechObj.txt_to_speak.substring(WAS_SAYING_PREFIX_1.length());
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_2 + new_speech;
+				} else if (speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_2)) {
+					final String new_speech = speechObj.txt_to_speak.substring(WAS_SAYING_PREFIX_2.length());
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_3 + new_speech;
+				} else if (!speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_3)) {
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_1 + speechObj.txt_to_speak;
 				}
 				break;
 			}
@@ -782,9 +807,9 @@ public class Speech2 {
 			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
 				System.out.println("+++++++++++++++++++++++++++++++++++++++");
 				System.out.println(current_speech_obj.utterance_id);
-				System.out.println(current_speech_obj.runnable);
-				if (current_speech_obj.runnable != null) {
-					current_speech_obj.runnable.run();
+				System.out.println(current_speech_obj.after_speaking);
+				if (current_speech_obj.after_speaking != null) {
+					UtilsSpeech2.broadcastAfterSpeakCode(current_speech_obj.after_speaking);
 				}
 
 				skipCurrentSpeech();
@@ -797,7 +822,7 @@ public class Speech2 {
 			// If it's to speak, prepare the app to speak.
 
 			if (!focus_volume_dnd_done) {
-				setVolumeDndFocus();
+				// todo setVolumeDndFocus(); - enable this back, it was just for testing
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
@@ -936,9 +961,9 @@ public class Speech2 {
 
 				final int speech_priority = UtilsSpeech2.getSpeechPriority(correct_speech_obj.utterance_id);
 				final String utterance_id = correct_speech_obj.utterance_id;
-				final String speech = correct_speech_obj.speech;
+				final String speech = correct_speech_obj.txt_to_speak;
 				final int audio_stream = correct_speech_obj.audio_stream;
-				final Runnable runnable = correct_speech_obj.runnable;
+				final Integer runnable = correct_speech_obj.after_speaking;
 
 				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
@@ -1003,5 +1028,87 @@ public class Speech2 {
 
 		// Doesn't matter if the user changed the volume or not if all the speeches have been finished.
 		user_changed_volume = false;
+	}
+
+
+
+
+	/**
+	 * <p>Register the module's broadcast receiver.</p>
+	 */
+	final void registerReceiver() {
+		final IntentFilter intentFilter = new IntentFilter();
+
+		intentFilter.addAction(BroadcastConstants.ACTION_CALL_SPEAK);
+		intentFilter.addAction(BroadcastConstants.ACTION_SKIP_SPEECH);
+		intentFilter.addAction(BroadcastConstants.ACTION_REMOVE_SPEECH);
+		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
+
+		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+	}
+
+	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			if (/*context == null ||*/ intent == null || intent.getAction() == null) {
+				return;
+			}
+
+			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2");
+			System.out.println(intent.getAction());
+
+			switch (intent.getAction()) {
+				case BroadcastConstants.ACTION_CALL_SPEAK: {
+					final String txt_to_speak = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
+					final int additional_command = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
+					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, -1);
+					@Nullable final Integer after_speaking;
+					if (intent.hasExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4)) {
+						after_speaking = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, -1);
+					} else {
+						after_speaking = null;
+					}
+
+					speak(txt_to_speak, additional_command, speech_priority, after_speaking);
+
+					break;
+				}
+
+				case BroadcastConstants.ACTION_SKIP_SPEECH: {
+					skipCurrentSpeech();
+
+					break;
+				}
+
+				case BroadcastConstants.ACTION_REMOVE_SPEECH: {
+					final String speech = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
+					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, -1);
+					final boolean low_to_high = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, true);
+
+					final String speech_id = getSpeechIdBySpeech(speech, speech_priority, low_to_high);
+					if (speech_id != null) {
+						removeSpeechById(speech_id);
+					}
+
+					break;
+				}
+
+				case AudioManager.VOLUME_CHANGED_ACTION: {
+					setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+							Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
+
+					break;
+				}
+			}
+		}
+	};
+
+
+
+
+	@Nullable
+	@Override
+	public final IBinder onBind(@Nullable final Intent intent) {
+		return null;
 	}
 }

@@ -42,7 +42,7 @@ import java.util.Map;
 /**
  * <p>Geodesy-related utilities.</p>
  */
-public final class UtilsAbsLocation {
+public final class UtilsLocationAbsolute {
 
 	// Units: seconds
 	//private static final int MAX_AGE_LOCATION_ROOM = 1 * 60;
@@ -92,7 +92,7 @@ public final class UtilsAbsLocation {
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private UtilsAbsLocation() {
+	private UtilsLocationAbsolute() {
 	}
 
 	// To add a new location, update the switches in getDistanceBetweenCoordinates() and getCurrentLocation().

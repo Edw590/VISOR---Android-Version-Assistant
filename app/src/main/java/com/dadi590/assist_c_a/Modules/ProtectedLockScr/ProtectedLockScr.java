@@ -121,7 +121,8 @@ public class ProtectedLockScr extends AppCompatActivity {
 		enterFullScreen();
 
 		// And start the service to be sure this never stops - don't check so it's faster to start it.
-		UtilsServices.startService(ProtectedLockScrSrv.class);
+		// Keep it starting in foreground, so if there is any error on the Main Service, this one still runs.
+		UtilsServices.startService(ProtectedLockScrSrv.class, true);
 
 		findViewById(R.id.btn_unlock).setOnClickListener(new View.OnClickListener() {
 			@Override

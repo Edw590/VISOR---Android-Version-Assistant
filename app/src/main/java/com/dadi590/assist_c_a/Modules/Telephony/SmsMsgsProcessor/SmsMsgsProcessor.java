@@ -21,7 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,8 +28,8 @@ import android.telephony.SmsMessage;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 
 
@@ -96,11 +95,11 @@ public final class SmsMsgsProcessor {
 
 		if (UtilsTelephony.isPrivateNumber(sender)) {
 			final String speak = "Sir, attention! New message from a private number!";
-			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
+			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
 		} else {
 			final String number_name = UtilsTelephony.getWhatToSayAboutNumber(sender);
 			final String speak = "Sir, new message from " + number_name + ".";
-			MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
+			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}
 }

@@ -21,19 +21,17 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 
-import android.content.Context;
 import android.provider.CallLog;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv;
+import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
-
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -124,12 +122,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-						MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ".";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -139,12 +137,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -153,11 +151,11 @@ public class PhoneCallsProcessor {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					MainSrv.getSpeech2().speak(speak, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
 				}
 				break;
 			}
@@ -403,6 +401,8 @@ public class PhoneCallsProcessor {
 									calls_state.get(calls_state.size() - 1).get(0));
 							final_return.add(new NumAndPhase(calls_state.get(calls_state.size() - 1).get(0),
 									mapCallLogToCALL_PHASE.get(type_call)));
+							// Won't put any measures here. Nothing here will happen. Will only make the code confusing
+							// (more xD).
 						}
 						calls_state.get(calls_state.size() - 1).set(1, BETTER_CALL_STATE_DISCONNECTED);
 					}

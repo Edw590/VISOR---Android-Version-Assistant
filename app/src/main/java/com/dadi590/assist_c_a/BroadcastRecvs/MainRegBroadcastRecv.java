@@ -21,17 +21,18 @@
 
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.AudioManager;
 import android.telephony.TelephonyManager;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
- * The class to be used for all main broadcasts that need registering.
+ * <p>The class to be used for all main broadcasts that need registering on the main app process.</p>
  */
 public class MainRegBroadcastRecv {
 
@@ -66,11 +67,10 @@ public class MainRegBroadcastRecv {
 		intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 		intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
-		// Lock screen - for testing
-		//intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-
-		// Volume changes
-		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
+		// Bluetooth
+		intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+		intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+		intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
 		UtilsGeneral.getContext().registerReceiver(mainRegBroadcastReceiver, intentFilter);
 	}
