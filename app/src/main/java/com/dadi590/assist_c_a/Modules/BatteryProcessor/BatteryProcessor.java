@@ -89,9 +89,9 @@ public class BatteryProcessor {
 
 		final boolean charger_connected;
 		switch (battery_status) {
-			case BatteryManager.BATTERY_PLUGGED_AC:
-			case BatteryManager.BATTERY_PLUGGED_USB:
-			case BatteryManager.BATTERY_PLUGGED_WIRELESS: {
+			case (BatteryManager.BATTERY_PLUGGED_AC):
+			case (BatteryManager.BATTERY_PLUGGED_USB):
+			case (BatteryManager.BATTERY_PLUGGED_WIRELESS): {
 				charger_connected = true;
 				break;
 			}

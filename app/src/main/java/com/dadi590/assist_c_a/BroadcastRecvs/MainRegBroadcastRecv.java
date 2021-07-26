@@ -21,8 +21,6 @@
 
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -67,12 +65,11 @@ public class MainRegBroadcastRecv {
 		intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 		intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
-		// Bluetooth
-		intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-		intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-		intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-		UtilsGeneral.getContext().registerReceiver(mainRegBroadcastReceiver, intentFilter);
+		try {
+			UtilsGeneral.getContext().registerReceiver(mainRegBroadcastReceiver, intentFilter);
+		} catch (final IllegalArgumentException ignored) {
+			// Then it's already registered - imagine this is called again because the speech module was restarted.
+		}
 	}
 
 	private final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {

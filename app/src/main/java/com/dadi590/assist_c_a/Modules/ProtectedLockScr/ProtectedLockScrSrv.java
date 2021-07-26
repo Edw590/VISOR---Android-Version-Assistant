@@ -76,7 +76,10 @@ public class ProtectedLockScrSrv extends Service {
 
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_USER_PRESENT);
-		UtilsGeneral.getContext().registerReceiver(localBroadcastReceiver, intentFilter);
+		try {
+			UtilsGeneral.getContext().registerReceiver(localBroadcastReceiver, intentFilter);
+		} catch (final IllegalArgumentException ignored) {
+		}
 
 		if (locked) { // Just a check to be more sure the activity doesn't come if it's not needed anymore.
 			try {
@@ -211,6 +214,9 @@ public class ProtectedLockScrSrv extends Service {
 	public final void onDestroy() {
 		super.onDestroy();
 		locked = false;
-		UtilsGeneral.getContext().unregisterReceiver(localBroadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(localBroadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 }

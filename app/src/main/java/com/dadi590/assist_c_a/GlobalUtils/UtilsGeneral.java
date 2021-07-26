@@ -30,10 +30,6 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -50,33 +46,6 @@ public final class UtilsGeneral {
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
 	private UtilsGeneral() {
-	}
-
-	/**
-	 * <p>Deletes a directory (either file or folder).</p>
-	 *
-	 * @param dir the path to delete
-	 *
-	 * @return true if deletion was completely successful, including all files if a non-empty folder was selected for
-	 * deletion; false otherwise
-	 */
-	public static boolean deletePath(@NonNull final File dir) {
-		if (dir.isDirectory()) {
-			final String[] children = dir.list();
-			boolean success = true;
-			if (children == null) {
-				return false;
-			} else {
-				for (final String child : children) {
-					success = success && deletePath(new File(dir, child));
-				}
-			}
-			return success && dir.delete();
-		} else if (dir.isFile()) {
-			return dir.delete();
-		} else {
-			return false;
-		}
 	}
 
 	/**
@@ -128,40 +97,6 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Checks and warns about root access availability for the app.</p>
-	 *
-	 * @param warn_root_available true to warn if root access is available, false to only warn when there's no access
-	 */
-	public static void checkWarnRootAccess(final boolean warn_root_available) {
-		// todo See if you can delete this... It's not supposed for the app to execute any root commands. Only system
-		//  hidden/internal methods.
-
-		switch (UtilsRoot.rootCommandsAvailability()) {
-			case (UtilsRoot.ROOT_AVAILABLE): {
-				if (warn_root_available) {
-					final String speak = "Root access available on the device.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
-				}
-
-				break;
-			}
-			case (UtilsRoot.ROOT_DENIED): {
-				final String speak = "WARNING! Root access was denied on this device! Some features may not " +
-						"be available!";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
-
-				break;
-			}
-			case (UtilsRoot.ROOT_UNAVAILABLE): {
-				final String speak = "Attention! The device is not rooted! Some features may not be available!";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
-
-				break;
-			}
-		}
-	}
-
-	/**
 	 * <p>Check if an accessory with speakers (like earphones, headphones, headsets...) are connected.</p>
 	 *
 	 * @return true if an accessory with speakers is connected, false otherwise
@@ -194,7 +129,7 @@ public final class UtilsGeneral {
 	/**
 	 * <p>Calls {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
 	 *
-	 * @return .
+	 * @return same as in {@link Context#getApplicationContext()}
 	 */
 	@NonNull
 	public static Context getContext() {

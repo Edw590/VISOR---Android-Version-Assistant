@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Utility class with functions that use directly a shell.</p>
+ * <p>Utility class with functions that directly use a shell.</p>
  */
 public final class UtilsShell {
 

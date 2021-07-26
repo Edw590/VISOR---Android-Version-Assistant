@@ -822,7 +822,7 @@ public class Speech2 extends Service {
 			// If it's to speak, prepare the app to speak.
 
 			if (!focus_volume_dnd_done) {
-				// todo setVolumeDndFocus(); - enable this back, it was just for testing
+				setVolumeDndFocus();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
@@ -1044,7 +1044,10 @@ public class Speech2 extends Service {
 		intentFilter.addAction(BroadcastConstants.ACTION_REMOVE_SPEECH);
 		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
 
-		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+		try {
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 
 	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -1054,11 +1057,10 @@ public class Speech2 extends Service {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2");
-			System.out.println(intent.getAction());
+			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
-				case BroadcastConstants.ACTION_CALL_SPEAK: {
+				case (BroadcastConstants.ACTION_CALL_SPEAK): {
 					final String txt_to_speak = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
 					final int additional_command = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
 					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, -1);
@@ -1074,13 +1076,13 @@ public class Speech2 extends Service {
 					break;
 				}
 
-				case BroadcastConstants.ACTION_SKIP_SPEECH: {
+				case (BroadcastConstants.ACTION_SKIP_SPEECH): {
 					skipCurrentSpeech();
 
 					break;
 				}
 
-				case BroadcastConstants.ACTION_REMOVE_SPEECH: {
+				case (BroadcastConstants.ACTION_REMOVE_SPEECH): {
 					final String speech = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
 					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, -1);
 					final boolean low_to_high = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, true);
@@ -1093,7 +1095,7 @@ public class Speech2 extends Service {
 					break;
 				}
 
-				case AudioManager.VOLUME_CHANGED_ACTION: {
+				case (AudioManager.VOLUME_CHANGED_ACTION): {
 					setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
 							Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
 

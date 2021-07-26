@@ -69,19 +69,19 @@ public final class UtilsMedia {
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			String folder = GL_CONSTS.MEDIA_FOLDER;
 			switch (media_type) {
-				case AUDIO: {
+				case (AUDIO): {
 					folder += "Audio recordings";
 					break;
 				}
-				case PHOTO: {
+				case (PHOTO): {
 					folder += "Photos";
 					break;
 				}
-				case VIDEO: {
+				case (VIDEO): {
 					folder += "Video recordings";
 					break;
 				}
-				case SCREENSHOT: {
+				case (SCREENSHOT): {
 					folder += "Screenshots";
 					break;
 				}
@@ -102,19 +102,19 @@ public final class UtilsMedia {
 					.format(System.currentTimeMillis());
 			File mediaFile = null;
 			switch (media_type) {
-				case AUDIO: {
+				case (AUDIO): {
 					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "AUD_" + timeStamp + ".aac");
 					break;
 				}
-				case PHOTO: {
+				case (PHOTO): {
 					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "PHO_" + timeStamp + ".jpg");
 					break;
 				}
-				case VIDEO: {
+				case (VIDEO): {
 					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
 					break;
 				}
-				case SCREENSHOT: {
+				case (SCREENSHOT): {
 					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "SCR_" + timeStamp + ".jpg");
 					break;
 				}

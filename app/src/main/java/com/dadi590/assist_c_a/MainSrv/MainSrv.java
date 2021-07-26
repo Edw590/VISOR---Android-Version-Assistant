@@ -176,7 +176,10 @@ public class MainSrv extends Service {
 		//audioRecorder = new AudioRecorder();
 
 		// Register the receiver before the speech module is started
-		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+		try {
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+		} catch (final IllegalArgumentException ignored) {
+		}
 
 		// Start services in background - no restrictions, since the Main Service is already in foreground
 		for (final Class service : services_to_start) {
@@ -197,7 +200,7 @@ public class MainSrv extends Service {
 	}
 
 	/**
-	 * <p>The sole purpose of this register is detect when the speech module is ready so the Main Service can start
+	 * <p>The sole purpose of this receiver is detect when the speech module is ready so the Main Service can start
 	 * everything else.</p>
 	 */
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -207,12 +210,14 @@ public class MainSrv extends Service {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv");
-			System.out.println(intent.getAction());
+			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
 			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_READY)) {
 				AfterTtsReady.afterTtsReady();
-				UtilsGeneral.getContext().unregisterReceiver(this);
+				try {
+					UtilsGeneral.getContext().unregisterReceiver(this);
+				} catch (final IllegalArgumentException ignored) {
+				}
 			}
 		}
 	};

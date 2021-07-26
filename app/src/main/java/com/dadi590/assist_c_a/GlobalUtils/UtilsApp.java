@@ -28,10 +28,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv;
-
-import java.io.File;
 
 /**
  * <p>Global app-related utilities.</p>
@@ -93,8 +92,7 @@ public final class UtilsApp {
      * Deletes the app cache.
      */
     public static void deleteAppCache() {
-        final File dir = UtilsGeneral.getContext().getCacheDir();
-        UtilsGeneral.deletePath(dir);
+        UtilsFilesDirs.deletePath(UtilsGeneral.getContext().getCacheDir());
     }
 
     /**
@@ -116,18 +114,28 @@ public final class UtilsApp {
     }
 
     /**
-     * <p>Checks if an installed app is enabled or not. Check if the app is installed before calling this function.</p>
+     * <p>Checks if an installed app is enabled or not.</p>
+     * <br>
+     * <p>Note: one of the states a package may have is the DEFAULT one, which is defined on the manifest, and we can't
+     * know if that means enabled or disabled. So this function supposes all packages have the default as enabled in
+     * the manifest. Hence, the result is an OR operation between STATE_DEFAULT and STATE_ENABLED.</p>
      *
      * @param packageName the name of the package of the app to be checked
      *
-     * @return true if the app is installed, false otherwise
+     * @return true if the app is enabled, false otherwise; null if the package is not installed
      */
-    public static boolean isAppEnabled(@NonNull final String packageName) {
+    @Nullable
+    public static Boolean isAppEnabled(@NonNull final String packageName) {
         final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
-        final int appEnabledSetting = packageManager.getApplicationEnabledSetting(packageName);
+        final int app_enabled_setting;
+        try {
+            app_enabled_setting = packageManager.getApplicationEnabledSetting(packageName);
+        } catch (final IllegalArgumentException ignored) {
+            return null;
+        }
 
-        return appEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
-                appEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+        return app_enabled_setting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT ||
+                app_enabled_setting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
     public static final int NORMAL = 0;
@@ -138,9 +146,9 @@ public final class UtilsApp {
      * system app with updates.</p>
      * <br>
      * <p><u>---CONSTANTS---</u></p>
-     * <p>- {@link #NORMAL} --> returned if the app is a normal app (with or without updates)</p>
-     * <p>- {@link #SYSTEM_WITHOUT_UPDATES} --> returned if the app is a system app without updates</p>
-     * <p>- {@link #SYSTEM_WITH_UPDATES} --> returned if the app is a system app with updates</p>
+     * <p>- {@link #NORMAL} --> for the returning value: the app is a normal app (with or without updates)</p>
+     * <p>- {@link #SYSTEM_WITHOUT_UPDATES} --> for the returning value: the app is a system app without updates</p>
+     * <p>- {@link #SYSTEM_WITH_UPDATES} --> for the returning value: the app is a system app with updates</p>
      * <p><u>---CONSTANTS---</u></p>
      *
      * @return one of the constants
@@ -174,8 +182,8 @@ public final class UtilsApp {
     }
 
     /**
-     * <p>Sends a broadcast that can only be received by components inside this application (which means, an internal
-     * broadcast to the app).</p>
+     * <p>Sends a broadcast that can only be received by components inside this application (which means, an
+     * app-internal broadcast).</p>
      * <p>To do this, this method sets {@link Intent#setPackage(String)} to this package's name automatically.</p>
      *
      *  @param intent the intent to use with the broadcast

@@ -55,41 +55,15 @@ final class UtilsIntentWhatToDo {
 			return;
 		}
 
-		System.out.println("PPPPPPPPPPPPPPPPPP-Main");
-		System.out.println(intent.getAction());
+		System.out.println("PPPPPPPPPPPPPPPPPP-Main - " + intent.getAction());
 
 		switch (intent.getAction()) {
 
 			/////////////////////////////////////
-			// Power
-			/*case Intent.ACTION_USER_PRESENT:
-			case Intent.ACTION_USER_UNLOCKED:
-			case "com.htc.intent.action.QUICKBOOT_POWERON":
-			case "android.intent.action.QUICKBOOT_POWERON":
-			case Intent.ACTION_LOCKED_BOOT_COMPLETED:
-			case Intent.ACTION_BOOT_COMPLETED: {
-				// Try to start the Main Service at all times. Useful if it crashed and the user didn't notice.
-				// todo Add infinite actions here, so it's checked every instant if the service is running or not,
-				//  for example when switching user - it won't start until we unlock the phone... --> not cool
-				// Useful in case it's not a system app. If it is, disable all that don't have to do with boot completed
-				// or user present/unlocked, since the persistent flag will take care of restarting the service every
-				// time, I think (maybe be sure that's what happens before disabling the actions if it's a system app).
-
-				// todo Also try to find some way of right after remove Admin Mode + Force stop happens, restarting the
-				// app through an intent instead of internal code (faster and easier, I think). If not because of being
-				// locked and screen off, then get it to do something else before shutting down and detect that with an
-				// intent action to restart the app promptly.
-				UtilsPermissions.wrapperRequestPerms(null, false);
-				UtilsServices.startService(MainSrv.class, true);
-
-				break;
-
-				Not used - all attempts to start the Main Service are in MainBroadcastRecv right in onReceive, so ANY
-				detection tries to start the Main Service.
-			}*/
-			case CONSTS.ACTION_HTC_QCK_POFF:
-			case CONSTS.ACTION_ANDR_QCK_POFF:
-			case Intent.ACTION_SHUTDOWN: {
+			// Shut down and reboot
+			case (CONSTS.ACTION_HTC_QCK_POFF):
+			case (CONSTS.ACTION_ANDR_QCK_POFF):
+			case (Intent.ACTION_SHUTDOWN): {
 				UtilsApp.prepareShutdown();
 
 				if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
@@ -103,7 +77,7 @@ final class UtilsIntentWhatToDo {
 
 				break;
 			}
-			case Intent.ACTION_REBOOT: {
+			case (Intent.ACTION_REBOOT): {
 				UtilsApp.prepareShutdown();
 
 				// No idea if this is supposed detected at all (might be stopped before it gets here by the system as
@@ -118,12 +92,12 @@ final class UtilsIntentWhatToDo {
 
 			/////////////////////////////////////
 			// SMS and phone calls
-			case CONSTS.ACTION_SMS_RECEIVED_ALL_API: {
+			case (CONSTS.ACTION_SMS_RECEIVED_ALL_API): {
 				SmsMsgsProcessor.smsMsgsProcessor(intent);
 
 				break;
 			}
-			case TelephonyManager.ACTION_PHONE_STATE_CHANGED: {
+			case (TelephonyManager.ACTION_PHONE_STATE_CHANGED): {
 				if (intent.hasExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)) {
 					// According to Android Developers website, having both READ_CALL_LOG and READ_PHONE_STATE
 					// permissions (which I must, to receive the EXTRA_INCOMING_NUMBER), will make the app receive 2
@@ -147,7 +121,7 @@ final class UtilsIntentWhatToDo {
 
 				break;
 			}
-			case CONSTS.ACTION_PRECISE_CALL_STATE_CHANGED: {
+			case (CONSTS.ACTION_PRECISE_CALL_STATE_CHANGED): {
 				// See here for more: https://stackoverflow.com/questions/32821952/how-to-use-precisecallstate
 				//MainSrv.getPhoneCallProcessor().phoneNumRecv(context, map_EXTRA_STATE_CALL_STATE.get(state), phoneNumber,
 				//		true);
@@ -159,18 +133,18 @@ final class UtilsIntentWhatToDo {
 			}
 
 			/////////////////////////////////////
-			// Battery
-			case Intent.ACTION_BATTERY_CHANGED: {
+			// Battery / Power
+			case (Intent.ACTION_BATTERY_CHANGED): {
 				MainSrv.getBatteryProcessor().processBatteryLvlChg(intent);
 
 				break;
 			}
-			case Intent.ACTION_POWER_CONNECTED: {
+			case (Intent.ACTION_POWER_CONNECTED): {
 				MainSrv.getBatteryProcessor().processBatteryPwrChg(true);
 
 				break;
 			}
-			case Intent.ACTION_POWER_DISCONNECTED: {
+			case (Intent.ACTION_POWER_DISCONNECTED): {
 				MainSrv.getBatteryProcessor().processBatteryPwrChg(false);
 
 				break;

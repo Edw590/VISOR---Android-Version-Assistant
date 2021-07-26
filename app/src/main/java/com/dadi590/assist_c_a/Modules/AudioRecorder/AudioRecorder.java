@@ -74,8 +74,11 @@ public class AudioRecorder {
 					}
 				};
 				runnables.add(runnable);
-				UtilsGeneral.getContext().registerReceiver(broadcastReceiver,
-						new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE));
+				try {
+					UtilsGeneral.getContext().registerReceiver(broadcastReceiver,
+							new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE));
+				} catch (final IllegalArgumentException ignored) {
+				}
 				final String speak = "Starting now, sir.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, runnable.hashCode());
 				// todo Make it detect when the speech is finished to put the Runnable working
@@ -89,7 +92,10 @@ public class AudioRecorder {
 				final String speak = "Already stopped, sir.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 				// It's not supposed to be registered by now, but as a precaution.
-				UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+				try {
+					UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+				} catch (final IllegalArgumentException ignored) {
+				}
 			}
 		}
 	}
@@ -105,8 +111,7 @@ public class AudioRecorder {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder");
-			System.out.println(intent.getAction());
+			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
 
 			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE)) {
 				final int after_speak_code = intent.getIntExtra(GL_BC_CONSTS.EXTRA_SPEECH2_AFTER_SPEAK_CODE, -1);
@@ -114,7 +119,10 @@ public class AudioRecorder {
 					if (runnable.hashCode() == after_speak_code) {
 						System.out.println("TTTTTTTTTT");
 						runnable.run();
-						UtilsGeneral.getContext().unregisterReceiver(this);
+						try {
+							UtilsGeneral.getContext().unregisterReceiver(this);
+						} catch (final IllegalArgumentException ignored) {
+						}
 						return;
 					}
 				}

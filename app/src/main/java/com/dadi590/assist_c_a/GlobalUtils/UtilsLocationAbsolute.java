@@ -106,7 +106,7 @@ public final class UtilsLocationAbsolute {
 	public static final double MISSING_PERMS = 1.0;
 	public static final double NO_LOCATION_FOR_PARAMETERS = 1.0;
 	/**
-	 * <p>Gets the current device location coordinates, latitude and longitude.</p>
+	 * <p>Gets the current device location coordinates (latitude and longitude).</p>
 	 * <p>This function can get the device location through various ways. Which one will be decided by the specified
 	 * parameters.</p>
 	 * <br>
@@ -182,23 +182,23 @@ public final class UtilsLocationAbsolute {
 		final int ordered_providers_size = 3;
 		final String[] ordered_providers = new String[ordered_providers_size];
 		switch (accuracy_type) {
-			case LOCATION_COUNTRY: {
+			case (LOCATION_COUNTRY): {
 				ordered_providers[0] = LocationManager.PASSIVE_PROVIDER;
 				ordered_providers[1] = LocationManager.NETWORK_PROVIDER;
 				ordered_providers[2] = LocationManager.GPS_PROVIDER;
 
 				break;
 			}
-			case LOCATION_CITY: {
+			case (LOCATION_CITY): {
 				ordered_providers[0] = LocationManager.NETWORK_PROVIDER;
 				ordered_providers[1] = LocationManager.GPS_PROVIDER;
 				ordered_providers[2] = LocationManager.PASSIVE_PROVIDER;
 
 				break;
 			}
-			/*case LOCATION_BUILDING:
-			case LOCATION_HOUSE:
-			case LOCATION_ROOM: {
+			/*case (LOCATION_BUILDING):
+			case (LOCATION_HOUSE):
+			case (LOCATION_ROOM): {
 				ordered_providers[0] = LocationManager.GPS_PROVIDER;
 				ordered_providers[1] = LocationManager.NETWORK_PROVIDER;
 				ordered_providers[2] = LocationManager.PASSIVE_PROVIDER;
@@ -309,13 +309,13 @@ public final class UtilsLocationAbsolute {
 		// Country much less.
 
 		switch (accuracy_type) {
-			case LOCATION_COUNTRY:
-			case LOCATION_CITY: {
+			case (LOCATION_COUNTRY):
+			case (LOCATION_CITY): {
 				return getHaversineDistance(first_point, second_point);
 			}
-			/*case LOCATION_BUILDING:
-			case LOCATION_HOUSE:
-			case LOCATION_ROOM:*/
+			/*case (LOCATION_BUILDING):
+			case (LOCATION_HOUSE):
+			case (LOCATION_ROOM):*/
 			default: { // Default just to be sure, if new locations are not added here, at least they have maximum
 				       // precision on them (until the location is added here).
 				return getVincentyDistance(first_point, second_point);

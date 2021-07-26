@@ -21,6 +21,9 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -41,6 +44,40 @@ public final class UtilsRoot {
      * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
      */
     private UtilsRoot() {
+    }
+
+    /**
+     * <p>Checks and warns about root access availability for the app.</p>
+     *
+     * @param warn_root_available true to warn if root access is available, false to only warn when there's no access
+     */
+    public static void checkWarnRootAccess(final boolean warn_root_available) {
+        // todo See if you can delete this... It's not supposed for the app to execute any root commands. Only system
+        //  hidden/internal methods.
+
+        switch (rootCommandsAvailability()) {
+            case (ROOT_AVAILABLE): {
+                if (warn_root_available) {
+                    final String speak = "Root access available on the device.";
+                    UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+                }
+
+                break;
+            }
+            case (ROOT_DENIED): {
+                final String speak = "WARNING! Root access was denied on this device! Some features may not " +
+                        "be available!";
+                UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+
+                break;
+            }
+            case (ROOT_UNAVAILABLE): {
+                final String speak = "Attention! The device is not rooted! Some features may not be available!";
+                UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+
+                break;
+            }
+        }
     }
 
     public static final int ROOT_AVAILABLE = 0;

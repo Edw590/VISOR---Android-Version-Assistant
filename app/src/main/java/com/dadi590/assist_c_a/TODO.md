@@ -214,3 +214,12 @@ Make also one for the shut down. A very fast one. Something.
 
 Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
 example. Find out how to do that.
+
+
+## Speech
+
+If I put the volume to zero and start Vibrating mode, the assistant will keep speaking until the speech stops, and then
+all next speeches are skipped. He should stop the speech immediately...
+
+Also, the last speech that was actually spoken (with volume...) should be the last thing said, and all the others should
+be on some list to then say them, starting with the one that was interrupted ("As I was saying, (...)").

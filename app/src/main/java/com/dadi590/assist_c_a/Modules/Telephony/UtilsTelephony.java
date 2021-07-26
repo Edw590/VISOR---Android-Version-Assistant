@@ -86,12 +86,12 @@ public final class UtilsTelephony {
 										final int location_search) {
 		final Uri uri_to_use;
 		switch (location_search) {
-			case ALL_CONTACTS:
+			case (ALL_CONTACTS):
 				uri_to_use = ContactsContract.Contacts.CONTENT_URI;
 				// This seems to give the contacts of the entire phone: SIM card, phone storage and accounts like Google,
 				// Whatsapp...
 				break;
-			case CONTACTS_SIM:
+			case (CONTACTS_SIM):
 				uri_to_use = ICC_URI_API4PLUS;
 				break;
 			default:
@@ -342,13 +342,13 @@ public final class UtilsTelephony {
 
                 String direction = null;
                 switch (Integer.parseInt(c.getString(c.getColumnIndexOrThrow(CallLog.Calls.TYPE)))) {
-                    case CallLog.Calls.OUTGOING_TYPE:
+                    case (CallLog.Calls.OUTGOING_TYPE):
                         direction = "OUTGOING";
                         break;
-                    case CallLog.Calls.INCOMING_TYPE:
+                    case (CallLog.Calls.INCOMING_TYPE):
                         direction = "INCOMING";
                         break;
-                    case CallLog.Calls.MISSED_TYPE:
+                    case (CallLog.Calls.MISSED_TYPE):
                         direction = "MISSED";
                         System.out.println(phNumber);
                         System.out.println(dateFormat.toString());

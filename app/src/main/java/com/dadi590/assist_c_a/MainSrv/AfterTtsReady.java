@@ -43,7 +43,7 @@ final class AfterTtsReady {
 		//UtilsGeneral.checkWarnRootAccess(false); Not supposed to be needed root access. Only system permissions.
 
 		switch (UtilsApp.appInstallationType()) {
-			case UtilsApp.SYSTEM_WITHOUT_UPDATES: {
+			case (UtilsApp.SYSTEM_WITHOUT_UPDATES): {
 				final String speak = "WARNING - Installed as system application but without updates. Only " +
 						"emergency code commands will be available.";
 				// todo Is it so? Even on Marshmallow and above with extractNativeLibs=false...? Test that.
@@ -53,7 +53,7 @@ final class AfterTtsReady {
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
 				break;
 			}
-			case UtilsApp.NORMAL: {
+			case (UtilsApp.NORMAL): {
 				final String speak = "WARNING - Installed as normal application! System features may not be " +
 						"available.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
@@ -69,7 +69,7 @@ final class AfterTtsReady {
 
 		/*if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
 			switch (Copiar_bibliotecas.copiar_biblioteca_PocketSphinx(getApplicationContext())) {
-				case ARQUITETURA_NAO_DISPONIVEL: {
+				case (ARQUITETURA_NAO_DISPONIVEL): {
 					// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
 					pocketsphinx_disponivel = false;
 					fala.speak("WARNING - It was not possible to find a compatible CPU architecture for PocketSphinx " +
@@ -77,7 +77,7 @@ final class AfterTtsReady {
 							"detection.", Fala.SEM_COMANDOS_ADICIONAIS, null, false);
 					break;
 				}
-				case ERRO_COPIA: {
+				case (ERRO_COPIA): {
 					// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
 					pocketsphinx_disponivel = false;
 					fala.speak("WARNING - It was not possible to copy the PocketSphinx library to the device. It will " +
