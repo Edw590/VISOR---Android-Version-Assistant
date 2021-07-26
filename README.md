@@ -57,8 +57,16 @@ After that, currently just click on the permissions button and accept everything
 
 ## For developers
 ### - Compile the app
-I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
-Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
+- I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
+- Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
+- Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature check on startMainService().
+- I have also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers). In that case those things should be replaced when compiling the app.
+
+Now a small explanation of the app structure:
+- All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder.
+- All utility methods are inside classes started with "Utils". All main utilities are on GlobalUtils. Other utilities may be one specific packages of modules or other things (depending if the utilities are for global app usage or only for that specific package).
+- The main broadcast receivers are on BroadcastRecvs package. I say "main" because other broadcast receivers may be anywhere else on the app code. For example inside classes, like on Speech2 or on MainSrv.
+- The HiddenMethods would be used if I had not discovered about a static way of getting Context. I'm keeping it in case I need it again.
 
 ## About
 ### - Roadmap
