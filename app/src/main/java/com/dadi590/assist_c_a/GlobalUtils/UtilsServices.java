@@ -118,6 +118,13 @@ public final class UtilsServices {
 	 */
 	@NonNull
 	public static int[] startMainService() {
+		final Boolean is_app_signed_by_me = UtilsCertificates.isOtherPackageMine(UtilsGeneral.getContext().getPackageName());
+		if (is_app_signed_by_me != null && !is_app_signed_by_me) {
+			// Won't ever be null, since it's the installed package which is calling the function, but must do the check
+			// for Java to stop complaining about it.
+			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
+			return new int[]{};
+		}
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
 		UtilsServices.startService(MainSrv.class, true);
 
