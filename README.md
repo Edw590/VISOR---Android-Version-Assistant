@@ -32,7 +32,7 @@ I should also note that I'm making this app to "think" it's a God. That's why yo
 
 The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards). Though, I'm only testing the app on Lollipop 5.1, on Oreo 8.1 (my 2 phones), and on Lollipop 4.4.2 (my tablet). Other Android versions only with the emulator, and more rarely.
 
-The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are ONLY available with one or more of the 3 mentioned ways, they will be added. So to have full functionality, install it that way.
+The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are ONLY available with one or more of the 3 mentioned ways, they will be added. So to have full functionality, install it that way.
 
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
@@ -44,36 +44,36 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - Another important thing is: the assistant will NOT speak if the phone's ringer mode is not the Normal one (which means, only if you have sound enabled for calls and messages). If it's on Vibrating or Do Not Disturb, it won't speak - unless again, Critical speech priority, which bypasses everything I found that could be bypassed to speak xD.
 - - Also another notes: if you have sound enabled and the assistant speaks...
 - - - It may raise your calls/messages volume to speak, and will stop other apps' audio. After it's done speaking, all will be back to normal, if anything was changed (volume, other apps' audio and Do Not Disturb) - unless it changed the volume to speak and while it was speaking, you changed it (in that case, the volume will not be touched again and will remain the one you chose).
-- - - Also, on High priority and above, all speeches will be spoken in both speakers and headphones. Bellow High, depends either headphones or speakers will be used, not both.
+- - - Also, on High priority and above, all speeches will be spoken in both speakers and headphones. Below High, either headphones or speakers will be used, not both.
 - Telephony:
 - - Note: all the modules here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related with that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 
 ## Installation/Usage
-Install the app either as a perfectly normal app, or as a system app. Grant it root access, if you'd like, and also enable Device Administration for it, if you want. System app + root access + Device Administration will give you full functionality of the app.
+Install the app either as a perfectly normal app, or as a privileged system app (below KitKat 4.4, in /system/app; on 4.4 and above, in /system/priv-app/). Grant it root access, if you'd like, and also enable Device Administration for it, if you want. Privileged system app + root access + Device Administration will give you full functionality of the app.
 
-After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only record audio is manual for now).
+After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only recording audio is manual for now).
 
 ## For developers
 ### - Compile the app
 - I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 - Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
 - Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature check on startMainService().
-- I have also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers). In that case those things should be replaced when compiling the app.
+- I have also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
 
 Now a small explanation of the app structure:
 - All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder.
-- All utility methods are inside classes started with "Utils". All main utilities are on GlobalUtils. Other utilities may be one specific packages of modules or other things (depending if the utilities are for global app usage or only for that specific package).
+- All utility methods are inside classes started with "Utils". All main utilities are on GlobalUtils. Other utilities may be one specific packages of modules or other folders (depending if the utilities are for global app usage or only for that specific package).
 - The main broadcast receivers are on BroadcastRecvs package. I say "main" because other broadcast receivers may be anywhere else on the app code. For example inside classes, like on Speech2 or on MainSrv.
-- The HiddenMethods would be used if I had not discovered about a static way of getting Context. I'm keeping it in case I need it again.
+- The HiddenMethods would be used if I had not discovered about a static way of getting Context. I'm keeping it in case it's needed again.
 
 ## About
 ### - Roadmap
 Have a look on the "TODO.txt" file.
 
 ### - Project status
-Ongoing, but possibly slowly, since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
+Ongoing, but possibly slowly since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
 
 ### - License
 This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
@@ -86,4 +86,4 @@ If you have any questions, try the options below:
 ## Final notes
 Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School when I bought a CASIO fx-CG20 and it asked for a company name. So I made this one up xD. Thought why not keep using it, so I have some company name to put on stuff xD.
 
-Hope you like the app! Any new ideas are welcomed! (I may not implement them that fast - depends, as I'm studying.)
+Hope you like the app! Any new ideas are welcomed! (I just may or may not implement them that fast - student)
