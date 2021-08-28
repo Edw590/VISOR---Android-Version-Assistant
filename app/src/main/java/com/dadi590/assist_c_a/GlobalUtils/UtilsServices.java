@@ -118,7 +118,7 @@ public final class UtilsServices {
 	 */
 	@NonNull
 	public static int[] startMainService() {
-		if (UtilsCertificates.isThisAppCorrupt()) {
+		if (UtilsCertificates.isThisAppCorrupted()) {
 			// This is just in case it's possible to patch the APK like it is with binary files without needing the
 			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
 			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.

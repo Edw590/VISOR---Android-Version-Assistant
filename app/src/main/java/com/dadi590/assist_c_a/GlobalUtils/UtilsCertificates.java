@@ -93,10 +93,10 @@ public final class UtilsCertificates {
 	 *
 	 * @return true if it's not corrupted, false otherwise
 	 */
-	public static boolean isThisAppCorrupt() {
-		final Boolean is_my_app = checkCertsPkg(UtilsGeneral.getContext().getPackageName(), ASSIST_C_A_RSA_CERT_FINGERPRINT);
-		assert is_my_app != null; // Will never be null. Else, how is the app installed.
-		return is_my_app;
+	public static boolean isThisAppCorrupted() {
+		final Boolean is_app_fine = checkCertsPkg(UtilsGeneral.getContext().getPackageName(), ASSIST_C_A_RSA_CERT_FINGERPRINT);
+		assert is_app_fine != null; // Will never be null. Else, how is the app installed.
+		return !is_app_fine;
 	}
 
 	/**
