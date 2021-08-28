@@ -21,8 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.ProtectedLockScr;
 
-import android.app.ActivityThread;
-import android.app.AppGlobals;
 import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -183,14 +181,6 @@ public class ProtectedLockScrSrv extends Service {
 		@Override
 		public void run() {
 			while (locked) {
-				System.out.println("LLLLLLLLLLL");
-				System.out.println(getApplicationContext());
-				System.out.println(getBaseContext());
-				System.out.println(AppGlobals.getInitialApplication());
-				System.out.println(ActivityThread.currentApplication());
-				System.out.println(UtilsGeneral.getContext());
-				System.out.println(intentPLS);
-
 				UtilsProtectedLockScr.showPLS(intentPLS);
 
 				UtilsServices.startMainService();

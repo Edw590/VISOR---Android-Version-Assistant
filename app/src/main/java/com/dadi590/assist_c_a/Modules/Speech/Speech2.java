@@ -102,6 +102,11 @@ public class Speech2 extends Service {
 
 		readyArrayLists();
 
+		try {
+			Thread.sleep(2500L);
+		} catch (final InterruptedException ignored) {
+		}
+
 		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
@@ -174,7 +179,7 @@ public class Speech2 extends Service {
 					// todo Send an email about this and put a notification on the phone!!!
 				}
 			}
-		}, GL_CONSTS.PREFERRED_TTS_ENGINE);
+		});//, GL_CONSTS.PREFERRED_TTS_ENGINE);
 	}
 
 	@Override
