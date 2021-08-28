@@ -42,13 +42,29 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * <p>So it seems Android will restart the process by calling only {@link android.app.Application#onCreate()} if the
  * main app process goes down.</p>
  */
-public class MainApp extends android.app.Application {
+public final class MainApp extends android.app.Application {
+
+	// Won't ever be null while the app is running because everything else will be called after MainApp.onCreate(), in
+	// which applicationContext is initialized. So it's fine not to initialize it here and say it's NonNull.
+	// Except, it seems, with Content Providers, in which case the Application class may not have been initialized yet.
+	// But with Activities, Services and Receivers it's alright. Though, if called from this class's Constructor, this
+	// variable may not be ready yet. Not sure.
+	/**
+	 * <p>The main application's context.</p>
+	 * <p>Do NOT use with Content Provider classes! This context may not be ready in those cases!.</p>
+	 * <p>Use for Activities, Services and Receivers.</p>
+	 */
+	@NonNull public static Context applicationContext;
 
 	@Override
 	public final void onCreate() {
 		super.onCreate();
 
 		// To do exactly when the app's main process starts
+
+		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
+		// which returns null sometimes.
+		applicationContext = getApplicationContext();
 
 		UtilsServices.startMainService();
 
@@ -76,6 +92,11 @@ public class MainApp extends android.app.Application {
 		startActivity (intent);
 
 		System.exit(1); // kill off the crashed app*/
+
+		System.out.println("------------- CRITICAL APP ERROR -------------");
+		System.out.println("Thread: " + thread);
+		System.out.println("Error:");
+		throwable.printStackTrace();
 
 		// todo Put it writing some log or whatever here!!!
 	}

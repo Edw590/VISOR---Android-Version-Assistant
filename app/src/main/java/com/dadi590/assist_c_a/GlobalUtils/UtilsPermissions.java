@@ -186,7 +186,7 @@ public final class UtilsPermissions {
 				boolean call_function = false;
 				if (check_install_type) {
 					final int app_install_type = UtilsApp.appInstallationType();
-					if (app_install_type == UtilsApp.SYSTEM_WITH_UPDATES || app_install_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
+					if (app_install_type == UtilsApp.PRIVILEGED_WITH_UPDATES || app_install_type == UtilsApp.PRIVILEGED_WITHOUT_UPDATES) {
 						call_function = true;
 					}
 				} else {

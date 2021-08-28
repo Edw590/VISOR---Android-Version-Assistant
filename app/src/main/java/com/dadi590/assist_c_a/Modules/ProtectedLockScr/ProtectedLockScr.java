@@ -277,16 +277,14 @@ public class ProtectedLockScr extends AppCompatActivity {
 		final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 		// SYSTEM_ALERT_WINDOW is not available from API 23 onwards automatically. Before that, everything is alright.
 		// On 23 and above, only if the app is allowed to draw overlays (OR comes from the Play Store, in which case,
-		// the permission will be granted automatically - some times, not always, it's confusing).
+		// the permission will be granted automatically - some times, not always, it's confusing, might have to do with
+		// who is the creator of the app, like Facebook...).
 		// From API 26 and above, TYPE_SYSTEM_ERROR (and others) can only be used if the app is a system app.
 		final int window_type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			System.out.println("RRRRRRRRRRRRRRRRR");
-			System.out.println(Settings.canDrawOverlays(UtilsGeneral.getContext()));
 			if (Settings.canDrawOverlays(UtilsGeneral.getContext())) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					System.out.println(UtilsSysApp.isSystemApp());
-					if (UtilsSysApp.isSystemApp()) {
+					if (UtilsSysApp.mainFunction(UtilsSysApp.IS_SYSTEM_APP)) {
 						layoutParams.type = window_type;
 						system_overlay = true;
 					}

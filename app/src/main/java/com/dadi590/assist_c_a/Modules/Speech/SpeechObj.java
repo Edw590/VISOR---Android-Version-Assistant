@@ -102,6 +102,6 @@ class SpeechObj {
 	@Override
 	public final String toString() {
 		return "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + txt_to_speak + "\", "
-				+ after_speaking + "\", " + audio_stream + "]";
+				+ after_speaking + ", " + audio_stream + "]";
 	}
 }

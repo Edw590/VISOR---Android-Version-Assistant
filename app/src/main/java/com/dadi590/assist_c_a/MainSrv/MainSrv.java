@@ -31,7 +31,6 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv;
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
@@ -42,6 +41,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 
 /**
@@ -58,10 +58,9 @@ public class MainSrv extends Service {
 	//private static Context main_app_context = null; - disabled while using UtilsGeneral.getMainAppContext()
 
 	// Modules instances
-	private static final AudioRecorder audioRecorder = new AudioRecorder();
-	private static final PhoneCallsProcessor phoneCallsProcessor = new PhoneCallsProcessor();
-	private static final MainRegBroadcastRecv mainRegBroadcastRecv = new MainRegBroadcastRecv();
-	private static final BatteryProcessor batteryProcessor = new BatteryProcessor();
+	private static AudioRecorder audioRecorder = null;
+	private static PhoneCallsProcessor phoneCallsProcessor = null;
+	private static BatteryProcessor batteryProcessor = null;
 
 	// Services to start in order
 	private static final Class[] services_to_start = {
@@ -111,15 +110,6 @@ public class MainSrv extends Service {
 		UtilsServices.startMainService();
 
 		return audioRecorder;
-	}
-	/**.
-	 * @return the global {@link MainBroadcastRecv} instance
-	 */
-	@NonNull
-	public static MainRegBroadcastRecv getMainRegBroadcastRecv() {
-		UtilsServices.startMainService();
-
-		return mainRegBroadcastRecv;
 	}
 	/**.
 	 * @return the global {@link PhoneCallsProcessor} instance
@@ -176,10 +166,7 @@ public class MainSrv extends Service {
 		//audioRecorder = new AudioRecorder();
 
 		// Register the receiver before the speech module is started
-		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
-		} catch (final IllegalArgumentException ignored) {
-		}
+		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
 
 		// Start services in background - no restrictions, since the Main Service is already in foreground
 		for (final Class service : services_to_start) {
@@ -213,7 +200,81 @@ public class MainSrv extends Service {
 			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
 			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_READY)) {
-				AfterTtsReady.afterTtsReady();
+				// Start the main broadcast receivers before everything else, so stuff can start sending broadcasts
+				// right away after being ready.
+				MainRegBroadcastRecv.registerReceivers();
+
+				//UtilsGeneral.checkWarnRootAccess(false); Not supposed to be needed root access. Only system permissions.
+
+				switch (UtilsApp.appInstallationType()) {
+					case (UtilsApp.PRIVILEGED_WITHOUT_UPDATES): {
+						final String speak = "WARNING - Installed as privileged application but without updates. Only " +
+								"emergency code commands will be available.";
+						// todo Is it so? Even on Marshmallow and above with extractNativeLibs=false...? Test that.
+						//  Remember the user who said you could "potentially" emulate loading from the APK itself? Try
+						//  that below Marshmallow... Maybe read the APK? Or extract it to memory and load from memory?
+						//  (always from memory, preferably)
+						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+						break;
+					}
+					case (UtilsApp.NON_PRIVILEGED): {
+						final String speak = "WARNING - Installed as non-privileged application! System features may " +
+								"not be available.";
+						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+						break;
+					}
+				}
+
+				if (!UtilsApp.isDeviceAdmin()) {
+					final String speak = "WARNING - The application is not a Device Administrator! Some security " +
+							"features may not be available.";
+					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+				}
+
+				/*if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
+					switch (Copiar_bibliotecas.copiar_biblioteca_PocketSphinx(getApplicationContext())) {
+						case (ARQUITETURA_NAO_DISPONIVEL): {
+							// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
+							pocketsphinx_disponivel = false;
+							fala.speak("WARNING - It was not possible to find a compatible CPU architecture for PocketSphinx " +
+									"library to be copied to the device. It will not be possible to have background hotword " +
+									"detection.", Fala.SEM_COMANDOS_ADICIONAIS, null, false);
+							break;
+						}
+						case (ERRO_COPIA): {
+							// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
+							pocketsphinx_disponivel = false;
+							fala.speak("WARNING - It was not possible to copy the PocketSphinx library to the device. It will " +
+									"not be possible to have background hotword detection.", Fala.SEM_COMANDOS_ADICIONAIS,
+									null, false);
+							break;
+						}
+					}
+				}*/
+
+				//Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
+
+				//pressao_longa_botoes.ativar_detecao(Build.VERSION.SDK_INT);
+
+				// Instantiate all modules in order, in case they haven't been already (speech module failure, restart,
+				// send this action again, and that would restart all other modules - no thanks)
+				if (batteryProcessor == null) {
+					batteryProcessor = new BatteryProcessor();
+				}
+				if (phoneCallsProcessor == null) {
+					phoneCallsProcessor = new PhoneCallsProcessor();
+				}
+				if (audioRecorder == null) {
+					audioRecorder = new AudioRecorder();
+				}
+
+				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
+				// useful in case the screen gets broken, for example).
+				// It's also said in top priority so the user can know immediately (hopefully) that the assistant is
+				// ready.
+				final String speak = "Ready, sir.";
+				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+
 				try {
 					UtilsGeneral.getContext().unregisterReceiver(this);
 				} catch (final IllegalArgumentException ignored) {

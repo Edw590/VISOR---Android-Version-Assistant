@@ -138,33 +138,33 @@ public final class UtilsApp {
                 app_enabled_setting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
-    public static final int NORMAL = 0;
-    public static final int SYSTEM_WITHOUT_UPDATES = 1;
-    public static final int SYSTEM_WITH_UPDATES = 2;
+    public static final int NON_PRIVILEGED = 0;
+    public static final int PRIVILEGED_WITHOUT_UPDATES = 1;
+    public static final int PRIVILEGED_WITH_UPDATES = 2;
     /**
-     * <p>Checks if the app is installed as normal app (with or without updates), as system app without updates, or
-     * system app with updates.</p>
+     * <p>Checks if the app is installed as a privileged app (with or without updates) or not.</p>
      * <br>
      * <p><u>---CONSTANTS---</u></p>
-     * <p>- {@link #NORMAL} --> for the returning value: the app is a normal app (with or without updates)</p>
-     * <p>- {@link #SYSTEM_WITHOUT_UPDATES} --> for the returning value: the app is a system app without updates</p>
-     * <p>- {@link #SYSTEM_WITH_UPDATES} --> for the returning value: the app is a system app with updates</p>
+     * <p>- {@link #NON_PRIVILEGED} --> for the returning value: the app is not a privileged app (it has any other
+     * type)</p>
+     * <p>- {@link #PRIVILEGED_WITHOUT_UPDATES} --> for the returning value: the app is a system app without updates</p>
+     * <p>- {@link #PRIVILEGED_WITH_UPDATES} --> for the returning value: the app is a system app with updates</p>
      * <p><u>---CONSTANTS---</u></p>
      *
      * @return one of the constants
      */
     public static int appInstallationType() {
-        if (UtilsSysApp.isSystemApp()) {
-            if (UtilsSysApp.isSystemUpdatedAppByFlag()) {
-                System.out.println("---------------SYSTEM WITH UPDATES---------------");
-                return SYSTEM_WITH_UPDATES;
+        if (UtilsSysApp.mainFunction(UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
+            if (UtilsSysApp.mainFunction(UtilsSysApp.IS_UPDATED_SYSTEM_APP)) {
+                System.out.println("---------------PRIVILEGED WITH UPDATES---------------");
+                return PRIVILEGED_WITH_UPDATES;
             } else {
-                System.out.println("---------------SYSTEM WITHOUT UPDATES---------------");
-                return SYSTEM_WITHOUT_UPDATES;
+                System.out.println("---------------PRIVILEGED WITHOUT UPDATES---------------");
+                return PRIVILEGED_WITHOUT_UPDATES;
             }
         } else {
-            System.out.println("---------------NORMAL---------------");
-            return NORMAL;
+            System.out.println("---------------NON-PRIVILEGED---------------");
+            return NON_PRIVILEGED;
         }
     }
 

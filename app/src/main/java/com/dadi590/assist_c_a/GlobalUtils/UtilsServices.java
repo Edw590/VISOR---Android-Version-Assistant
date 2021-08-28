@@ -82,8 +82,8 @@ public final class UtilsServices {
 	 *
 	 * @param service_class the class of the service to start
 	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
-	 *                   false to start in background; on Android 7.1 Nougat and below, this value has no effect as the
-	 *                   service is always started in background
+	 *                   false to start in background; below that, this value has no effect as the service is always
+	 *                   started in background
 	 */
 	public static void startService(@NonNull final Class<?> service_class, final boolean foreground) {
 		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
@@ -118,12 +118,13 @@ public final class UtilsServices {
 	 */
 	@NonNull
 	public static int[] startMainService() {
-		final Boolean is_app_signed_by_me = UtilsCertificates.isOtherPackageMine(UtilsGeneral.getContext().getPackageName());
-		if (is_app_signed_by_me != null && !is_app_signed_by_me) {
-			// Won't ever be null, since it's the installed package which is calling the function, but must do the check
-			// for Java to stop complaining about it.
+		if (UtilsCertificates.isThisAppCorrupt()) {
+			// This is just in case it's possible to patch the APK like it is with binary files without needing the
+			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
+			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.
+			// It's also in case something changes on the APK because of some corruption. The app won't start.
 			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
-			return new int[]{};
+			return new int[]{}; // Just to be sure it doesn't carry on.
 		}
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
 		UtilsServices.startService(MainSrv.class, true);

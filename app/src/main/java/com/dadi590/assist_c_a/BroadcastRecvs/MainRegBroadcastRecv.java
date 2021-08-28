@@ -32,19 +32,19 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 /**
  * <p>The class to be used for all main broadcasts that need registering on the main app process.</p>
  */
-public class MainRegBroadcastRecv {
+public final class MainRegBroadcastRecv {
 
 	/**
-	 * <p>Main class constructor.</p>
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	public MainRegBroadcastRecv() {
+	private MainRegBroadcastRecv() {
 	}
 
 	/**
 	 * <p>Registers all the receivers in the class.</p>
 	 *
 	 */
-	public final void registerReceivers() {
+	public static void registerReceivers() {
 		// Note: don't put as a constructor, since the receivers must be registered only after TTS is ready.
 
 		final IntentFilter intentFilter = new IntentFilter();
@@ -72,7 +72,7 @@ public class MainRegBroadcastRecv {
 		}
 	}
 
-	private final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {
+	private static final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			UtilsIntentWhatToDo.intentWhatToDo(intent);

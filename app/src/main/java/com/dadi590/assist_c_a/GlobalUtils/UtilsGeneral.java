@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -29,6 +30,8 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.dadi590.assist_c_a.MainApp;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -127,13 +130,29 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Calls {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
+	 * <p>Returns the Application Context.</p>
+	 * <p>Main note: probably not good idea to use on Content Provider classes. Only on Activities, Services and
+	 * Receivers. Read the doc of {@link MainApp#applicationContext}.</p>
+	 * <p>It will use the way that doesn't get a null value from the 2 below, in this order. It's also not supposed to
+	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I
+	 * change NonNull to Nullable or something. Until then, assume it's never null.</p>
+	 * <br>
+	 * <p>- Calls {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
+	 * <p>Warning from {@link AppGlobals#getInitialApplication()}, which calls the last mentioned method above:</p>
+	 * <p>"Return the first Application object made in the process.</p>
+	 * <p>NOTE: Only works on the main thread."</p>
+	 * <p>- Returns the Application Context, got at app boot on {@link MainApp}.</p>
 	 *
 	 * @return same as in {@link Context#getApplicationContext()}
 	 */
 	@NonNull
 	public static Context getContext() {
-		return ActivityThread.currentApplication().getApplicationContext();
+		Context context = ActivityThread.currentApplication().getApplicationContext();
+		if (context == null) {
+			System.out.println("/UJHGRGT%&/UGFFFT%YUYG");
+			context = MainApp.applicationContext;
+		}
+		return context;
 	}
 
 	/**

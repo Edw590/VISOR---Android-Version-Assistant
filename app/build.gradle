@@ -51,8 +51,9 @@ android {
 	Do NOT put it below API 23, or the app will not be able to check/request run-time permissions!
 
 	Versions for which the app was developed (developing to a version implies testing on that version):
-		- Lollipop 5.1, API 22 --> until [still on it]
-		- Oreo 8.1, API 27 --> until [still on it]
+		- KitKat 4.4.2, API 19 (tablet) --> until [still on it]
+		- Lollipop 5.1, API 22 (phone) --> until [still on it]
+		- Oreo 8.1, API 27 (phone) --> until [still on it]
 
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

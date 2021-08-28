@@ -21,9 +21,7 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import android.app.AlarmManager;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,7 +46,6 @@ import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,7 +112,7 @@ public class Speech2 extends Service {
 					// todo Improve this here... Not cool if the engine is uninstalled. Put it restarting only in the
 					//  first time in case it needs.
 					// Also test if this is actually working... You didn't get to test that.
-					if (!GL_CONSTS.PREFERRED_TTS_ENGINE.equals(tts.getCurrentEngine())) {
+					/*if (!GL_CONSTS.PREFERRED_TTS_ENGINE.equals(tts.getCurrentEngine())) {
 						final Context context = UtilsGeneral.getContext();
 						final Intent intent = new Intent(context, MainSrv.class);
 						final int pendingIntentId = 123456;
@@ -124,7 +121,7 @@ public class Speech2 extends Service {
 						final AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 						mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000L, pendingIntent);
 						System.exit(0);
-					}
+					}*/
 
 					// For testing only to see info about each engine available.
 					/*System.out.println("JJJJJJJJJJJJj");
@@ -172,6 +169,7 @@ public class Speech2 extends Service {
 					// wrong and must be fixed as soon as possible.
 
 					// An empty string should be enough to throw an error and crash the application.
+					System.out.println("----------- APP DEAD - TSS START ERROR -----------");
 					speak("", NO_ADDITIONAL_COMMANDS, PRIORITY_LOW, null);
 					// todo Send an email about this and put a notification on the phone!!!
 				}
@@ -899,7 +897,12 @@ public class Speech2 extends Service {
 		@Override
 		public final void onError(final String utteranceId, final int errorCode) {
 			super.onError(utteranceId, errorCode);
-			// The super call up here just calls the other onError() method. So don't do anything here.
+			System.out.println("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
+			System.out.println(errorCode);
+			System.out.println("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
+
+			// The super call up here just calls the other onError() method. So don't do anything here (except printing
+			// the error).
 		}
 
 		// As of API 23

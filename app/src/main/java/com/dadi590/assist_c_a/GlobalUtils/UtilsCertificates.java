@@ -48,7 +48,7 @@ public final class UtilsCertificates {
 	}
 
 	// Hashing algorithms to use in order, in case one or more are not available
-	private static final String[][] hashing_algorithms = {
+	private static final String[][] possible_hashing_algorithms = {
 			{"SHA-512", "128"},
 			{"SHA-384", "96"},
 			{"SHA-224", "56"},
@@ -77,28 +77,55 @@ public final class UtilsCertificates {
 	};
 
 	/**
-	 * <p>Checks if the given package is signed with the same certificate as this app (my certificate).</p>
-	 * <br>
-	 * <p>NOTE: as this app is signed with a self-generated certificate, and only with that one, this function checks
-	 * only if the given package is signed with ONLY this app's certificate and nothing else.</p>
+	 * <p>Checks if the given package is signed with the same certificate(s) as this app (my certificate(s)).</p>
 	 *
-	 * @param package_name the name of the package to check
+	 * @param package_name same as in {@link #checkCertsPkg(String, Map[])}
 	 *
-	 * @return true if it's signed with the same certificate, false otherwise; null if the package was not found
+	 * @return same as in {@link #checkCertsPkg(String, Map[])}
 	 */
 	@Nullable
 	public static Boolean isOtherPackageMine(@NonNull final String package_name) {
+		return checkCertsPkg(package_name, ASSIST_C_A_RSA_CERT_FINGERPRINT);
+	}
+
+	/**
+	 * <p>Checks if the app became corrupt (done by checking its certificates).</p>
+	 *
+	 * @return true if it's not corrupted, false otherwise
+	 */
+	public static boolean isThisAppCorrupt() {
+		final Boolean is_my_app = checkCertsPkg(UtilsGeneral.getContext().getPackageName(), ASSIST_C_A_RSA_CERT_FINGERPRINT);
+		assert is_my_app != null; // Will never be null. Else, how is the app installed.
+		return is_my_app;
+	}
+
+	/**
+	 * <p>Checks if the given package is signed ONLY with certificates present in the given list.</p>
+	 *
+	 * @param package_name the name of the package to check
+	 * @param list_cert_hashes a list of certificate hashes the package can be signed with - in each index of the array,
+	 *                         there must be a {@link HashMap} of types "String, String" in which the key is the hashing
+	 *                         algorithm used for the value, which is the actual hash. Example:
+	 *                         {@code put("SHA-512", "AB52234EAB52234EAB52234EAB52234E")}.
+	 *
+	 * @return true if it's signed with the same certificate, false otherwise; null if the package was not found (or if
+	 * for some reason, there's no hashing algorithm present on the system)
+	 */
+	@Nullable
+	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map[] list_cert_hashes) {
 		String[] hashing_algorithm_to_use = null;
-		for (final String[] hashing_algorithm : hashing_algorithms) {
+		for (final String[] hashing_algorithm : possible_hashing_algorithms) {
 			try {
 				MessageDigest.getInstance(hashing_algorithm[0]);
 				hashing_algorithm_to_use = hashing_algorithm;
 				break;
 			} catch (final NoSuchAlgorithmException ignored) {
-				// Will never happen. I'm checking all methods. If NONE is available, wow. Someone must have deeply
-				// modified the ROM or something.
-				return null;
 			}
+		}
+		if (hashing_algorithm_to_use == null) {
+			// Will never happen, supposedly. I'm checking all hashing algorithms. If NONE is available, wow. Someone
+			// must have deeply modified the ROM or something.
+			return null;
 		}
 
 		final Signature[] other_app_signatures = getAppSignatures(package_name);
@@ -106,38 +133,54 @@ public final class UtilsCertificates {
 			return null;
 		}
 
+		// For each certificate of the other app, check if it matches any of the certificates in the given list.
+		boolean no_matches_at_all = true;
 		for (final Signature signature : other_app_signatures) {
 			final String other_app_sig_hash = Objects.requireNonNull(getHashOfSignature(signature, hashing_algorithm_to_use));
-			// It will always be non-null though, since if it would be null, then we wouldn't get here, since the
-			// function would have returned null by now.
+			// It will always be non-null though, since if it would be null, then we wouldn't get here, because the
+			// function would have returned null by now on other_app_signatures.
 
 			boolean match_found = false;
-			for (final Map cert_hash : ASSIST_C_A_RSA_CERT_FINGERPRINT) {
+			for (final Map cert_hash : list_cert_hashes) {
 				if (other_app_sig_hash.equals(cert_hash.get(hashing_algorithm_to_use[0]))) {
 					match_found = true;
+					no_matches_at_all = false;
 					break;
 				}
 			}
-			if (!match_found) {
-				// If ANY of the certificates on the other app are no whitelisted here, it's not signed by me.
-				// This mitigates the FakeID vulnerability mentioned on getAppSignatures().
-				return false;
-			}/* else {
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-					// If we're on Pie or above, then GET_SIGNING_CERTIFICATES was used. That means all certificates are
-					// authorized to be on the app (we don't need to make checks for that, as opposite with
-					// GET_SIGNATURES. So if one of them are my certificates, cool, since the app is authorized to used
-					// them.
-					return true;
 
-					EDIT: Actually, there's the option of multiple signers. Just check if all the certificates match
-					my whitelist and it's done. Won't be that much more or processing power anyway.
+			if (match_found) {
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+					// If we're on Pie or above, then GET_SIGNING_CERTIFICATES was used. That means all certificates
+					// are authorized to be on the app (we don't need to make checks for that, as opposite to
+					// GET_SIGNATURES). So if one of them are my certificates, cool, since the app is authorized to used
+					// it.
+					return true;
+					// So return true already. One match is enough here.
 				}
-			}*/
+				// Else, keep searching for at least one certificate without whitelist matches.
+			} else {
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) {
+					// Below Pie (using GET_SIGNATURES then), if ANY of the certificates on the other app are not
+					// whitelisted here, it's not signed by me. This mitigates the FakeID vulnerability mentioned on
+					// getAppSignatures().
+					return false;
+					// So return false already. One no-match is enough here.
+				}
+				// Else, keep searching for at least one match.
+			}
 		}
 
-		// If nothing made it return false on the for loop, then all certificates are trusted - so it's signed by me.
-		return true;
+		if (no_matches_at_all) {
+			// If there were no matches, not my app for sure. Gets here if the Android version is Pie or above and no
+			// match was found at all (or the function would have returned true already).
+			return false;
+		} else {
+			// Else, if it's ALL matches, it's my app for sure. Gets here if the Android version is below Pie and all
+			// certificates have a match with the given list of certificates (or the function would have returned false
+			// already).
+			return true;
+		}
 	}
 
 	/**
@@ -157,6 +200,9 @@ public final class UtilsCertificates {
 	 * <p>Note: it's said that the vulnerability was patched on KitKat, but a company detected the issue on KitKat too,
 	 * so I'm assuming they fixed it in an update. So any device that doesn't receive updates, may update it, according
 	 * to my thought. EDIT: Just read it was fixed on Lollipop. Confusion. Assume bug exists until Lollipop 5.0.</p>
+	 * <br>
+	 * <p>Note 2: this problem is only found when an app is signed by multiple certificates. If it's signed by only one,
+	 * there's no problem at all, and of course, the certificate can be checked to see if it's the correct one or not.</p>
 	 *
 	 * @param package_name the package to get the signatures from
 	 *
@@ -208,11 +254,13 @@ public final class UtilsCertificates {
 	 * <p>Gets a Base64 encoded string of the hash of the given signature.</p>
 	 *
 	 * @param signature the signature to get the hash from
-	 * @param hashing_algorithm the hashing algorithm to use
+	 * @param hashing_algorithm on the 1st index, the hashing algorithm to use; on the 2nd index, the size of the hash
+	 *
 	 * @return the Base64 encoded string
 	 */
 	@Nullable
-	private static String getHashOfSignature(@NonNull final Signature signature, @NonNull final String[] hashing_algorithm) {
+	private static String getHashOfSignature(@NonNull final Signature signature,
+											 @NonNull final String[] hashing_algorithm) {
 		final MessageDigest messageDigest;
 		try {
 			messageDigest = MessageDigest.getInstance(hashing_algorithm[0]);

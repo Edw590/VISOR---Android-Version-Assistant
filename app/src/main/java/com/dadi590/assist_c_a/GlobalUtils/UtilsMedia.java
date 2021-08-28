@@ -54,10 +54,10 @@ public final class UtilsMedia {
 	 * (photographs), "VID" (video recordings), or "SCR" (screenshots).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #AUDIO} --> media type for audio recordings</p>
-	 * <p>- {@link #PHOTO} --> media type for photographs</p>
-	 * <p>- {@link #VIDEO} --> media type for video recordings</p>
-	 * <p>- {@link #SCREENSHOT} --> media type for screenshots</p>
+	 * <p>- {@link #AUDIO} --> for {@code media_type}: audio recordings</p>
+	 * <p>- {@link #PHOTO} --> for {@code media_type}: photographs</p>
+	 * <p>- {@link #VIDEO} --> for {@code media_type}: video recordings</p>
+	 * <p>- {@link #SCREENSHOT} --> for {@code media_type}: screenshots</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param media_type one of the constants
