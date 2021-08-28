@@ -42,8 +42,8 @@ class SpeechObj {
 	// above is applied (said in another comment).
 	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
 	// system-dependent, and ALARM seems to always have high priority, possibly.
-	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_RING;
-	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_RING;
+	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_NOTIFICATION;
+	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_NOTIFICATION;
 	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
 	// Also don't change to MUSIC, for the same reason.
 	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
@@ -53,6 +53,9 @@ class SpeechObj {
 	// with CRITICAL, since it's to be spoken at full volume always.
 	// Leave on RING since this way the volume can be set independently of the music playing. On headphones such thing
 	// can't be done independently though. Pity.
+	// EDIT 2: Changed to NOTIFICATION because of tablets. They might not use RING (miTab Advance doesn't). I can't
+	// change it manually, but the app still speaks. With NOTIFICATION, I guess it should work everywhere (there are
+	// always notifications). Alarms exist too anyways and the music stream too, of course. So all cool, I think.
 	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
 	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
 	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.

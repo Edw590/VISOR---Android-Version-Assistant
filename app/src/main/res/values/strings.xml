@@ -20,6 +20,6 @@
   -->
 
 <resources>
-	<string name="app_name">LEGION (Android)</string>
-	<string name="app_description">LEGION (Android version)</string>
+	<string name="app_name">LEGION</string>
+	<string name="app_description">LEGION</string>
 </resources>

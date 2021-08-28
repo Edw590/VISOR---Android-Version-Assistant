@@ -178,18 +178,22 @@ public final class UtilsServices {
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notificationInfo.channel_id);
 		builder.setContentTitle(notificationInfo.notification_title);
 		builder.setContentText(notificationInfo.notification_content);
-		builder.setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
 		builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
 		builder.setContentIntent(notificationInfo.notif_content_intent);
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+		builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
+		builder.setWhen(System.currentTimeMillis());
+		builder.setShowWhen(true);
+		builder.setLocalOnly(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			builder.setSmallIcon(R.drawable.ic_stat_dadi_empresas_inc__transparent);
+			builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.dadi_empresas_inc));
+			builder.setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
+		} else {
 			builder.setSmallIcon(R.drawable.dadi_empresas_inc);
 			builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
 					R.drawable.ic_stat_dadi_empresas_inc__transparent));
-			// The line above wasn't supposed to be needed, but without it, a red icon appears on Lollipop, so let it stay.
-		} else {
-			builder.setSmallIcon(R.drawable.ic_stat_dadi_empresas_inc__transparent);
-			builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-					R.drawable.dadi_empresas_inc));
+			// The line above wasn't supposed to be needed, but without it, a red icon appears on KitKat, so let it stay.
+			builder.setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
 		}
 		if (notificationInfo.notification_type == TYPE_FOREGROUND) {
 			builder.setOngoing(true);

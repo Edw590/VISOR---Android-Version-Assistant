@@ -92,6 +92,7 @@
 		android:description="@string/app_description"
 		android:icon="@drawable/dadi_empresas_inc__transparent"
 		android:roundIcon="@drawable/dadi_empresas_inc__transparent"
+		android:logo="@drawable/dadi_empresas_inc__transparent"
 		android:theme="@style/AppTheme"
 		android:appCategory="productivity"
 		android:directBootAware="true"
