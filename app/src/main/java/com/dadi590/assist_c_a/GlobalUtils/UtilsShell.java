@@ -64,13 +64,8 @@ public final class UtilsShell {
 		commands.add("su");
 		commands.add("stat -c " + parameter + " " + path);
 
-		CmdOuputObj commands_output = executeShellCmd(commands);
-		if (commands_output == null) {
-			commands.remove(0);
-			commands_output = executeShellCmd(commands);
-		}
+		final CmdOuputObj commands_output = executeShellCmd(commands);
 
-		assert commands_output != null; // Just want the warning out. It won't be null if the "su" command is not there.
 		return UtilsGeneral.convertBytesToPrintable(commands_output.output_stream);
 	}
 

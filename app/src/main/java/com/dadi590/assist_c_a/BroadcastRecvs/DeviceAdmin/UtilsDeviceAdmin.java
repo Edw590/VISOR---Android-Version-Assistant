@@ -23,12 +23,9 @@ package com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr;
-import com.dadi590.assist_c_a.Modules.ProtectedLockScr.UtilsProtectedLockScr;
 
 /**
  * <p>Device Administration related utilities.</p>

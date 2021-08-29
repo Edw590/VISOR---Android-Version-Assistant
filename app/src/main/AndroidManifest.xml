@@ -86,7 +86,7 @@
 
 
 	<application
-		android:name="com.dadi590.assist_c_a.MainApp"
+		android:name="com.dadi590.assist_c_a.ApplicationClass"
 
 		android:label="@string/app_name"
 		android:description="@string/app_description"

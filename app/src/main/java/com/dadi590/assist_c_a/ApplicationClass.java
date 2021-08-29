@@ -21,17 +21,18 @@
 
 package com.dadi590.assist_c_a;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.multidex.MultiDex;
+import androidx.multidex.MultiDexApplication;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
- * <p>The main Application class, which I'm extending to start the Main Service while android:persistent flag is set
- * to true.</p>
+ * <p>The Application class of the app, which I'm extending to start the Main Service while android:persistent flag is
+ * set to true.</p>
  * <br>
  * <p>Explanation of the last part (StackOverflow):</p>
  * <p>"Note that your Application.onCreate() will be started automatically; your Service will not be started
@@ -39,10 +40,10 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * so you can just run normal threads doing what you need to."</p>
  * <p>"No, persistent applies only to your process. Your Application.onCreate() will be called, but services that called
  * stopSelf() are not automatically restarted."</p>
- * <p>So it seems Android will restart the process by calling only {@link android.app.Application#onCreate()} if the
- * main app process goes down.</p>
+ * <p>So it seems Android will restart the process by calling only {@link Application#onCreate()} if the main app
+ * process goes down.</p>
  */
-public final class MainApp extends android.app.Application {
+public final class ApplicationClass extends MultiDexApplication {
 
 	// Won't ever be null while the app is running because everything else will be called after MainApp.onCreate(), in
 	// which applicationContext is initialized. So it's fine not to initialize it here and say it's NonNull.
@@ -65,6 +66,9 @@ public final class MainApp extends android.app.Application {
 		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
 		// which returns null sometimes.
 		applicationContext = getApplicationContext();
+
+		// Clear the app cache as soon as the app starts not to take unnecessary space
+		UtilsApp.deleteAppCache();
 
 		UtilsServices.startMainService();
 
@@ -99,11 +103,5 @@ public final class MainApp extends android.app.Application {
 		throwable.printStackTrace();
 
 		// todo Put it writing some log or whatever here!!!
-	}
-
-	@Override
-	protected final void attachBaseContext(@Nullable final Context base) {
-		super.attachBaseContext(base);
-		MultiDex.install(this);
 	}
 }

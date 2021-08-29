@@ -37,6 +37,7 @@ public class MainBroadcastRecv extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
 		UtilsServices.startMainService();
 
 		/*

@@ -31,7 +31,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainApp;
+import com.dadi590.assist_c_a.ApplicationClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -132,7 +132,7 @@ public final class UtilsGeneral {
 	/**
 	 * <p>Returns the Application Context.</p>
 	 * <p>Main note: probably not good idea to use on Content Provider classes. Only on Activities, Services and
-	 * Receivers. Read the doc of {@link MainApp#applicationContext}.</p>
+	 * Receivers. Read the doc of {@link ApplicationClass#applicationContext}.</p>
 	 * <p>It will use the way that doesn't get a null value from the 2 below, in this order. It's also not supposed to
 	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I
 	 * change NonNull to Nullable or something. Until then, assume it's never null.</p>
@@ -141,7 +141,7 @@ public final class UtilsGeneral {
 	 * <p>Warning from {@link AppGlobals#getInitialApplication()}, which calls the last mentioned method above:</p>
 	 * <p>"Return the first Application object made in the process.</p>
 	 * <p>NOTE: Only works on the main thread."</p>
-	 * <p>- Returns the Application Context, got at app boot on {@link MainApp}.</p>
+	 * <p>- Returns the Application Context, got at app boot on {@link ApplicationClass}.</p>
 	 *
 	 * @return same as in {@link Context#getApplicationContext()}
 	 */
@@ -150,7 +150,7 @@ public final class UtilsGeneral {
 		Context context = ActivityThread.currentApplication().getApplicationContext();
 		if (context == null) {
 			System.out.println("/UJHGRGT%&/UGFFFT%YUYG");
-			context = MainApp.applicationContext;
+			context = ApplicationClass.applicationContext;
 		}
 		return context;
 	}

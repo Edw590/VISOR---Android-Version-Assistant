@@ -21,14 +21,14 @@
 
 package com.dadi590.assist_c_a.GlobalUtils.HiddenMethods;
 
-import androidx.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+
+import androidx.annotation.NonNull;
 
 /**
  * <p>Original class: {@link PackageManager}.</p>
@@ -44,7 +44,7 @@ public final class EPackageManager {
 	/**.
 	 * @return an instance of {@link IPackageManager}
 	 */
-	@androidx.annotation.NonNull
+	@NonNull
 	private static IPackageManager getIPackageManager() {
 		return AppGlobals.getPackageManager();
 	}
@@ -64,7 +64,7 @@ public final class EPackageManager {
 	 *
 	 * @throws PackageManager.NameNotFoundException .
 	 */
-	@androidx.annotation.NonNull
+	@NonNull
 	public static PackageInfo getPackageInfo(@NonNull final String packageName,
 											 @PackageManager.PackageInfoFlags final int flags)
 			throws PackageManager.NameNotFoundException {
