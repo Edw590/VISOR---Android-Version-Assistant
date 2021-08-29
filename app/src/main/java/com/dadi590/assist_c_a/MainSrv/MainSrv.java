@@ -150,9 +150,6 @@ public class MainSrv extends Service {
 		);
 		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
-		// Clear the app cache as soon as it starts not to take unnecessary space
-		UtilsApp.deleteAppCache();
-
 		// Before anything else, start the speech module since the assistant must be able to speak.
 		// Don't forget inside the speech module there's a function that executes all important things right after
 		// the TTS is ready - the second reason this must be in the beginning.
