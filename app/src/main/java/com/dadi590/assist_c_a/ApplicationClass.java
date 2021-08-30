@@ -63,6 +63,14 @@ public final class ApplicationClass extends MultiDexApplication {
 
 		// To do exactly when the app's main process starts
 
+		// Setup handler for uncaught exceptions
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(@NonNull final Thread t, @NonNull final Throwable e) {
+				handleUncaughtException (t, e);
+			}
+		});
+
 		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
 		// which returns null sometimes.
 		applicationContext = getApplicationContext();
@@ -71,14 +79,6 @@ public final class ApplicationClass extends MultiDexApplication {
 		UtilsApp.deleteAppCache();
 
 		UtilsServices.startMainService();
-
-		// Setup handler for uncaught exceptions
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(@NonNull final Thread t, @NonNull final Throwable e) {
-				handleUncaughtException (t, e);
-			}
-		});
 	}
 
 	/**
@@ -103,5 +103,6 @@ public final class ApplicationClass extends MultiDexApplication {
 		throwable.printStackTrace();
 
 		// todo Put it writing some log or whatever here!!!
+		// If you need Context for anything, use getApplicationContext, since this is used before the static one is set.
 	}
 }

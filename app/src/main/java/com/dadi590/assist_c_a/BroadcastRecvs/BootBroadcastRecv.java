@@ -30,20 +30,17 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
- * <p>The {@link BroadcastReceiver} to be used to start the Main Service with ANY broadcast detection (except boot
- * broadcasts) --> do NOT use to decide what to do with the broadcasts!!! For that, use the
- * {@link MainRegBroadcastRecv}.</p>
+ * <p>The {@link BroadcastReceiver} to be used ONLY to start the app at the device boot.</p>
+ * <p>Explanation of the why on a comment.</p>
  */
-public class MainBroadcastRecv extends BroadcastReceiver {
+public class BootBroadcastRecv extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW1");
+		if (intent != null) {
+			System.out.println(intent.getAction());
+		}
 		UtilsServices.startMainService();
-
-		/*
-		UtilsIntentWhatToDo.intentWhatToDo(intent);
-		Do NOT enable this!!! I'm ignoring safety measures (see the Manifest where I'm ignoring possible spoofing of SMS)
-		with this received since ANY action received is supposed to get the app to start the main service and NOTHING ELSE.
-		*/
 	}
 }

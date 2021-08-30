@@ -195,32 +195,48 @@
 				<action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
 			</intent-filter>
 		</receiver>
-		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv"
+		<!--
+		Explanation of the 2 receivers below
+
+		The BootBroadcastRecv is to be used ONLY to start the app on device boot. Do NOT use the MainBroacastRecv for
+		this. The reason is that there are broadcasts that are sent before LOCKED_BOOT_COMPLETED, and that will make the
+		app start right away (this when directBootAware is true - else, not even LOCKED_BOOT_COMPLETED will be detected).
+		If the wanted TTS engine is not ready by then, any other will be used and the app will need to be restarted to
+		use the wanted engine (ready by the time the user force stops it and restarts it). When LOCKED_BOOT_COMPLETED
+		is detected, everything is ready to be used. The boot receiver is Direct Boot Aware, while the main one is not
+		to not attempt to start the app before LOCKED_BOOT_COMPLETED does.
+		If it's to use the same receiver, put a delay of 10 seconds before starting the service (5 too low, 7.5 good on
+		BV9500, so 10 for slower devices) - have in mind that any attempts will result in 10 seconds wait time...
+		-->
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.BootBroadcastRecv"
 			android:exported="true"
-			android:directBootAware="true"
-			android:permission=""
-			tools:ignore="UnprotectedSMSBroadcastReceiver">
-			<!-- android:permission="" so anyone can send broadcasts for this to detect. It's only used to start the
-			Main Service anyways (doesn't do anything with the received intent, so no security holes). -->
+			android:directBootAware="true">
 			<intent-filter android:priority="1000">
-				<!-- DO NOT USE THIS TO ACTUALLY DECIDE WHAT TO DO WITH STUFF!!! USE THE REGISTERED BROADCASTS FOR
-				THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN
-				SERVICE!!! -->
+				<!-- 1000 priority as that's system-level used priority. So this will get stuff first and nothing can
+				 stop the broadcast before this gets it (as long as it's installed as a system app, that is - else, the
+				 system will ignore and set it to 0). -->
 
 				<!-- ALWAYS REGISTER ACTIONS INSTEAD OF DECLARING THEM TO AVOID ISSUES WITH REGISTER-ONLY ACTIONS -->
 				<!-- Also, all actions need to be sent with the Main Service started and not with it stopped, so why
-				not register them all anyways. -->
+				 not register them all anyways. -->
 
 				<!-- Except these below, which need to be sent before the Main Service is started... -->
-				<action android:name="android.intent.action.USER_PRESENT" />
-				<action android:name="android.intent.action.USER_UNLOCKED" />
 				<action android:name="android.intent.action.BOOT_COMPLETED" />
 				<action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-				<action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
 				<action android:name="android.intent.action.QUICKBOOT_POWERON" />
+				<action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
 				<!-- About QUICKBOOT_POWERON: "This is broadcast that you don’t find in the official Android
 				documentation. It’s sent on some devices and emulators when the device is restarted only." - StackOverflow -->
-				<!-- Why all those BOOT and USER actions? Refer to IntentWhatToDo.intentWhatToDo(). -->
+			</intent-filter>
+		</receiver>
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv"
+			android:exported="true"
+			android:directBootAware="false"
+			tools:ignore="UnprotectedSMSBroadcastReceiver">
+			<intent-filter android:priority="1000">
+				<!-- DO NOT USE THIS TO ACTUALLY DECIDE WHAT TO DO WITH STUFF!!! USE THE REGISTERED BROADCASTS FOR
+				 THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN
+				 SERVICE!!! -->
 
 				<!-- All of these are for the system to send ANYthing to start the Main Service in case it crashed or
 				something. See "List of all the Intent-Filters that I found.txt" for the list of these broadcasts. -->
@@ -549,8 +565,8 @@
 				<action android:name="android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED" />
 
 				<!-- DO NOT USE THIS TO ACTUALLY DECIDE WHAT TO DO WITH STUFF!!! USE THE REGISTERED BROADCASTS FOR
-				THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN
-				SERVICE!!! -->
+				 THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN
+				 SERVICE!!! -->
 			</intent-filter>
 		</receiver>
 	</application>
