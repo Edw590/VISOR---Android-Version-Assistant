@@ -57,7 +57,7 @@ public final class UtilsLocationRelative {
 	 *
 	 * @return one of the constants
 	 */
-	public static int getAbstDistanceRSSI(final int rssi) {
+	public static int getAbstrDistanceRSSI(final int rssi) {
 		// For now I don't see use for the tx_power parameter, so I'm passing always the default one. Some other time
 		// might implement BLE device detection, on which the value is useful since some devices have a value (not
 		// BV9500 it seems).
@@ -156,16 +156,20 @@ public final class UtilsLocationRelative {
 		50 meters, I'll use 8.0. A person said n could reach from 2 to 8 in some cases. So I'll use that 8 value here.
 		*/
 
-		// This will be used if 1.0 < resulting distance < 5.0.
+		// This will be used if 2.0 < resulting distance < 7.5.
 		final double ret_value = StrictMath.pow(10.0, (double) -(rssi - tx_power) / (10.0 * 2.75));
 
-		if (ret_value <= 1.0) {
+		if (ret_value <= 2.0) {
+			// 2 meters here because it's near enough to 1 meter - can't be 1 meter because the idea of the if statements
+			// is to correct incorrect calculation, so it's to assume if it gives about 2 meters, it might mean it's less
+			// than that actually (like with my phone and tablet, a meter away from each other and this returning more
+			// than 1 meter.
 			return StrictMath.pow(10.0, (double) - (rssi - tx_power) / (10.0 * 2.1));
 		} else if (ret_value >= 50.0) {
 			return StrictMath.pow(10.0, (double) - (rssi - tx_power) / (10.0 * 8.0));
 		} else if (ret_value >= 20.0) {
 			return StrictMath.pow(10.0, (double) - (rssi - tx_power) / (10.0 * 6.0));
-		} else if (ret_value >= 5.0) {
+		} else if (ret_value >= 7.5) { // 7.5 meters because it's near enough to 5 meters and still away from 20 meters
 			return StrictMath.pow(10.0, (double) - (rssi - tx_power) / (10.0 * 3.88));
 		} else {
 			return ret_value;
