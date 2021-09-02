@@ -72,6 +72,7 @@ android {
 
 	defaultConfig {
 		applicationId "com.dadi590.assist_c_a"
+		//noinspection MinSdkTooLow
 		minSdkVersion 15
 		//noinspection ExpiredTargetSdkVersion
 		targetSdkVersion 23
@@ -82,6 +83,7 @@ android {
 
 		multiDexEnabled true
 	}
+
 	compileOptions {
 		sourceCompatibility APP_JAVA_VERSION
 		targetCompatibility APP_JAVA_VERSION

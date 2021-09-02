@@ -21,11 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_2;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
-
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -57,6 +52,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_2;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
 
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
@@ -453,6 +453,7 @@ public class Speech2 extends Service {
 
 		final int audio_stream_to_use;
 
+		SpeechObj new_speech_obj = null;
 		String utterance_id_to_use;
 		if (utterance_id == null) {
 			// A while true to create random utterance IDs and ensure they have not been already used on the lists
@@ -475,7 +476,7 @@ public class Speech2 extends Service {
 					break;
 				}
 			}
-			final SpeechObj new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking);
+			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
 			audio_stream_to_use = new_speech_obj.audio_stream;
 		} else {
@@ -489,9 +490,16 @@ public class Speech2 extends Service {
 			// Set the current_speech_obj to the speech getting ready to be spoken immediately, so that if any other
 			// speech is requested goes at the same time, goes directly to the lists (race condition, and this is
 			// supposed to fix it).
-			// Will never been null if the implementation of Speech2 is correct.
-			current_speech_obj = Objects.requireNonNull(
-					UtilsSpeech2.getSpeechObjFromId(utterance_id_to_use, arrays_speech_objs));
+			if (new_speech_obj == null) {
+				// If it's null above, then the speech was already on the lists. So go look for it.
+				// Below will never been null if the implementation of Speech2 is correct.
+				current_speech_obj = Objects.requireNonNull(
+						UtilsSpeech2.getSpeechObjFromId(utterance_id_to_use, arrays_speech_objs));
+			} else {
+				// If it's not null, then a new speech was just created and we can use that object instead of going
+				// looking for it (optimized).
+				current_speech_obj = new_speech_obj;
+			}
 
 			return sendTtsSpeak(txt_to_speak, utterance_id_to_use, audio_stream_to_use);
 		} else {
