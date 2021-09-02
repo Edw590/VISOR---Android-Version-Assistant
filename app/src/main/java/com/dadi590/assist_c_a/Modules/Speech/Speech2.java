@@ -21,6 +21,11 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_2;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
+
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -53,11 +58,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_2;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
-
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
  * speeches.</p>
@@ -67,8 +67,27 @@ import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
  */
 public class Speech2 extends Service {
 
+	/*
+	Main note of how this module works!!!
+	-----
+
+	A speech is requested through a broadcast. This sets a variable that says there's a speech in process and
+	starts processing the speech, adds the speech to a list, and starts processing it.
+
+	While that's happening (from the moment it start being processed before speaking to before it ends being spoken),
+	another speech is requested the same way. As there's already a speech being processed, this new one is added to a
+	list and that's it. Nothing more is done to it.
+
+	When the first speech finishes being spoken, it calls a function which removes the speech from the list and
+	iterates the list for any other speeches on the line. When it finds one, it starts processing it right away.
+
+	So, this works in one line of flow. Infinite speeches are called, and they're all stacked. Once a speech finishes
+	being spoken, it calls the second one on the line. So take things in only on one line of flow (I tried that it is a
+	synchronous class on the speech processing).
+	*/
+
 	TextToSpeech tts;
-	// If more permissions are ever needed, well, here's a 10 in case I forget to update the number (possible).
+	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
 	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
 	SpeechObj current_speech_obj = new SpeechObj("", "", true, null);
 	private String last_thing_said = "";
@@ -92,8 +111,8 @@ public class Speech2 extends Service {
 	private boolean is_speaking = false;
 	private boolean focus_volume_dnd_done = false;
 
-	AudioAttributes audioAttributes = null; // No problem in being null, since it will only be used if TTS loaded
-	// correctly - and if it did, then audioAttributes was initialized decently.
+	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
+	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
 
 	@Override
@@ -108,29 +127,6 @@ public class Speech2 extends Service {
 				if (status == TextToSpeech.SUCCESS) {
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					// If the preferred engine is not ready when the app starts on boot, wait a bit and restart the app
-					// todo Improve this here... Not cool if the engine is uninstalled. Put it restarting only in the
-					//  first time in case it needs.
-					// Also test if this is actually working... You didn't get to test that.
-					/*if (!GL_CONSTS.PREFERRED_TTS_ENGINE.equals(tts.getCurrentEngine())) {
-						final Context context = UtilsGeneral.getContext();
-						final Intent intent = new Intent(context, MainSrv.class);
-						final int pendingIntentId = 123456;
-						final PendingIntent pendingIntent = PendingIntent.getService(context, pendingIntentId, intent,
-								PendingIntent.FLAG_CANCEL_CURRENT);
-						final AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-						mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000L, pendingIntent);
-						System.exit(0);
-					}*/
-
-					// For testing only to see info about each engine available.
-					/*System.out.println("JJJJJJJJJJJJj");
-					for (final TextToSpeech.EngineInfo engine : tts.getEngines()) {
-						System.out.println(engine.name);
-						System.out.println(engine.label);
-						System.out.println(engine.priority);
-						System.out.println(engine.system);
-					}*/
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 						// Set the TTS voice. With the app as a system app, it seems the app might start even before the
 						// system has all voices ready, because the app starts using a Brazilian voice (???). So this fixes
@@ -259,13 +255,14 @@ public class Speech2 extends Service {
 	 *
 	 * @param utteranceId the utterance ID of the speech
 	 *
-	 * @return true if the speech has been removed successfully, false if the utterance ID is not on the queues
+	 * @return the successfully removed {@link SpeechObj}, or null if the utterance ID was not on the lists
 	 */
-	final boolean removeSpeechById(@NonNull final String utteranceId) {
+	@Nullable
+	final SpeechObj removeSpeechById(@NonNull final String utteranceId) {
 		final int[] indexes = UtilsSpeech2.getSpeechIndexesFromId(utteranceId, arrays_speech_objs);
 		if (indexes == null) {
 			// Should not happen when called from inside the Speech class if the Speech is well implemented
-			return false;
+			return null;
 		}
 
 		// This variable below is for, hopefully, faster access than being getting the array every time.
@@ -278,9 +275,7 @@ public class Speech2 extends Service {
 		}
 		last_thing_said = speechObj.txt_to_speak;
 		// Here below must be the original array, so it can be modified
-		arrays_speech_objs.get(indexes[0]).remove(indexes[1]);
-
-		return true;
+		return arrays_speech_objs.get(indexes[0]).remove(indexes[1]);
 	}
 
 	/**
@@ -444,9 +439,10 @@ public class Speech2 extends Service {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
-		// said from the string of what he listened or something (2nd one preferable).
+		// said from the string of what he listened or something (2nd one preferable - else we can't tell him to shut
+		// up while he's speaking, because he disabled the recognition).
 		// When this is implemented, don't forget to check if he's speaking on the speakers or on headphones. If
-		// it's on headphones, no need to cancel the recognition. If it's on speakers, no sure. If the volume is
+		// it's on headphones, no need to cancel the recognition. If it's on speakers, not sure. If the volume is
 		// high enough, he wouldn't hear us anyways. If we lower the volume, he could hear us.
 
 		if (additional_command == EXECUTOR_SOMETHING_SAID) {
@@ -457,9 +453,28 @@ public class Speech2 extends Service {
 
 		final int audio_stream_to_use;
 
-		final String utterance_id_to_use;
+		String utterance_id_to_use;
 		if (utterance_id == null) {
-			utterance_id_to_use = UtilsSpeech2.generateUtteranceId(priority);
+			// A while true to create random utterance IDs and ensure they have not been already used on the lists
+			while (true) {
+				utterance_id_to_use = UtilsSpeech2.generateUtteranceId(priority);
+
+				boolean match_found = false;
+				for (final Iterable<SpeechObj> speech_objs : arrays_speech_objs) {
+					for (final SpeechObj speech_obj : speech_objs) {
+						if (speech_obj.utterance_id.equals(utterance_id_to_use)) {
+							match_found = true;
+							break;
+						}
+					}
+					if (match_found) {
+						break;
+					}
+				}
+				if (!match_found) {
+					break;
+				}
+			}
 			final SpeechObj new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
 			audio_stream_to_use = new_speech_obj.audio_stream;
@@ -470,14 +485,22 @@ public class Speech2 extends Service {
 
 		if (current_speech_obj.utterance_id.isEmpty()) {
 			// The function only gets here if there was no speech already taking place.
+
+			// Set the current_speech_obj to the speech getting ready to be spoken immediately, so that if any other
+			// speech is requested goes at the same time, goes directly to the lists (race condition, and this is
+			// supposed to fix it).
+			// Will never been null if the implementation of Speech2 is correct.
+			current_speech_obj = Objects.requireNonNull(
+					UtilsSpeech2.getSpeechObjFromId(utterance_id_to_use, arrays_speech_objs));
+
 			return sendTtsSpeak(txt_to_speak, utterance_id_to_use, audio_stream_to_use);
 		} else {
 			speeches_on_lists = true;
 
-			// If there's a speech already being spoken, the new one is just added to the list (when the current one stops,
-			// it will take care of starting the next ones on the queues).
+			// If there's a speech already being spoken, the new one is just added to the list (when the current one
+			// stops, it will take care of starting the next ones on the queues).
 			// Except if the new speech has a higher priority than the current one. In that case, the current one
-			// stops to give place to the new one.
+			// stops temporarily to give place to the new one.
 			if (priority > UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id)) {
 				if (ttsStop(false) == TextToSpeech.SUCCESS) {
 					return CUR_SPEECH_STOPPED;
@@ -485,6 +508,12 @@ public class Speech2 extends Service {
 					return CUR_SPEECH_NOT_STOPPED;
 				}
 			} else {
+				// Even though no speech is taking place, the speech is added to the lists. Why? Because it may be
+				// stopped and may need to be spoken later. For example, a higher priority speech is requested. The
+				// current one will be temporarily stopped, the higher priority one will be spoken, and then the first
+				// one will be spoken again.
+				// So all speeches go to the lists always.
+
 				return SPEECH_ON_LIST;
 			}
 		}
@@ -567,12 +596,14 @@ public class Speech2 extends Service {
 	 * @return same as in {@link TextToSpeech#stop()}
 	 */
 	private int ttsStop(final boolean skip_speech) {
-		// The current speech must be cleared so onDone knows the speech was force stopped, since the current speech
-		// can never be empty when onDone is called (how was it called if there's no current speech) - except if the
-		// speech was force stopped. That has a different implementation and must be processed separately. This is a way
-		// for onDone to do nothing, since the custom onStop will do. Read also above the if statement on onDone.
+		// The current speech must be cleared so onDone() (in case it's called) knows the speech was force stopped since
+		// the current speech can never be empty when onDone is called (how was it called if there's no current speech)
+		// - except if the speech was force stopped. That has a different implementation and must be processed
+		// separately. This is a way for onDone to do nothing, since the custom onStop will - which will also make the
+		// the program flow continue to be only one (onDone() is called in another thread but nothing is done, so we
+		// continue here to onStop()). Read also above the if statement on onDone().
 		final SpeechObj old_speech_obj = current_speech_obj;
-		current_speech_obj = new SpeechObj("", "", false, null);
+		current_speech_obj = new SpeechObj("", "", true, null);
 		if (tts.stop() == TextToSpeech.ERROR) {
 			current_speech_obj = old_speech_obj;
 
@@ -776,29 +807,20 @@ public class Speech2 extends Service {
 	}
 
 	/**
-	 * <p>Things to do before starting to speak, as soon as detection is possible.</p>
+	 * <p>Things to do exactly before starting to speak, as soon as detection is possible.</p>
 	 * <br>
-	 * <p>In case the ringer mode is not set to NORMAL, no callbacks are triggered by calling this function, aside from
-	 * {@link UtteranceProgressListener#onStop(String, boolean)}, which doesn't have an implementation in this app on
-	 * purpose, so consider this as the last part of {@link UtteranceProgressListener} (means for a speech) to be
-	 * executed in that case.</p>
+	 * <p>In case the ringer mode is not set to NORMAL (to be detected exactly before starting to speak), no callbacks
+	 * are triggered by calling this function, aside from {@link UtteranceProgressListener#onStop(String, boolean)},
+	 * which doesn't have an implementation in this app on purpose, so consider this as the last part of
+	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case.</p>
 	 *
 	 * @param utterance_id the utterance ID of the speech about to be spoken
 	 */
 	final void rightBeforeSpeaking(final String utterance_id) {
-		final int[] indexes = UtilsSpeech2.getSpeechIndexesFromId(utterance_id, arrays_speech_objs);
-		// indexes == null should never happen if the implementation is well done. And if it does happen, I want to know
-		// so I can fix the implementation and that's why I have requireNonNull (it will throw the NPE and exit the
-		// method, but continue program execution. Probably won't happen, anyways.
-		// todo After you get all with broadcasts or AIDL or whatever, test starting an audio recording on API 19 -
-		//  indexes == null multiple times there
-		current_speech_obj = arrays_speech_objs.get(Objects.requireNonNull(indexes)[0]).get(indexes[1]);
-
 		boolean skip_speech = false;
 
-		// If the Audio Manager instance is null, something wrong happened with the Main Service, so speak anyways.
-		// If it's not null, check the ringer mode, which must be NORMAL, otherwise the assistant will not speak -
-		// unless the speech is a CRITICAL one.
+		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
+		// CRITICAL speech.
 		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL) {
 			final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 					.getSystemService(Context.AUDIO_SERVICE);
@@ -836,25 +858,9 @@ public class Speech2 extends Service {
 	 */
 	class TtsUtteranceProgressListener extends UtteranceProgressListener {
 
-		// As of API 24
-		@Override
-		public final void onBeginSynthesis(final String utteranceId, final int sampleRateInHz, final int audioFormat,
-										   final int channelCount) {
-			super.onBeginSynthesis(utteranceId, sampleRateInHz, audioFormat, channelCount);
-
-			rightBeforeSpeaking(utteranceId);
-		}
-
 		@Override
 		public final void onStart(final String utteranceId) {
-			// On API 23 and below, only update when the audio is about to be played, since it's the best they
-			// those APIs can do.
-			// The check below must be here because on API 24 and above, both onBeginSynthesis() and onStart() are
-			// called, and the rightBeforeSpeaking() function must be called only once as soon as possible before the
-			// speech beginning (which is on onStart() for API 23 and below, and onBeginSynthesis() for API 24 and above).
-			if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-				rightBeforeSpeaking(utteranceId);
-			}
+			rightBeforeSpeaking(utteranceId);
 		}
 
 		@Override
@@ -865,11 +871,13 @@ public class Speech2 extends Service {
 			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
 			// If the utterance ID is empty, then it means it was force stopped and it's to be done nothing.
-			// This is an attempt to get onDone to be called always except when tts.stop() is called, since as a start,
-			// it seems that it's not always called (it is on Lollipop 5.1 but not on Oreo 8.1); but also because the
-			// implementation is different if the speech was force stopped than if it finished normally.
+			// When tts.stop() is called, I think onDone was supposed to be called (I think it's supposed to be always
+			// called?). Though, on Lollipop 5.1 it is called, but not on Oreo 8.1. So as the custom onStop will be
+			// called first, it will put empty the utterance ID of the current speech and tell onDone that what was to
+			// be done, was already done by onStop(). This in case onDone is called. If it's not, no matter - onStop()
+			// already did onDone()'s job as a failsafe measure.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", false, null);
+				current_speech_obj = new SpeechObj("", "", true, null);
 				speechTreatment(utteranceId);
 			}
 		}
@@ -887,7 +895,7 @@ public class Speech2 extends Service {
 			// both are called, which one is called first. So in any case, the first to be called will stop the other
 			// one from being called this way.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", false, null);
+				current_speech_obj = new SpeechObj("", "", true, null);
 				speechTreatment(utteranceId);
 			}
 		}
@@ -926,7 +934,8 @@ public class Speech2 extends Service {
 		System.out.println(utteranceId);
 		System.out.println("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
 
-		current_speech_obj = new SpeechObj("", "", false, null);
+		// current_speech_obj is already null here - this onStop() is only called from ttsStop(), which empties
+		// current_speech_obj by itself. Use utteranceId to get info about the speech that was stopped.
 		if (skip_speech) {
 			// If it's to skip the speech, just stop the current speech with tts.stop(), which will delete all the speeches
 			// on its list (which are none, according with the Speech2 implementation - nothing is ever on the list except
@@ -946,11 +955,12 @@ public class Speech2 extends Service {
 	 * <p>This method is to be called from inside {@link TtsUtteranceProgressListener} only, except for
 	 * {@link #onStop(String, boolean)}.</p>
 	 *
-	 * @param utteranceId same as in the method of {@link UtteranceProgressListener} that called this function
+	 * @param utteranceId same as in the method of {@link UtteranceProgressListener} that called this function (or
+	 * {@link #onStop(String, boolean)}
 	 */
 	final void speechTreatment(final String utteranceId) {
 		if (!utteranceId.isEmpty()) {
-			// Why is this here? Refer to the custom onStop().
+			// Why is this check here and not just the removal? Refer to the custom onStop().
 			removeSpeechById(utteranceId);
 		}
 
@@ -1011,14 +1021,15 @@ public class Speech2 extends Service {
 	}
 
 	/**
-	 * <p>Things to be done when there all speeches were taken care (spoken or skipped) of and there are no more in the
+	 * <p>Things to be done when there all speeches were taken care of (spoken or skipped) and there are no more in the
 	 * lists.</p>
 	 */
 	private void allSpeechesFinished() {
 		speeches_on_lists = false;
 		is_speaking = false;
 
-		// Since there are no more speeches, reset the stream volume and abandon the audio focus.
+		// Since there are no more speeches, reset the stream volume and abandon the audio focus of the last used audio
+		// stream.
 		if (focus_volume_dnd_done) {
 			resetVolumeDndFocus();
 		}

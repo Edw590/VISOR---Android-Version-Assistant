@@ -21,6 +21,11 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX_UNIQUE_CHAR;
+import static com.dadi590.assist_c_a.Modules.Speech.Speech2.PRIORITY_LOW;
+
 import android.content.Intent;
 
 import androidx.annotation.Nullable;
@@ -31,11 +36,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX_UNIQUE_CHAR;
-import static com.dadi590.assist_c_a.Modules.Speech.Speech2.PRIORITY_LOW;
 
 /**
  * <p>Speech API v2 related utilities.</p>
@@ -145,6 +145,26 @@ final class UtilsSpeech2 {
 		}
 
 		return null;
+	}
+
+	/**
+	 * <p>Gets the {@link SpeechObj} associated with the given utterance ID.</p>
+	 *
+	 * @param utterance_id the utterance ID of the wanted {@link SpeechObj} instance
+	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
+	 *
+	 * @return the {@link SpeechObj} instance for the given utterance ID, or null in case the utterance ID is not on the
+	 * lists
+	 */
+	@Nullable
+	static SpeechObj getSpeechObjFromId(final String utterance_id,
+										final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
+		final int[] indexes = getSpeechIndexesFromId(utterance_id, arrays_speech_objs);
+		if (indexes == null) {
+			return null;
+		}
+
+		return arrays_speech_objs.get(indexes[0]).get(indexes[1]);
 	}
 
 	/**
