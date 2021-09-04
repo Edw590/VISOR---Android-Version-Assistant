@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.MainAct;
+package com.dadi590.assist_c_a.ActivitiesFragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -41,14 +41,14 @@ import java.lang.reflect.Method;
 import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
- * Class only for testing purposes on the Main Activity.
+ * Class only for testing purposes on the development fragment.
  */
-final class MainActTests {
+final class FragDevelopmentTests {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private MainActTests() {
+	private FragDevelopmentTests() {
 	}
 
 	/**

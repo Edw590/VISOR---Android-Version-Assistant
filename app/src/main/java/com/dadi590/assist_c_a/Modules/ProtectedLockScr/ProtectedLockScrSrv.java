@@ -166,7 +166,7 @@ public class ProtectedLockScrSrv extends Service {
 	}
 
 	/**
-	 * <p>This will restart the {@link ProtectedLockScr} activity if there is some error and it is shut down if it
+	 * <p>This will restart the {@link ProtectedLockScrAct} activity if there is some error and it is shut down if it
 	 * cannot retrieve running tasks from all the apps - if it can (depends on permissions), it will also check if the
 	 * activity is not the one in absolute foreground, and if it's not, restart it.</p>
 	 * <p>This means that:</p>

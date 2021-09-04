@@ -19,9 +19,8 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.MainAct;
+package com.dadi590.assist_c_a.ActivitiesFragments;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -33,18 +32,20 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.MainSrv.MainSrv;
-import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScr;
+import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.R;
@@ -52,44 +53,37 @@ import com.dadi590.assist_c_a.R;
 import java.util.Locale;
 
 /**
- * The main {@link Activity} of the application - MainActivity.
+ * <p>The main fragment to be used for development purposes.</p>
  */
-public class MainAct extends AppCompatActivity {
+public class FragDevelopment extends Fragment {
+
+	@Nullable
+	@Override
+	public final View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
+								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.frag_development, container, false);
+	}
 
 	@Override
-	protected final void onCreate(@Nullable final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main_act);
-
-		// Do this only once, when the activity is created and while it's not destroyed
-
-		final int perms_left = UtilsServices.startMainService()[1];
-		UtilsPermissions.warnPermissions(perms_left, false);
+	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 
 		setButtonsClickListeners();
 
 		// To request focus to the EditText that sends text to the assistant
-		final EditText editText = findViewById(R.id.txt_to_send);
+		// Below (and anywhere else) will never throw an exception because there exists a view
+		final EditText editText = requireView().findViewById(R.id.txt_to_send);
 		editText.requestFocus();
-	}
-
-	@Override
-	protected final void onStart() {
-		super.onStart();
-
-		// Do this below every time the activity is started/resumed/whatever
-
-		UtilsServices.startMainService();
 	}
 
 	/**
 	 * Sets all the listeners for buttons of the activity.
 	 */
 	private void setButtonsClickListeners() {
-		final EditText txt_to_speech = findViewById(R.id.txt_to_speech);
-		final EditText txt_to_send = findViewById(R.id.txt_to_send);
+		final EditText txt_to_speech = requireView().findViewById(R.id.txt_to_speech);
+		final EditText txt_to_send = requireView().findViewById(R.id.txt_to_send);
 
-		findViewById(R.id.btn_tests).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_tests).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				// BUTTON FOR TESTING
@@ -102,7 +96,7 @@ public class MainAct extends AppCompatActivity {
 				System.out.println("HHHHHHHHHHHHH");
 				System.out.println(BTAdapter.startDiscovery());
 
-				final Intent intent = new Intent(MainAct.this, ProtectedLockScr.class);
+				final Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
 
 				//System.out.println(UtilsShell.getAccessRights("", true));
@@ -125,7 +119,7 @@ public class MainAct extends AppCompatActivity {
 				// BUTTON FOR TESTING
 			}
 		});
-		findViewById(R.id.btn_perms).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_perms).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				int missing_authorizations = 0;
@@ -135,13 +129,13 @@ public class MainAct extends AppCompatActivity {
 					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 				} else {
 					// Request all missing permissions
-					final int perms_left = UtilsPermissions.wrapperRequestPerms(MainAct.this, true)[1];
+					final int perms_left = UtilsPermissions.wrapperRequestPerms(getActivity(), true)[1];
 					UtilsPermissions.warnPermissions(perms_left, true);
 
 					// Check if the notification policy access has been granted for the app and if not, open the settings
 					// screen for the user to grant it.
 					final NotificationManager mNotificationManager = (NotificationManager)
-							getSystemService(Context.NOTIFICATION_SERVICE);
+							UtilsGeneral.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 						missing_authorizations++;
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
@@ -152,7 +146,7 @@ public class MainAct extends AppCompatActivity {
 					if (!Settings.canDrawOverlays(UtilsGeneral.getContext())) {
 						missing_authorizations++;
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-								Uri.parse("package:" + getPackageName()));
+								Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
 						startActivity(intent);
 					}
 
@@ -186,7 +180,7 @@ public class MainAct extends AppCompatActivity {
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		});
-		findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
@@ -194,14 +188,14 @@ public class MainAct extends AppCompatActivity {
 				// Didn't find any constants for these 2 strings above
 			}
 		});
-		findViewById(R.id.btn_speak_min).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_speak_min).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_LOW, null);
 			}
 		});
-		findViewById(R.id.btn_speak_high).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_speak_high).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
@@ -210,7 +204,7 @@ public class MainAct extends AppCompatActivity {
 				// just to test if the priority implementation is working.
 			}
 		});
-		findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				if ("start".equals(txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH))) {
@@ -225,18 +219,11 @@ public class MainAct extends AppCompatActivity {
 				sendBroadcast(broadcast_intent, GL_CONSTS.ASSIST_C_A_RECV_PERM);*/
 			}
 		});
-		findViewById(R.id.btn_skip_speech).setOnClickListener(new View.OnClickListener() {
+		requireView().findViewById(R.id.btn_skip_speech).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				UtilsSpeech2BC.skipCurrentSpeech();
 			}
 		});
-	}
-
-	@Override
-	protected final void onStop() {
-		super.onStop();
-
-		UtilsServices.startMainService();
 	}
 }

@@ -83,7 +83,7 @@ public final class UtilsProtectedLockScr {
 	 */
 	@NonNull
 	public static Intent getPLSIntent() {
-		final Intent intentPLS = new Intent(UtilsGeneral.getContext(), ProtectedLockScr.class);
+		final Intent intentPLS = new Intent(UtilsGeneral.getContext(), ProtectedLockScrAct.class);
 		intentPLS.addFlags(
 				Intent.FLAG_ACTIVITY_CLEAR_TOP |
 				Intent.FLAG_ACTIVITY_SINGLE_TOP |

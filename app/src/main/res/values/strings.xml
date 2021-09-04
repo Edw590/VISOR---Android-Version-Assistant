@@ -22,4 +22,8 @@
 <resources>
 	<string name="app_name">LEGION</string>
 	<string name="app_description">LEGION</string>
+	<string name="app_title">LEGION Systems</string>
+
+	<string name="fragDevelopment_title">Dev Mode</string>
+	<string name="fragMain_title">Home</string>
 </resources>

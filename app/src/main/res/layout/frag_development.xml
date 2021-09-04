@@ -20,11 +20,11 @@
   ~ under the License.
   -->
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	tools:context=".MainAct.MainAct">
+	tools:context=".ActivitiesFragments.FragDevelopment">
 
 	<LinearLayout
 		android:orientation="vertical"
@@ -54,8 +54,7 @@
 			android:ems="10"
 			android:hint="Enter text to speak"
 			android:inputType="textPersonName"
-			android:text="This is an example."
-			android:autofillHints="" />
+			android:text="This is an example." />
 
 		<Button
 			android:id="@+id/btn_speak_min"
@@ -88,8 +87,7 @@
 			android:inputType="textPersonName"
 			android:importantForAutofill="no"
 			android:focusable="true"
-			android:focusableInTouchMode="true"
-			android:focusedByDefault="true" />
+			android:focusableInTouchMode="true" />
 
 		<Button
 			android:id="@+id/btn_send_text"
@@ -108,5 +106,4 @@
 			android:text="For testing" />
 
 	</LinearLayout>
-
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

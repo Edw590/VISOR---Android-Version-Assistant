@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2021 DADi590
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
@@ -20,9 +19,21 @@
   ~ under the License.
   -->
 
-<resources>
-	<color name="colorPrimary">#B80000</color>
-	<color name="colorPrimaryDark">#720000</color>
-	<color name="colorAccent">#008A05</color>
-	<color name="colorOrange">@android:color/holo_orange_dark</color>
-</resources>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/nav_graph"
+	app:startDestination="@id/frag_development">
+
+	<fragment
+		android:id="@+id/frag_main"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragMain"
+		android:label="@string/fragMain_title"
+		tools:layout="@layout/frag_main" />
+	<fragment
+		android:id="@+id/frag_development"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragDevelopment"
+		android:label="@string/fragDevelopment_title"
+		tools:layout="@layout/frag_development" />
+
+</navigation>

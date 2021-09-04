@@ -52,6 +52,13 @@ public class AudioRecorder {
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
 	/**
+	 * <p>Main class constructor.</p>
+	 */
+	public AudioRecorder() {
+		super();
+	}
+
+	/**
 	 * <p>Method to call instead of calling directly {@link #startRecording(int, boolean)}.</p>
 	 *  @param start true to start recording, false to stop recording
 	 * @param audioSource same as in {@link #startRecording(int, boolean)}

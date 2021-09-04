@@ -20,6 +20,10 @@
  */
 
 /**
- * <p>Everything directly related with the Main Activity.</p>
+ * <p>All Activities or Fragments or other alike that show UI to the user but that are not directly related to modules,
+ * like the {@link com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct}.</p>
+ * <p>All {@link android.app.Activity}s will have its name started by "Act". All {@link android.app.Fragment}s will have
+ * its name started by "Frag" - in the entire project scope, not just on this package (though, on other places, the said
+ * prefixes may be suffixes).</p>
  */
-package com.dadi590.assist_c_a.MainAct;
+package com.dadi590.assist_c_a.ActivitiesFragments;

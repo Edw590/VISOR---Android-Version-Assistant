@@ -130,11 +130,11 @@ public class Speech {
 	public static final int SPEECH_ABORTED_RINGER_MODE = 3234;
 	/**
 	 * <p>Speaks the given text in a normal speech or in an emergency speech. It's also possible to execute something
-	 * after finish speaking through {@code after_speaking}, and also give additional commands through
+	 * after finish speaking through {@code after_speaking_code}, and also give additional commands through
 	 * {@code additional_command}.</p>
 	 * <br>
 	 * <p>If AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, exactly nothing will be done except
-	 * run {@code after_speaking}. So the speech will be aborted, but the given code will still be executed.</p>
+	 * run {@code after_speaking_code}. So the speech will be aborted, but the given code will still be executed.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #NO_ADDITIONAL_COMMANDS} --> for {@code additional_command}: execute no additional commands</p>
@@ -149,18 +149,18 @@ public class Speech {
 	 * @param txt_to_speak what to speak
 	 * @param additional_command one of the constants
 	 * @param emergency_speech true if it's an emergency speech, false if it's a normal speech
-	 * @param after_speaking code to execute after finishing speaking
+	 * @param after_speaking_code code to execute after finishing speaking
 	 *
 	 * @return return value of {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} //
 	 * {@link TextToSpeech#speak(String, int, HashMap)}, or {@link #SPEECH_ABORTED_RINGER_MODE} (its value, 3234, is
 	 * never returned by any of the mentioned functions)
 	 */
 	public final int speak(@NonNull final String txt_to_speak, final int additional_command,
-						   final boolean emergency_speech, @Nullable final Runnable after_speaking) {
+						   final boolean emergency_speech, @Nullable final Runnable after_speaking_code) {
 		final AudioManager audioManager = null;//MainSrv.getAudioManager();
 		if (audioManager != null && audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-			if (after_speaking != null) {
-				after_speaking.run();
+			if (after_speaking_code != null) {
+				after_speaking_code.run();
 			}
 
 			return SPEECH_ABORTED_RINGER_MODE;
@@ -208,7 +208,7 @@ public class Speech {
 		}
 		utterance_ids.add(currently_speaking_speech_ID);
 		speeches.add(to_speak);
-		runnables.add(after_speaking);
+		runnables.add(after_speaking_code);
 
 		if (additional_command != NO_ADDITIONAL_COMMANDS) {
 			if (additional_command == EXECUTOR_SOMETHING_SAID) {

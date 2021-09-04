@@ -270,8 +270,8 @@ public class Speech2 extends Service {
 
 		// If there's an ID of a Runnable to run after the speech is finished, send the broadcast that that Runnable
 		// can be ran.
-		if (speechObj.after_speaking != null) {
-			UtilsSpeech2.broadcastAfterSpeakCode(speechObj.after_speaking);
+		if (speechObj.after_speaking_code != null) {
+			UtilsSpeech2.broadcastAfterSpeakCode(speechObj.after_speaking_code);
 		}
 		last_thing_said = speechObj.txt_to_speak;
 		// Here below must be the original array, so it can be modified
@@ -364,7 +364,7 @@ public class Speech2 extends Service {
 	 * maximum the chosen audio stream can handle.</p>
 	 * <br>
 	 * <p>If {@code AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL}, exactly nothing will be done (the
-	 * speech will be completely aborted), except broadcast {@code after_speaking}.
+	 * speech will be completely aborted), except broadcast {@code after_speaking_code}.
 	 * <br>
 	 * <p>All the {@code PRIORITY_} constants except {@link #PRIORITY_USER_ACTION} are to be used only for speeches that
 	 * are not a response to a user action, for example automated tasks or broadcast receivers.</p>
@@ -397,9 +397,9 @@ public class Speech2 extends Service {
 	 * @param txt_to_speak what to speak
 	 * @param additional_command one of the constants
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
-	 * @param after_speaking a unique reference which will be broadcast as soon as the speech is finished (for example,
+	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for example,
 	 *                       a unique reference to a {@link Runnable} which is detected by a receiver and which will
-	 *                       execute the Runnable that corresponds to the reference; or null, if nothing is required
+	 *                       execute the Runnable that corresponds to the reference); or null, if nothing is required
 	 *                       to be done after the speech finishes
 	 *
 	 * @return same as in {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
@@ -407,9 +407,9 @@ public class Speech2 extends Service {
 	 * being spoken immediately; one of the constants otherwise.
 	 */
 	final int speak(@NonNull final String txt_to_speak, final int additional_command, final int speech_priority,
-					@Nullable final Integer after_speaking) {
+					@Nullable final Integer after_speaking_code) {
 		return speakInternal(txt_to_speak, additional_command, speech_priority, null, AUDIO_STREAM_UNUSED,
-				after_speaking);
+				after_speaking_code);
 	}
 
 	private static final int AUDIO_STREAM_UNUSED = 3234;
@@ -429,13 +429,13 @@ public class Speech2 extends Service {
 	 *                     null if it's not already in the lists
 	 * @param audio_stream the audio stream to use in case the given speech is already in the lists - will only be used
 	 *                     if {@code utterance_id} parameter is != null; or one of the constants
-	 * @param after_speaking same as in {@link #speak(String, int, int, Integer)}
+	 * @param after_speaking_code same as in {@link #speak(String, int, int, Integer)}
 	 *
 	 * @return same as in {@link #speak(String, int, int, Integer)}
 	 */
 	private int speakInternal(final String txt_to_speak, final int additional_command,
 							  final int priority, @Nullable final String utterance_id,
-							  final int audio_stream, @Nullable final Integer after_speaking) {
+							  final int audio_stream, @Nullable final Integer after_speaking_code) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
@@ -476,7 +476,9 @@ public class Speech2 extends Service {
 					break;
 				}
 			}
-			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking);
+			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking_code);
+			System.out.println("------------------------");
+			System.out.println(after_speaking_code);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
 			audio_stream_to_use = new_speech_obj.audio_stream;
 		} else {
@@ -543,12 +545,10 @@ public class Speech2 extends Service {
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);
-			tts_params.bundle.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0F);
 
 			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, tts_params.bundle, utterance_id);
 		} else {
 			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(audio_stream));
-			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, String.valueOf(1.0F));
 			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utterance_id);
 
 			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, tts_params.hashmap);
@@ -835,9 +835,9 @@ public class Speech2 extends Service {
 			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
 				System.out.println("+++++++++++++++++++++++++++++++++++++++");
 				System.out.println(current_speech_obj.utterance_id);
-				System.out.println(current_speech_obj.after_speaking);
-				if (current_speech_obj.after_speaking != null) {
-					UtilsSpeech2.broadcastAfterSpeakCode(current_speech_obj.after_speaking);
+				System.out.println(current_speech_obj.after_speaking_code);
+				if (current_speech_obj.after_speaking_code != null) {
+					UtilsSpeech2.broadcastAfterSpeakCode(current_speech_obj.after_speaking_code);
 				}
 
 				skipCurrentSpeech();
@@ -983,7 +983,7 @@ public class Speech2 extends Service {
 				final String utterance_id = correct_speech_obj.utterance_id;
 				final String speech = correct_speech_obj.txt_to_speak;
 				final int audio_stream = correct_speech_obj.audio_stream;
-				final Integer runnable = correct_speech_obj.after_speaking;
+				final Integer runnable = correct_speech_obj.after_speaking_code;
 
 				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
@@ -1085,14 +1085,18 @@ public class Speech2 extends Service {
 					final String txt_to_speak = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
 					final int additional_command = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
 					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, -1);
-					@Nullable final Integer after_speaking;
+					@Nullable final Integer after_speaking_code;
 					if (intent.hasExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4)) {
-						after_speaking = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, -1);
+						// The -1 doesn't matter here, because if the extra doesn't exist, that means after_speaking_code is
+						// supposedly null but can't be sent as null because it's an int, so the extra is not sent at
+						// all. So in that case, here it's put as null too. If the extra exists, then a value other than
+						// null is to be put on after_speaking_code, and so it is. Conclusion: -1 is never used.
+						after_speaking_code = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, -1);
 					} else {
-						after_speaking = null;
+						after_speaking_code = null;
 					}
 
-					speak(txt_to_speak, additional_command, speech_priority, after_speaking);
+					speak(txt_to_speak, additional_command, speech_priority, after_speaking_code);
 
 					break;
 				}

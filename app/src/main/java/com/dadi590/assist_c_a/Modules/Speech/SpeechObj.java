@@ -63,7 +63,7 @@ class SpeechObj {
 	static final int DEFAULT_AUDIO_STREAM = -3234;
 
 	final String utterance_id;
-	final Integer after_speaking;
+	final Integer after_speaking_code;
 	String txt_to_speak; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
 	final int audio_stream;
 
@@ -75,12 +75,12 @@ class SpeechObj {
 	 * @param current_speech_obj true if the instance is being created to reset the {@link Speech2#current_speech_obj} -
 	 *                           the audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value;
 	 *                           false otherwise
-	 * @param after_speaking same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, int, Integer)}
 	 */
 	SpeechObj(final String utterance_id, @NonNull final String txt_to_speak, final boolean current_speech_obj,
-			  @Nullable final Integer after_speaking) {
+			  @Nullable final Integer after_speaking_code) {
 		this.utterance_id = utterance_id;
-		this.after_speaking = after_speaking;
+		this.after_speaking_code = after_speaking_code;
 		this.txt_to_speak = txt_to_speak;
 
 		if (current_speech_obj) {
@@ -105,6 +105,6 @@ class SpeechObj {
 	@Override
 	public final String toString() {
 		return "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + txt_to_speak + "\", "
-				+ after_speaking + ", " + audio_stream + "]";
+				+ after_speaking_code + ", " + audio_stream + "]";
 	}
 }

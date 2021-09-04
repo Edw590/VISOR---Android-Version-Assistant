@@ -49,7 +49,7 @@ import com.dadi590.assist_c_a.R;
 /**
  * <p>The activity of the assistant's Protected Lock Screen (PLS for abbreviation).</p>
  */
-public class ProtectedLockScr extends AppCompatActivity {
+public class ProtectedLockScrAct extends AppCompatActivity {
 
 	// For an explanation on how the Protected Lock Screen works, please go to the package-info.java file.
 
@@ -108,7 +108,7 @@ public class ProtectedLockScr extends AppCompatActivity {
 	@Override
 	protected final void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.protected_lock_scr);
+		setContentView(R.layout.act_protected_lock_scr);
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
