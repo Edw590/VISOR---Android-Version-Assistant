@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
 /**
- * <p>Functions to call to communicate with {@link Speech2}.</p>
+ * <p>Functions to call to communicate with {@link Speech2}, by using broadcasts.</p>
  */
 public final class UtilsSpeech2BC {
 
@@ -54,7 +54,10 @@ public final class UtilsSpeech2BC {
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1, txt_to_speak);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, additional_command);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, speech_priority);
-		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, after_speaking_code);
+		if (after_speaking_code != null) {
+			broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, after_speaking_code);
+		}
+
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
 
@@ -63,6 +66,7 @@ public final class UtilsSpeech2BC {
 	 */
 	public static void skipCurrentSpeech() {
 		final Intent broadcast_intent = new Intent(BroadcastConstants.ACTION_SKIP_SPEECH);
+
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
 
@@ -80,6 +84,7 @@ public final class UtilsSpeech2BC {
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_REMOVE_SPEECH_1, speech);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_REMOVE_SPEECH_2, speech_priority);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_REMOVE_SPEECH_3, low_to_high);
+
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
 }

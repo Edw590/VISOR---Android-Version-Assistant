@@ -21,11 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX_UNIQUE_CHAR;
-import static com.dadi590.assist_c_a.Modules.Speech.Speech2.PRIORITY_LOW;
-
 import android.content.Intent;
 
 import androidx.annotation.Nullable;
@@ -36,6 +31,11 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.UTTERANCE_ID_PREFIX_UNIQUE_CHAR;
+import static com.dadi590.assist_c_a.Modules.Speech.Speech2.PRIORITY_LOW;
 
 /**
  * <p>Speech API v2 related utilities.</p>
@@ -175,6 +175,7 @@ final class UtilsSpeech2 {
 	static void broadcastAfterSpeakCode(final int code) {
 		final Intent intent = new Intent(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE);
 		intent.putExtra(GL_BC_CONSTS.EXTRA_SPEECH2_AFTER_SPEAK_CODE, code);
+
 		UtilsApp.sendInternalBroadcast(intent);
 	}
 }
