@@ -6,7 +6,7 @@
 - [Current modules (features)](#current-modules-features)
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
-- - [Compile the app](#--compile-the-app)
+- - [To compile the app](#--to-compile-the-app)
 - [About](#about)
 - - [Roadmap](#--roadmap)
 - - [Project status](#--project-status)
@@ -56,7 +56,7 @@ Install the app either as a perfectly normal app, or as a privileged system app 
 After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only recording audio is manual for now).
 
 ## For developers
-### - Compile the app
+### - To compile the app
 - I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 - Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
 - Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature check on startMainService().
