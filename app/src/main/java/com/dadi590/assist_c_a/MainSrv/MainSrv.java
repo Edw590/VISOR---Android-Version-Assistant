@@ -44,6 +44,10 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * The main {@link Service} of the application - MainService.
  */
@@ -57,12 +61,23 @@ public class MainSrv extends Service {
 	// Not bad, since it's the application context (global for the entire process), not a local one
 	//private static Context main_app_context = null; - disabled while using UtilsGeneral.getMainAppContext()
 
-	// Modules instances
-	private static AudioRecorder audioRecorder = null;
-	private static PhoneCallsProcessor phoneCallsProcessor = null;
-	private static BatteryProcessor batteryProcessor = null;
+	// Modules instances to start in order (hence, use LinkedHashMap to keep the order and not HashMap, for example)
+	static final Map<Class, Object> map_module_instances = new LinkedHashMap<Class, Object>() {
+		private static final long serialVersionUID = -6765954534439562196L;
+		@NonNull @Override public LinkedHashMap<Class, Object> clone() throws AssertionError {
+			throw new AssertionError();
+		}
 
-	// Services to start in order
+		{
+			// ATTENTION - Only the constructor with no parameters of the module will be called, so put ALL the modules
+			// being started with a constructor with no parameters!!!
+			put(BatteryProcessor.class, null);
+			put(PhoneCallsProcessor.class, null);
+			put(AudioRecorder.class, null);
+		}
+	};
+
+	// Modules services to start in order
 	private static final Class[] services_to_start = {
 			Speech2.class,
 	};
@@ -109,7 +124,7 @@ public class MainSrv extends Service {
 	public static AudioRecorder getAudioRecorder() {
 		UtilsServices.startMainService();
 
-		return audioRecorder;
+		return (AudioRecorder) map_module_instances.get(AudioRecorder.class);
 	}
 	/**.
 	 * @return the global {@link PhoneCallsProcessor} instance
@@ -118,7 +133,7 @@ public class MainSrv extends Service {
 	public static PhoneCallsProcessor getPhoneCallsProcessor() {
 		UtilsServices.startMainService();
 
-		return phoneCallsProcessor;
+		return (PhoneCallsProcessor) map_module_instances.get(PhoneCallsProcessor.class);
 	}
 	/**.
 	 * @return the global {@link BatteryProcessor} instance
@@ -127,7 +142,7 @@ public class MainSrv extends Service {
 	public static BatteryProcessor getBatteryProcessor() {
 		UtilsServices.startMainService();
 
-		return batteryProcessor;
+		return (BatteryProcessor) map_module_instances.get(BatteryProcessor.class);
 	}
 
 	//////////////////////////////////////
@@ -255,14 +270,19 @@ public class MainSrv extends Service {
 
 				// Instantiate all modules in order, in case they haven't been already (speech module failure, restart,
 				// send this action again, and that would restart all other modules - no thanks)
-				if (batteryProcessor == null) {
-					batteryProcessor = new BatteryProcessor();
-				}
-				if (phoneCallsProcessor == null) {
-					phoneCallsProcessor = new PhoneCallsProcessor();
-				}
-				if (audioRecorder == null) {
-					audioRecorder = new AudioRecorder();
+				// Also, updating the values does NOT change the order, since this is already a LinkedHashMap (which
+				// keeps the order, unlike HashMap, for example).
+				for (final Map.Entry<Class, Object> module : map_module_instances.entrySet()) {
+					if (module.getValue() == null) {
+						try {
+							final Class module_class = module.getKey();
+							map_module_instances.put(module_class, module_class.getConstructor().newInstance());
+						} catch (final NoSuchMethodException ignored) {
+						} catch (final IllegalAccessException ignored) {
+						} catch (final InstantiationException ignored) {
+						} catch (final InvocationTargetException ignored) {
+						}
+					}
 				}
 
 				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
