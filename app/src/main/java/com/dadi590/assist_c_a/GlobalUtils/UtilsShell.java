@@ -119,7 +119,7 @@ public final class UtilsShell {
 						su_required = true;
 					} else {
 						// ... and the app doesn't have root access permission, return error
-						return new CmdOuputObj(0, empty_byte_array, empty_byte_array, true);
+						return new CmdOuputObj(null, empty_byte_array, empty_byte_array, true);
 					}
 				}
 			}
@@ -128,27 +128,35 @@ public final class UtilsShell {
 		try {
 			final Process process = Runtime.getRuntime().exec(commands_list.get(0)); // Just need that it starts the
 			// process here
-			final DataOutputStream dataOutputStream = new DataOutputStream(process.getOutputStream());
-			final InputStream inputStream = process.getInputStream();
-			final InputStream errorStream = process.getErrorStream();
+			try (final DataOutputStream dataOutputStream = new DataOutputStream(process.getOutputStream())) {
 
-			final int commands_list_size = commands_list.size();
-			for (int i = 1; i < commands_list_size; i++) { // From index 0 because the 1st command was already executed
-				final String command = commands_list.get(i);
-				if (!command.isEmpty()) { // Empty or null
-					dataOutputStream.writeBytes(command.endsWith("\n") ? command : command + "\n");
+				final int commands_list_size = commands_list.size();
+				for (int i = 1; i < commands_list_size; i++) { // From index 0 because the 1st command was already executed
+					final String command = commands_list.get(i);
+					if (!command.isEmpty()) { // Empty or null
+						dataOutputStream.writeBytes(command.endsWith("\n") ? command : command + "\n");
+						dataOutputStream.flush();
+					}
+				}
+
+				if (su_required) {
+					// Don't remove this from here or it's an infinite wait if the command doesn't come in the list (I may
+					// forget as I already did just now xD).
+					dataOutputStream.writeBytes("exit\n");
 					dataOutputStream.flush();
 				}
+			} catch (final IOException ignored) {
+				return new CmdOuputObj(null, empty_byte_array, empty_byte_array, true);
 			}
 
-			if (su_required) {
-				// Don't remove this from here or it's an infinite wait if the command doesn't come in the list (I may
-				// forget as I already did just now xD).
-				dataOutputStream.writeBytes("exit\n");
-				dataOutputStream.flush();
-			}
+			final InputStream[] streams;
+			try (final InputStream inputStream = process.getInputStream();
+				 final InputStream errorStream = process.getErrorStream()) {
 
-			final InputStream[] streams = {inputStream, errorStream};
+				streams = new InputStream[]{inputStream, errorStream};
+			} catch (final IOException ignored) {
+				return new CmdOuputObj(null, empty_byte_array, empty_byte_array, true);
+			}
 			int number_bytes_read;
 			final ArrayList<Byte> storage_array = new ArrayList<>(64);
 			final int buffer_length = 1; // Don't put higher. Try and see the Inspection error ("Large array
@@ -156,8 +164,9 @@ public final class UtilsShell {
 			// because right now it's only one element per buffer (so no null bytes are appended and invalidate a file,
 			// for example)
 			final int streams_length = streams.length;
+			final byte[] empty_array = new byte[buffer_length];
 			for (final InputStream stream : streams) {
-				final byte[] buffer = new byte[buffer_length];
+				final byte[] buffer = empty_array.clone();
 
 				while (true) {
 					number_bytes_read = stream.read(buffer);
@@ -188,6 +197,7 @@ public final class UtilsShell {
 	}
 	/**
 	 * <p>Class to use for the returning value of {@link #executeShellCmd(List)}.</p>
+	 * <p>Always check if the error_code is null. If it is, the streams will be of size 0.</p>
 	 */
 	public static class CmdOuputObj {
 		public final Integer error_code;
@@ -198,12 +208,12 @@ public final class UtilsShell {
 		/**
 		 * <p>Main class constructor.</p>
 		 *
-		 * @param error_code the exit code returned by the terminal, or null in case an exception was thrown while
-		 *                   processing the commands inside the app and the execution was aborted at some point
+		 * @param error_code the exit code returned by the terminal; or null in case an exception was thrown while
+		 *                   processing the commands inside the app and the execution was aborted at some point, or in
+		 *                   case {@link #error_no_root} is set to true
 		 * @param output_stream the output stream of the terminal
 		 * @param error_stream the error stream of the terminal
 		 * @param error_no_root in case root access was required by the commands and it was refused for whatever reason
-		 *                      - in this case, the error code will be 0 and the stream arrays will be of size 0
 		 */
 		public CmdOuputObj(@Nullable final Integer error_code, @NonNull final byte[] output_stream,
 						   @NonNull final byte[] error_stream, final boolean error_no_root) {

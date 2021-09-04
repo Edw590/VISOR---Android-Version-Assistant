@@ -62,9 +62,9 @@ public class MainSrv extends Service {
 	//private static Context main_app_context = null; - disabled while using UtilsGeneral.getMainAppContext()
 
 	// Modules instances to start in order (hence, use LinkedHashMap to keep the order and not HashMap, for example)
-	static final Map<Class, Object> map_module_instances = new LinkedHashMap<Class, Object>() {
+	static final Map<Class<?>, Object> map_module_instances = new LinkedHashMap<Class<?>, Object>() {
 		private static final long serialVersionUID = -6765954534439562196L;
-		@NonNull @Override public LinkedHashMap<Class, Object> clone() throws AssertionError {
+		@NonNull @Override public LinkedHashMap<Class<?>, Object> clone() throws AssertionError {
 			throw new AssertionError();
 		}
 
@@ -78,7 +78,7 @@ public class MainSrv extends Service {
 	};
 
 	// Modules services to start in order
-	private static final Class[] services_to_start = {
+	private static final Class<?>[] services_to_start = {
 			Speech2.class,
 	};
 
@@ -181,8 +181,8 @@ public class MainSrv extends Service {
 		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
 
 		// Start services in background - no restrictions, since the Main Service is already in foreground
-		for (final Class service : services_to_start) {
-			UtilsServices.startService(service, false);
+		for (final Class<?> service_class : services_to_start) {
+			UtilsServices.startService(service_class, false);
 		}
 	}
 
@@ -272,10 +272,10 @@ public class MainSrv extends Service {
 				// send this action again, and that would restart all other modules - no thanks)
 				// Also, updating the values does NOT change the order, since this is already a LinkedHashMap (which
 				// keeps the order, unlike HashMap, for example).
-				for (final Map.Entry<Class, Object> module : map_module_instances.entrySet()) {
+				for (final Map.Entry<Class<?>, Object> module : map_module_instances.entrySet()) {
 					if (module.getValue() == null) {
 						try {
-							final Class module_class = module.getKey();
+							final Class<?> module_class = module.getKey();
 							map_module_instances.put(module_class, module_class.getConstructor().newInstance());
 						} catch (final NoSuchMethodException ignored) {
 						} catch (final IllegalAccessException ignored) {
@@ -287,7 +287,7 @@ public class MainSrv extends Service {
 
 				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
 				// useful in case the screen gets broken, for example).
-				// It's also said in top priority so the user can know immediately (hopefully) that the assistant is
+				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
 				// ready.
 				final String speak = "Ready, sir.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);

@@ -57,9 +57,8 @@ public final class UtilsSysApp {
 	// Removed flags with doc copied from source
 	/**
 	 * <p>"Value for {@link ApplicationInfo#flags}: set to {@code true} if the application
-	 * is permitted to hold privileged permissions.</p>
-	 *
-	 * {@hide}"
+	 * is permitted to hold privileged permissions."</p>
+	 * <br>
 	 * <p>NOTE: Only on API 19 through API 22.</p>
 	 */
 	private static final int FLAG_PRIVILEGED = 1 << 30;

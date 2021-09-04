@@ -99,86 +99,96 @@ public final class UtilsTelephony {
 		}
 
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-		final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null);
 
 		int num_matches = 0;
 		String last_name_found = "";
-		final Collection<String> matches = new ArrayList<>(10); // 10 matches at most, I guess?
+		try (final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null)) {
+			final Collection<String> matches = new ArrayList<>(10); // 10 matches at most, I guess?
 
-		// todo Put this in a thread!!! --> "Skipped 135 frames!"
+			// todo Put this in a thread!!! --> "Skipped 135 frames!"
 
-		if (location_search == ALL_CONTACTS) {
-			if ((cursor != null ? cursor.getCount() : 0) > 0) {
-				while (cursor.moveToNext()) {
-					final String id = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
-					final String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-					//System.out.println("Name: " + name);
+			if (location_search == ALL_CONTACTS) {
+				if ((cursor != null ? cursor.getCount() : 0) > 0) {
+					while (true) {
+						if (!cursor.moveToNext()) {
+							break;
+						}
 
-					if (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-						final Cursor cursor1 = contentResolver.query(
-								ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-								null,
-								ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-								new String[]{id}, null
-						);
-						while (cursor1.moveToNext()) {
-							final String phoneNo = cursor1.getString(cursor1.getColumnIndex(
-									ContactsContract.CommonDataKinds.Phone.NUMBER));
-							//System.out.println("Number: " + phoneNo);
+						final String id = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+						final String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+						//System.out.println("Name: " + name);
 
-							if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-								// Nota: os métodos compareStrictly() só estão disponíveis com as classes escondidas/internas ativadas (ver código-fonte --> @UnsupportedAppUsage).
-                                /*System.out.println("---Name: " + name);
-                                System.out.println("---Number: " + phoneNo);*/
-								boolean already_found = false;
-								for (final String match: matches) {
-									if (match.equals(name)) {
-										already_found = true;
+						if (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+							try (
+									final Cursor cursor1 = contentResolver.query(
+									ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+									null,
+									ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+									new String[]{id}, null)
+							) {
+								while (true) {
+									if (!cursor1.moveToNext()) {
 										break;
 									}
-								}
-								if (!already_found) {
-									matches.add(name);
-									last_name_found = name;
-									num_matches++;
+
+									final String phoneNo = cursor1.getString(cursor1.getColumnIndex(
+											ContactsContract.CommonDataKinds.Phone.NUMBER));
+									//System.out.println("Number: " + phoneNo);
+
+									if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
+										// Nota: os métodos compareStrictly() só estão disponíveis com as classes escondidas/internas ativadas (ver código-fonte --> @UnsupportedAppUsage).
+									/*System.out.println("---Name: " + name);
+									System.out.println("---Number: " + phoneNo);*/
+										boolean already_found = false;
+										for (final String match : matches) {
+											if (match.equals(name)) {
+												already_found = true;
+												break;
+											}
+										}
+										if (!already_found) {
+											matches.add(name);
+											last_name_found = name;
+											num_matches++;
+										}
+									}
 								}
 							}
 						}
-						cursor1.close();
 					}
 				}
-			}
-			if (cursor != null) {
-				cursor.close();
-			}
-		} else if (location_search == CONTACTS_SIM) {
-			// Leave it even being "always true" - until another location is added... Might prevent bugs.
-			while (cursor.moveToNext()) {
-				final String name = cursor.getString(cursor.getColumnIndex("name"));
-				//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
-				final String phoneNo = cursor.getString(cursor.getColumnIndex("number"));
-                /*System.out.println("Name: " + name);
-                System.out.println("Phone Number: " + phoneNo);*/
+			} else if (location_search == CONTACTS_SIM) {
+				// Leave it even being "always true" - until another location is added... Might prevent bugs.
+				while (true) {
+					if (!cursor.moveToNext()) {
+						break;
+					}
 
-				if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-					// Note: the compareStrictly() methods are only available with the hidden/internal classes showing
-                    /*System.out.println("---Name: " + name);
-                    System.out.println("---Number: " + phoneNo);*/
-					boolean already_found = false;
-					for (final String match: matches) {
-						if (match.equals(name)) {
-							already_found = true;
-							break;
+					final String name = cursor.getString(cursor.getColumnIndex("name"));
+					//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
+					final String phoneNo = cursor.getString(cursor.getColumnIndex("number"));
+					/*System.out.println("Name: " + name);
+					System.out.println("Phone Number: " + phoneNo);*/
+
+					if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
+						// Note: the compareStrictly() methods are only available with the hidden/internal classes showing
+						/*System.out.println("---Name: " + name);
+						System.out.println("---Number: " + phoneNo);*/
+						boolean already_found = false;
+						for (final String match : matches) {
+							if (match.equals(name)) {
+								already_found = true;
+								break;
+							}
+						}
+						if (!already_found) {
+							matches.add(name);
+							last_name_found = name;
+							num_matches++;
 						}
 					}
-					if (!already_found) {
-						matches.add(name);
-						last_name_found = name;
-						num_matches++;
-					}
 				}
 			}
-			cursor.close();
 		}
 
         /*System.out.println("OOOOOOOOOOOOOOOOOOO");
@@ -275,20 +285,19 @@ public final class UtilsTelephony {
 	@NonNull
 	public static String[] getLastCall() {
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-		final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null);
+		try (final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null)) {
+			if (cursor == null) {
+				return new String[]{ERROR, ERROR};
+			}
 
-		if (cursor == null) {
-			return new String[]{ERROR, ERROR};
+			if (cursor.moveToLast()) { //starts pulling logs from last - you can use moveToFirst() for first logs
+				final String phNumber = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
+				final String type = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE));
+				cursor.close();
+
+				return new String[]{phNumber, type};
+			}
 		}
-
-		if (cursor.moveToLast()) { //starts pulling logs from last - you can use moveToFirst() for first logs
-			final String phNumber = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
-			final String type = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE));
-			cursor.close();
-
-			return new String[]{phNumber, type};
-		}
-		cursor.close();
 
 		return new String[]{NO_CALLS_DETECTED, NO_CALLS_DETECTED};
 	}
@@ -302,19 +311,23 @@ public final class UtilsTelephony {
 	 */
 	public static int getTypeLastCallByNum(@NonNull final String number) {
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-		final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null);
+		try (final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null)) {
 
-		if (cursor == null) {
-			return -2;
-		}
-
-		do {
-			final String phNumber = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
-			if (PhoneNumberUtils.compareStrictly(phNumber, number)) {
-				return Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE)));
+			if (cursor == null) {
+				return -2;
 			}
-		} while (cursor.moveToPrevious());
-		cursor.close();
+
+			do {
+				final String phNumber = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
+				if (PhoneNumberUtils.compareStrictly(phNumber, number)) {
+					return Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE)));
+				}
+
+				if (!cursor.moveToPrevious()) {
+					break;
+				}
+			} while (true);
+		}
 
 		return -1;
 	}

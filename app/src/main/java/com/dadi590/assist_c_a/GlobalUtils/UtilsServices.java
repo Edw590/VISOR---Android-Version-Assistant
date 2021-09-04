@@ -124,7 +124,7 @@ public final class UtilsServices {
 			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.
 			// It's also in case something changes on the APK because of some corruption. The app won't start.
 			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
-			return new int[]{}; // Just to be sure it doesn't carry on.
+			return new int[0]; // Just to be sure it doesn't carry on.
 		}
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
 		UtilsServices.startService(MainSrv.class, true);

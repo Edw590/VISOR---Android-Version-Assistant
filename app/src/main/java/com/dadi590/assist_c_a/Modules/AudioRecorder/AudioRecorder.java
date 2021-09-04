@@ -38,6 +38,7 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>The audio recorder module of the assistant.</p>
@@ -47,7 +48,7 @@ public class AudioRecorder {
 	@Nullable private MediaRecorder recorder = null;
 	private boolean recording = false;
 
-	final ArrayList<Runnable> runnables = new ArrayList<>(1);
+	final List<Runnable> runnables = new ArrayList<>(1);
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
@@ -189,8 +190,6 @@ public class AudioRecorder {
 		try {
 			recorder.prepare();
 		} catch (final IOException e) {
-			e.printStackTrace();
-
 			recorder.release();
 			recorder = null;
 			if (!check_recording_possible) {
@@ -207,8 +206,6 @@ public class AudioRecorder {
 		try {
 			recorder.start();
 		} catch (final IllegalStateException e) {
-			e.printStackTrace();
-
 			recorder.release();
 			recorder = null;
 			if (!check_recording_possible) {

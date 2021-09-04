@@ -101,7 +101,8 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	// API 29 - that's on public APIs only, not internal ones.
 	// Also the "WrongConstant" STATUS_BAR_SERVICE works, so can't be that wrong - ignore too.
 	@SuppressLint({"NewApi", "WrongConstant"})
-	StatusBarManager statusBarManager = (StatusBarManager) UtilsGeneral.getContext().getSystemService(STATUS_BAR_SERVICE);
+	final StatusBarManager statusBarManager = (StatusBarManager) UtilsGeneral.getContext()
+			.getSystemService(STATUS_BAR_SERVICE);
 	// At least compiling with API 29, the method on StatusBarManager is still collapsePanels(), so all cool using the
 	// internal API directly without reflection.
 
@@ -238,8 +239,8 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 			}
 		} else if (hasFocus) {
 			// In case the activity has focus again, stop the thread.
-			//has_focus = true;
-			//System.out.println("JJJJJJJJJ");
+			has_focus = true;
+			System.out.println("JJJJJJJJJ");
 		}
 	}
 

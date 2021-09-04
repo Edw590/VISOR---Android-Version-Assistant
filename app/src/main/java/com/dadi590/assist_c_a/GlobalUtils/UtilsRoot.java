@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -95,48 +96,60 @@ public final class UtilsRoot {
      * @return one of the constants
      */
     public static int rootCommandsAvailability() {
-        int retval;
+        final int ret_val;
         final Process suProcess;
 
         try {
             suProcess = Runtime.getRuntime().exec("su");
 
-            final DataOutputStream dataOutputStream = new DataOutputStream(suProcess.getOutputStream());
-            final BufferedReader bufferedReader;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                bufferedReader = new BufferedReader(new InputStreamReader(suProcess.getInputStream(),
-                        StandardCharsets.UTF_8));
-            } else {
-                bufferedReader = new BufferedReader(new InputStreamReader(suProcess.getInputStream()));
-            }
+            try (final DataOutputStream dataOutputStream = new DataOutputStream(suProcess.getOutputStream())) {
+                final String current_UID;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                            suProcess.getInputStream(), StandardCharsets.UTF_8))) {
+                        current_UID = bufferedReader.readLine();
+                    } catch (final IOException ignored) {
+                        return ROOT_UNAVAILABLE;
+                    }
+                } else {
+                    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                            suProcess.getInputStream(), Charset.defaultCharset()))) {
+                        current_UID = bufferedReader.readLine();
+                    } catch (final IOException ignored) {
+                        return ROOT_UNAVAILABLE;
+                    }
+                }
 
-            // Getting the id of the current user to check if this is root
-            dataOutputStream.writeBytes("id\n");
-            dataOutputStream.flush();
-
-            final String currUid = bufferedReader.readLine();
-            final boolean exitSu;
-            if (currUid == null) {
-                retval = ROOT_DENIED;
-                exitSu = false;
-            } else if (currUid.contains("uid=0")) {
-                retval = ROOT_AVAILABLE;
-                exitSu = true;
-            } else {
-                retval = ROOT_DENIED;
-                exitSu = true;
-            }
-
-            if (exitSu) {
-                dataOutputStream.writeBytes("exit\n");
+                // Getting the ID of the current user to check if it's root
+                dataOutputStream.writeBytes("id\n");
                 dataOutputStream.flush();
+
+                final boolean exit_su;
+                if (current_UID == null) {
+                    ret_val = ROOT_DENIED;
+                    exit_su = false;
+                } else if (current_UID.contains("uid=0")) {
+                    ret_val = ROOT_AVAILABLE;
+                    exit_su = true;
+                } else {
+                    ret_val = ROOT_DENIED;
+                    exit_su = true;
+                }
+
+                if (exit_su) {
+                    dataOutputStream.writeBytes("exit\n");
+                    dataOutputStream.flush();
+                }
+            } catch (final IOException ignored) {
+                return ROOT_UNAVAILABLE;
             }
 
             suProcess.waitFor();
         } catch (final IOException | InterruptedException ignored) {
-            retval = ROOT_UNAVAILABLE;
+            return ROOT_UNAVAILABLE; // The only place where this was, but I added this return in the other catch
+            // clauses too (what could I put there...).
         }
 
-        return retval;
+        return ret_val;
     }
 }

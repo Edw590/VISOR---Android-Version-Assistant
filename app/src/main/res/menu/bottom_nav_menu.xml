@@ -23,11 +23,11 @@
 
 	<item
 		android:id="@+id/frag_main"
-		android:label="@string/fragMain_title"
+		android:title="@string/fragMain_title"
 		android:icon="@drawable/home" />
 	<item
 		android:id="@+id/frag_development"
-		android:label="@string/fragDevelopment_title"
+		android:title="@string/fragDevelopment_title"
 		android:icon="@drawable/development" />
 
 </menu>

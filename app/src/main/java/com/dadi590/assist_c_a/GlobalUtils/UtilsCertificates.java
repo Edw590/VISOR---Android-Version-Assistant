@@ -58,9 +58,13 @@ public final class UtilsCertificates {
 	};
 
 	// App certificates fingerprint whitelist (one or more)
-	private static final Map[] ASSIST_C_A_RSA_CERT_FINGERPRINT = {
+	private static final Map<?, ?>[] ASSIST_C_A_RSA_CERT_FINGERPRINT = {
 			// Certificate 1
 			new HashMap<String, String>() {
+				@NonNull @Override public HashMap<String, String> clone() throws AssertionError {
+					throw new AssertionError();
+				}
+
 				private static final long serialVersionUID = -8864195772334229619L;
 
 				{
@@ -112,7 +116,7 @@ public final class UtilsCertificates {
 	 * for some reason, there's no hashing algorithm present on the system)
 	 */
 	@Nullable
-	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map[] list_cert_hashes) {
+	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map<?, ?>[] list_cert_hashes) {
 		String[] hashing_algorithm_to_use = null;
 		for (final String[] hashing_algorithm : possible_hashing_algorithms) {
 			try {
@@ -141,7 +145,7 @@ public final class UtilsCertificates {
 			// function would have returned null by now on other_app_signatures.
 
 			boolean match_found = false;
-			for (final Map cert_hash : list_cert_hashes) {
+			for (final Map<?, ?> cert_hash : list_cert_hashes) {
 				if (other_app_sig_hash.equals(cert_hash.get(hashing_algorithm_to_use[0]))) {
 					match_found = true;
 					no_matches_at_all = false;

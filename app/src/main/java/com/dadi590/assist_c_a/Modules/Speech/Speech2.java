@@ -190,6 +190,7 @@ public class Speech2 extends Service {
 	final String getLastThingSaid() {
 		return last_thing_said;
 	}
+
 	/**
 	 * <p>Sets {@link #user_changed_volume} to true in case the audio stream of the changed volume equals the audio
 	 * stream currently being used to speak.</p>
@@ -397,10 +398,10 @@ public class Speech2 extends Service {
 	 * @param txt_to_speak what to speak
 	 * @param additional_command one of the constants
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
-	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for example,
-	 *                       a unique reference to a {@link Runnable} which is detected by a receiver and which will
-	 *                       execute the Runnable that corresponds to the reference); or null, if nothing is required
-	 *                       to be done after the speech finishes
+	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for
+	 *                            example, a unique reference to a {@link Runnable} which is detected by a receiver and
+	 *                            which will execute the Runnable that corresponds to the reference); or null, if nothing
+	 *                            is required to be done after the speech finishes
 	 *
 	 * @return same as in {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
@@ -561,8 +562,9 @@ public class Speech2 extends Service {
 	private void readyArrayLists() {
 		// Fill each ArrayList with a number of ArrayLists, which correspond to the number of existing priority values.
 		// 50 as the initial value because I don't think more than 50 speeches will be on a list... (wtf).
+		final ArrayList<SpeechObj> new_array = new ArrayList<>(50);
 		for (int i = 0; i < NUMBER_OF_PRIORITIES; i++) {
-			arrays_speech_objs.add(new ArrayList<>(50));
+			arrays_speech_objs.add(new_array);
 		}
 	}
 
@@ -821,10 +823,8 @@ public class Speech2 extends Service {
 	 * are triggered by calling this function, aside from {@link UtteranceProgressListener#onStop(String, boolean)},
 	 * which doesn't have an implementation in this app on purpose, so consider this as the last part of
 	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case.</p>
-	 *
-	 * @param utterance_id the utterance ID of the speech about to be spoken
 	 */
-	final void rightBeforeSpeaking(final String utterance_id) {
+	final void rightBeforeSpeaking() {
 		boolean skip_speech = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
@@ -868,7 +868,7 @@ public class Speech2 extends Service {
 
 		@Override
 		public final void onStart(final String utteranceId) {
-			rightBeforeSpeaking(utteranceId);
+			rightBeforeSpeaking();
 		}
 
 		@Override

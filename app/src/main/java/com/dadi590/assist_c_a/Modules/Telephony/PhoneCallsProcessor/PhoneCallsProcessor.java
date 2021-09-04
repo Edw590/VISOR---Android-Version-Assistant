@@ -28,7 +28,6 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
@@ -36,6 +35,7 @@ import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.CALL_STATE_OFFHOOK;
@@ -400,9 +400,8 @@ public class PhoneCallsProcessor {
 							System.out.println(mapCallLogToCALL_PHASE.get(type_call) + " -> " +
 									calls_state.get(calls_state.size() - 1).get(0));
 							final_return.add(new NumAndPhase(calls_state.get(calls_state.size() - 1).get(0),
-									mapCallLogToCALL_PHASE.get(type_call)));
-							// Won't put any measures here. Nothing here will happen. Will only make the code confusing
-							// (more xD).
+									Objects.requireNonNull(mapCallLogToCALL_PHASE.get(type_call))));
+							// The above will never be null as long as the map remains well done.
 						}
 						calls_state.get(calls_state.size() - 1).set(1, BETTER_CALL_STATE_DISCONNECTED);
 					}
@@ -430,8 +429,8 @@ public class PhoneCallsProcessor {
 					if (calls_state.get(calls_state.size() - 1).get(1).equals(String.valueOf(CALL_STATE_OFFHOOK))) {
 
 						System.out.println(CALL_PHASE_LOST_LATE + " -> " + calls_state.get(calls_state.size() - 1).get(0));
-						final_return.add(new NumAndPhase(calls_state.get(
-								MainSrv.getPhoneCallsProcessor().calls_state.size() - 1).get(0), CALL_PHASE_LOST_LATE));
+						final_return.add(new NumAndPhase(calls_state.get(calls_state.size() - 1).get(0),
+								CALL_PHASE_LOST_LATE));
 						calls_state.get(calls_state.size() - 1).set(1, BETTER_CALL_STATE_DISCONNECTED);
 					}
 				}
