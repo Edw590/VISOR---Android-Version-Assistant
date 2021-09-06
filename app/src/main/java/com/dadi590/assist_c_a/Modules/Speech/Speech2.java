@@ -877,7 +877,7 @@ public class Speech2 extends Service {
 		if (!skip_speech) {
 			// If it's to speak, prepare the app to speak.
 			if (!focus_volume_dnd_done) {
-				//setVolumeDndFocus();
+				setVolumeDndFocus();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
