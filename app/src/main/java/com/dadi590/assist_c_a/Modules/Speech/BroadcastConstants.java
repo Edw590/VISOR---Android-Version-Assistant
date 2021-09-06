@@ -37,7 +37,9 @@ final class BroadcastConstants {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * <p>What it does: calls {@link Speech2#skipCurrentSpeech()}.</p>
+	 * <p>Explanation: calls {@link Speech2#skipCurrentSpeech()}.</p>
+	 * <p>Broadcast by: any class.</p>
+	 * <p>Specific to the class: none.</p>
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_SKIP_SPEECH = "SPEECH2_ACTION_SKIP_SPEECH";
@@ -47,7 +49,9 @@ final class BroadcastConstants {
 	/**
 	 * <p>Explanation: removes a speech from the lists based on its speech string. More info on
 	 * {@link Speech2#getSpeechIdBySpeech(String, int, boolean)} and {@link Speech2#removeSpeechById(String)}.</p>
-	 * <p>Main target: {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}</p>
+	 * <p>Main executed function: {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}</p>
+	 * <p>Broadcast by: any class.</p>
+	 * <p>Specific to the class: none.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_2}: mandatory</p>
@@ -61,7 +65,9 @@ final class BroadcastConstants {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * <p>Target: {@link Speech2#speak(String, int, int, Integer)}.</p>
+	 * <p>Executed function: {@link Speech2#speak(String, int, int, Integer)}.</p>
+	 * <p>Broadcast by: any class.</p>
+	 * <p>Specific to the class: none.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is {@link Speech2#NO_ADDITIONAL_COMMANDS})</p>
@@ -73,4 +79,13 @@ final class BroadcastConstants {
 	static final String EXTRA_CALL_SPEAK_2 = "SPEECH2_EXTRA_CALL_SPEAK_2";
 	static final String EXTRA_CALL_SPEAK_3 = "SPEECH2_EXTRA_CALL_SPEAK_3";
 	static final String EXTRA_CALL_SPEAK_4 = "SPEECH2_EXTRA_CALL_SPEAK_4";
+
+	/**
+	 * <p>Explanation: warns when the speech module is ready for use after the first time (means any time other than
+	 * the module initialization time).</p>
+	 * <p>Broadcast by: {@link Speech2}.</p>
+	 * <p>Specific to the class: {@link Speech2}.</p>
+	 * <p>Extras: none.</p>
+	 */
+	static final String ACTION_SPEECH2_READY_AGAIN = "ACTION_SPEECH2_READY_AGAIN";
 }

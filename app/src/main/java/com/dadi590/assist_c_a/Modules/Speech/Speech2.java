@@ -121,6 +121,24 @@ public class Speech2 extends Service {
 
 		readyArrayLists();
 
+		initializeTts(true);
+	}
+
+	@Override
+	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+		// Do this below every time the service is started/resumed/whatever
+
+		return START_STICKY;
+	}
+
+	/**
+	 * <p>Initializes the {@link TextToSpeech} object.</p>
+	 *
+	 * @param from_onCreate true if the call to this function was made from onCreate(), false otherwise - this way the
+	 *                      function can execute tasks that can only be done in the module initialization (when
+	 *                      onCreate() is called)
+	 */
+	void initializeTts(final boolean from_onCreate) {
 		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
@@ -139,27 +157,33 @@ public class Speech2 extends Service {
 							}
 						}
 
-						// Set the audio attributes to use
-						final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-							builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
+						if (from_onCreate) {
+							// Set the audio attributes to use
+							final AudioAttributes.Builder builder = new AudioAttributes.Builder();
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+								builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
+							}
+							builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+							builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
+							//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
+							// track plays it uses the System (Ringer) volume as the master volume control. Not the media
+							// volume as I would expect." (this is about setting that flag - changes the audio stream).
+							// That's to be changed depending on the speech priority only and the enforcing of the audio is
+							// done manually though DND, volume, and the stream. So don't set this flag.
+							audioAttributes = builder.build();
+							//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
+							// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
+							// speaking and it's interrupted - but onDone is never called, only onStop().
+							// Which means, if it doesn't work well in one case, don't enable.
 						}
-						builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-						builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
-						//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
-						// track plays it uses the System (Ringer) volume as the master volume control. Not the media
-						// volume as I would expect." (this is about setting that flag - changes the audio stream).
-						// That's to be changed depending on the speech priority only and the enforcing of the audio is
-						// done manually though DND, volume, and the stream. So don't set this flag.
-						audioAttributes = builder.build();
-						//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
-						// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
-						// speaking and it's interrupted - but onDone is never called, only onStop().
-						// Which means, if it doesn't work well in one case, don't enable.
 					}
 
-					registerReceiver();
-					UtilsApp.sendInternalBroadcast(new Intent(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+					if (from_onCreate) {
+						registerReceiver();
+						UtilsApp.sendInternalBroadcast(new Intent(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+					} else {
+						UtilsApp.sendInternalBroadcast(new Intent(BroadcastConstants.ACTION_SPEECH2_READY_AGAIN));
+					}
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
 					// wrong and must be fixed as soon as possible.
@@ -171,13 +195,6 @@ public class Speech2 extends Service {
 				}
 			}
 		}, GL_CONSTS.PREFERRED_TTS_ENGINE);
-	}
-
-	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-		// Do this below every time the service is started/resumed/whatever
-
-		return START_STICKY;
 	}
 
 	//////////////////////////////////////
@@ -364,6 +381,12 @@ public class Speech2 extends Service {
 	 * Do Not Disturb setting and only then will proceed to the other 2 things. The volume will also be set to the
 	 * maximum the chosen audio stream can handle.</p>
 	 * <br>
+	 * <p>If a speech is requested, this speech module had already been initialized, and the previously selected TTS
+	 * engine was uninstalled or there was some error attempting to send text to the engine, this module will restart
+	 * internally and another TTS engine will be used to speak (in case there's no engine available after restart, it
+	 * will continue to restart until it finds an available engine to speak again). It will only come back to the
+	 * preferred engine again if the module is restarted manually (for example by a force stop of the app).</p>
+	 * <br>
 	 * <p>If {@code AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL}, exactly nothing will be done (the
 	 * speech will be completely aborted), except broadcast {@code after_speaking_code}.
 	 * <br>
@@ -478,13 +501,9 @@ public class Speech2 extends Service {
 				}
 			}
 			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking_code);
-			System.out.println("------------------------");
-			System.out.println(after_speaking_code);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
-			audio_stream_to_use = new_speech_obj.audio_stream;
 		} else {
 			utterance_id_to_use = utterance_id;
-			audio_stream_to_use = audio_stream;
 		}
 
 		if (current_speech_obj.utterance_id.isEmpty()) {
@@ -504,7 +523,16 @@ public class Speech2 extends Service {
 				current_speech_obj = new_speech_obj;
 			}
 
-			return sendTtsSpeak(txt_to_speak, utterance_id_to_use, audio_stream_to_use);
+			// In case there was some error (for example, the engine was uninstalled), reinitialize the TTS object.
+			final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak, current_speech_obj.utterance_id,
+					current_speech_obj.audio_stream);
+			System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+			System.out.println(tts_error_code);
+			if (tts_error_code != TextToSpeech.SUCCESS) {
+				initializeTts(false);
+			}
+
+			return tts_error_code;
 		} else {
 			speeches_on_lists = true;
 
@@ -542,7 +570,7 @@ public class Speech2 extends Service {
 	 *
 	 * @return same as in {@link TextToSpeech}'s speak() methods
 	 */
-	private int sendTtsSpeak(final String txt_to_speak, final String utterance_id, final int audio_stream) {
+	int sendTtsSpeak(final String txt_to_speak, final String utterance_id, final int audio_stream) {
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);
@@ -849,7 +877,7 @@ public class Speech2 extends Service {
 		if (!skip_speech) {
 			// If it's to speak, prepare the app to speak.
 			if (!focus_volume_dnd_done) {
-				setVolumeDndFocus();
+				//setVolumeDndFocus();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
@@ -1060,6 +1088,8 @@ public class Speech2 extends Service {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
+		intentFilter.addAction(BroadcastConstants.ACTION_SPEECH2_READY_AGAIN);
+
 		intentFilter.addAction(BroadcastConstants.ACTION_CALL_SPEAK);
 		intentFilter.addAction(BroadcastConstants.ACTION_SKIP_SPEECH);
 		intentFilter.addAction(BroadcastConstants.ACTION_REMOVE_SPEECH);
@@ -1081,6 +1111,19 @@ public class Speech2 extends Service {
 			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
+				case (BroadcastConstants.ACTION_SPEECH2_READY_AGAIN): {
+					// todo Warn there was an error with the selected engine and the TTS had to be reinitialized with
+					//  another engine
+					final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak,
+							current_speech_obj.utterance_id, current_speech_obj.audio_stream);
+					System.out.println("IIIIIIIIIIIIIIIIIIIIIIII");
+					System.out.println(tts_error_code);
+					if (tts_error_code != TextToSpeech.SUCCESS) {
+						initializeTts(false);
+					}
+
+					break;
+				}
 				case (BroadcastConstants.ACTION_CALL_SPEAK): {
 					final String txt_to_speak = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
 					final int additional_command = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);

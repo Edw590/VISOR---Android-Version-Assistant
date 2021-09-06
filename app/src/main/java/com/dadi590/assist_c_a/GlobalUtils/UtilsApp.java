@@ -186,11 +186,14 @@ public final class UtilsApp {
      * app-internal broadcast).</p>
      * <p>To do this, this method sets {@link Intent#setPackage(String)} to this package's name automatically.</p>
      *
-     *  @param intent the intent to use with the broadcast
+     * @param intent the intent to use with the broadcast
      */
     public static void sendInternalBroadcast(@NonNull final Intent intent) {
         final Context context = UtilsGeneral.getContext();
         intent.setPackage(context.getPackageName());
+        // Don't add setComponent() here. If it's an internal broadcast receiver to a class (a registered one), it
+        // will complicate things. Just make sure the broadcast action is only available for the class you want or
+        // something.
 
         context.sendBroadcast(intent);
     }

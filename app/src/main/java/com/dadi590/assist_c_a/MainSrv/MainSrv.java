@@ -192,7 +192,7 @@ public class MainSrv extends Service {
 
 		// Do NOT put ANYTHING here!!!
 		// MANY places starting this service don't check if it's already started or not, so this method will be called
-		// many times randomly. Put everything on onCreate() which is called only if the service was not running and
+		// many times randomly. Put everything on onCreate(), which is called only if the service was not running and
 		// was just started.
 
 		return START_STICKY;
