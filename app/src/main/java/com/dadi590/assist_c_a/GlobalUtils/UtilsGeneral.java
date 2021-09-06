@@ -204,8 +204,8 @@ public final class UtilsGeneral {
 
 	/**
 	 * <p>Convert a byte array to printable characters in a string.</p>
-	 * <p>Note: all bytes except null will be attempted to be printed, all based on the platform's default charset (on
-	 * Android is always the UTF-8 charset).</p>
+	 * <p>Note: all bytes will be attempted to be printed, all based on the platform's default charset (on Android is
+	 * always the UTF-8 charset).</p>
 	 *
 	 * @param byte_array the byte array
 	 *
@@ -216,11 +216,8 @@ public final class UtilsGeneral {
 		final byte[] new_array = new byte[byte_array.length];
 		int new_length = 0;
 		for (final byte _byte : byte_array) {
-			// Allow all possible characters except the null character to be printed
-			if ((int) _byte != 0) {
-				new_array[new_length] = _byte;
-				new_length++;
-			}
+			new_array[new_length] = _byte;
+			new_length++;
 		}
 		// The default charset on Android is always UTF-8 as stated in the method documentation, so all is ok
 		return new String(new_array, 0, new_length, Charset.defaultCharset());

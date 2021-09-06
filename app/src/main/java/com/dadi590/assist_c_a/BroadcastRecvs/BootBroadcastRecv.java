@@ -31,16 +31,12 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
  * <p>The {@link BroadcastReceiver} to be used ONLY to start the app at the device boot.</p>
- * <p>Explanation of the why on a comment.</p>
+ * <p>Explanation of the why on a comment on the manifest.</p>
  */
 public class BootBroadcastRecv extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW1");
-		if (intent != null) {
-			System.out.println(intent.getAction());
-		}
 		UtilsServices.startMainService();
 	}
 }

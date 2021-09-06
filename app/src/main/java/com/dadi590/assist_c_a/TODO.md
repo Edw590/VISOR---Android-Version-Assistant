@@ -14,6 +14,9 @@ Missing making the alarm system...
 Make it a smart alarm system. If you're leaving home, he can warn you about it; if you're entering some market, he can
 remind you of what to buy; if you just woke up, he can remind you of doing various things...
 
+WHEN WRITING TO THE FILES, ALWAYS ADD RANDOM DATA RANDOMLY THROUGH THE FILE IN BLOCKS OF LESS THAN 16 BYTES!!!!!
+That should help preventing understanding what's in the message in case the same IV is used.
+
 
 ## Speech recognition
 
