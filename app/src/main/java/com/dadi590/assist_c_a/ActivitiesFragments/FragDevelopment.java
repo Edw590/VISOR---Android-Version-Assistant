@@ -22,7 +22,6 @@
 package com.dadi590.assist_c_a.ActivitiesFragments;
 
 import android.app.NotificationManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -91,10 +90,6 @@ public class FragDevelopment extends Fragment {
 				// BUTTON FOR TESTING
 
 				//UtilsLocationRelative.startIndRelDistance();
-
-				final BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
-				System.out.println("HHHHHHHHHHHHH");
-				System.out.println(BTAdapter.startDiscovery());
 
 				final Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);

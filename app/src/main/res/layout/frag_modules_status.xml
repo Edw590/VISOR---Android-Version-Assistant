@@ -24,18 +24,15 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:theme="@style/AppTheme.NoActionBar"
 	tools:context=".ActivitiesFragments.FragDevelopment">
 
 	<LinearLayout
 		android:orientation="vertical"
 		android:layout_height="wrap_content"
-		android:layout_width="match_parent">
-
-		<androidx.appcompat.widget.AppCompatButton
-			android:id="@+id/btn_unlock"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:text="Unlock" />
+		android:layout_width="match_parent"
+		android:theme="@style/AppTheme.NoActionBar"
+		android:id="@+id/frag_modules_status_linear_layout">
 
 	</LinearLayout>
 

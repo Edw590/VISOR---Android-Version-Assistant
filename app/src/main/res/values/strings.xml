@@ -26,4 +26,5 @@
 
 	<string name="fragDevelopment_title">Dev Mode</string>
 	<string name="fragMain_title">Home</string>
+	<string name="fragModulesStatus_title">Modules status</string>
 </resources>

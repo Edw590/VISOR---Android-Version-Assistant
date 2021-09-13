@@ -31,13 +31,13 @@
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent">
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_perms"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="Click here until there is nothing left to authorize/enable" />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_device_admin"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 
-		<EditText
+		<androidx.appcompat.widget.AppCompatEditText
 			android:id="@+id/txt_to_speech"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -56,19 +56,19 @@
 			android:inputType="textPersonName"
 			android:text="This is an example." />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_speak_min"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="Speak (min priority)" />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_speak_high"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="Speak (high priority)" />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_skip_speech"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 
-		<EditText
+		<androidx.appcompat.widget.AppCompatEditText
 			android:id="@+id/txt_to_send"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
 			android:focusable="true"
 			android:focusableInTouchMode="true" />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_send_text"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -99,11 +99,12 @@
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 
-		<Button
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_tests"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="For testing" />
 
 	</LinearLayout>
+
 </androidx.core.widget.NestedScrollView>

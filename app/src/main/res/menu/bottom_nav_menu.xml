@@ -29,5 +29,9 @@
 		android:id="@+id/frag_development"
 		android:title="@string/fragDevelopment_title"
 		android:icon="@drawable/development" />
+	<item
+		android:id="@+id/frag_modules_status"
+		android:title="@string/fragModulesStatus_title"
+		android:icon="@drawable/development" />
 
 </menu>

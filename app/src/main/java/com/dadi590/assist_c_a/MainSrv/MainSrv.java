@@ -43,10 +43,9 @@ import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.ModulesList;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * The main {@link Service} of the application - MainService.
@@ -58,91 +57,43 @@ public class MainSrv extends Service {
 
 	// Private variables //
 
-	// Not bad, since it's the application context (global for the entire process), not a local one
-	//private static Context main_app_context = null; - disabled while using UtilsGeneral.getMainAppContext()
-
-	// Modules instances to start in order (hence, use LinkedHashMap to keep the order and not HashMap, for example)
-	static final Map<Class<?>, Object> map_module_instances = new LinkedHashMap<Class<?>, Object>() {
-		private static final long serialVersionUID = -6765954534439562196L;
-		@NonNull @Override public LinkedHashMap<Class<?>, Object> clone() throws AssertionError {
-			throw new AssertionError();
-		}
-
-		{
-			// ATTENTION - Only the constructor with no parameters of the module will be called, so put ALL the modules
-			// being started with a constructor with no parameters!!!
-			put(BatteryProcessor.class, null);
-			put(PhoneCallsProcessor.class, null);
-			put(AudioRecorder.class, null);
-		}
-	};
-
-	// Modules services to start in order
-	private static final Class<?>[] services_to_start = {
-			Speech2.class,
-	};
-
 	//////////////////////////////////////
 
 	//////////////////////////////////////
 	// Getters and setters
 
-	///**.
-	// * @return the {@link AudioManager}
-	// */
-	/*@Nullable
-	public static AudioManager getAudioManager() {
-		UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class, true);
-
-		return (AudioManager) main_app_context.getSystemService(AUDIO_SERVICE);
-	}*/
-
-	// Global class instances getters //
-
-	// Do NOT put @NonNull on the returning values. If the service has not started OR CRASHED, everything will return
-	// null!!!
-	// EDIT: actually, since I started using UtilsGeneral.getContext(), all seems to work just fine. With getSpeech(),
-	// all works fine as long as I don't return null. If I return the instance, the service starts normally. I'll just
-	// leave it on NonNull. This probably also works because I instantiate everything on the declaration now (because
-	// of UtilsGeneral.getContext() being always available).
-
-	///**.
-	// * @return the main process' Application Context
-	// */
-	//@Nullable
-	//public static Context getMainAppContext() {
-	//	UtilsPermissions.wrapperRequestPerms(null, false);
-	//	UtilsServices.startService(MainSrv.class, true);
-	//
-	//	return main_app_context;
-	//}
-	/**.
-	 * @return the global {@link AudioRecorder} instance
+	/**
+	 * <p>Get the global {@link AudioRecorder} instance.</p>
+	 *
+	 * @return .
 	 */
 	@NonNull
 	public static AudioRecorder getAudioRecorder() {
 		UtilsServices.startMainService();
 
-		return (AudioRecorder) map_module_instances.get(AudioRecorder.class);
+		return (AudioRecorder) ModulesList.getModuleInstance(AudioRecorder.class);
 	}
-	/**.
-	 * @return the global {@link PhoneCallsProcessor} instance
+	/**
+	 * <p>Get the global {@link PhoneCallsProcessor} instance.</p>
+	 *
+	 * @return .
 	 */
 	@NonNull
 	public static PhoneCallsProcessor getPhoneCallsProcessor() {
 		UtilsServices.startMainService();
 
-		return (PhoneCallsProcessor) map_module_instances.get(PhoneCallsProcessor.class);
+		return (PhoneCallsProcessor) ModulesList.getModuleInstance(PhoneCallsProcessor.class);
 	}
-	/**.
-	 * @return the global {@link BatteryProcessor} instance
+	/**
+	 * <p>Get the global {@link BatteryProcessor} instance.</p>
+	 *
+	 * @return .
 	 */
 	@NonNull
 	public static BatteryProcessor getBatteryProcessor() {
 		UtilsServices.startMainService();
 
-		return (BatteryProcessor) map_module_instances.get(BatteryProcessor.class);
+		return (BatteryProcessor) ModulesList.getModuleInstance(BatteryProcessor.class);
 	}
 
 	//////////////////////////////////////
@@ -165,37 +116,14 @@ public class MainSrv extends Service {
 		);
 		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
-		// Before anything else, start the speech module since the assistant must be able to speak.
-		// Don't forget inside the speech module there's a function that executes all important things right after
-		// the TTS is ready - the second reason this must be in the beginning.
-		//speech2 = new Speech2();
-
-		// Put the MainService process' context available statically
-		//main_app_context = getApplicationContext();
-
-		// Initialization of all the assistant's modules, after the service was successfully started (means that
-		// main_app_context is ready to be used wherever it's needed) along with the speech module.
-		//audioRecorder = new AudioRecorder();
-
 		// Register the receiver before the speech module is started
 		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
 
-		// Start services in background - no restrictions, since the Main Service is already in foreground
-		for (final Class<?> service_class : services_to_start) {
-			UtilsServices.startService(service_class, false);
-		}
-	}
-
-	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-		// Do this below every time the service is started/resumed/whatever
-
-		// Do NOT put ANYTHING here!!!
-		// MANY places starting this service don't check if it's already started or not, so this method will be called
-		// many times randomly. Put everything on onCreate(), which is called only if the service was not running and
-		// was just started.
-
-		return START_STICKY;
+		// The speech module must be started before everything else for now - only way of him to communicate with the
+		// user. Later, notifications will be added. Emails would be a good idea too in more extreme notifications.
+		// After the speech module is ready, it will send a broadcast for the receiver below to activate the rest of
+		// the assistant.
+		UtilsServices.startService(Speech2.class, false);
 	}
 
 	/**
@@ -268,21 +196,36 @@ public class MainSrv extends Service {
 
 				//pressao_longa_botoes.ativar_detecao(Build.VERSION.SDK_INT);
 
-				// Instantiate all modules in order, in case they haven't been already (speech module failure, restart,
-				// send this action again, and that would restart all other modules - no thanks)
-				// Also, updating the values does NOT change the order, since this is already a LinkedHashMap (which
-				// keeps the order, unlike HashMap, for example).
-				for (final Map.Entry<Class<?>, Object> module : map_module_instances.entrySet()) {
-					if (module.getValue() == null) {
-						try {
-							final Class<?> module_class = module.getKey();
-							map_module_instances.put(module_class, module_class.getConstructor().newInstance());
-						} catch (final NoSuchMethodException ignored) {
-						} catch (final IllegalAccessException ignored) {
-						} catch (final InstantiationException ignored) {
-						} catch (final InvocationTargetException ignored) {
+				// Start all modules in the order defined in GL_CONSTS.modules_list, in case they haven't been already
+				// (speech module failure, restart, send this action again, and that would restart all other modules -
+				// no thanks).
+				// The services will be started in background - no restrictions, since the Main Service is already in
+				// foreground.
+				int i = 0;
+				for (final Object[] module : ModulesList.getModulesList()) {
+					switch ((int) module[1]) {
+						case (ModulesList.MODULE_TYPE_SERVICE): {
+							// The call to startService() will already check if the service is running or not.
+							UtilsServices.startService((Class<?>) module[0], false);
+
+							break;
+						}
+						case (ModulesList.MODULE_TYPE_INSTANCE): {
+							// Here we check if the module is already running with the module_instances array.
+							if (!ModulesList.isModuleRunningByIndex(i)) {
+								try {
+									ModulesList.setModuleInstance(((Class<?>) module[0]).getConstructor().newInstance(), i);
+								} catch (final NoSuchMethodException ignored) {
+								} catch (final IllegalAccessException ignored) {
+								} catch (final InstantiationException ignored) {
+								} catch (final InvocationTargetException ignored) {
+								}
+							}
+
+							break;
 						}
 					}
+					i++;
 				}
 
 				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
@@ -304,5 +247,17 @@ public class MainSrv extends Service {
 	@Nullable
 	public final IBinder onBind(@Nullable final Intent intent) {
 		return null;
+	}
+
+	@Override
+	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+		// Do this below every time the service is started/resumed/whatever
+
+		// Do NOT put ANYTHING here!!!
+		// MANY places starting this service don't check if it's already started or not, so this method will be called
+		// many times randomly. Put everything on onCreate(), which is called only if the service was not running and
+		// was just started.
+
+		return START_STICKY;
 	}
 }

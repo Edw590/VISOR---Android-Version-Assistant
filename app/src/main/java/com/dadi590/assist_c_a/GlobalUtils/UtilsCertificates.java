@@ -29,7 +29,6 @@ import android.content.pm.SigningInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -47,25 +46,14 @@ public final class UtilsCertificates {
 	private UtilsCertificates() {
 	}
 
-	// Hashing algorithms to use in order, in case one or more are not available
-	private static final String[][] possible_hashing_algorithms = {
-			{"SHA-512", "128"},
-			{"SHA-384", "96"},
-			{"SHA-224", "56"},
-			{"SHA-256", "64"},
-			{"SHA-1",   "32"},
-			{"MD5",     "32"},
-	};
-
 	// App certificates fingerprint whitelist (one or more)
 	private static final Map<?, ?>[] ASSIST_C_A_RSA_CERT_FINGERPRINT = {
 			// Certificate 1
 			new HashMap<String, String>() {
+				private static final long serialVersionUID = -8864195772334229619L;
 				@NonNull @Override public HashMap<String, String> clone() throws AssertionError {
 					throw new AssertionError();
 				}
-
-				private static final long serialVersionUID = -8864195772334229619L;
 
 				{
 					put("SHA-512", "E8AEBF2B968F1A7409D585A0450DAB3E722993F6EAA6C74FDED7841F6957494AAA66650BEA88A24B1" +
@@ -98,8 +86,9 @@ public final class UtilsCertificates {
 	 * @return true if it's not corrupted, false otherwise
 	 */
 	public static boolean isThisAppCorrupted() {
-		final Boolean is_app_fine = checkCertsPkg(UtilsGeneral.getContext().getPackageName(), ASSIST_C_A_RSA_CERT_FINGERPRINT);
-		assert is_app_fine != null; // Will never be null. Else, how is the app installed.
+		// Below will never be null. Else, how is the app installed.
+		final Boolean is_app_fine = Objects.requireNonNull(checkCertsPkg(UtilsGeneral.getContext().getPackageName(),
+				ASSIST_C_A_RSA_CERT_FINGERPRINT));
 		return !is_app_fine;
 	}
 
@@ -112,23 +101,24 @@ public final class UtilsCertificates {
 	 *                         algorithm used for the value, which is the actual hash. Example:
 	 *                         {@code put("SHA-512", "AB52234EAB52234EAB52234EAB52234E")}.
 	 *
-	 * @return true if it's signed with the same certificate, false otherwise; null if the package was not found (or if
-	 * for some reason, there's no hashing algorithm present on the system)
+	 * @return true if it's signed with the same certificate, false otherwise; null if the package was not found
 	 */
 	@Nullable
 	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map<?, ?>[] list_cert_hashes) {
-		String[] hashing_algorithm_to_use = null;
-		for (final String[] hashing_algorithm : possible_hashing_algorithms) {
+		final String[][] possible_hash_algos = UtilsCryptoHashing.getPossibleHashAlgorithms();
+		int hash_algo_to_use = -1;
+		for (int i = possible_hash_algos.length -1; i >= 0; i--) {
 			try {
-				MessageDigest.getInstance(hashing_algorithm[0]);
-				hashing_algorithm_to_use = hashing_algorithm;
+				MessageDigest.getInstance(possible_hash_algos[i][0]);
+				hash_algo_to_use = i;
 				break;
 			} catch (final NoSuchAlgorithmException ignored) {
 			}
 		}
-		if (hashing_algorithm_to_use == null) {
+		if (hash_algo_to_use == -1) {
 			// Will never happen, supposedly. I'm checking all hashing algorithms. If NONE is available, wow. Someone
-			// must have deeply modified the ROM or something.
+			// must have deeply modified the ROM or something (and other apps wouldn't run, so no - at least one must
+			// exist).
 			return null;
 		}
 
@@ -140,13 +130,14 @@ public final class UtilsCertificates {
 		// For each certificate of the other app, check if it matches any of the certificates in the given list.
 		boolean no_matches_at_all = true;
 		for (final Signature signature : other_app_signatures) {
-			final String other_app_sig_hash = Objects.requireNonNull(getHashOfSignature(signature, hashing_algorithm_to_use));
+			final String other_app_sig_hash = Objects.requireNonNull(UtilsCryptoHashing.getHashStringOfBytes(signature.toByteArray(),
+					hash_algo_to_use));
 			// It will always be non-null though, since if it would be null, then we wouldn't get here, because the
 			// function would have returned null by now on other_app_signatures.
 
 			boolean match_found = false;
 			for (final Map<?, ?> cert_hash : list_cert_hashes) {
-				if (other_app_sig_hash.equals(cert_hash.get(hashing_algorithm_to_use[0]))) {
+				if (other_app_sig_hash.equals(cert_hash.get(possible_hash_algos[hash_algo_to_use][0]))) {
 					match_found = true;
 					no_matches_at_all = false;
 					break;
@@ -252,29 +243,5 @@ public final class UtilsCertificates {
 
 			return packageInfo.signatures.clone();
 		}
-	}
-
-	/**
-	 * <p>Gets a Base64 encoded string of the hash of the given signature.</p>
-	 *
-	 * @param signature the signature to get the hash from
-	 * @param hashing_algorithm on the 1st index, the hashing algorithm to use; on the 2nd index, the size of the hash
-	 *
-	 * @return the Base64 encoded string
-	 */
-	@Nullable
-	private static String getHashOfSignature(@NonNull final Signature signature,
-											 @NonNull final String[] hashing_algorithm) {
-		final MessageDigest messageDigest;
-		try {
-			messageDigest = MessageDigest.getInstance(hashing_algorithm[0]);
-		} catch (final NoSuchAlgorithmException ignored) {
-			// Will never happen, because from Android Developers or the class doc, SHA-512 is available from 1+
-			// onwards on all API levels
-			return null;
-		}
-		messageDigest.update(signature.toByteArray());
-
-		return String.format("%" + hashing_algorithm[1] + "X", new BigInteger(1, messageDigest.digest()));
 	}
 }

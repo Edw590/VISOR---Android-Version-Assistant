@@ -31,7 +31,7 @@
 		android:layout_height="match_parent"
 		android:orientation="vertical">
 
-		<TextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:text="@string/app_title"
