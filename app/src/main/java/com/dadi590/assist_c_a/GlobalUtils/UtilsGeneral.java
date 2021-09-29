@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.ApplicationClass;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -208,19 +209,40 @@ public final class UtilsGeneral {
 	 * always the UTF-8 charset).</p>
 	 *
 	 * @param byte_array the byte array
+	 * @param utf7 true if the bytes were encoded using UTF-7, false if they were encoded using UTF-8
 	 *
 	 * @return a string containing printable characters representative of the provided bytes
 	 */
 	@NonNull
-	public static String convertBytesToPrintable(@NonNull final byte[] byte_array) {
-		final byte[] new_array = new byte[byte_array.length];
-		int new_length = 0;
-		for (final byte _byte : byte_array) {
-			new_array[new_length] = _byte;
-			new_length++;
+	public static String bytesToPrintableChars(@NonNull final byte[] byte_array, final boolean utf7) {
+		if (utf7) {
+			try {
+				return new String(byte_array, GL_CONSTS.UTF7_NAME_LIB);
+			} catch (final UnsupportedEncodingException ignored) {
+				// Won't happen - UTF-7 is included in the project through com.beetstra.jutf7 library.
+				return null;
+			}
+		} else {
+			// The default charset on Android is always UTF-8 as stated in the method documentation, so all is ok
+			return new String(byte_array, Charset.defaultCharset());
 		}
-		// The default charset on Android is always UTF-8 as stated in the method documentation, so all is ok
-		return new String(new_array, 0, new_length, Charset.defaultCharset());
+	}
+
+	/**
+	 * <p>Converts a {@link byte} to an "unsigned" {@link int}.</p>
+	 * <p>Primitives in Java are all signed. So {@code (byte) 200 = -56} - this gets it equal to 200, for an unsigned
+	 * storage and representation. Useful if the byte is supposed to be used with indexes on arrays and stuff.</p>
+	 *
+	 * @param _byte the {@link byte} to be converted
+	 *
+	 * @return the converted byte to an "unsigned" {@link int}
+	 */
+	public static int byteToIntUnsigned(final byte _byte) {
+		// 'Will print a negative int -56 because upcasting byte to int does so called "sign extension" which yields
+		// those bits: 1111 1111 1111 1111 1111 1111 1100 1000 (-56)' - https://stackoverflow.com/a/4266841/8228163
+		// This below will zero everything out except the first 8 bits (ANDed with 1) - so a positive number (the
+		// unsigned byte) remains.
+		return (int) _byte & 0xFF;
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

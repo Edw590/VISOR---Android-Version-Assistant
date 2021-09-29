@@ -73,13 +73,15 @@ public class BatteryProcessor {
 	 */
 	public final void processBatteryLvlChg(@NonNull final Intent intent) {
 		final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-		final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-		final int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-		if (battery_status == -1 || level == -1 || scale == -1) {
+		final int battery_level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		final int battery_level_scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+		if (battery_status == -1 || battery_level == -1 || battery_level_scale == -1) {
 			return;
 		}
 
-		final int battery_percentage = level * 100 / scale;
+		final int battery_percentage = battery_level * 100 / battery_level_scale;
+
+		System.out.println("> " + battery_percentage);
 
 		// If the class was just instantiated, store the current battery percentage and wait for the next change.
 		if (last_detected_percent == -1) {

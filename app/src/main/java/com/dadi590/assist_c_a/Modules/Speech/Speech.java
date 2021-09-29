@@ -42,7 +42,7 @@ import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
 import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
 
 /**
- * <p>The speech module of the assistant based on {@link TextToSpeech}'s internal queue.</p>
+ * <p>The speech module of the assistant, based on {@link TextToSpeech}'s internal queue.</p>
  *
  * @deprecated use the v2 API: {@link Speech2}. I've left this one here (Speech v1) in case it's needed again.
  */
@@ -170,7 +170,7 @@ public class Speech {
 		// normal and emergency (incoming call has different priority than stolen device, for example). Also, pause the
 		// speech ("wait, wait. [thinking on something...] ok, carry on") --> though, it means I can't disable the
 		// recognition while he's speaking...
-		// Done. New implementation of TextToSpeech. No need for files. Can't pause though, but he'll just say it again.
+		// Done. New implementation of the Speech API. No need for files. Can't pause though, but he'll just say it again.
 
 		// todo See why the phone speaks through headphones AND speakers when the speech is requested by
 		// onPartialResults() or through MainAct!!!! --> WTF

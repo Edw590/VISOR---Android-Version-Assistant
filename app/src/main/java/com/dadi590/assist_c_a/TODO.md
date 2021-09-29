@@ -226,3 +226,15 @@ all next speeches are skipped. He should stop the speech immediately...
 
 Also, the last speech that was actually spoken (with volume...) should be the last thing said, and all the others should
 be on some list to then say them, starting with the one that was interrupted ("As I was saying, (...)").
+
+
+## Speech
+
+If there is some issue on the device and many broadcasts are sent at once and the assistant speaks in each of them, it
+will be speaking for some time always the same thing. Like on the tablet, when the charger cable is not well put.
+So get the assistant to skip infinite equal speeches and say it skipped X equal speeches to the last one.
+
+## Speech
+
+Put it checking for background noise before speaking. If it's very noisy, put volume at maximum to speak. If it's no
+noise at all, low volume. If people are talking, for example (medium noise), put medium volume (as it's default now).

@@ -27,7 +27,6 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
-import com.dadi590.assist_c_a.Modules.DeviceLocator.DeviceLocator;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 
@@ -54,7 +53,7 @@ public final class ModulesList {
 	 */
 	private static final Object[][] modules_list = {
 			{Speech2.class, MODULE_TYPE_SERVICE, "Speech", null},
-			{DeviceLocator.class, MODULE_TYPE_SERVICE, "Device Locator", null},
+			//{DeviceLocator.class, MODULE_TYPE_SERVICE, "Device Locator", null},
 			{BatteryProcessor.class, MODULE_TYPE_INSTANCE, "Battery Processor", null},
 			{PhoneCallsProcessor.class, MODULE_TYPE_INSTANCE, "Phone Calls Processor", null},
 			{AudioRecorder.class, MODULE_TYPE_INSTANCE, "Audio Recorder", null},
@@ -67,7 +66,7 @@ public final class ModulesList {
 	}
 
 	/**
-	 * <p>Get the {@link #modules_list} array.</p>
+	 * <p>Get a clone of {@link #modules_list}.</p>
 	 *
 	 * @return .
 	 */

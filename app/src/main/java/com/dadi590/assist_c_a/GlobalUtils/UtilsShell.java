@@ -66,7 +66,7 @@ public final class UtilsShell {
 
 		final CmdOuputObj commands_output = executeShellCmd(commands);
 
-		return UtilsGeneral.convertBytesToPrintable(commands_output.output_stream);
+		return UtilsGeneral.bytesToPrintableChars(commands_output.output_stream, false);
 	}
 
 	/*public static boolean createFile(@NonNull final String complete_name) {
@@ -99,7 +99,7 @@ public final class UtilsShell {
 	 * <p>- The function will input "exit\n" as the last command in case the command to execute su was issued (resulting
 	 * in an infinite wait for it).</p>
 	 * <p>- The return values are byte arrays. To get the printable form of them, use
-	 * {@link UtilsGeneral#convertBytesToPrintable(byte[])}.</p>
+	 * {@link UtilsGeneral#bytesToPrintableChars(byte[], boolean)}.</p>
 	 *
 	 * @param commands_list list of commands to execute, each in a new index
 	 *

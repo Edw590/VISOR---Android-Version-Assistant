@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import java.util.ArrayList;
+
 /**
  * <p>Actions, extras, and classes to use to send a broadcast to this module.</p>
  * <br>
@@ -48,8 +50,9 @@ final class BroadcastConstants {
 
 	/**
 	 * <p>Explanation: removes a speech from the lists based on its speech string. More info on
-	 * {@link Speech2#getSpeechIdBySpeech(String, int, boolean)} and {@link Speech2#removeSpeechById(String)}.</p>
-	 * <p>Main executed function: {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}</p>
+	 * {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)} and
+	 * {@link UtilsSpeech2#removeSpeechById(String, ArrayList)}.</p>
+	 * <p>Main executed function: {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}</p>
 	 * <p>Broadcast by: any class.</p>
 	 * <p>Specific to the class: none.</p>
 	 * <p>Extras (ordered parameters):</p>

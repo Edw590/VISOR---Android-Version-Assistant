@@ -49,14 +49,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.NUMBER_OF_PRIORITIES;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_2;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_3;
 
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
@@ -71,8 +65,8 @@ public class Speech2 extends Service {
 	Main note of how this module works!!!
 	-----
 
-	A speech is requested through a broadcast. This sets a variable that says there's a speech in process and
-	starts processing the speech, adds the speech to a list, and starts processing it.
+	A speech is requested through a broadcast. This sets a variable that says there's a speech in process, adds the
+	speech to a list, and starts processing it.
 
 	While that's happening (from the moment it start being processed before speaking to before it ends being spoken),
 	another speech is requested the same way. As there's already a speech being processed, this new one is added to a
@@ -80,10 +74,13 @@ public class Speech2 extends Service {
 
 	When the first speech finishes being spoken, it calls a function which removes the speech from the list and
 	iterates the list for any other speeches on the line. When it finds one, it starts processing it right away.
+	If the speech was interrupted by a higher priority one, the current one will be stopped, and the same function will
+	be called, though this time it won't remove the speech from the lists, but will still look for a new speech, always
+	from high to low priorities.
 
 	So, this works in one line of flow. Infinite speeches are called, and they're all stacked. Once a speech finishes
 	being spoken, it calls the second one on the line. So take things in only on one line of flow (I tried that it is a
-	synchronous class on the speech processing).
+	synchronous class on the speech processing part to be easy to think on).
 	*/
 
 	TextToSpeech tts;
@@ -119,7 +116,7 @@ public class Speech2 extends Service {
 	public final void onCreate() {
 		super.onCreate();
 
-		readyArrayLists();
+		UtilsSpeech2.readyArrayLists(arrays_speech_objs);
 
 		initializeTts(true);
 	}
@@ -208,6 +205,8 @@ public class Speech2 extends Service {
 		return last_thing_said;
 	}
 
+	//////////////////////////////////////
+
 	/**
 	 * <p>Sets {@link #user_changed_volume} to true in case the audio stream of the changed volume equals the audio
 	 * stream currently being used to speak.</p>
@@ -266,36 +265,6 @@ public class Speech2 extends Service {
 		}
 	}
 
-	//////////////////////////////////////
-
-	/**
-	 * <p>Removes a speech from the queues through its utterance ID.</p>
-	 *
-	 * @param utteranceId the utterance ID of the speech
-	 *
-	 * @return the successfully removed {@link SpeechObj}, or null if the utterance ID was not on the lists
-	 */
-	@Nullable
-	final SpeechObj removeSpeechById(@NonNull final String utteranceId) {
-		final int[] indexes = UtilsSpeech2.getSpeechIndexesFromId(utteranceId, arrays_speech_objs);
-		if (indexes == null) {
-			// Should not happen when called from inside the Speech class if the Speech is well implemented
-			return null;
-		}
-
-		// This variable below is for, hopefully, faster access than being getting the array every time.
-		final SpeechObj speechObj = arrays_speech_objs.get(indexes[0]).get(indexes[1]);
-
-		// If there's an ID of a Runnable to run after the speech is finished, send the broadcast that that Runnable
-		// can be ran.
-		if (speechObj.after_speaking_code != null) {
-			UtilsSpeech2.broadcastAfterSpeakCode(speechObj.after_speaking_code);
-		}
-		last_thing_said = speechObj.txt_to_speak;
-		// Here below must be the original array, so it can be modified
-		return arrays_speech_objs.get(indexes[0]).remove(indexes[1]);
-	}
-
 	/**
 	 * <p>Skips the currently speaking speech.</p>
 	 *
@@ -303,53 +272,6 @@ public class Speech2 extends Service {
 	 */
 	final int skipCurrentSpeech() {
 		return ttsStop(true);
-	}
-
-	public static final int UNKNOWN_PRIORITY = -1;
-	/**
-	 * <p>Gets the speech ID through its speech string.</p>
-	 * <br>
-	 * <p>This method will return the ID of the <em>first</em> occurrence only, in case there are multiple speeches with
-	 * the same string.</p>
-	 * <br>
-	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #UNKNOWN_PRIORITY} --> for {@code speech_priority}: in case the speech priority is not known -- then the
-	 * method will take more time to search the arrays for it, since it will search all arrays until it finds an
-	 * occurrence.</p>
-	 * <p><u>---CONSTANTS---</u></p>
-	 *
-	 * @param speech the speech string to search the arrays for
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, int, Integer)} or the constant. If it's the
-	 *                           constant, then the parameter {@code low_to_high} will be completely ignored
-	 * @param low_to_high true to search from lower priority arrays to higher ones, false to do the opposite
-	 *
-	 * @return the ID of the found speech
-	 */
-	@Nullable
-	final String getSpeechIdBySpeech(@NonNull final String speech, final int speech_priority,
-											final boolean low_to_high) {
-		if (speech_priority == UNKNOWN_PRIORITY) {
-			final int arrays_speech_objs_size = arrays_speech_objs.size();
-			if (low_to_high) {
-				for (int priority = 0; priority < arrays_speech_objs_size; priority++) {
-					final String ret = UtilsSpeech2.internalGetSpeechIdBySpeech(priority, speech, arrays_speech_objs);
-					if (ret != null) {
-						return ret;
-					}
-				}
-			} else {
-				for (int priority = arrays_speech_objs_size - 1; priority >= 0; priority--) {
-					final String ret = UtilsSpeech2.internalGetSpeechIdBySpeech(priority, speech, arrays_speech_objs);
-					if (ret != null) {
-						return ret;
-					}
-				}
-			}
-		} else {
-			return UtilsSpeech2.internalGetSpeechIdBySpeech(speech_priority, speech, arrays_speech_objs);
-		}
-
-		return null;
 	}
 
 	public static final int NO_ADDITIONAL_COMMANDS = 0;
@@ -475,8 +397,6 @@ public class Speech2 extends Service {
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
-		final int audio_stream_to_use;
-
 		SpeechObj new_speech_obj = null;
 		String utterance_id_to_use;
 		if (utterance_id == null) {
@@ -526,8 +446,6 @@ public class Speech2 extends Service {
 			// In case there was some error (for example, the engine was uninstalled), reinitialize the TTS object.
 			final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak, current_speech_obj.utterance_id,
 					current_speech_obj.audio_stream);
-			System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-			System.out.println(tts_error_code);
 			if (tts_error_code != TextToSpeech.SUCCESS) {
 				initializeTts(false);
 			}
@@ -581,47 +499,6 @@ public class Speech2 extends Service {
 			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utterance_id);
 
 			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, tts_params.hashmap);
-		}
-	}
-
-	/**
-	 * <p>Get the ArrayLists of speech objects ready for use.</p>
-	 */
-	private void readyArrayLists() {
-		// Fill each ArrayList with a number of ArrayLists, which correspond to the number of existing priority values.
-		// 50 as the initial value because I don't think more than 50 speeches will be on a list... (wtf).
-		final ArrayList<SpeechObj> new_array = new ArrayList<>(50);
-		for (int i = 0; i < NUMBER_OF_PRIORITIES; i++) {
-			arrays_speech_objs.add(new_array);
-		}
-	}
-
-	/**
-	 * <p>Rephrases a speech that was interrupted, to have a prefix, so when it's spoken again, one knows it was the
-	 * speech that was trying to be said before the interruption.</p>
-	 *
-	 * @param utterance_id the utterance ID of the speech to be rephrased
-	 */
-	private void reSayRephraseSpeech(final String utterance_id) {
-		final int priority = UtilsSpeech2.getSpeechPriority(utterance_id);
-
-		final List<SpeechObj> correct_sub_array = arrays_speech_objs.get(priority);
-		final int size_loop = correct_sub_array.size();
-		for (int i = 0; i < size_loop; i++) {
-			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
-				final SpeechObj speechObj = correct_sub_array.get(i);
-
-				if (speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_1)) {
-					final String new_speech = speechObj.txt_to_speak.substring(WAS_SAYING_PREFIX_1.length());
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_2 + new_speech;
-				} else if (speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_2)) {
-					final String new_speech = speechObj.txt_to_speak.substring(WAS_SAYING_PREFIX_2.length());
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_3 + new_speech;
-				} else if (!speechObj.txt_to_speak.startsWith(WAS_SAYING_PREFIX_3)) {
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = WAS_SAYING_PREFIX_1 + speechObj.txt_to_speak;
-				}
-				break;
-			}
 		}
 	}
 
@@ -978,7 +855,7 @@ public class Speech2 extends Service {
 			// the current speech).
 			speechTreatment(utteranceId);
 		} else {
-			reSayRephraseSpeech(utteranceId);
+			UtilsSpeech2.reSayRephraseSpeech(utteranceId, arrays_speech_objs);
 			// In this case, the speech is not to be removed from the list. Only stopped temporarily.
 			speechTreatment("");
 		}
@@ -995,9 +872,13 @@ public class Speech2 extends Service {
 	 * {@link #onStop(String, boolean)}
 	 */
 	final void speechTreatment(final String utteranceId) {
+		// Main note: everything that calls this function empties current_speech_obj first.
+
+		// Why is this check here and not just the removal? Refer to the custom onStop().
 		if (!utteranceId.isEmpty()) {
-			// Why is this check here and not just the removal? Refer to the custom onStop().
-			removeSpeechById(utteranceId);
+			// Won't happen - or the speech wouldn't have taken place.
+			last_thing_said = Objects.requireNonNull(UtilsSpeech2.removeSpeechById(utteranceId, arrays_speech_objs))
+					.txt_to_speak;
 		}
 
 		// From back to beginning since high priority has greater value than low priority and the first speeches to be
@@ -1155,9 +1036,10 @@ public class Speech2 extends Service {
 					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, -1);
 					final boolean low_to_high = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, true);
 
-					final String speech_id = getSpeechIdBySpeech(speech, speech_priority, low_to_high);
+					final String speech_id = UtilsSpeech2.getSpeechIdBySpeech(speech, speech_priority, low_to_high,
+							arrays_speech_objs);
 					if (speech_id != null) {
-						removeSpeechById(speech_id);
+						UtilsSpeech2.removeSpeechById(speech_id, arrays_speech_objs);
 					}
 
 					break;

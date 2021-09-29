@@ -48,8 +48,10 @@ public final class UtilsCryptoHashing {
 	private static final String[][] possible_hashing_algorithms = {
 			// ATTENTION - the implementation of UtilsCertificates#checkCertsPkg() depends on the format of this array.
 			// If it's to be changed, check that function too.
+			// Format: 1st index: algorithm name; 2nd index: hexadecimal representation length
+			// (https://www.php.net/manual/en/function.hash.php)
 			{"MD5",     "32"},
-			{"SHA-1",   "32"},
+			{"SHA-1",   "40"},
 			{"SHA-224", "56"},
 			{"SHA-256", "64"},
 			{"SHA-384", "96"},

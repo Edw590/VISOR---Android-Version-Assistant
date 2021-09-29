@@ -86,15 +86,13 @@ public final class UtilsMedia {
 					break;
 				}
 			}
-			final File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), folder);
-			// This location works best if you want the created images to be shared between applications and persist
-			// after your app has been uninstalled.
 
 			// Create the storage directory if it does not exist
-			if (!mediaStorageDir.exists()) {
-				mediaStorageDir.mkdirs();
-				// In the beginning it's checked if the storage is available and that method returns true if and only if
-				// the storage has read/write access - so the folder can be created. No need to check if it was or not.
+			// In the beginning it's checked if the storage is available and that method returns true if and only if
+			// the storage has read/write access - so the folder can be created. No need to check for nullability.
+			final File media_folder = UtilsFilesDirs.createDirectory(folder);
+			if (media_folder == null) {
+				return null;
 			}
 
 			// Create a media file name
@@ -103,30 +101,30 @@ public final class UtilsMedia {
 			File mediaFile = null;
 			switch (media_type) {
 				case (AUDIO): {
-					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "AUD_" + timeStamp + ".aac");
+					mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + timeStamp + ".aac");
 					break;
 				}
 				case (PHOTO): {
-					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "PHO_" + timeStamp + ".jpg");
+					mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + timeStamp + ".jpg");
 					break;
 				}
 				case (VIDEO): {
-					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
+					mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
 					break;
 				}
 				case (SCREENSHOT): {
-					mediaFile = new File(mediaStorageDir.getPath() + File.separator + "SCR_" + timeStamp + ".jpg");
+					mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + timeStamp + ".jpg");
 					break;
 				}
 			}
 
 			return mediaFile;
 		} else {
-			final String speak = "There was a problem creating the media file in the external storage as " +
-					"it is not mounted.";
+			final String speak = "There was a problem creating the media file in the external storage since " +
+					"it is not mounted with read and write permissions.";
 			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
-		}
 
-		return null;
+			return null;
+		}
 	}
 }

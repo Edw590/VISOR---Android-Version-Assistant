@@ -51,7 +51,7 @@ public final class UtilsNetwork {
 		final List<String> commands = new ArrayList<>(1);
 		commands.add("ping -c " + packets_num + " -i 0.5 -n -s 248 -t 1 -v " + ip);
 		final UtilsShell.CmdOuputObj cmdOuputObj = UtilsShell.executeShellCmd(commands);
-		final String[] output_lines = UtilsGeneral.convertBytesToPrintable(cmdOuputObj.output_stream).split("\n");
+		final String[] output_lines = UtilsGeneral.bytesToPrintableChars(cmdOuputObj.output_stream, false).split("\n");
 
 		// Here it gets the time values (excluding the duplicated ones)
 		final List<Double> time_values = new ArrayList<>(packets_num);

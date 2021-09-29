@@ -28,6 +28,8 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
+import java.util.ArrayList;
+
 /**
  * <p>Functions to call to communicate with {@link Speech2}, by using broadcasts.</p>
  */
@@ -74,9 +76,9 @@ public final class UtilsSpeech2BC {
 	 * <p>Broadcasts a request to remove a speech by its speech string.</p>
 	 * <p>More info on {@link BroadcastConstants#ACTION_REMOVE_SPEECH}.</p>
 	 *
-	 * @param speech same as in {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}
-	 * @param speech_priority same as in {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}
-	 * @param low_to_high same as in {@link Speech2#getSpeechIdBySpeech(String, int, boolean)}
+	 * @param speech same as in {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}
+	 * @param speech_priority same as in {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}
+	 * @param low_to_high same as in {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}
 	 */
 	public static void removeSpeechByStr(@NonNull final String speech, final int speech_priority,
 										 final boolean low_to_high) {

@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
@@ -136,6 +137,14 @@ final class UtilsIntentWhatToDo {
 			// Battery / Power
 			case (Intent.ACTION_BATTERY_CHANGED): {
 				MainSrv.getBatteryProcessor().processBatteryLvlChg(intent);
+
+				System.out.println("---------------");
+				final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+				System.out.println(battery_status);
+				final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+				System.out.println(level);
+				final int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+				System.out.println(scale);
 
 				break;
 			}
