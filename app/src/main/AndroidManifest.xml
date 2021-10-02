@@ -97,6 +97,7 @@
 		android:appCategory="productivity"
 		android:directBootAware="true"
 		android:usesNonSdkApi="true"
+		android:requestLegacyExternalStorage="true"
 
 		android:allowClearUserData="true"
 		android:persistent="false"

@@ -146,13 +146,13 @@ public final class UtilsFilesDirs {
 	}
 
 	/**
-	 * <p>Creates a directory in the external storage.</p>
+	 * <p>Creates a directory in the external storage and all necessary but non-existent parent directories.</p>
 	 *
 	 * @param abs_folder_path the absolute folder path
 	 *
-	 * @return the {@link File} instance for the chosen directory if the operation exited successfully (the directory
-	 * already existed or was created); null if the app has no read and/or write permissions on the chosen directory or
-	 * there was some other problem with {@link File#mkdirs()}
+	 * @return the {@link File} instance for the chosen directory if the operation exited successfully (the directory(ies)
+	 * already existed or was/were created); null if the app has no read and/or write permissions on the chosen directory
+	 * or there was some other problem with {@link File#mkdirs()}
 	 */
 	@Nullable
 	public static File createDirectory(@NonNull final String abs_folder_path) {
@@ -160,7 +160,9 @@ public final class UtilsFilesDirs {
 
 		try {
 			// Create the storage directory if it does not exist
-			if (!folder.exists()) {
+			if (folder.exists()) {
+				return folder;
+			} else {
 				if (folder.mkdirs()) {
 					return folder;
 				}

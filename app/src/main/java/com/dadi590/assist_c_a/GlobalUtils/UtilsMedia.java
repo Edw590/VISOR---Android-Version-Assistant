@@ -67,22 +67,22 @@ public final class UtilsMedia {
 	@Nullable
 	public static File getOutputMediaFile(final int media_type){
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			String folder = GL_CONSTS.MEDIA_FOLDER;
+			String folder = Environment.getExternalStorageDirectory() + "/" + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
 			switch (media_type) {
 				case (AUDIO): {
-					folder += "Audio recordings";
+					folder += "Audio recordings/";
 					break;
 				}
 				case (PHOTO): {
-					folder += "Photos";
+					folder += "Photos/";
 					break;
 				}
 				case (VIDEO): {
-					folder += "Video recordings";
+					folder += "Video recordings/";
 					break;
 				}
 				case (SCREENSHOT): {
-					folder += "Screenshots";
+					folder += "Screenshots/";
 					break;
 				}
 			}
@@ -96,32 +96,32 @@ public final class UtilsMedia {
 			}
 
 			// Create a media file name
-			final String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+			final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 					.format(System.currentTimeMillis());
 			File mediaFile = null;
 			switch (media_type) {
 				case (AUDIO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + timeStamp + ".aac");
+					mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + time_stamp + ".aac");
 					break;
 				}
 				case (PHOTO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + timeStamp + ".jpg");
+					mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + time_stamp + ".jpg");
 					break;
 				}
 				case (VIDEO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
+					mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + time_stamp + ".mp4");
 					break;
 				}
 				case (SCREENSHOT): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + timeStamp + ".jpg");
+					mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + time_stamp + ".jpg");
 					break;
 				}
 			}
 
 			return mediaFile;
 		} else {
-			final String speak = "There was a problem creating the media file in the external storage since " +
-					"it is not mounted with read and write permissions.";
+			final String speak = "Attention - There was a problem creating the media file in the device storage. " +
+					"It is not mounted with read and write permissions.";
 			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
 
 			return null;
