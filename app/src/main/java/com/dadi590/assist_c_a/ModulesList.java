@@ -49,9 +49,10 @@ public final class ModulesList {
 	 * running.</p>
 	 * <p>Types of modules:</p>
 	 * <p>- {@link #MODULE_TYPE_SERVICE}: the module is a {@link android.app.Service}</p>
-	 * <p>- {@link #MODULE_TYPE_INSTANCE}: the module is a normal class that must be instantiated</p>
+	 * <p>- {@link #MODULE_TYPE_INSTANCE}: the module is a normal class that must only be instantiated</p>
 	 */
 	private static final Object[][] modules_list = {
+			//{SomeValuesUpdater.class, MODULE_TYPE_INSTANCE, "Some Values Updater", null},
 			{Speech2.class, MODULE_TYPE_SERVICE, "Speech", null},
 			//{DeviceLocator.class, MODULE_TYPE_SERVICE, "Device Locator", null},
 			{BatteryProcessor.class, MODULE_TYPE_INSTANCE, "Battery Processor", null},

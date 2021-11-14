@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -93,8 +94,7 @@ public final class UtilsGeneral {
 		if (length < 1) throw new IllegalArgumentException("Length 0 string requested");
 		buf = new char[length];
 
-		final int buf_length = buf.length;
-		for (int idx = 0; idx < buf_length; idx++) {
+		for (int idx = 0; idx < length; idx++) {
 			buf[idx] = symbols[random.nextInt(symbols.length)];
 		}
 		return new String(buf);
@@ -243,6 +243,20 @@ public final class UtilsGeneral {
 		// This below will zero everything out except the first 8 bits (ANDed with 1) - so a positive number (the
 		// unsigned byte) remains.
 		return (int) _byte & 0xFF;
+	}
+
+	/**
+	 * <p>Checks if the device is currently running on low memory.</p>
+	 *
+	 * @return true if running on low memory, false otherwise
+	 */
+	public static boolean isDeviceRunningOnLowMemory() {
+		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getContext()
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		activityManager.getMemoryInfo(memoryInfo);
+
+		return memoryInfo.lowMemory;
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

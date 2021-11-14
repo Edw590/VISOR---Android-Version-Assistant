@@ -883,8 +883,7 @@ public class Speech2 extends Service {
 
 		// From back to beginning since high priority has greater value than low priority and the first speeches to be
 		// put back on track are the higher priority ones.
-		final int arrays_speech_objs_size = arrays_speech_objs.size();
-		for (int priority = arrays_speech_objs_size - 1; priority >= 0; priority--) {
+		for (int priority = arrays_speech_objs.size() - 1; priority >= 0; priority--) {
 			if (!arrays_speech_objs.get(priority).isEmpty()) {
 				final SpeechObj correct_speech_obj = arrays_speech_objs.get(priority).get(0);
 

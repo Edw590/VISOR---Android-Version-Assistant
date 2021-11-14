@@ -28,6 +28,8 @@ import androidx.annotation.NonNull;
 
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
 
 /**
  * <p>Processes changes in the battery levels or on battery power mode.</p>
@@ -49,6 +51,9 @@ public class BatteryProcessor {
 	 * @param power_connected true if external power was connected, false otherwise
 	 */
 	public final void processBatteryPwrChg(final boolean power_connected) {
+		// Update the value on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.power_connected, Boolean.toString(power_connected));
+
 		if (last_detected_percent == -1) {
 			return;
 		}
@@ -80,6 +85,9 @@ public class BatteryProcessor {
 		}
 
 		final int battery_percentage = battery_level * 100 / battery_level_scale;
+
+		// Update the value on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.battery_percentage, Integer.toString(battery_percentage));
 
 		System.out.println("> " + battery_percentage);
 

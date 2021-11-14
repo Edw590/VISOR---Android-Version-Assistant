@@ -44,6 +44,14 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 								@android.annotation.NonNull final Intent intent) {
 		super.onEnabled(context, intent);
 
+		// todo Why doesn't this work...?
+		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			final ComponentName mAdminName = new ComponentName(context, DeviceAdminRecv.class);
+			final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext()
+					.getSystemService(Context.DEVICE_POLICY_SERVICE);
+			devicePolicyManager.setUninstallBlocked(mAdminName, UtilsGeneral.getContext().getPackageName(), true);
+		}*/
+
 		UtilsServices.startMainService();
 
 		UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, null, PRIORITY_ADMIN_ENABLED, null);
@@ -85,9 +93,8 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 		// GET THE SECONDARY APP RESETTING IT!!! (The one which will restart this one...)
 
 		// This below is in case the administrator mode was enabled, but was disabled right after. The assistant
-		// would still say the administrator mode is enabled after saying it was disable --> wtf. This fixes that.
+		// would still say the administrator mode is enabled after saying it was disabled --> wtf. This fixes that.
 		UtilsSpeech2BC.removeSpeechByStr(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, true);
-
 		// todo This is not removing the speech, I think.....
 	}
 }

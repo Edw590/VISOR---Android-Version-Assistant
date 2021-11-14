@@ -66,9 +66,12 @@ public final class GL_CONSTS {
 	public static final String CH_ID_PLS_SRV_FOREGROUND = "ProtectedLockScrSrv:FOREGROUND";
 
 	// Media
-	public static final String MEDIA_FOLDER = ASSISTANT_NAME + File.separator;
+	public static final String MEDIA_FOLDER_REL_PATH = ASSISTANT_NAME + File.separator;
 
 	// TTS
 	public static final String PREFERRED_TTS_ENGINE = "ivona.tts";
 	public static final String PREFERRED_TTS_VOICE = "en-GB-Brian";
+
+	// UTF-7 --> to "put public" the private access of com.beetstra.jutf7.CharsetProvider.UTF7_NAME
+	public static final String UTF7_NAME_LIB = "UTF-7";
 }

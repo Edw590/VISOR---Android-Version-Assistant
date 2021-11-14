@@ -21,6 +21,10 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 
+import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
+import static android.telephony.TelephonyManager.CALL_STATE_OFFHOOK;
+import static android.telephony.TelephonyManager.CALL_STATE_RINGING;
+
 import android.provider.CallLog;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
@@ -31,15 +35,13 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-
-import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
-import static android.telephony.TelephonyManager.CALL_STATE_OFFHOOK;
-import static android.telephony.TelephonyManager.CALL_STATE_RINGING;
 
 /**
  * <p>Processes all phone calls made/received on the phone.</p>
@@ -88,6 +90,19 @@ public class PhoneCallsProcessor {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println(phoneNumber);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
+
+		// Update the values on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.last_phone_call_time, Long.toString(System.currentTimeMillis()));
+		boolean active_number = false;
+		for (final ArrayList<String> call : calls_state) {
+			if (call.get(1).equals(BETTER_CALL_STATE_ACTIVE)) {
+				ValuesStorage.updateValue(CONSTS.curr_phone_call_number, call.get(0));
+				active_number = true;
+			}
+		}
+		if (!active_number) {
+			ValuesStorage.updateValue(CONSTS.curr_phone_call_number, ValuesStorage.UNDEFINED_VALUE);
+		}
 
 		if (precise_call_state) {
 			// todo There's no PRECISE_CALL_STATE_LOST... Implement that somehow
@@ -162,6 +177,14 @@ public class PhoneCallsProcessor {
 		}
 	}
 
+
+	private static final String BETTER_CALL_STATE_OUTGOING = "BETTER_CALL_STATE_OUTGOING";
+	private static final String BETTER_CALL_STATE_INCOMING = "BETTER_CALL_STATE_INCOMING";
+	private static final String BETTER_CALL_STATE_WAITING = "BETTER_CALL_STATE_WAITING";
+	private static final String BETTER_CALL_STATE_DISCONNECTED = "BETTER_CALL_STATE_FINISHED";
+	//final String BETTER_CALL_STATE_ON_HOLD = "BETTER_CALL_STATE_ON_HOLD";
+	private static final String BETTER_CALL_STATE_ACTIVE = "BETTER_CALL_STATE_ACTIVE";
+
 	private static final int CALL_PHASE_OUTGOING = 3234_0;
 	private static final int CALL_PHASE_RINGING_NEW = 3234_1;
 	private static final int CALL_PHASE_LOST = 3234_2;
@@ -205,12 +228,6 @@ public class PhoneCallsProcessor {
 	 */
 	@Nullable
 	private NumAndPhase[] getCallPhase(final int state, @Nullable final String incomingNumber) {
-		final String BETTER_CALL_STATE_OUTGOING = "BETTER_CALL_STATE_OUTGOING";
-		final String BETTER_CALL_STATE_INCOMING = "BETTER_CALL_STATE_INCOMING";
-		final String BETTER_CALL_STATE_WAITING = "BETTER_CALL_STATE_WAITING";
-		final String BETTER_CALL_STATE_DISCONNECTED = "BETTER_CALL_STATE_FINISHED";
-		//final String BETTER_CALL_STATE_ON_HOLD = "BETTER_CALL_STATE_ON_HOLD";
-		final String BETTER_CALL_STATE_ACTIVE = "BETTER_CALL_STATE_ACTIVE";
 
 		//--- What has been tried and for what end, but that didn't work for one or more things ---
 		//        - Detect if call recording is possible or not (with or without root - works in both cases):
@@ -237,8 +254,7 @@ public class PhoneCallsProcessor {
 					return new NumAndPhase[]{new NumAndPhase(incomingNumber, CALL_PHASE_RINGING_NEW)};
 				} else {
 					// New incoming call waiting
-					final int calls_state_size = calls_state.size();
-					for (int i = 0; i < calls_state_size; i++) {
+					for (int i = 0, size = calls_state.size(); i < size; i++) {
 						if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_ACTIVE)) {
 							// If any call was already active and another one came, then that other one is waiting to be
 							// answered.
@@ -282,8 +298,7 @@ public class PhoneCallsProcessor {
 					to_return = new NumAndPhase(incomingNumber, CALL_PHASE_OUTGOING);
 				} else {
 					// Check if the 1st or only call was answered.
-					final int calls_state_size = calls_state.size();
-					for (int i = 0; i < calls_state_size; i++) {
+					for (int i = 0, size = calls_state.size(); i < size; i++) {
 						if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 							if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING)) {
 								// If the number was in INCOMING (not WAITING, because I don't know how to detect a call
@@ -302,8 +317,7 @@ public class PhoneCallsProcessor {
 				// on the list. This is in case the cases above don't apply --> WAITING to OFFHOOK (don't know what to
 				// do with that - can't be rejected or answered). Then in that case, I leave the state CALL_STATE_OFFHOOK
 				// on the list.
-				final int calls_state_size = calls_state.size();
-				for (int i = 0; i < calls_state_size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; i++) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						calls_state.get(i).set(1, String.valueOf(CALL_STATE_OFFHOOK));
 						break;
@@ -323,8 +337,7 @@ public class PhoneCallsProcessor {
 				}
 
 				System.out.println("Here:");
-				int calls_state_size = calls_state.size();
-				for (int i = 0; i < calls_state_size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; i++) {
 					System.out.println(calls_state.get(i).get(0) + " | " + calls_state.get(i).get(1));
 				}
 
@@ -359,8 +372,7 @@ public class PhoneCallsProcessor {
 					}
 				}
 
-				calls_state_size = calls_state.size();
-				for (int i = 0; i < calls_state_size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; i++) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						if (!(calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING))) {
@@ -389,8 +401,7 @@ public class PhoneCallsProcessor {
 				// And this is done here to go in the correct order in the return array. After the handling of the 1st
 				// call and before the handling of the last call. And on the LATE events.
 				if (calls_state.size() >= 3) {
-					calls_state_size = calls_state.size();
-					for (int i = 1; i < calls_state_size -1; i++) {
+					for (int i = 1, size = calls_state.size(); i < size -1; i++) {
 						if (calls_state.get(i).get(0).equals(incomingNumber)) {
 							continue;
 						}
@@ -440,8 +451,7 @@ public class PhoneCallsProcessor {
 
 				// Now processing of the immediate events, so they get all in order (the late ones happened before the
 				// immediate ones).
-				calls_state_size = calls_state.size();
-				for (int i = 0; i < calls_state_size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; i++) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING)) {

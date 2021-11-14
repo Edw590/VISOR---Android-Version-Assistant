@@ -106,8 +106,7 @@ final class UtilsSpeech2 {
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
 		final List<SpeechObj> correct_sub_array = arrays_speech_objs.get(priority);
 
-		final int correct_sub_array_size = correct_sub_array.size();
-		for (int i = 0; i < correct_sub_array_size; i++) {
+		for (int i = 0, size = correct_sub_array.size(); i < size; i++) {
 			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
 				return new int[]{priority, i};
 			}
@@ -214,8 +213,7 @@ final class UtilsSpeech2 {
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
 		final List<SpeechObj> array_speech_objs = arrays_speech_objs.get(priority);
 
-		final int array_speech_objs_size = array_speech_objs.size();
-		for (int i = 0; i < array_speech_objs_size; i++) {
+		for (int i = 0, size = array_speech_objs.size(); i < size; i++) {
 			if (array_speech_objs.get(i).txt_to_speak.equals(speech)) {
 				return array_speech_objs.get(i).utterance_id;
 			}
@@ -249,16 +247,15 @@ final class UtilsSpeech2 {
 	static String getSpeechIdBySpeech(@NonNull final String speech, final int speech_priority, final boolean low_to_high,
 									 @NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		if (speech_priority == UNKNOWN_PRIORITY) {
-			final int arrays_speech_objs_size = arrays_speech_objs.size();
 			if (low_to_high) {
-				for (int priority = 0; priority < arrays_speech_objs_size; priority++) {
+				for (int priority = 0, size = arrays_speech_objs.size(); priority < size; priority++) {
 					final String ret = internalGetSpeechIdBySpeech(priority, speech, arrays_speech_objs);
 					if (ret != null) {
 						return ret;
 					}
 				}
 			} else {
-				for (int priority = arrays_speech_objs_size - 1; priority >= 0; priority--) {
+				for (int priority = arrays_speech_objs.size() - 1; priority >= 0; priority--) {
 					final String ret = internalGetSpeechIdBySpeech(priority, speech, arrays_speech_objs);
 					if (ret != null) {
 						return ret;

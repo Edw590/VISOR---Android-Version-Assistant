@@ -21,6 +21,10 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.EMERGENCY_ID_PREFIX;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
+import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
+
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,10 +40,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.EMERGENCY_ID_PREFIX;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
 
 /**
  * <p>The speech module of the assistant, based on {@link TextToSpeech}'s internal queue.</p>
@@ -241,8 +241,7 @@ public class Speech {
 				// when this occurs - might finish when it gets here, or isSpeaking() could return faster or slower than
 				// the currently_speaking_speech_ID variable is updated or vice-versa.
 				if (tts.isSpeaking() && !current_speech_id.isEmpty()) {
-					final int utteranceIDs_size = utterance_ids.size();
-					for (int i = 0; i < utteranceIDs_size; i++) {
+					for (int i = 0, size = utterance_ids.size(); i < size; i++) {
 						if (utterance_ids.get(i).equals(current_speech_id)) {
 							utterance_ids.add(i + 1, utterance_ids.get(i));
 							speeches.add(i + 1, WAS_SAYING_PREFIX_1 + speeches.get(i));
@@ -324,8 +323,7 @@ public class Speech {
 			reset_speeches = false;
 		}
 
-		int utteranceIDs_size = utterance_ids.size();
-		for (int i = 0; i < utteranceIDs_size; i++) {
+		for (int i = 0, size = utterance_ids.size(); i < size; i++) {
 			if (utterance_ids.get(i).equals(utteranceId)) {
 				System.out.println(speeches.get(i));
 				if (runnables.get(i) != null) {
@@ -341,8 +339,7 @@ public class Speech {
 
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (isEmergencySpeech(utteranceId) && reset_speeches) {
-			utteranceIDs_size = utterance_ids.size();
-			for (int i = 0; i < utteranceIDs_size; i++) {
+			for (int i = 0, size = utterance_ids.size(); i < size; i++) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 					tts_params.bundle.clear();
 					tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, speech_audio_stream);

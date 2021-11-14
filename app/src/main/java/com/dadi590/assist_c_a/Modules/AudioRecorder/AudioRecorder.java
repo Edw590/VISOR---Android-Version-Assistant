@@ -34,6 +34,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +50,7 @@ public class AudioRecorder {
 	@Nullable private MediaRecorder recorder = null;
 	private boolean recording = false;
 
-	final List<Runnable> runnables = new ArrayList<>(1);
+	final List<Runnable> runnables = new ArrayList<>(5);
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
@@ -73,12 +75,15 @@ public class AudioRecorder {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						startRecording(audioSource, false);
-				/*if (audioSource == MediaRecorder.AudioSource.MIC && !recording) {
-					// In case of an error and that the microphone is the audio source, start the background
-					// recognition again.
-					Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
-				}*/
+						if (startRecording(audioSource, false) == NO_ERRORS) {
+							// Update the values on the ValuesStorage
+							ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(true));
+						}
+						/*if (audioSource == MediaRecorder.AudioSource.MIC && !recording) {
+							// In case of an error and that the microphone is the audio source, start the background
+							// recognition again.
+							Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
+						}*/
 					}
 				};
 				runnables.add(runnable);
@@ -96,11 +101,14 @@ public class AudioRecorder {
 				stopRecording();
 				final String speak = "Stopped, sir.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+
+				// Update the values on the ValuesStorage
+				ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(false));
 			} else {
 				final String speak = "Already stopped, sir.";
 				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
-				// It's not supposed to be registered by now, but as a precaution.
 				try {
+					// It's not supposed to be registered by now, but as a precaution.
 					UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 				} catch (final IllegalArgumentException ignored) {
 				}
@@ -159,7 +167,7 @@ public class AudioRecorder {
 	 *                                 otherwise
 	 * @return one of the constants
 	 */
-	int startRecording(final int audioSource, final boolean check_recording_possible) {
+	final int startRecording(final int audioSource, final boolean check_recording_possible) {
 		// Do NOT change the coder and format settings. I've put those because they were compatible with all devices
 		// that the app supports, and still the sound is very good.
 		recorder = new MediaRecorder();

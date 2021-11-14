@@ -31,6 +31,8 @@ import androidx.annotation.NonNull;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
 
 
 /**
@@ -73,14 +75,13 @@ public final class SmsMsgsProcessor {
 		msgs = new SmsMessage[pdus.length];
 		final StringBuilder stringBuilder = new StringBuilder(25);
 		// Check Android version and use appropriate createFromPdu.
-		final int pdus_length = pdus.length;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			for (int i = 0; i < pdus_length; i++) {
+			for (int i = 0, length = pdus.length; i < length; i++) {
 				msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i], format);
 				stringBuilder.append(msgs[i].getMessageBody());
 			}
 		} else {
-			for (int i = 0; i < pdus_length; i++) {
+			for (int i = 0, length = pdus.length; i < length; i++) {
 				msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
 				stringBuilder.append(msgs[i].getMessageBody());
 			}
@@ -92,6 +93,10 @@ public final class SmsMsgsProcessor {
 		System.out.println(sender);
 		//System.out.println(message);
 		System.out.println("&&&&&&&&&&&&&&&&&");
+
+		// Update the values on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.last_sms_msg_time, Long.toString(System.currentTimeMillis()));
+		ValuesStorage.updateValue(CONSTS.last_sms_msg_number, sender);
 
 		if (UtilsTelephony.isPrivateNumber(sender)) {
 			final String speak = "Sir, attention! New message from a private number!";

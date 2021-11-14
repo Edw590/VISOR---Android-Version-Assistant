@@ -130,8 +130,7 @@ public final class UtilsShell {
 			// process here
 			try (final DataOutputStream dataOutputStream = new DataOutputStream(process.getOutputStream())) {
 
-				final int commands_list_size = commands_list.size();
-				for (int i = 1; i < commands_list_size; i++) { // From index 0 because the 1st command was already executed
+				for (int i = 1, size = commands_list.size(); i < size; i++) { // From index 0 because the 1st command was already executed
 					final String command = commands_list.get(i);
 					if (!command.isEmpty()) { // Empty or null
 						dataOutputStream.writeBytes(command.endsWith("\n") ? command : command + "\n");
