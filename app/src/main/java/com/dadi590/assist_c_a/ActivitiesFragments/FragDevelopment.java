@@ -40,7 +40,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCryptoEnDecrypt;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.MainSrv.MainSrv;
@@ -49,6 +51,9 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.R;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -93,6 +98,35 @@ public class FragDevelopment extends Fragment {
 
 				final Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
+
+				System.out.println("HHHHHHHHHHHHHHHHHH");
+				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
+				final byte[] password2 = "this is one other test".getBytes(Charset.defaultCharset());
+				byte[] message = new byte[0];
+				try {
+					message = "this is another test ´1ºªá¨nñë€§«".getBytes(GL_CONSTS.UTF7_NAME_LIB);
+				} catch (final UnsupportedEncodingException ignored) {
+				}
+				final byte[] associated_authed_data = "Test 44".getBytes(Charset.defaultCharset());
+				System.out.println(Arrays.toString(password1));
+				System.out.println(Arrays.toString(password2));
+				System.out.println(Arrays.toString(message));
+				System.out.println(Arrays.toString(associated_authed_data));
+				System.out.println("---");
+
+				final byte[] encrypted_message = UtilsCryptoEnDecrypt.encryptBytes(password1, password2, message, associated_authed_data);
+				System.out.println(Arrays.toString(encrypted_message));
+				/*UtilsFilesDirs.writeFile(Environment.getExternalStorageDirectory() + "/V.I.S.O.R./teste.txt", encrypted_message, false);
+				System.out.println("---");
+
+				final byte[] file_contents = UtilsFilesDirs.readFileExtStge(Environment.getExternalStorageDirectory() + "/V.I.S.O.R./teste.txt");
+				System.out.println(Arrays.toString(file_contents));
+				System.out.println("---");
+
+				final byte[] gotten_message = UtilsCryptoEnDecrypt.decryptBytes(password1, password2, file_contents, associated_authed_data);
+				System.out.println(Arrays.toString(gotten_message));
+				System.out.println(UtilsGeneral.bytesToPrintableChars(gotten_message, true));
+				System.out.println(UtilsGeneral.bytesToPrintableChars(gotten_message, false));*/
 
 				//System.out.println(UtilsShell.getAccessRights("", true));
 				//System.out.println(UtilsShell.getAccessRights("/oe", true));
