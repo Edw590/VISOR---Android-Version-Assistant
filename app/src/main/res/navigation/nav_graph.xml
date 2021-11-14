@@ -39,5 +39,10 @@
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragModulesStatus"
 		android:label="@string/fragModulesStatus_title"
 		tools:layout="@layout/frag_modules_status" />
+	<fragment
+		android:id="@+id/frag_events_scheduler"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragEventsScheduler"
+		android:label="@string/fragEventsScheduler_title"
+		tools:layout="@layout/frag_events_scheduler" />
 
 </navigation>

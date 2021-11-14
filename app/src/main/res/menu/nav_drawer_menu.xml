@@ -34,6 +34,10 @@
 			android:id="@+id/frag_modules_status"
 			android:title="@string/fragModulesStatus_title"
 			android:icon="@drawable/development" />
+		<item
+			android:id="@+id/fragEventsScheduler"
+			android:title="@string/fragEventsScheduler_title"
+			android:icon="@drawable/development" />
 	</group>
 
 </menu>

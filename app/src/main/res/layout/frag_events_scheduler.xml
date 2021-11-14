@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright 2021 DADi590
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
@@ -19,23 +20,20 @@
   ~ under the License.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:theme="@style/AppTheme.NoActionBar"
+	tools:context=".ActivitiesFragments.FragDevelopment">
 
-	<item
-		android:id="@+id/frag_main"
-		android:title="@string/fragMain_title"
-		android:icon="@drawable/home" />
-	<item
-		android:id="@+id/frag_development"
-		android:title="@string/fragDevelopment_title"
-		android:icon="@drawable/development" />
-	<item
-		android:id="@+id/frag_modules_status"
-		android:title="@string/fragModulesStatus_title"
-		android:icon="@drawable/development" />
-	<item
-		android:id="@+id/fragEventsScheduler"
-		android:title="@string/fragEventsScheduler_title"
-		android:icon="@drawable/development" />
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:theme="@style/AppTheme.NoActionBar"
+		android:id="@+id/frag_events_scheduler_linear_layout">
 
-</menu>
+	</LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
