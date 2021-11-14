@@ -1,6 +1,7 @@
 # LEGION - A real assistant [Android/Client]
 
 ## Table of Contents
+- [Pictures](#Pictures)
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
 - [Current modules (features)](#current-modules-features)
@@ -13,6 +14,9 @@
 - - [License](#--license)
 - [Support](#support)
 - [Final notes](#final-notes)
+
+## Pictures
+![alt text](Pictures/Dev_Mode.png)
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.

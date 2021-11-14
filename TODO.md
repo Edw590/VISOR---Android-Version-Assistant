@@ -265,3 +265,8 @@ noise at all, low volume. If people are talking, for example (medium noise), put
 ## Telephony
 
 Answer the calls on some other device.
+
+
+## Radio
+
+Integrate a radio app into it (FM radio, not Internet radio). Also try to integrate SpiritFM into this, if the license agrees (I don't know, the author unfortunately passed away and the paid app is no longer sold, so no idea if I could just decompile it and put the code here, I'll have to see if that's legal).
