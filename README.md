@@ -1,5 +1,9 @@
 # LEGION - A real assistant [Android/Client]
 
+## Notice
+This project is connected to other projects:
+- [LEGION - A real assistant [Platforms Unifier]](https://github.com/DADi590/LEGION---A-real-assistant--Platforms-Unifier)
+
 ## Table of Contents
 - [Pictures](#Pictures)
 - [Background](#background)
