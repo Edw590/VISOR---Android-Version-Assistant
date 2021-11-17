@@ -80,7 +80,7 @@ Now a small explanation of the app structure:
 
 ## About
 ### - Roadmap
-Have a look on the "TODO.txt" file.
+Have a look on the "TODO.md" file.
 
 ### - Project status
 Ongoing, but possibly slowly since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
