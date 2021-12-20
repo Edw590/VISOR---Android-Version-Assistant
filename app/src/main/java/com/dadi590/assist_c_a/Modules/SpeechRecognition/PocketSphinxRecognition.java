@@ -54,7 +54,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 
 	private static final String KEYWORD_WAKEUP = "3234_wakeup";
 
-	private static final String KEYPHRASE = GL_CONSTS.ASSISTANT_NAME_WO_DOTS.toLowerCase(Locale.ENGLISH); // "legion"
+	private static final String KEYPHRASE = GL_CONSTS.ASSISTANT_NAME_WO_DOTS.toLowerCase(Locale.ENGLISH); // "visor"
 
 	/**
 	 * <p>Just to have a constructor.</p>

@@ -20,11 +20,12 @@
   -->
 
 <resources>
-	<string name="app_name">LEGION</string>
-	<string name="app_description">LEGION</string>
-	<string name="app_title">LEGION Systems</string>
+	<string name="app_name">V.I.S.O.R.</string>
+	<string name="app_description">Virtual Intelligence System for an Optimized Reality</string>
+	<string name="app_title">V.I.S.O.R. Systems</string>
 
 	<string name="fragDevelopment_title">Dev Mode</string>
 	<string name="fragMain_title">Home</string>
 	<string name="fragModulesStatus_title">Modules status</string>
+	<string name="fragEventsScheduler_title">Events Scheduler</string>
 </resources>

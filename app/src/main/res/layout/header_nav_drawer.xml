@@ -32,7 +32,7 @@
 		android:layout_height="match_parent"
 		android:adjustViewBounds="true"
 		android:contentDescription="App icon"
-		android:src="@drawable/dadi_empresas_inc__transparent"
+		android:src="@mipmap/main_logo_legacy_only"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent" />
 
