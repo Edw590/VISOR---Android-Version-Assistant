@@ -70,12 +70,12 @@ class SpeechObj {
 	/**
 	 * <p>Main class constructor.</p>
 	 *
-	 * @param utterance_id same as in {@link Speech2#speak(String, int, int, Integer)}
-	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * @param utterance_id same as in {@link Speech2#speak(String, int, Integer)}
+	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, Integer)}
 	 * @param current_speech_obj true if the instance is being created to reset the {@link Speech2#current_speech_obj} -
 	 *                           the audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value;
 	 *                           false otherwise
-	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, Integer)}
 	 */
 	SpeechObj(final String utterance_id, @NonNull final String txt_to_speak, final boolean current_speech_obj,
 			  @Nullable final Integer after_speaking_code) {

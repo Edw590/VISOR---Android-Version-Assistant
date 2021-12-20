@@ -123,7 +123,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		// And start the service to be sure this never stops - don't check so it's faster to start it.
 		// Keep it starting in foreground, so if there is any error on the Main Service, this one still runs.
-		UtilsServices.startService(ProtectedLockScrSrv.class, true);
+		UtilsServices.startService(ProtectedLockScrSrv.class, null, true);
 
 		findViewById(R.id.btn_unlock).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -197,8 +197,9 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 					// limit, at least on BV9500. 20ms should be fine. To be above "fine", 25ms. Should be good.
 					Thread.sleep(25L);
 				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
 				}
-				count++;
+				++count;
 			}
 			runnable_running = false;
 		}

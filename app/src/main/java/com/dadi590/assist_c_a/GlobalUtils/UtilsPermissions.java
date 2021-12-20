@@ -57,12 +57,12 @@ public final class UtilsPermissions {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "All permissions have been successfully granted to the application.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 		}
 	}
 
@@ -123,11 +123,11 @@ public final class UtilsPermissions {
 											perm_name, android.os.Process.myUserHandle());
 									// GRANT_RUNTIME_PERMISSIONS and INTERACT_ACROSS_USERS_FULL needed here.
 								} catch (final SecurityException ignored) {
-									num_forced_error_perms++;
+									++num_forced_error_perms;
 								}
 
 								if (!checkSelfPermission(perm_name)) {
-									num_not_granted_perms++;
+									++num_not_granted_perms;
 								}
 							}
 						} else {
@@ -152,7 +152,7 @@ public final class UtilsPermissions {
 				// If the permission exists on the device API level...
 				if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {
 					if (!checkSelfPermission(perm_name)) {
-						num_not_granted_perms++;
+						++num_not_granted_perms;
 					}
 				}
 			}

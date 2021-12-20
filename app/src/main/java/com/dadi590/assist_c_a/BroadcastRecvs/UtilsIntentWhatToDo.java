@@ -27,7 +27,9 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -69,10 +71,10 @@ final class UtilsIntentWhatToDo {
 
 				if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
 					final String speak = "Fast shut down detected.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String speak = "Shut down detected.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 				// Note: must be very small speeches, since the phone will shut down fast.
 
@@ -84,7 +86,7 @@ final class UtilsIntentWhatToDo {
 				// No idea if this is supposed detected at all (might be stopped before it gets here by the system as
 				// soon as it detects it or something).
 				final String speak = "Reboot detected.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				// Note: must be a very small speech, since the phone will shut down fast.
 
 

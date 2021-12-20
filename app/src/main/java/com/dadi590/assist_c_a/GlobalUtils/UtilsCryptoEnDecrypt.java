@@ -271,7 +271,7 @@ public final class UtilsCryptoEnDecrypt {
 		final byte[] randomized_data = new byte[randomized_data_length];
 
 		int num_added_bytes = 0;
-		for (int i = 0; i < randomized_data_length; i++) {
+		for (int i = 0; i < randomized_data_length; ++i) {
 			if (i % 16 == 0) {
 				secureRandom = new SecureRandom(); // Reseed SecureRandom for security every 2 usages (here and below)
 				random_index = i + secureRandom.nextInt(Math.min(randomized_data_length - i, 16)); // Up until index 15. From
@@ -282,7 +282,7 @@ public final class UtilsCryptoEnDecrypt {
 				// If it's to add a random byte at the chosen random index, add one between the values 128 and 255.
 				// This means the data can NOT use byte values inside that range.
 				randomized_data[i] = (byte) (secureRandom.nextInt(128) + 128);
-				num_added_bytes++;
+				++num_added_bytes;
 			} else {
 				randomized_data[i] = data[i - num_added_bytes];
 			}
@@ -306,7 +306,7 @@ public final class UtilsCryptoEnDecrypt {
 		for (final byte _byte : randomized_data) {
 			if (UtilsGeneral.byteToIntUnsigned(_byte) <= 127) {
 				data[i] = _byte;
-				i++;
+				++i;
 			}
 		}
 

@@ -22,14 +22,14 @@
 package com.dadi590.assist_c_a.Modules.ValuesStorage;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * <p>The class where all public values are stored.</p>
  */
 public final class ValuesStorage {
 
-	// Random chars by me xD. Just to be sure it's really not used anywhere.
-	public static final String UNDEFINED_VALUE = "3234_NONE-RV43U98TN45CTU8N489P2DJ38P98RJ3W4O8RUWLOEL8RULO3RULOC3IRUN";
+	public static final String UNDEFINED_VALUE = null;
 
 	// If a new one is added below, add it on the function that returns the values too!
 	public static final String TYPE_BOOLEAN = "TYPE_BOOLEAN";
@@ -47,8 +47,9 @@ public final class ValuesStorage {
 			// Telephony - SMS
 			{CONSTS.last_sms_msg_time, "Telephony - Time of last SMS msg (milliseconds)", TYPE_LONG, UNDEFINED_VALUE}, // Updating
 			{CONSTS.last_sms_msg_number, "Telephony - Number of last SMS msg sender", TYPE_STRING, UNDEFINED_VALUE}, // Updating
-			// Time
-			{CONSTS.current_time, "Current time (milliseconds)", TYPE_LONG, UNDEFINED_VALUE}, // Updating
+			// Date and time
+			{CONSTS.current_time, "Current time (" + CONSTS.CURRENT_TIME_FORMAT + ")", TYPE_STRING, UNDEFINED_VALUE}, // Updating
+			{CONSTS.current_date, "Current date (" + CONSTS.CURRENT_DATE_FORMAT + ")", TYPE_STRING, UNDEFINED_VALUE}, // Updating
 			// Weather
 			{CONSTS.loc_temp_for_the_day_c, "Location temperature for the day (C)", TYPE_DOUBLE, UNDEFINED_VALUE},
 			{CONSTS.loc_temp_for_the_day_f, "Location temperature for the day (F)", TYPE_DOUBLE, UNDEFINED_VALUE},
@@ -70,8 +71,8 @@ public final class ValuesStorage {
 	 * @param key the key
 	 * @param new_value the new value
 	 */
-	public static void updateValue(@NonNull final String key, @NonNull final String new_value) {
-		for (int i = 0, length = values_arrays.length; i < length; i++) {
+	public static void updateValue(@NonNull final String key, @Nullable final String new_value) {
+		for (int i = 0, length = values_arrays.length; i < length; ++i) {
 			if (values_arrays[i][0].equals(key)) {
 				values_arrays[i][3] = new_value;
 			}
@@ -79,19 +80,23 @@ public final class ValuesStorage {
 	}
 
 	/**
-	 * <p>Returns the value stored for the given key, in the correct type.</p>
+	 * <p>Returns the value stored for the given key, in the correct type (check the type on the list of values).</p>
 	 * <p>If the value (always stored as a {@link String}) stored for the given key came from a {@code boolean}, this
-	 * function will return the value as a {@code boolean}, as it was originally.</p>
+	 * function will return the value as a {@code boolean}, as it was original.</p>
 	 *
 	 * @param key the key associated with the wanted value
 	 *
-	 * @return the value for the given key, in the appropriate type
+	 * @return the value for the given key, in the appropriate type; null in case the key does not have a value set
 	 */
-	@NonNull
+	@Nullable
 	public static Object getValue(@NonNull final String key) {
 		for (final String[] value_array : values_arrays) {
 			if (value_array[0].equals(key)) {
 				final String value = value_array[3];
+				if (value == UNDEFINED_VALUE) {
+					return UNDEFINED_VALUE;
+				}
+
 				switch (value_array[2]) {
 					case (TYPE_BOOLEAN): {
 						return Boolean.parseBoolean(value);
@@ -109,7 +114,6 @@ public final class ValuesStorage {
 						return value;
 					}
 				}
-				break;
 			}
 		}
 

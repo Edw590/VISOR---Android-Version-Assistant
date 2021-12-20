@@ -137,12 +137,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -152,12 +152,12 @@ public class PhoneCallsProcessor {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 				break;
 			}
@@ -166,11 +166,11 @@ public class PhoneCallsProcessor {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 				}
 				break;
 			}
@@ -254,7 +254,7 @@ public class PhoneCallsProcessor {
 					return new NumAndPhase[]{new NumAndPhase(incomingNumber, CALL_PHASE_RINGING_NEW)};
 				} else {
 					// New incoming call waiting
-					for (int i = 0, size = calls_state.size(); i < size; i++) {
+					for (int i = 0, size = calls_state.size(); i < size; ++i) {
 						if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_ACTIVE)) {
 							// If any call was already active and another one came, then that other one is waiting to be
 							// answered.
@@ -298,7 +298,7 @@ public class PhoneCallsProcessor {
 					to_return = new NumAndPhase(incomingNumber, CALL_PHASE_OUTGOING);
 				} else {
 					// Check if the 1st or only call was answered.
-					for (int i = 0, size = calls_state.size(); i < size; i++) {
+					for (int i = 0, size = calls_state.size(); i < size; ++i) {
 						if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 							if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING)) {
 								// If the number was in INCOMING (not WAITING, because I don't know how to detect a call
@@ -317,7 +317,7 @@ public class PhoneCallsProcessor {
 				// on the list. This is in case the cases above don't apply --> WAITING to OFFHOOK (don't know what to
 				// do with that - can't be rejected or answered). Then in that case, I leave the state CALL_STATE_OFFHOOK
 				// on the list.
-				for (int i = 0, size = calls_state.size(); i < size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; ++i) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						calls_state.get(i).set(1, String.valueOf(CALL_STATE_OFFHOOK));
 						break;
@@ -337,7 +337,7 @@ public class PhoneCallsProcessor {
 				}
 
 				System.out.println("Here:");
-				for (int i = 0, size = calls_state.size(); i < size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; ++i) {
 					System.out.println(calls_state.get(i).get(0) + " | " + calls_state.get(i).get(1));
 				}
 
@@ -372,7 +372,7 @@ public class PhoneCallsProcessor {
 					}
 				}
 
-				for (int i = 0, size = calls_state.size(); i < size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; ++i) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						if (!(calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING))) {
@@ -401,7 +401,7 @@ public class PhoneCallsProcessor {
 				// And this is done here to go in the correct order in the return array. After the handling of the 1st
 				// call and before the handling of the last call. And on the LATE events.
 				if (calls_state.size() >= 3) {
-					for (int i = 1, size = calls_state.size(); i < size -1; i++) {
+					for (int i = 1, size = calls_state.size(); i < size -1; ++i) {
 						if (calls_state.get(i).get(0).equals(incomingNumber)) {
 							continue;
 						}
@@ -451,7 +451,7 @@ public class PhoneCallsProcessor {
 
 				// Now processing of the immediate events, so they get all in order (the late ones happened before the
 				// immediate ones).
-				for (int i = 0, size = calls_state.size(); i < size; i++) {
+				for (int i = 0, size = calls_state.size(); i < size; ++i) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
 						if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING)) {

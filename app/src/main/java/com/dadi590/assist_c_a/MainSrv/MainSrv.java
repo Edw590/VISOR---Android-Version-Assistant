@@ -40,6 +40,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
@@ -95,9 +96,27 @@ public class MainSrv extends Service {
 
 		return (BatteryProcessor) ModulesList.getModuleInstance(BatteryProcessor.class);
 	}
+	/**
+	 * <p>Get the global {@link CmdsExecutor} instance.</p>
+	 *
+	 * @return .
+	 */
+	@NonNull
+	public static CmdsExecutor getExecutor() {
+		UtilsServices.startMainService();
+
+		return (CmdsExecutor) ModulesList.getModuleInstance(CmdsExecutor.class);
+	}
 
 	//////////////////////////////////////
 
+
+	/**
+	 * <p>Just to have a constructor.</p>
+	 */
+	public MainSrv() {
+		// No need to implement.
+	}
 
 	@Override
 	public final void onCreate() {
@@ -123,7 +142,7 @@ public class MainSrv extends Service {
 		// user. Later, notifications will be added. Emails would be a good idea too in more extreme notifications.
 		// After the speech module is ready, it will send a broadcast for the receiver below to activate the rest of
 		// the assistant.
-		UtilsServices.startService(Speech2.class, false);
+		UtilsServices.startService(Speech2.class, null, false);
 	}
 
 	/**
@@ -132,8 +151,8 @@ public class MainSrv extends Service {
 	 */
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			if (/*context == null ||*/ intent == null || intent.getAction() == null) {
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 
@@ -154,13 +173,13 @@ public class MainSrv extends Service {
 						//  Remember the user who said you could "potentially" emulate loading from the APK itself? Try
 						//  that below Marshmallow... Maybe read the APK? Or extract it to memory and load from memory?
 						//  (always from memory, preferably)
-						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 						break;
 					}
 					case (UtilsApp.NON_PRIVILEGED): {
 						final String speak = "WARNING - Installed as non-privileged application! System features may " +
 								"not be available.";
-						UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 						break;
 					}
 				}
@@ -168,7 +187,7 @@ public class MainSrv extends Service {
 				if (!UtilsApp.isDeviceAdmin()) {
 					final String speak = "WARNING - The application is not a Device Administrator! Some security " +
 							"features may not be available.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 
 				/*if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
@@ -206,7 +225,7 @@ public class MainSrv extends Service {
 					switch ((int) module[1]) {
 						case (ModulesList.MODULE_TYPE_SERVICE): {
 							// The call to startService() will already check if the service is running or not.
-							UtilsServices.startService((Class<?>) module[0], false);
+							UtilsServices.startService((Class<?>) module[0], null, false);
 
 							break;
 						}
@@ -225,7 +244,32 @@ public class MainSrv extends Service {
 							break;
 						}
 					}
-					i++;
+					++i;
+				}
+
+				// Enable the power button long press detection.
+				switch (LongBtnsPressDetector.startDetector()) {
+					case LongBtnsPressDetector.UNSUPPORTED_OS_VERSION: {
+						final String speak = "The power button long press detection will not be available. Your " +
+								"Android version is not supported.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+
+						break;
+					}
+					case LongBtnsPressDetector.UNSUPPORTED_HARDWARE: {
+						final String speak = "The power button long press detection will not be available. " +
+								"Your hardware does not seem to support the detection.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+
+						break;
+					}
+					case LongBtnsPressDetector.PERMISSION_DENIED: {
+						final String speak = "The power button long press detection will not be available. The " +
+								"permission to draw a system overlay was denied.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+
+						break;
+					}
 				}
 
 				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
@@ -233,7 +277,7 @@ public class MainSrv extends Service {
 				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
 				// ready.
 				final String speak = "Ready, sir.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 				try {
 					UtilsGeneral.getContext().unregisterReceiver(this);

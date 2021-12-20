@@ -24,18 +24,11 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <p>Checks if the device can execute root commands or not, and in case it can, executes root commands.</p>
- * <br>
- * <p>Class gotten from http://muzikant-android.blogspot.com/2011/02/how-to-get-root-access-and-execute.html (now
- * adapted to this app and with added methods).</p>
+ * <p>Utilities related to root features, like checking if root user rights are available or not, for example.</p>
  *
  * @author Muzikant
  */
@@ -53,14 +46,11 @@ public final class UtilsRoot {
      * @param warn_root_available true to warn if root access is available, false to only warn when there's no access
      */
     public static void checkWarnRootAccess(final boolean warn_root_available) {
-        // todo See if you can delete this... It's not supposed for the app to execute any root commands. Only system
-        //  hidden/internal methods.
-
         switch (rootCommandsAvailability()) {
             case (ROOT_AVAILABLE): {
                 if (warn_root_available) {
                     final String speak = "Root access available on the device.";
-                    UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+                    UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
                 }
 
                 break;
@@ -68,13 +58,13 @@ public final class UtilsRoot {
             case (ROOT_DENIED): {
                 final String speak = "WARNING! Root access was denied on this device! Some features may not " +
                         "be available!";
-                UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
                 break;
             }
             case (ROOT_UNAVAILABLE): {
                 final String speak = "Attention! The device is not rooted! Some features may not be available!";
-                UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 
                 break;
             }
@@ -96,60 +86,26 @@ public final class UtilsRoot {
      * @return one of the constants
      */
     public static int rootCommandsAvailability() {
-        final int ret_val;
-        final Process suProcess;
+        // The original implementation was gotten from
+        // http://muzikant-android.blogspot.com/2011/02/how-to-get-root-access-and-execute.html, was then adapted to the
+        // app and finally changed to call the executeShellCmd function.
+        // So the way it checks root is supposed to be the same (hopefully it's the same and I didn't mess up). Only the
+        // shell part is now removed because it is on the mentioned function.
 
-        try {
-            suProcess = Runtime.getRuntime().exec("su");
-
-            try (final DataOutputStream dataOutputStream = new DataOutputStream(suProcess.getOutputStream())) {
-                final String current_UID;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                            suProcess.getInputStream(), StandardCharsets.UTF_8))) {
-                        current_UID = bufferedReader.readLine();
-                    } catch (final IOException ignored) {
-                        return ROOT_UNAVAILABLE;
-                    }
-                } else {
-                    try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                            suProcess.getInputStream(), Charset.defaultCharset()))) {
-                        current_UID = bufferedReader.readLine();
-                    } catch (final IOException ignored) {
-                        return ROOT_UNAVAILABLE;
-                    }
-                }
-
-                // Getting the ID of the current user to check if it's root
-                dataOutputStream.writeBytes("id\n");
-                dataOutputStream.flush();
-
-                final boolean exit_su;
-                if (current_UID == null) {
-                    ret_val = ROOT_DENIED;
-                    exit_su = false;
-                } else if (current_UID.contains("uid=0")) {
-                    ret_val = ROOT_AVAILABLE;
-                    exit_su = true;
-                } else {
-                    ret_val = ROOT_DENIED;
-                    exit_su = true;
-                }
-
-                if (exit_su) {
-                    dataOutputStream.writeBytes("exit\n");
-                    dataOutputStream.flush();
-                }
-            } catch (final IOException ignored) {
-                return ROOT_UNAVAILABLE;
-            }
-
-            suProcess.waitFor();
-        } catch (final IOException | InterruptedException ignored) {
-            return ROOT_UNAVAILABLE; // The only place where this was, but I added this return in the other catch
-            // clauses too (what could I put there...).
+        final List<String> commands = new ArrayList<>(3);
+        commands.add("su");
+        commands.add("id");
+        commands.add("exit");
+        final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+        if (cmdOutputObj.error_code == null) {
+            System.out.println("ROOT_UNAVAILABLE");
+            return ROOT_UNAVAILABLE;
+        } else if (UtilsGeneral.bytesToPrintableChars(cmdOutputObj.output_stream, false).contains("uid=0")) {
+            System.out.println("ROOT_AVAILABLE");
+            return ROOT_AVAILABLE;
+        } else {
+            System.out.println("ROOT_DENIED");
+            return ROOT_DENIED;
         }
-
-        return ret_val;
     }
 }

@@ -45,6 +45,21 @@ import com.dadi590.assist_c_a.R;
  */
 public class FragModulesStatus extends Fragment {
 
+	View current_view = null;
+
+	String color_accent;
+	String color_primary;
+
+	final Object[][] modules_list = ModulesList.getModulesList();
+	final int modules_list_length = modules_list.length;
+
+	/**
+	 * <p>Just to have a constructor.</p>
+	 */
+	public FragModulesStatus() {
+		// No need to implement.
+	}
+
 	@Nullable
 	@Override
 	public final View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
@@ -56,7 +71,14 @@ public class FragModulesStatus extends Fragment {
 	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.frag_modules_status_linear_layout);
+		current_view = view;
+
+		color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
+				R.color.colorPrimary));
+		color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
+				R.color.colorAccent));
+
+		final LinearLayout linearLayout = current_view.findViewById(R.id.frag_modules_status_linear_layout);
 
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -66,14 +88,10 @@ public class FragModulesStatus extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		final String color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
-				R.color.colorAccent));
-		final String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
-				R.color.colorPrimary));
-
 		int i = 0;
-		for (final Object[] module : ModulesList.getModulesList()) { // Add a switch for each module.
+		for (final Object[] module : modules_list) { // Add a switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
+			switchCompat.setId(i); // Set the ID to be the index of the module in the list
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
 			switchCompat.setTypeface(null, Typeface.BOLD);
@@ -92,7 +110,38 @@ public class FragModulesStatus extends Fragment {
 			}
 
 			linearLayout.addView(switchCompat);
-			i++;
+			++i;
 		}
+
+		// Thread disabled temporarily. Put it stopping after the user leaves this fragment.
+		//infinity_checker.start();
 	}
+
+	private final Thread infinity_checker = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) { // Keep checking the modules' status.
+				System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+				for (int i = 0; i < modules_list_length; ++i) {
+					final SwitchCompat switchCompat = current_view.findViewById(i);
+
+					final boolean module_running = ModulesList.isModuleRunningByIndex(i);
+					switchCompat.setChecked(module_running); // --> "Animators may only be run on Looper threads"
+					if (module_running) {
+						// If the module is running, color the text green (Accent Color).
+						switchCompat.setTextColor(Color.parseColor(color_accent));
+					} else {
+						// If it's not running, color it red (Primary Color).
+						switchCompat.setTextColor(Color.parseColor(color_primary));
+					}
+				}
+
+				try {
+					Thread.sleep(1_000L);
+				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+	});
 }

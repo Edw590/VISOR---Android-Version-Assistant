@@ -21,6 +21,11 @@
 
 package com.dadi590.assist_c_a.Modules.ValuesStorage;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
  * <p>The module that periodically updates some values which no other module updates by an event.</p>
  * <p>Examples: time and weather (can't be updated by an event - there isn't one).</p>
@@ -31,13 +36,29 @@ public class SomeValuesUpdater {
 	 * <p>Main class constructor.</p>
 	 */
 	public SomeValuesUpdater() {
-		while (true) {
-			ValuesStorage.updateValue(CONSTS.current_time, Long.toString(System.currentTimeMillis()));
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					{
+						final SimpleDateFormat time = new SimpleDateFormat(CONSTS.CURRENT_TIME_FORMAT, Locale.getDefault());
+						time.setTimeZone(TimeZone.getDefault());
+						ValuesStorage.updateValue(CONSTS.current_time, time.format(new Date()));
 
-			try {
-				Thread.sleep(10_000L);
-			} catch (final InterruptedException ignored) {
+						// Keep the timezone in English here so he can say the weekday in English.
+						final SimpleDateFormat date = new SimpleDateFormat(CONSTS.CURRENT_DATE_FORMAT, Locale.US);
+						date.setTimeZone(TimeZone.getDefault());
+						ValuesStorage.updateValue(CONSTS.current_date, date.format(new Date()));
+					}
+
+
+					try {
+						Thread.sleep(10_000L);
+					} catch (final InterruptedException ignored) {
+						Thread.currentThread().interrupt();
+					}
+				}
 			}
-		}
+		}).start();
 	}
 }

@@ -40,8 +40,8 @@ final class BroadcastConstants {
 
 	/**
 	 * <p>Explanation: calls {@link Speech2#skipCurrentSpeech()}.</p>
-	 * <p>Broadcast by: any class.</p>
-	 * <p>Specific to the class: none.</p>
+	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class: {@link Speech2}.</p>
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_SKIP_SPEECH = "SPEECH2_ACTION_SKIP_SPEECH";
@@ -53,8 +53,8 @@ final class BroadcastConstants {
 	 * {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)} and
 	 * {@link UtilsSpeech2#removeSpeechById(String, ArrayList)}.</p>
 	 * <p>Main executed function: {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}</p>
-	 * <p>Broadcast by: any class.</p>
-	 * <p>Specific to the class: none.</p>
+	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class: {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_2}: mandatory</p>
@@ -68,9 +68,9 @@ final class BroadcastConstants {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * <p>Executed function: {@link Speech2#speak(String, int, int, Integer)}.</p>
-	 * <p>Broadcast by: any class.</p>
-	 * <p>Specific to the class: none.</p>
+	 * <p>Executed function: {@link Speech2#speak(String, int, Integer)}.</p>
+	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class: {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is {@link Speech2#NO_ADDITIONAL_COMMANDS})</p>
@@ -86,9 +86,9 @@ final class BroadcastConstants {
 	/**
 	 * <p>Explanation: warns when the speech module is ready for use after the first time (means any time other than
 	 * the module initialization time).</p>
-	 * <p>Broadcast by: {@link Speech2}.</p>
-	 * <p>Specific to the class: {@link Speech2}.</p>
+	 * <p>Is broadcast by: {@link Speech2}.</p>
+	 * <p>To be received only by the class: {@link Speech2}.</p>
 	 * <p>Extras: none.</p>
 	 */
-	static final String ACTION_SPEECH2_READY_AGAIN = "ACTION_SPEECH2_READY_AGAIN";
+	static final String ACTION_READY_AGAIN = "ACTION_SPEECH2_READY_AGAIN";
 }

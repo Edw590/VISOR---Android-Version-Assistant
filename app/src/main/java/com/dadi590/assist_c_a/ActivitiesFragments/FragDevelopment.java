@@ -25,7 +25,6 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,20 +39,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsCryptoEnDecrypt;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
 import com.dadi590.assist_c_a.R;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -100,6 +96,10 @@ public class FragDevelopment extends Fragment {
 				//startActivity(intent);
 
 				System.out.println("HHHHHHHHHHHHHHHHHH");
+				System.out.println(ValuesStorage.getValue(CONSTS.last_phone_call_time));
+				MainSrv.getExecutor().processTask("turn on wifi", false, false);
+
+				/*System.out.println("HHHHHHHHHHHHHHHHHH");
 				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
 				final byte[] password2 = "this is one other test".getBytes(Charset.defaultCharset());
 				byte[] message = new byte[0];
@@ -115,7 +115,7 @@ public class FragDevelopment extends Fragment {
 				System.out.println("---");
 
 				final byte[] encrypted_message = UtilsCryptoEnDecrypt.encryptBytes(password1, password2, message, associated_authed_data);
-				System.out.println(Arrays.toString(encrypted_message));
+				System.out.println(Arrays.toString(encrypted_message));*/
 				/*UtilsFilesDirs.writeFile(Environment.getExternalStorageDirectory() + "/V.I.S.O.R./teste.txt", encrypted_message, false);
 				System.out.println("---");
 
@@ -155,7 +155,7 @@ public class FragDevelopment extends Fragment {
 
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 					final String speak = "No manual permission authorizations needed below Android Marshmallow.";
-					UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 				} else {
 					// Request all missing permissions
 					final int perms_left = UtilsPermissions.wrapperRequestPerms(getActivity(), true)[1];
@@ -166,14 +166,14 @@ public class FragDevelopment extends Fragment {
 					final NotificationManager mNotificationManager = (NotificationManager)
 							UtilsGeneral.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
-						missing_authorizations++;
+						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
 						startActivity(intent);
 					}
 
 					// Check if the app can draw system overlays and open the settings screen if not
 					if (!Settings.canDrawOverlays(UtilsGeneral.getContext())) {
-						missing_authorizations++;
+						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 								Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
 						startActivity(intent);
@@ -183,7 +183,7 @@ public class FragDevelopment extends Fragment {
 					final PowerManager powerManager = (PowerManager) UtilsGeneral.getContext()
 							.getSystemService(Context.POWER_SERVICE);
 					if (!powerManager.isIgnoringBatteryOptimizations(UtilsGeneral.getContext().getPackageName())) {
-						missing_authorizations++;
+						++missing_authorizations;
 						final Intent intent = new Intent();
 						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 						intent.setData(Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
@@ -194,7 +194,7 @@ public class FragDevelopment extends Fragment {
 				//Mete-o a verificar estas coisas na inicialização da app também... Mas só verificar, não pedir.
 
 				if (!UtilsApp.isDeviceAdmin()) {
-					missing_authorizations++;
+					++missing_authorizations;
 					startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
 							"com.android.settings.DeviceAdminSettings")));
 				}
@@ -206,7 +206,7 @@ public class FragDevelopment extends Fragment {
 					speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 							"authorizations left to grant: " + missing_authorizations + ".";
 				}
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 		});
 		requireView().findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {
@@ -221,14 +221,14 @@ public class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_LOW, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, null);
 			}
 		});
 		requireView().findViewById(R.id.btn_speak_high).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				// Leave PRIORITY_HIGH there because CRITICAL will get the volume in the maximum, and this is probably
 				// just to test if the priority implementation is working.
 			}
@@ -236,10 +236,11 @@ public class FragDevelopment extends Fragment {
 		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
-				if ("start".equals(txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH))) {
-					MainSrv.getAudioRecorder().record(true, MediaRecorder.AudioSource.MIC);
-				} else if ("stop".equals(txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH))) {
-					MainSrv.getAudioRecorder().record(false, -1);
+				final String inserted_text = txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
+				if ("stop".equals(inserted_text)) {
+					MainSrv.getAudioRecorder().recordAudio(false, -1);
+				} else {
+					MainSrv.getExecutor().processTask(inserted_text, false, false);
 				}
 
 				/*final Intent broadcast_intent = new Intent(BroadcastReceivers_com_registo.ENVIAR_TAREFA);

@@ -28,6 +28,8 @@ import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +44,9 @@ import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Random;
 
+import CommandsDetection_APU.CommandsDetection_APU;
+import GlobalUtils_APU.GlobalUtils_APU;
+
 /**
  * <p>Global app-related utilities.</p>
  */
@@ -54,22 +59,34 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Checks if the External Functions are available or not.</p>
+	 * <p>Returns the version of the Assistant Platforms Unifier if it's available.</p>
+	 * <p>Reason why it might not be available: if it's bundled as an external library and the file is not present -
+	 * like happens with Android Lollipop and below in which extract libraries is mandatory. From Marshmallow, it's
+	 * possible to use libraries inside the APK, so this should not happen - but better prevent anyways.</p>
 	 *
-	 * @return true if the External Functions are available, false otherwise.
+	 * @return the version of the APU if it's available, null otherwise
 	 */
-	public static boolean ext_funcs_available() {
+	// Ignore the error below saying the method never returns null. It can be null - just remove the library file from
+	// due folder and see it happening... (if the app is run on below Marshmallow, where library files are extracted).
+	@Nullable
+	public static String platformUnifierVersion() {
 		// "You see, Java's exception hierarchy is a bit unintuitive. You have two classes, Exception and Error, each of
 		// which extends Throwable. Thus, if you want to catch absolutely everything you need to catch Throwable (not
 		// recommended)."
-		// In this case, the error for this case is UnsatisfiedLinkError, which is part of the Error class, not
-		// Exception. But I want to catch ANY error to know if they're available or not, so I chose Throwable.
+		// In this case, the error is UnsatisfiedLinkError in case the library is not present (was not unpacked or
+		// unsupported architecture like MIPS), which is part of the Error class, not Exception. But I want to catch ANY
+		// error to know if its or not, so I chose Throwable.
+		// EDIT: never mind. I'll stick to UnsatisfiedLinkError. Must only be changed if anything other than that
+		// happens.
 		try {
-			//Funcoes_externas.chamar_tarefa("sgfhjvfgsbvysd");
-		} catch (final Throwable ignored) {
-			return false;
+			// Leave this as it is unless you have a better idea. I need to check if the Commands Detection submodule is
+			// present before returning the version (which also checks if the GlobalUtils are present or not - which
+			// must always be).
+			final String temp = CommandsDetection_APU.NONE;
+			return GlobalUtils_APU.VERSION;
+		} catch (final UnsatisfiedLinkError ignored) {
+			return null;
 		}
-		return true;
 	}
 
 	/**
@@ -94,7 +111,7 @@ public final class UtilsGeneral {
 		if (length < 1) throw new IllegalArgumentException("Length 0 string requested");
 		buf = new char[length];
 
-		for (int idx = 0; idx < length; idx++) {
+		for (int idx = 0; idx < length; ++idx) {
 			buf[idx] = symbols[random.nextInt(symbols.length)];
 		}
 		return new String(buf);
@@ -135,9 +152,8 @@ public final class UtilsGeneral {
 	 * <p>Main note: probably not good idea to use on Content Provider classes. Only on Activities, Services and
 	 * Receivers. Read the doc of {@link ApplicationClass#applicationContext}.</p>
 	 * <p>It will use the way that doesn't get a null value from the 2 below, in this order. It's also not supposed to
-	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I
-	 * change NonNull to Nullable or something. Until then, assume it's never null.</p>
-	 * <br>
+	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I'll
+	 * change NonNull to Nullable or something. Until then, assume it's never null. Ways:</p>
 	 * <p>- Calls {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
 	 * <p>Warning from {@link AppGlobals#getInitialApplication()}, which calls the last mentioned method above:</p>
 	 * <p>"Return the first Application object made in the process.</p>
@@ -257,6 +273,20 @@ public final class UtilsGeneral {
 		activityManager.getMemoryInfo(memoryInfo);
 
 		return memoryInfo.lowMemory;
+	}
+
+	/**
+	 * <p>Vibrate the device for the amount of time given.</p>
+	 *
+	 * @param duration milliseconds to vibrate
+	 */
+	public static void vibrateDevice(final long duration) {
+		final Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+		} else {
+			vibrator.vibrate(duration);
+		}
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

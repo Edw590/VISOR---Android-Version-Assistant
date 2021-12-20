@@ -33,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -55,15 +56,17 @@ public final class UtilsServices {
 	 * then starts it again normally (unless it was already started, like by the system).</p>
 	 *
 	 * @param service_class the class of the service to restart
+	 * @param intent same as in {@link #startService(Class, Intent, boolean)}
 	 * @param force_restart true to force stopping the service, false to stop normally
 	 */
-	public static void restartService(@NonNull final Class<?> service_class, final boolean force_restart) {
+	public static void restartService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
+									  final boolean force_restart) {
 		if (force_restart) {
 			UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(service_class));
 		} else {
 			stopService(service_class);
 		}
-		startService(service_class, true);
+		startService(service_class, intent, true);
 	}
 
 	/**
@@ -81,29 +84,39 @@ public final class UtilsServices {
 	 * <p>Starts a service without additional parameters in case it's not already running.</p>
 	 *
 	 * @param service_class the class of the service to start
+	 * @param intent the intent to use to start the service, or null if it's to use the default intent (no extras or
+	 *               anything)
 	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
 	 *                   false to start in background; below that, this value has no effect as the service is always
 	 *                   started in background
 	 */
-	public static void startService(@NonNull final Class<?> service_class, final boolean foreground) {
+	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
+									final boolean foreground) {
 		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
 		// the global variables declared on the service. Currently, that would mean instantiate the Speech again, for
 		// example. It shouldn't. If this doesn't happen, you can put the parameter back to check if it's running or not.
 		// While you don't see about that, it will only start if it's not already running.
+		// Note: this above is referring to when I had a parameter to be possible to tell the function to check or not
+		// if the service is running or not (would call it anyways if it would not be to check if it's running or not).
 
 		if (!isServiceRunning(service_class)) {
 			final Context context = UtilsGeneral.getContext();
-			final Intent intent = new Intent(context, service_class);
+			final Intent intent_to_use;
+			if (intent == null) {
+				intent_to_use = new Intent(context, service_class);
+			} else {
+				intent_to_use = intent;
+			}
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				if (foreground) {
-					context.startForegroundService(intent);
+					context.startForegroundService(intent_to_use);
 					return;
 				}
 			}
 
 			// Do NOT call this in high frequency. It's said on the doc that it takes various milliseconds to process
 			// this call.
-			context.startService(intent);
+			context.startService(intent_to_use);
 		}
 	}
 
@@ -127,7 +140,7 @@ public final class UtilsServices {
 			return new int[0]; // Just to be sure it doesn't carry on.
 		}
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class, true);
+		UtilsServices.startService(MainSrv.class, null, true);
 
 		return ret;
 	}

@@ -60,9 +60,9 @@ android {
 	Do NOT put it below API 23, or the app will not be able to check/request run-time permissions!
 
 	Versions for which the app was developed (developing to a version implies testing on that version):
-		- KitKat 4.4.2, API 19 (tablet) --> until [still on it]
-		- Lollipop 5.1, API 22 (phone) --> until [still on it]
-		- Oreo 8.1, API 27 (phone) --> until [still on it]
+		- KitKat 4.4.2, API 19 (tablet) [secondary] --> until [still on it]
+		- Lollipop 5.1, API 22 (phone) [more rare] --> until [still on it]
+		- Oreo 8.1, API 27 (phone) [main] --> until [still on it]
 
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,8 +91,8 @@ android {
 
 	buildTypes {
 		debug {
-			minifyEnabled true
-			shrinkResources true
+			minifyEnabled false // todo NPE
+			shrinkResources false // todo NPE
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 			signingConfig signingConfigs.release
 		}
@@ -111,12 +111,20 @@ android {
 	packagingOptions {
 		resources.excludes.add("META-INF/*")
 	}
+	sourceSets {
+		main {
+			assets.srcDirs = ['src/main/assets']
+		}
+	}
 }
 
 dependencies {
+	/////////////////////
+	// Maven //
+
 	// General
-	implementation "androidx.appcompat:appcompat:1.3.1"
-	implementation "androidx.constraintlayout:constraintlayout:2.1.1"
+	implementation "androidx.appcompat:appcompat:1.3.1" // 1.4.0 --> compileSdkVersion needed = 31
+	implementation "androidx.constraintlayout:constraintlayout:2.1.2"
 	implementation "androidx.multidex:multidex:2.0.1"
 	implementation "androidx.preference:preference:1.1.1"
 
@@ -126,6 +134,19 @@ dependencies {
 
 	// External
 	implementation "org.gavaghan:geodesy:1.1.3"
-	implementation files("libs/jutf7-1.0.0.jar")
 	implementation "com.madgag.spongycastle:core:1.58.0.0"
+
+	/////////////////////
+	// Local files
+
+	// External
+	implementation files("libs/jutf7-1.0.0.jar")
+	implementation files("libs/pocketsphinx-android-5prealpha-release.aar")
+
+	// Platforms Unifier Module
+	implementation files("libs/assist_platforms_unifier.aar")
 }
+
+ant.importBuild 'assets.xml'
+preBuild.dependsOn(list, checksum)
+clean.dependsOn(clean_assets)

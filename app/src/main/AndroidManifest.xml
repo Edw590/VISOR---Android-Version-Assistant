@@ -39,6 +39,9 @@
 	<uses-permission android:name="android.permission.BLUETOOTH"/>
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 	<uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
@@ -55,6 +58,7 @@
 
 	<!-- AppOps permissions (those that have a specific settings screen for the user to grant them) -->
 	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 
 	<!-- Privileged apps' permissions (only by having the app installed in /system/priv-app, or below KitKat, in
 	/system/app) -->
@@ -65,6 +69,7 @@
 	<uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
 	<uses-permission android:name="android.permission.LOCK_DEVICE" />
 	<uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
+	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
 	<!-- Verifier permissions -->
 	<uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" />
@@ -180,6 +185,14 @@
 		<service android:name="com.dadi590.assist_c_a.Modules.Speech.Speech2"
 			android:exported="false"
 			android:directBootAware="true" />
+		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition"
+			android:exported="false"
+			android:directBootAware="true"
+			android:process=":GoogleSpeechRecognition" />
+		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition"
+			android:exported="false"
+			android:directBootAware="true"
+			android:process=":PocketSphinxSpeechRecognition" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:exported="true"

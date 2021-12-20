@@ -24,6 +24,12 @@ android.permission.BLUETOOTH_ADMIN
 android.permission.BLUETOOTH_SCAN
 - So the app can discover nearby Bluetooth devices. Useful currently to detect the relative location of the device
 
+android.permission.CHANGE_WIFI_STATE
+- To be able to toggle the Wi-Fi state on and off
+
+android.permission.ACCESS_WIFI_STATE
+- To be able to get the Wi-Fi state
+
 ------------Dangerous permissions------------
 
 android.permission.RECEIVE_SMS

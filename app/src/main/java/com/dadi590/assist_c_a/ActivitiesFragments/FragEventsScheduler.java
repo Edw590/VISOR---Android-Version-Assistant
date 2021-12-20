@@ -96,7 +96,7 @@ public class FragEventsScheduler extends Fragment {
 			}
 
 			linearLayout.addView(switchCompat);
-			i++;
+			++i;
 		}
 	}
 }

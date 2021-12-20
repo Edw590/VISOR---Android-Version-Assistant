@@ -50,8 +50,8 @@ public final class UtilsNetwork {
 		// 248 + 8 header = 256 bytes each packet
 		final List<String> commands = new ArrayList<>(1);
 		commands.add("ping -c " + packets_num + " -i 0.5 -n -s 248 -t 1 -v " + ip);
-		final UtilsShell.CmdOuputObj cmdOuputObj = UtilsShell.executeShellCmd(commands);
-		final String[] output_lines = UtilsGeneral.bytesToPrintableChars(cmdOuputObj.output_stream, false).split("\n");
+		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+		final String[] output_lines = UtilsGeneral.bytesToPrintableChars(cmdOutputObj.output_stream, false).split("\n");
 
 		// Here it gets the time values (excluding the duplicated ones)
 		final List<Double> time_values = new ArrayList<>(packets_num);
@@ -73,13 +73,13 @@ public final class UtilsNetwork {
 		final int first_n_elements = 5;
 		double sum = 0.0;
 		double sum_squares = 0.0;
-		for (int i = 0; i < first_n_elements; i++) {
+		for (int i = 0; i < first_n_elements; ++i) {
 			final double value = time_values.get(i);
 			sum += value;
 			sum_squares += value * value;
 		}
 		boolean any_outlier = false;
-		for (int i = 0; i < first_n_elements; i++) {
+		for (int i = 0; i < first_n_elements; ++i) {
 			if (UtilsMath.isOutlier(time_values.get(i), sum, sum_squares, 5, accuracy_parameter)) {
 				any_outlier = true;
 				time_values.remove(i);
@@ -95,9 +95,9 @@ public final class UtilsNetwork {
 			sum = 0.0;
 			sum_squares = 0.0;
 			summed_elements = 0;
-			for (int i = 0; i < first_n_elements; i++) {
+			for (int i = 0; i < first_n_elements; ++i) {
 				final double value = time_values.get(i);
-				summed_elements++;
+				++summed_elements;
 				sum += value;
 				sum_squares += value * value;
 			}
@@ -105,10 +105,10 @@ public final class UtilsNetwork {
 
 		// With the remaining elements, the function will check if any of them is an outlier, comparing to the values
 		// got from the first 5 elements (those 5 decide the fate of the list xD).
-		for (int i = summed_elements; i < packets_num - summed_elements; i++) {
+		for (int i = summed_elements; i < packets_num - summed_elements; ++i) {
 			final double value = time_values.get(i);
 			if (!UtilsMath.isOutlier(value, sum, sum_squares, summed_elements, accuracy_parameter)) {
-				summed_elements++;
+				++summed_elements;
 				sum += value;
 				sum_squares += value * value;
 			}

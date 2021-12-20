@@ -34,7 +34,7 @@ import android.speech.tts.UtteranceProgressListener;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.Executor;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.util.ArrayList;
@@ -139,7 +139,7 @@ public class Speech {
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #NO_ADDITIONAL_COMMANDS} --> for {@code additional_command}: execute no additional commands</p>
 	 * <p>- {@link #EXECUTOR_SOMETHING_SAID} --> for {@code additional_command}: set Executor's
-	 * {@link Executor#something_said} variable to true.</p>
+	 * {@link CmdsExecutor#something_said} variable to true.</p>
 	 * <p>- {@link #SKIP_CURRENT_SPEECH} --> for {@code additional_command}: skip the currently speaking speech - in
 	 * this case, the {@code txt_to_speak} and {@code emergency_speech} parameters will be ignored</p>
 	 * <p>- {@link #SPEECH_ABORTED_RINGER_MODE} --> for the returning value: in case the speech was aborted because
@@ -241,7 +241,7 @@ public class Speech {
 				// when this occurs - might finish when it gets here, or isSpeaking() could return faster or slower than
 				// the currently_speaking_speech_ID variable is updated or vice-versa.
 				if (tts.isSpeaking() && !current_speech_id.isEmpty()) {
-					for (int i = 0, size = utterance_ids.size(); i < size; i++) {
+					for (int i = 0, size = utterance_ids.size(); i < size; ++i) {
 						if (utterance_ids.get(i).equals(current_speech_id)) {
 							utterance_ids.add(i + 1, utterance_ids.get(i));
 							speeches.add(i + 1, WAS_SAYING_PREFIX_1 + speeches.get(i));
@@ -323,7 +323,7 @@ public class Speech {
 			reset_speeches = false;
 		}
 
-		for (int i = 0, size = utterance_ids.size(); i < size; i++) {
+		for (int i = 0, size = utterance_ids.size(); i < size; ++i) {
 			if (utterance_ids.get(i).equals(utteranceId)) {
 				System.out.println(speeches.get(i));
 				if (runnables.get(i) != null) {
@@ -339,7 +339,7 @@ public class Speech {
 
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (isEmergencySpeech(utteranceId) && reset_speeches) {
-			for (int i = 0, size = utterance_ids.size(); i < size; i++) {
+			for (int i = 0, size = utterance_ids.size(); i < size; ++i) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 					tts_params.bundle.clear();
 					tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, speech_audio_stream);

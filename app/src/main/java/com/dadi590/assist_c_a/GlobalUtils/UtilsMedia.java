@@ -122,7 +122,7 @@ public final class UtilsMedia {
 		} else {
 			final String speak = "Attention - There was a problem creating the media file in the device storage. " +
 					"It is not mounted with read and write permissions.";
-			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
 			return null;
 		}

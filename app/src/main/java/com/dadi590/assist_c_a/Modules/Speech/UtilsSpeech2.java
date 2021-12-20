@@ -48,7 +48,7 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a prefix for the speech utterance ID based on the speech priority.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, Integer)}
 	 *
 	 * @return the prefix to add to the beginning of the utterance ID
 	 */
@@ -61,7 +61,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @param utteranceId the utterance ID of the speech to be analyzed
 	 *
-	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Integer)}.
+	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, Integer)}.
 	 * In case an empty string is given, the lowest priority will be returned.
 	 */
 	static int getSpeechPriority(final String utteranceId) {
@@ -77,7 +77,7 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a random utterance ID with the prefix for the given priority.</p>
 	 *
-	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, int, Integer)}
+	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, Integer)}
 	 *
 	 * @return the generated utterance ID
 	 */
@@ -106,7 +106,7 @@ final class UtilsSpeech2 {
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
 		final List<SpeechObj> correct_sub_array = arrays_speech_objs.get(priority);
 
-		for (int i = 0, size = correct_sub_array.size(); i < size; i++) {
+		for (int i = 0, size = correct_sub_array.size(); i < size; ++i) {
 			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
 				return new int[]{priority, i};
 			}
@@ -155,7 +155,7 @@ final class UtilsSpeech2 {
 	static void readyArrayLists(@NonNull final Collection<? super ArrayList<SpeechObj>> arrays_speech_objs) {
 		// Fill each ArrayList with a number of ArrayLists, which correspond to the number of existing priority values.
 		// 50 as the initial value because I don't think more than 50 speeches will be on a list... (wtf).
-		for (int i = 0; i < CONSTS.NUMBER_OF_PRIORITIES; i++) {
+		for (int i = 0; i < CONSTS.NUMBER_OF_PRIORITIES; ++i) {
 			arrays_speech_objs.add(new ArrayList<>(50));
 			// Before you think in declaring a new variable to be the array to always add in the for loop, think again
 			// and realize it's a reference... So it will be the same array all over the indexes of the main one (copy
@@ -201,7 +201,7 @@ final class UtilsSpeech2 {
 	 * <p>This method will return the ID of the <em>first</em> occurrence only in case there are multiple speeches with
 	 * the same string.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, Integer)}
 	 * @param speech the speech string to search the array for
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
 	 *
@@ -213,7 +213,7 @@ final class UtilsSpeech2 {
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
 		final List<SpeechObj> array_speech_objs = arrays_speech_objs.get(priority);
 
-		for (int i = 0, size = array_speech_objs.size(); i < size; i++) {
+		for (int i = 0, size = array_speech_objs.size(); i < size; ++i) {
 			if (array_speech_objs.get(i).txt_to_speak.equals(speech)) {
 				return array_speech_objs.get(i).utterance_id;
 			}
@@ -236,7 +236,7 @@ final class UtilsSpeech2 {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param speech the speech string to search the arrays for
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, int, Integer)} or the constant. If it's the
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, Integer)} or the constant. If it's the
 	 *                           constant, then the parameter {@code low_to_high} will be completely ignored
 	 * @param low_to_high true to search from lower priority arrays to higher ones, false to do the opposite
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
@@ -248,7 +248,7 @@ final class UtilsSpeech2 {
 									 @NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		if (speech_priority == UNKNOWN_PRIORITY) {
 			if (low_to_high) {
-				for (int priority = 0, size = arrays_speech_objs.size(); priority < size; priority++) {
+				for (int priority = 0, size = arrays_speech_objs.size(); priority < size; ++priority) {
 					final String ret = internalGetSpeechIdBySpeech(priority, speech, arrays_speech_objs);
 					if (ret != null) {
 						return ret;
@@ -282,7 +282,7 @@ final class UtilsSpeech2 {
 
 		final List<SpeechObj> correct_sub_array = arrays_speech_objs.get(priority);
 		final int size_loop = correct_sub_array.size();
-		for (int i = 0; i < size_loop; i++) {
+		for (int i = 0; i < size_loop; ++i) {
 			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
 				final SpeechObj speechObj = correct_sub_array.get(i);
 

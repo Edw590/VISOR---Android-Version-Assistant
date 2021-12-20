@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
@@ -48,7 +49,7 @@ import java.util.List;
 public class AudioRecorder {
 
 	@Nullable private MediaRecorder recorder = null;
-	private boolean recording = false;
+	private boolean is_recording = false;
 
 	final List<Runnable> runnables = new ArrayList<>(5);
 
@@ -62,24 +63,35 @@ public class AudioRecorder {
 	}
 
 	/**
-	 * <p>Method to call instead of calling directly {@link #startRecording(int, boolean)}.</p>
-	 *  @param start true to start recording, false to stop recording
-	 * @param audioSource same as in {@link #startRecording(int, boolean)}
+	 * <p>Returns the {@link #is_recording} variable.</p>
+	 *
+	 * @return .
 	 */
-	public final void record(final boolean start, final int audioSource) {
+	public final boolean isRecording() {
+		return is_recording;
+	}
+
+	/**
+	 * <p>Method to call instead of calling directly {@link #startRecording(int, boolean)}.</p>
+	 *
+	 * @param start true to start recording, false to stop recording
+	 * @param audioSource same as in {@link #startRecording(int, boolean)}, or as a standard, -1 if {@code start} is
+	 *                    false (this parameter will be ignored if it's to stop recording).
+	 */
+	public final void recordAudio(final boolean start, final int audioSource) {
 		if (start) {
-			if (recording) {
+			if (is_recording) {
 				final String speak = "Already on it sir.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			} else {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						if (startRecording(audioSource, false) == NO_ERRORS) {
+						if (NO_ERRORS == startRecording(audioSource, false)) {
 							// Update the values on the ValuesStorage
 							ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(true));
 						}
-						/*if (audioSource == MediaRecorder.AudioSource.MIC && !recording) {
+						/* todo if (audioSource == MediaRecorder.AudioSource.MIC && !recording) {
 							// In case of an error and that the microphone is the audio source, start the background
 							// recognition again.
 							Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
@@ -93,20 +105,19 @@ public class AudioRecorder {
 				} catch (final IllegalArgumentException ignored) {
 				}
 				final String speak = "Starting now, sir.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, runnable.hashCode());
-				// todo Make it detect when the speech is finished to put the Runnable working
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, runnable.hashCode());
 			}
 		} else {
-			if (recording) {
+			if (is_recording) {
 				stopRecording();
 				final String speak = "Stopped, sir.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
 				// Update the values on the ValuesStorage
 				ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(false));
 			} else {
 				final String speak = "Already stopped, sir.";
-				UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 				try {
 					// It's not supposed to be registered by now, but as a precaution.
 					UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
@@ -116,14 +127,10 @@ public class AudioRecorder {
 		}
 	}
 
-	/**
-	 * <p>The sole purpose of this register is detect when the speech module is ready so the Main Service can start
-	 * everything else.</p>
-	 */
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			if (/*context == null ||*/ intent == null || intent.getAction() == null) {
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (null == intent || null == intent.getAction()) {
 				return;
 			}
 
@@ -168,7 +175,7 @@ public class AudioRecorder {
 	 * @return one of the constants
 	 */
 	final int startRecording(final int audioSource, final boolean check_recording_possible) {
-		// Do NOT change the coder and format settings. I've put those because they were compatible with all devices
+		// Do NOT change the encoder and format settings. I've put those because they were compatible with all devices
 		// that the app supports, and still the sound is very good.
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(audioSource);
@@ -179,11 +186,11 @@ public class AudioRecorder {
 		} else {
 			file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
 		}
-		if (file == null) {
+		if (null == file) {
 			final String speak = "Error 1 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
-			recording = false;
+			is_recording = false;
 
 			return ERR_CREATE_FILE;
 		}
@@ -191,9 +198,9 @@ public class AudioRecorder {
 		recorder.setOutputFile(fileName);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
 
-        /*if (!check_recording_possible) {
-            Utils_reconhecimentos_voz.desativar_reconhecimentos_voz();
-        }*/
+        if (!check_recording_possible) {
+            UtilsSpeechRecognizers.terminateSpeechRecognizers();
+        }
 
 		try {
 			recorder.prepare();
@@ -202,11 +209,11 @@ public class AudioRecorder {
 			recorder = null;
 			if (!check_recording_possible) {
 				final String speak = "Error 2 sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
 
-			recording = false;
+			is_recording = false;
 
 			return ERR_PREP_RECORDING;
 		}
@@ -218,11 +225,11 @@ public class AudioRecorder {
 			recorder = null;
 			if (!check_recording_possible) {
 				final String speak = "Error 3 sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.EXECUTOR_SOMETHING_SAID, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
 
-			recording = false;
+			is_recording = false;
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
 			/*int permission_status = UtilsPermissions.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT);
@@ -237,12 +244,12 @@ public class AudioRecorder {
 			recorder = null;
 			file.delete();
 
-			recording = false;
+			is_recording = false;
 
 			return UtilsGeneral.FONTE_DISPONIVEL;
 		}
 
-		recording = true;
+		is_recording = true;
 
 		return NO_ERRORS;
 	}
@@ -251,7 +258,7 @@ public class AudioRecorder {
 	 * <p>Stops an ongoing audio recording.</p>
 	 */
 	private void stopRecording() {
-		if (recorder != null) {
+		if (null != recorder) {
 			try {
 				recorder.stop();
 			} catch (final IllegalStateException ignored) {
@@ -259,6 +266,6 @@ public class AudioRecorder {
 			recorder.release();
 			recorder = null;
 		}
-		recording = false;
+		is_recording = false;
 	}
 }

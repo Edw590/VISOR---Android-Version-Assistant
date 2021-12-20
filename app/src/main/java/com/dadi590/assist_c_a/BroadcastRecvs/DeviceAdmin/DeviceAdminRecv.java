@@ -54,7 +54,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		UtilsServices.startMainService();
 
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, null, PRIORITY_ADMIN_ENABLED, null);
+		UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, null);
 	}
 
 	@NonNull
@@ -67,7 +67,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, null, Speech2.PRIORITY_HIGH, null);
+		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.PRIORITY_HIGH, null);
 		// Why PRIORITY_CRITICAL? Because onDisabled() also has it, so they have the same priority. And onDisabled()
 		// skips this speech in case it's being spoken, so it's all good.
 		// EDIT: it's on HIGH now. Why CRITICAL... Critical thing is when it's disabled. If the user is just
@@ -86,7 +86,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLED, Speech2.NO_ADDITIONAL_COMMANDS, Speech2.PRIORITY_CRITICAL, null);
+		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLED, Speech2.PRIORITY_CRITICAL, null);
 		// Why PRIORITY_CRITICAL? Refer to CONSTS.SPEAK_DISABLED.
 		// todo HE'LL SPEAK AND LEAVE THE PHONE WITH THE DO NOT DISTURB AND THE MAX VOLUME IF IT'S STOPPED IN
 		//  THE MIDDLE!!!!!! How do you fix that.....? You don't, right? xD Cool. No idea.

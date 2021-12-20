@@ -27,14 +27,23 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.Modules.ValuesStorage.SomeValuesUpdater;
 
 /**
  * <p>The list of modules of the assistant.</p>
  */
 public final class ModulesList {
 
+	// In case it's not a module and it's just wanted to check if it's running or not. Could be a submodule. For example
+	// the Google and PocketSphinx speech recognizers. That's why the constant is private. It's not to be used externally.
+	private static final int MODULE_TYPE_INSTANCE_CHK_ONLY = -2;
+	private static final int MODULE_TYPE_SERVICE_CHK_ONLY = -1;
 	public static final int MODULE_TYPE_SERVICE = 0;
 	public static final int MODULE_TYPE_INSTANCE = 1;
 
@@ -52,12 +61,16 @@ public final class ModulesList {
 	 * <p>- {@link #MODULE_TYPE_INSTANCE}: the module is a normal class that must only be instantiated</p>
 	 */
 	private static final Object[][] modules_list = {
-			//{SomeValuesUpdater.class, MODULE_TYPE_INSTANCE, "Some Values Updater", null},
+			{SomeValuesUpdater.class, MODULE_TYPE_INSTANCE, "Some Values Updater", null},
 			{Speech2.class, MODULE_TYPE_SERVICE, "Speech", null},
 			//{DeviceLocator.class, MODULE_TYPE_SERVICE, "Device Locator", null},
 			{BatteryProcessor.class, MODULE_TYPE_INSTANCE, "Battery Processor", null},
 			{PhoneCallsProcessor.class, MODULE_TYPE_INSTANCE, "Phone Calls Processor", null},
 			{AudioRecorder.class, MODULE_TYPE_INSTANCE, "Audio Recorder", null},
+			{CmdsExecutor.class, MODULE_TYPE_INSTANCE, "Commands Executor", null},
+			{SpeechRecognitionCtrl.class, MODULE_TYPE_INSTANCE, "Speech Recognition Control", null},
+			{PocketSphinxRecognition.class, MODULE_TYPE_SERVICE_CHK_ONLY, "- Hotword recognizer", null},
+			{GoogleRecognition.class, MODULE_TYPE_SERVICE_CHK_ONLY, "- Commands recognizer", null},
 	};
 
 	/**
@@ -89,7 +102,7 @@ public final class ModulesList {
 			if ((Class<?>) module[0] == module_class) {
 				return isModuleRunningByIndex(i);
 			}
-			i++;
+			++i;
 		}
 
 		// Won't ever get here as long as the class exists.
@@ -105,11 +118,13 @@ public final class ModulesList {
 	 */
 	public static boolean isModuleRunningByIndex(final int module_index) {
 		switch ((int) modules_list[module_index][1]) {
-			case (MODULE_TYPE_SERVICE): {
+			case (MODULE_TYPE_SERVICE):
+			case (MODULE_TYPE_SERVICE_CHK_ONLY): {
 				return UtilsServices.isServiceRunning((Class<?>) modules_list[module_index][0]);
 			}
-			case (MODULE_TYPE_INSTANCE): {
-				return modules_list[module_index][3] != null;
+			case (MODULE_TYPE_INSTANCE):
+			case (MODULE_TYPE_INSTANCE_CHK_ONLY): {
+					return modules_list[module_index][3] != null;
 			}
 		}
 

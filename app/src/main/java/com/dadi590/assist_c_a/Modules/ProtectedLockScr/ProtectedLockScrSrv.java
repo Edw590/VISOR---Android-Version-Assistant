@@ -91,7 +91,7 @@ public class ProtectedLockScrSrv extends Service {
 
 	private final BroadcastReceiver localBroadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 			UtilsServices.startMainService();
 
 			if (intent == null || intent.getAction() == null) {
@@ -188,6 +188,7 @@ public class ProtectedLockScrSrv extends Service {
 				try {
 					Thread.sleep(1000L);
 				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
 				}
 			}
 		}

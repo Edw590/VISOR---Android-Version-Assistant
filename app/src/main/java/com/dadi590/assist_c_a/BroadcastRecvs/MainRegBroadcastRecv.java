@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.telephony.TelephonyManager;
 
+import androidx.annotation.Nullable;
+
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
@@ -60,7 +62,7 @@ public final class MainRegBroadcastRecv {
 		intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 		intentFilter.addAction(CONSTS.ACTION_PRECISE_CALL_STATE_CHANGED);
 
-		// Battery
+		// Battery / Power
 		intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
 		intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 		intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
@@ -74,7 +76,7 @@ public final class MainRegBroadcastRecv {
 
 	private static final BroadcastReceiver mainRegBroadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 			UtilsIntentWhatToDo.intentWhatToDo(intent);
 		}
 	};

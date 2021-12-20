@@ -22,6 +22,8 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition;
 
 /**
  * <p>Global broadcast actions that can be received by any component in the app.</p>
@@ -36,8 +38,8 @@ public final class GL_BC_CONSTS {
 
 	/**
 	 * <p>Explanation: warns when a speech that requested to broadcast a code after being finished, has finished.</p>
-	 * <p>Broadcast by: {@link Speech2}.</p>
-	 * <p>Specific to the class: none.</p>
+	 * <p>Is broadcast by: {@link Speech2}.</p>
+	 * <p>To be received only by the class: any chosen class.</p>
 	 * <p>Extras:</p>
 	 * <p>- {@link #EXTRA_SPEECH2_AFTER_SPEAK_CODE} (int): unique ID of the {@link Runnable} to run</p>
 	 */
@@ -46,9 +48,25 @@ public final class GL_BC_CONSTS {
 
 	/**
 	 * <p>Explanation: warns when the speech module is ready for use.</p>
-	 * <p>Broadcast by: {@link Speech2}.</p>
-	 * <p>Specific to the class: none.</p>
+	 * <p>Is broadcast by: {@link Speech2}.</p>
+	 * <p>To be received only by the class: any chosen class.</p>
 	 * <p>Extras: none.</p>
 	 */
 	public static final String ACTION_SPEECH2_READY = "ACTION_SPEECH2_READY";
+
+	/**
+	 * <p>Explanation: informs that Google's speech recognition has began.</p>
+	 * <p>Is broadcast by: {@link GoogleRecognition}.</p>
+	 * <p>To be received only by the class: any chosen class.</p>
+	 * <p>Extras: none.</p>
+	 */
+	public static final String ACTION_GOOGLE_RECOG_STARTED = "SPEECH_RECOG_ACTION_GOOGLE_RECOG_STARTED";
+
+	/**
+	 * <p>Explanation: informs that PocketSphinx's speech recognition has began.</p>
+	 * <p>Is broadcast by: {@link PocketSphinxRecognition}.</p>
+	 * <p>To be received only by the class: any chosen class.</p>
+	 * <p>Extras: none.</p>
+	 */
+	public static final String ACTION_POCKETSPHINX_RECOG_STARTED = "SPEECH_RECOG_ACTION_POCKETSPHINX_RECOG_STARTED";
 }

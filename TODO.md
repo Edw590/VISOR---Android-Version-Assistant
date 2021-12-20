@@ -269,4 +269,81 @@ Answer the calls on some other device.
 
 ## Radio
 
-Integrate a radio app into it (FM radio, not Internet radio). Also try to integrate SpiritFM into this, if the license agrees (I don't know, the author unfortunately passed away and the paid app is no longer sold, so no idea if I could just decompile it and put the code here, I'll have to see if that's legal).
+Integrate a radio app into it (FM radio, not Internet radio). Also try to integrate SpiritFM into this, if the license
+agrees (I don't know, the author unfortunately passed away and the paid app is no longer sold, so no idea if I could
+just decompile it and put the code here, I'll have to see if that's legal).
+
+
+## Speech recognition
+
+Think of some way for LEGION to not listen to himself. If there is an error processing the commands, for example, he
+can't say what was said to generate the error because he'll hear himself saying what caused the error --> wow. So...
+
+
+## Notify of errors
+
+Send errors by e-mail or at least with a notification.
+
+
+## Executor
+
+If there is not SIM card on the phone, the emergency commands (which are not ready yet) won't work and might throw an
+error? Or even if it doesn't, at least would be good to remind it's not possible to call someone - only emergency
+numbers.
+
+
+## Speech recognition
+
+If the Google App is not installed, Google's speech recognizer won't be available --> overall speech recognition won't
+work. So...
+    - Force the app to be always installed and with the speech recognition files...?
+    - Put something internal to the app to recognize speech? (Note: PocketSphinx is not good enough for normal speech.)
+
+Aside from that, put this checking if English is installed and selected (the app can only accept English).
+
+
+## Speech recognition
+
+If the Google App is not installed or selected as the speech recognizer, the GoogleRecognition service will hang
+forever --> put a timer on onBeginningOfSpeech() or something.
+
+
+## Executor
+
+The assistant no longer knows when the music is playing or not. See a new way of knowing that. Note: this was written
+about Lollipop 5.1. No idea if it still happens with Oreo.
+
+
+## Executor
+
+Put it enabling the Mobile Data in a decent way without root or system permissions if possible.
+
+
+## Executor
+
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+## Speech
+
+Show a notification if the assistant can't talk.
+
+
+## Values Storage
+
+The values are not put there in the app initialization... Change that. So the last call if the phone was restarted, is
+no call at all? Cool.
+
+
+## Executor
+
+Put all command executions running on a separate thread... Maybe put the Executor on a separate process?
+Turn on or off the airplane mode with the root commands option and see how infinite it takes and meanwhile, the app is
+not responding.

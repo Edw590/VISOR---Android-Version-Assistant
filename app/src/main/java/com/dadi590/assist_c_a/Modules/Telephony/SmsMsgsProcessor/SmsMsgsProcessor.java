@@ -76,12 +76,12 @@ public final class SmsMsgsProcessor {
 		final StringBuilder stringBuilder = new StringBuilder(25);
 		// Check Android version and use appropriate createFromPdu.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			for (int i = 0, length = pdus.length; i < length; i++) {
+			for (int i = 0, length = pdus.length; i < length; ++i) {
 				msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i], format);
 				stringBuilder.append(msgs[i].getMessageBody());
 			}
 		} else {
-			for (int i = 0, length = pdus.length; i < length; i++) {
+			for (int i = 0, length = pdus.length; i < length; ++i) {
 				msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
 				stringBuilder.append(msgs[i].getMessageBody());
 			}
@@ -100,11 +100,11 @@ public final class SmsMsgsProcessor {
 
 		if (UtilsTelephony.isPrivateNumber(sender)) {
 			final String speak = "Sir, attention! New message from a private number!";
-			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 		} else {
 			final String number_name = UtilsTelephony.getWhatToSayAboutNumber(sender);
 			final String speak = "Sir, new message from " + number_name + ".";
-			UtilsSpeech2BC.speak(speak, null, Speech2.PRIORITY_MEDIUM, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}
 }

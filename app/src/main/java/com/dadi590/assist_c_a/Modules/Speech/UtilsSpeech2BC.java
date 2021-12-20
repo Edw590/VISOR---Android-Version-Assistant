@@ -42,19 +42,15 @@ public final class UtilsSpeech2BC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to execute {@link Speech2#speak(String, int, int, Integer)}.</p>
-	 *
-	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, int, Integer)}
-	 * @param additional_command same as in {@link Speech2#speak(String, int, int, Integer)} or null to pass
-	 * {@link Speech2#NO_ADDITIONAL_COMMANDS}
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, int, Integer)}
-	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, int, Integer)}
+	 * <p>Broadcasts a request to execute {@link Speech2#speak(String, int, Integer)}.</p>
+	 *  @param txt_to_speak same as in {@link Speech2#speak(String, int, Integer)}
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, Integer)}
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, Integer)}
 	 */
-	public static void speak(@NonNull final String txt_to_speak, @Nullable final Integer additional_command,
-							 final int speech_priority, @Nullable final Integer after_speaking_code) {
+	public static void speak(@NonNull final String txt_to_speak, final int speech_priority,
+							 @Nullable final Integer after_speaking_code) {
 		final Intent broadcast_intent = new Intent(BroadcastConstants.ACTION_CALL_SPEAK);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1, txt_to_speak);
-		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, additional_command);
 		broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, speech_priority);
 		if (after_speaking_code != null) {
 			broadcast_intent.putExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, after_speaking_code);

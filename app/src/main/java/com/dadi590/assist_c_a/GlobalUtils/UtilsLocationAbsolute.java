@@ -266,7 +266,7 @@ public final class UtilsLocationAbsolute {
 		final String[] providers_to_try = {LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER,
 				LocationManager.PASSIVE_PROVIDER};
 		final List<Location> locations = new ArrayList<>(3);
-		for (int i = 0, length = providers_to_try.length; i < length; i++) {
+		for (int i = 0, length = providers_to_try.length; i < length; ++i) {
 			// Fill all with nulls, in case there
 			locations.add(null);
 		}
@@ -276,7 +276,7 @@ public final class UtilsLocationAbsolute {
 
 		if (UtilsPermissions.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
 				&& UtilsPermissions.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-			for (int i = 0, length = providers_to_try.length; i < length; i++) {
+			for (int i = 0, length = providers_to_try.length; i < length; ++i) {
 				final Location location = locationManager.getLastKnownLocation(providers_to_try[i]);
 				if (location != null && getAgeOfFix(location) <= (long) map_LOCATION_to_AGE.get(accuracy_type)) {
 					locations.set(i, location);

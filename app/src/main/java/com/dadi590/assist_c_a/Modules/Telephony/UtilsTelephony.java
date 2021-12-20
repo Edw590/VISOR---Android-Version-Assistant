@@ -109,11 +109,7 @@ public final class UtilsTelephony {
 
 			if (location_search == ALL_CONTACTS) {
 				if ((cursor != null ? cursor.getCount() : 0) > 0) {
-					while (true) {
-						if (!cursor.moveToNext()) {
-							break;
-						}
-
+					while (cursor.moveToNext()) {
 						final String id = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 						final String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 						//System.out.println("Name: " + name);
@@ -126,11 +122,7 @@ public final class UtilsTelephony {
 									ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
 									new String[]{id}, null)
 							) {
-								while (true) {
-									if (!cursor1.moveToNext()) {
-										break;
-									}
-
+								while (cursor1.moveToNext()) {
 									final String phoneNo = cursor1.getString(cursor1.getColumnIndex(
 											ContactsContract.CommonDataKinds.Phone.NUMBER));
 									//System.out.println("Number: " + phoneNo);
@@ -149,7 +141,7 @@ public final class UtilsTelephony {
 										if (!already_found) {
 											matches.add(name);
 											last_name_found = name;
-											num_matches++;
+											++num_matches;
 										}
 									}
 								}
@@ -159,11 +151,7 @@ public final class UtilsTelephony {
 				}
 			} else if (location_search == CONTACTS_SIM) {
 				// Leave it even being "always true" - until another location is added... Might prevent bugs.
-				while (true) {
-					if (!cursor.moveToNext()) {
-						break;
-					}
-
+				while (cursor.moveToNext()) {
 					final String name = cursor.getString(cursor.getColumnIndex("name"));
 					//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
 					final String phoneNo = cursor.getString(cursor.getColumnIndex("number"));
@@ -184,7 +172,7 @@ public final class UtilsTelephony {
 						if (!already_found) {
 							matches.add(name);
 							last_name_found = name;
-							num_matches++;
+							++num_matches;
 						}
 					}
 				}
@@ -322,11 +310,7 @@ public final class UtilsTelephony {
 				if (PhoneNumberUtils.compareStrictly(phNumber, number)) {
 					return Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE)));
 				}
-
-				if (!cursor.moveToPrevious()) {
-					break;
-				}
-			} while (true);
+			} while (cursor.moveToPrevious());
 		}
 
 		return -1;
@@ -373,7 +357,7 @@ public final class UtilsTelephony {
                 //Toast.makeText(context, phNumber + callDuration + callDayTimes + direction, Toast.LENGTH_SHORT).show();
                 // you can use strings in this line
 
-                j++;
+                ++j;
             }
             while (c.moveToPrevious() && j < totalCall);
         }

@@ -39,8 +39,9 @@ public final class CONSTS {
 	public static final String last_sms_msg_time = "last_sms_msg_time";
 	public static final String last_sms_msg_number = "last_sms_msg_number";
 
-	// Time
-	public static final String current_time = "current_time_s";
+	// Date and time
+	public static final String current_time = "current_time";
+	public static final String current_date = "current_date";
 
 	// Weather
 	public static final String loc_temp_for_the_day_c = "current_loc_temp_c";
@@ -51,6 +52,9 @@ public final class CONSTS {
 	public static final String recording_audio = "recording_audio";
 
 	/////////////////////////////////////////////////////////////////
+
+	public static final String CURRENT_TIME_FORMAT = "HH:mm:ss z";
+	public static final String CURRENT_DATE_FORMAT = "EEEE dd-MM-yyyy";
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>

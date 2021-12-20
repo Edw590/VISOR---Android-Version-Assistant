@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Utilities related with files and directories.</p>
@@ -173,4 +175,38 @@ public final class UtilsFilesDirs {
 
 		return null;
 	}
+
+	/**
+	 * <p>Gets the access rights of a file or folder.</p>
+	 *
+	 * @param path the path to the file or folder
+	 * @param human_readable true to return "drwxr-xr-x", for example; false to return in octal form (for example, 755)
+	 *
+	 * @return one of the strings mentioned in {@code human_readable} parameter
+	 */
+	@NonNull
+	public static String getAccessRights(@NonNull final String path, final boolean human_readable) {
+		final String parameter;
+		if (human_readable) {
+			parameter = "%A";
+		} else {
+			parameter = "%a";
+		}
+
+		// todo When you need to use the function, put it checking if without "su" the permission is denied, and if it
+		//  is, run the command again but with root user rights
+
+		final List<String> commands = new ArrayList<>(3);
+		commands.add("su");
+		commands.add("stat -c " + parameter + " " + path);
+		commands.add("exit");
+
+		final UtilsShell.CmdOutputObj commands_output = UtilsShell.executeShellCmd(commands, true);
+
+		return UtilsGeneral.bytesToPrintableChars(commands_output.output_stream, false);
+	}
+
+	/*public static boolean createFile(@NonNull final String complete_name) {
+		final String partition = complete_name.split("/")[1];
+	}*/
 }

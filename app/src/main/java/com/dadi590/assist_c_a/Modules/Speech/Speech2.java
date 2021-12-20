@@ -41,7 +41,6 @@ import android.speech.tts.Voice;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.Executor;
 import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
@@ -179,7 +178,7 @@ public class Speech2 extends Service {
 						registerReceiver();
 						UtilsApp.sendInternalBroadcast(new Intent(GL_BC_CONSTS.ACTION_SPEECH2_READY));
 					} else {
-						UtilsApp.sendInternalBroadcast(new Intent(BroadcastConstants.ACTION_SPEECH2_READY_AGAIN));
+						UtilsApp.sendInternalBroadcast(new Intent(BroadcastConstants.ACTION_READY_AGAIN));
 					}
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
@@ -187,7 +186,7 @@ public class Speech2 extends Service {
 
 					// An empty string should be enough to throw an error and crash the application.
 					System.out.println("----------- APP DEAD - TTS INITIALIZATION ERROR -----------");
-					speak("", NO_ADDITIONAL_COMMANDS, PRIORITY_LOW, null);
+					//speak("", NO_ADDITIONAL_COMMANDS, PRIORITY_LOW, null);
 					// todo Send an email about this and put a notification on the phone!!!
 				}
 			}
@@ -275,7 +274,6 @@ public class Speech2 extends Service {
 	}
 
 	public static final int NO_ADDITIONAL_COMMANDS = 0;
-	public static final int EXECUTOR_SOMETHING_SAID = 1;
 	// Below, high values for return values to not be confused with TextToSpeech.speak() methods' current return values
 	// and any other values that might arise.
 	public static final int SPEECH_ON_LIST = 3234_0;
@@ -321,12 +319,6 @@ public class Speech2 extends Service {
 	 * volume. For example, extreme security warnings, like Device Administrator mode successfully revoked.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #NO_ADDITIONAL_COMMANDS} --> for {@code additional_command}: execute no additional commands</p>
-	 * <p>- {@link #EXECUTOR_SOMETHING_SAID} --> for {@code additional_command}: set {@link Executor#something_said}
-	 * variable to true. Note: the speech may take time to actually be spoken, depending on the currently speaking
-	 * speeches. Note 2: this doesn't care if the speech was skipped by the user. That would need to get the program
-	 * waiting until the speech gets actually spoken or skipped to know what happened - not a good idea.</p>
-	 * <br>
 	 * <p>- {@link #PRIORITY_LOW} --> for {@code speech_priority}: low priority speech</p>
 	 * <p>- {@link #PRIORITY_MEDIUM} --> for {@code speech_priority}: medium priority speech</p>
 	 * <p>- {@link #PRIORITY_USER_ACTION} --> for {@code speech_priority}: medium-high priority speech</p>
@@ -341,7 +333,6 @@ public class Speech2 extends Service {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param txt_to_speak what to speak
-	 * @param additional_command one of the constants
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
 	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for
 	 *                            example, a unique reference to a {@link Runnable} which is detected by a receiver and
@@ -352,36 +343,25 @@ public class Speech2 extends Service {
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
 	 * being spoken immediately; one of the constants otherwise.
 	 */
-	final int speak(@NonNull final String txt_to_speak, final int additional_command, final int speech_priority,
+	final int speak(@NonNull final String txt_to_speak, final int speech_priority,
 					@Nullable final Integer after_speaking_code) {
-		return speakInternal(txt_to_speak, additional_command, speech_priority, null, AUDIO_STREAM_UNUSED,
-				after_speaking_code);
+		return speakInternal(txt_to_speak, speech_priority, null, after_speaking_code);
 	}
 
-	private static final int AUDIO_STREAM_UNUSED = 3234;
 	/**
-	 * <p>Same as in {@link #speak(String, int, int, Integer)}, but with additional parameters to be used only
+	 * <p>Same as in {@link #speak(String, int, Integer)}, but with additional parameters to be used only
 	 * internally to the class - this is the main speak() method.</p>
-	 * <br>
-	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #AUDIO_STREAM_UNUSED} --> for {@code audio_stream}: if the parameter is not to be used, used this
-	 * value as a standard value</p>
-	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, int, Integer)}
-	 * @param additional_command same as in {@link #speak(String, int, int, Integer)}
-	 * @param priority same as in {@link #speak(String, int, int, Integer)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, Integer)}
+	 * @param priority same as in {@link #speak(String, int, Integer)}
 	 * @param utterance_id the utterance ID to be used to re-register the given speech in case it's already in the lists,
 	 *                     null if it's not already in the lists
-	 * @param audio_stream the audio stream to use in case the given speech is already in the lists - will only be used
-	 *                     if {@code utterance_id} parameter is != null; or one of the constants
-	 * @param after_speaking_code same as in {@link #speak(String, int, int, Integer)}
+	 * @param after_speaking_code same as in {@link #speak(String, int, Integer)}
 	 *
-	 * @return same as in {@link #speak(String, int, int, Integer)}
+	 * @return same as in {@link #speak(String, int, Integer)}
 	 */
-	private int speakInternal(final String txt_to_speak, final int additional_command,
-							  final int priority, @Nullable final String utterance_id,
-							  final int audio_stream, @Nullable final Integer after_speaking_code) {
+	private int speakInternal(final String txt_to_speak, final int priority, @Nullable final String utterance_id,
+							  @Nullable final Integer after_speaking_code) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
@@ -390,10 +370,6 @@ public class Speech2 extends Service {
 		// When this is implemented, don't forget to check if he's speaking on the speakers or on headphones. If
 		// it's on headphones, no need to cancel the recognition. If it's on speakers, not sure. If the volume is
 		// high enough, he wouldn't hear us anyways. If we lower the volume, he could hear us.
-
-		if (additional_command == EXECUTOR_SOMETHING_SAID) {
-			// todo MainSrv.getExecutor().something_done_true();
-		}
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
@@ -480,9 +456,9 @@ public class Speech2 extends Service {
 	 * <p>Sends the specified string to {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)}.</p>
 	 * <br>
-	 * <p>Attention: not to be called except from inside {@link #speak(String, int, int, Integer)}.</p>
+	 * <p>Attention: not to be called except from inside {@link #speak(String, int, Integer)}.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, int, Integer)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, Integer)}
 	 * @param utterance_id the utterance ID to register the speech
 	 * @param audio_stream the audio stream to be used to speak the speech
 	 *
@@ -912,7 +888,7 @@ public class Speech2 extends Service {
 					user_changed_volume = false;
 				}
 
-				speakInternal(speech, NO_ADDITIONAL_COMMANDS, speech_priority, utterance_id, audio_stream, runnable);
+				speakInternal(speech, speech_priority, utterance_id, runnable);
 
 				try {
 					// This being here won't cause any stop in the assistant once this module is a Service in a separate
@@ -927,6 +903,7 @@ public class Speech2 extends Service {
 					// Now carrying on what I was saying, (...)".
 					Thread.sleep(500L);
 				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
 				}
 
 				return;
@@ -968,7 +945,7 @@ public class Speech2 extends Service {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
-		intentFilter.addAction(BroadcastConstants.ACTION_SPEECH2_READY_AGAIN);
+		intentFilter.addAction(BroadcastConstants.ACTION_READY_AGAIN);
 
 		intentFilter.addAction(BroadcastConstants.ACTION_CALL_SPEAK);
 		intentFilter.addAction(BroadcastConstants.ACTION_SKIP_SPEECH);
@@ -983,15 +960,15 @@ public class Speech2 extends Service {
 
 	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			if (/*context == null ||*/ intent == null || intent.getAction() == null) {
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 
 			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
-				case (BroadcastConstants.ACTION_SPEECH2_READY_AGAIN): {
+				case (BroadcastConstants.ACTION_READY_AGAIN): {
 					// todo Warn there was an error with the selected engine and the TTS had to be reinitialized with
 					//  another engine
 					final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak,
@@ -1019,7 +996,7 @@ public class Speech2 extends Service {
 						after_speaking_code = null;
 					}
 
-					speak(txt_to_speak, additional_command, speech_priority, after_speaking_code);
+					speak(txt_to_speak, speech_priority, after_speaking_code);
 
 					break;
 				}
