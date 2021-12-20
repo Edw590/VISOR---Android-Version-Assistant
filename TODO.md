@@ -213,7 +213,7 @@ Make have an initial part, the loop, and then a final part.
 Make also one for the shut down. A very fast one. Something.
 
 
-## Unique voice for LEGION
+## Unique voice for VISOR
 
 Make the assistant have a unique voice. Like, it uses only Brian internally and nothing else can use the voice, for
 example. Find out how to do that.
@@ -276,7 +276,7 @@ just decompile it and put the code here, I'll have to see if that's legal).
 
 ## Speech recognition
 
-Think of some way for LEGION to not listen to himself. If there is an error processing the commands, for example, he
+Think of some way for VISOR to not listen to himself. If there is an error processing the commands, for example, he
 can't say what was said to generate the error because he'll hear himself saying what caused the error --> wow. So...
 
 

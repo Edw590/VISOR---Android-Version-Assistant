@@ -1,4 +1,4 @@
-# LEGION - A real assistant [Android/Client]
+# V.I.S.O.R. - A real assistant [Android/Client]
 
 ## Table of Contents
 - [Pictures](#pictures)
@@ -21,8 +21,8 @@
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
-- [LEGION - A real assistant [Android/Client]](https://github.com/DADi590/LEGION---A-real-assistant--Android-Client)
-- [LEGION - A real assistant [Platforms Unifier]](https://github.com/DADi590/LEGION---A-real-assistant--Platforms-Unifier)
+- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/LEGION---A-real-assistant--Android-Client)
+- [V.I.S.O.R. - A real assistant [Platforms Unifier]](https://github.com/DADi590/LEGION---A-real-assistant--Platforms-Unifier)
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
@@ -46,7 +46,7 @@ The app is also able to work with root access and system permissions. The prefer
 
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
-- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named LEGION. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, currently just write "start" on the text to send box, and to stop, write "stop".
+- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, currently just write "start" on the text to send box, and to stop, write "stop".
 - **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (always keep it from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
 - **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website.
 - **Speech module** --> Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. Some important notes here:
@@ -90,8 +90,8 @@ This project is licensed under Apache 2.0 License - http://www.apache.org/licens
 
 ## Support
 If you have any questions, try the options below:
-- Create an Issue here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/issues
-- Create a Discussion here: https://github.com/DADi590/LEGION---A-real-assistant--Android-Client/discussions
+- Create an Issue here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/issues
+- Create a Discussion here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/discussions
 
 ## Final notes
 Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School when I bought a CASIO fx-CG20 and it asked for a company name. So I made this one up xD. Thought why not keep using it, so I have some company name to put on stuff xD.

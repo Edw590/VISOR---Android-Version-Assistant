@@ -42,7 +42,7 @@ final class CONSTS {
 	// will make the phone automatically disable the device administration mode and uninstall the app all in once.
 	// Means make the speech as small as possible but still decently warning the user.
 	static final String SPEAK_DISABLED = "WARNING, ADMIN MODE REVOKED FROM " + GL_CONSTS.ASSISTANT_NAME_WO_DOTS + "!!!";
-	// With "WARNING, ADMIN MODE REVOKED FROM LEGION!!!", the last word said on BV9500 is "revoked". Not that bad.
+	// With "WARNING, ADMIN MODE REVOKED FROM VISOR!!!", the last word said on BV9500 is "revoked". Not that bad.
 	// todo In case the app gets published on some store, put a warning saying what the app will say if the Admin Mode
 	//  gets revoked and explain why such an abbreviated speech.
 
