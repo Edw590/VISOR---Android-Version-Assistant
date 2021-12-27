@@ -22,15 +22,15 @@
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
-- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/LEGION---A-real-assistant--Android-Client)
-- [V.I.S.O.R. - A real assistant [Platforms Unifier]](https://github.com/DADi590/LEGION---A-real-assistant--Platforms-Unifier)
+- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client)
+- [V.I.S.O.R. - A real assistant [Platforms Unifier]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Platforms-Unifier)
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
 I've now finally decided to make it public, after vastly improving its coding style (<3 IntelliJ's Inspections...) and translating the code to English (was in Portuguese, even though speeches and recognition were already in English).
 
 ## Explanation of the assistant
-Its command recognition module is not a simple recognition - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words inbetween some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
+Its command recognition submodule is not a simple recognition (have a look on the Platforms Unifier module) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words inbetween some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
 
 It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - hmm, nah... xD.
 
@@ -57,8 +57,8 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - Note: all the modules here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related with that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
-- **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx projet. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
-- **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection module of the Platforms Unifier for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
+- **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
+- **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
 - **Values Storage** --> It's a module on which all other modules dump values. Like battery percentage, or current caller, or if it's recording audio or not. Then when the user (or the app internally) needs one of those values for anything (the app could be checking the battery percentage to automatically warn the user, or the user specifically asked the battery percentage), the module needing the value will get it from this Values Storage module. The idea is having a global place where to get needed values and in a global way.
 
 ## Installation/Usage
@@ -95,6 +95,4 @@ If you have any questions, try the options below:
 - Create a Discussion here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/discussions
 
 ## Final notes
-Anything you see about a DADi EMPRESAS, Inc. or DE, Inc., forget about it XD. It's a non-existent company. I made it up on High-School when I bought a CASIO fx-CG20 and it asked for a company name. So I made this one up xD. Thought why not keep using it, so I have some company name to put on stuff xD.
-
 Hope you like the app! Any new ideas are welcomed! (I just may or may not implement them that fast - student)
