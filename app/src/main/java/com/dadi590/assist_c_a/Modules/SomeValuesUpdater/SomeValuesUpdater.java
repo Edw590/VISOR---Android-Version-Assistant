@@ -36,10 +36,10 @@ import java.util.TimeZone;
  */
 public class SomeValuesUpdater implements IModule {
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
@@ -48,7 +48,7 @@ public class SomeValuesUpdater implements IModule {
 	@Override
 	public final void destroyModule() {
 		infinity_thread.interrupt();
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**

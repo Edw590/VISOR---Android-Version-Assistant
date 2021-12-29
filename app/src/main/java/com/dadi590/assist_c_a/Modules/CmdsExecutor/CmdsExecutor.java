@@ -58,10 +58,10 @@ public class CmdsExecutor implements IModule {
 	private static boolean something_done = false;
 	static boolean something_said = false;
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
@@ -70,7 +70,7 @@ public class CmdsExecutor implements IModule {
 	@Override
 	public final void destroyModule() {
 		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**

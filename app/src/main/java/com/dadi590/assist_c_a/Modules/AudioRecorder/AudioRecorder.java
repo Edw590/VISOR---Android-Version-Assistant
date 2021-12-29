@@ -53,10 +53,10 @@ public class AudioRecorder implements IModule {
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
@@ -65,7 +65,7 @@ public class AudioRecorder implements IModule {
 	@Override
 	public final void destroyModule() {
 		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**

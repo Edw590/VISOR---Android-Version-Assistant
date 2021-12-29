@@ -46,9 +46,5 @@ r
 Bapp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsApp.java,9\f\9fc60631e0f75da8d7d31f26b7086fa99e675753
 Å
 Qapp/src/main/java/com/dadi590/assist_c_a/BroadcastRecvs/MainRegBroadcastRecv.java,0\9\0945b00cbaae9c1111241c415ca0cdd6649b5c92
-}
-Mapp/src/main/java/com/dadi590/assist_c_a/Modules/CameraManager/CONSTS_BC.java,3\5\35abfc45e72eca1ade5db5a05014cc2ac62195ed
 Å
 Qapp/src/main/java/com/dadi590/assist_c_a/Modules/DeviceLocator/DeviceLocator.java,0\1\01884a3487a009d0c51907ca209d82e13958c4ec
-à
-Xapp/src/main/java/com/dadi590/assist_c_a/Modules/CameraManager/UtilsCameraManagerBC.java,b\6\b6a60af7af137e1859dcd0f032628654bb29e3ac

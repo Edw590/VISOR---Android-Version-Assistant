@@ -60,10 +60,10 @@ public class CameraManagement implements IModule {
 
 	boolean flashlight_was_on_before_pic = false;
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
@@ -72,7 +72,7 @@ public class CameraManagement implements IModule {
 	@Override
 	public final void destroyModule() {
 		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**
@@ -83,6 +83,14 @@ public class CameraManagement implements IModule {
 			final IntentFilter intentFilter = new IntentFilter();
 
 			intentFilter.addAction(CONSTS_BC.ACTION_USE_CAMERA);
+
+			intentFilter.addAction(CONSTS_BC.ACTION_PICTURE_TAKEN);
+			intentFilter.addAction(CONSTS_BC.ACTION_PICTURE_TAKEN_NO_FOCUS);
+			intentFilter.addAction(CONSTS_BC.ACTION_ERR_CANT_OPEN_CAM);
+			intentFilter.addAction(CONSTS_BC.ACTION_ERR_CANT_CREATE_FILE);
+			intentFilter.addAction(CONSTS_BC.ACTION_ERR_FILE_DELETED);
+			intentFilter.addAction(CONSTS_BC.ACTION_ERR_WRITING_PIC_TO_FILE);
+			intentFilter.addAction(CONSTS_BC.ACTION_ERR_UNSUPPORTED_FLASH_MODE);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
@@ -178,7 +186,7 @@ public class CameraManagement implements IModule {
 						if (turn_on_flashlight) {
 							if (null == camera_old) {
 								// Request the back camera, as that's the one that has the flashlight on it.
-								camera_old = Camera.open();
+								camera_old = UtilsCameraManager.openCamera(true);
 								if (null == camera_old) {
 									return CAMERA_IN_USAGE;
 								}
@@ -282,21 +290,15 @@ public class CameraManagement implements IModule {
 				camera_old.setParameters(parameters);
 				camera_old.startPreview();
 
-				// Update the values on the ValuesStorage
-				ValuesStorage.updateValue(CONSTS.main_flashlight_enabled, Boolean.toString(true));
-
 				return FLASHLIGHT_SET_ON;
 			} else {
 				camera_old.stopPreview();
 				camera_old.release();
 				camera_old = null;
 
-				if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
+				if (parameters.getFlashMode().equals(mode_to_use)) {
 					return FLASHLIGHT_ALREADY_OFF;
 				}
-
-				// Update the values on the ValuesStorage
-				ValuesStorage.updateValue(CONSTS.main_flashlight_enabled, Boolean.toString(false));
 
 				return FLASHLIGHT_SET_OFF;
 			}
@@ -377,6 +379,46 @@ public class CameraManagement implements IModule {
 				case CONSTS_BC.ACTION_USE_CAMERA: {
 					final int usage = intent.getIntExtra(CONSTS_BC.EXTRA_USE_CAMERA_1, -1);
 					useCamera(usage);
+
+					break;
+				}
+
+				case CONSTS_BC.ACTION_PICTURE_TAKEN:
+				case CONSTS_BC.ACTION_PICTURE_TAKEN_NO_FOCUS: {
+					if (flashlight_was_on_before_pic) {
+						flashlight_was_on_before_pic = false;
+						useCamera(USAGE_FLASHLIGHT_ON);
+					}
+
+					if (CONSTS_BC.ACTION_PICTURE_TAKEN_NO_FOCUS.equals(intent_action)) {
+						final String speak = "Notice - It was not possible to focus the camera, but the picture was" +
+								"still take.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+					}
+
+					break;
+				}
+				case CONSTS_BC.ACTION_ERR_FILE_DELETED: {
+					final String speak = "Error - The picture file has been deleted before it could start being written to.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+					break;
+				}
+				case CONSTS_BC.ACTION_ERR_CANT_CREATE_FILE: {
+					final String speak = "Error - It was not possible to create a picture file.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+					break;
+				}
+				case CONSTS_BC.ACTION_ERR_CANT_OPEN_CAM: {
+					final String speak = "Error - It was not possible to open the camera.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+					break;
+				}
+				case CONSTS_BC.ACTION_ERR_WRITING_PIC_TO_FILE: {
+					final String speak = "Error - An error occurred while writing to the picture file.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
 					break;
 				}

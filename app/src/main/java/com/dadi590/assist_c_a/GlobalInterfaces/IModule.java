@@ -30,7 +30,7 @@ package com.dadi590.assist_c_a.GlobalInterfaces;
 public interface IModule {
 
 	/**
-	 * <p>Checks if the module is working as it should.</p>
+	 * <p>Checks if the module is working as it should (fully working).</p>
 	 * <p>Suppose a module has 2 threads running and one of them dies: the module is no longer working properly - but
 	 * it's still alive. Then the module is no longer working as it should.</p>
 	 * <p>So how to know the module stopped working properly so it can be restarted? The module-specific implementation
@@ -39,12 +39,12 @@ public interface IModule {
 	 *
 	 * @return true if the module is still working properly, false if it's malfunctioning/stopped
 	 */
-	boolean isModuleWorkingProperly();
+	boolean isModuleFullyWorking();
 
 	/**
 	 * <p>Before restarting the module in case something happened, call this function which will stop all module
 	 * functions that were not stopped, allowing the Garbage Collector to do its job.</p>
-	 * <p>After calling this function, any subsequent calls to {@link #isModuleWorkingProperly()} will return false.</p>
+	 * <p>After calling this function, any subsequent calls to {@link #isModuleFullyWorking()} will return false.</p>
 	 */
 	void destroyModule();
 }

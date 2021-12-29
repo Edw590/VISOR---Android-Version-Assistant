@@ -80,7 +80,9 @@ public class Speech2 implements IModule {
 	synchronous class on the speech processing part to be easy to think on).
 	*/
 
-	TextToSpeech tts;
+	boolean tts_loaded_successfully = false;
+
+	TextToSpeech tts = null;
 	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
 	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
 	SpeechObj current_speech_obj = new SpeechObj("", "", true, null);
@@ -108,19 +110,19 @@ public class Speech2 implements IModule {
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
-		return true;
+		return tts_loaded_successfully;
 	}
 	@Override
 	public final void destroyModule() {
 		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**
@@ -135,11 +137,10 @@ public class Speech2 implements IModule {
 	/**
 	 * <p>Initializes the {@link TextToSpeech} object.</p>
 	 *
-	 * @param from_onCreate true if the call to this function was made from onCreate(), false otherwise - this way the
-	 *                      function can execute tasks that can only be done in the module initialization (when
-	 *                      onCreate() is called)
+	 * @param from_constructor true if the call to this function was made from the constructor, false otherwise - this
+	 *                         way the function can execute tasks that can only be done in the module initialization
 	 */
-	void initializeTts(final boolean from_onCreate) {
+	final void initializeTts(final boolean from_constructor) {
 		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
@@ -158,7 +159,7 @@ public class Speech2 implements IModule {
 							}
 						}
 
-						if (from_onCreate) {
+						if (from_constructor) {
 							// Set the audio attributes to use
 							final AudioAttributes.Builder builder = new AudioAttributes.Builder();
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -179,12 +180,14 @@ public class Speech2 implements IModule {
 						}
 					}
 
-					if (from_onCreate) {
+					if (from_constructor) {
 						registerReceiver();
 						UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC.ACTION_READY));
 					} else {
 						UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC.ACTION_READY_AGAIN));
 					}
+
+					tts_loaded_successfully = true;
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
 					// wrong and must be fixed as soon as possible.

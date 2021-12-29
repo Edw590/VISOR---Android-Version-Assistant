@@ -51,10 +51,10 @@ public class SpeechRecognitionCtrl implements IModule {
 	private static final long default_wait_time = 5_000L;
 	long wait_time = default_wait_time;
 
-	private boolean is_module_alive = true;
+	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleWorkingProperly() {
-		if (!is_module_alive) {
+	public final boolean isModuleFullyWorking() {
+		if (is_module_destroyed) {
 			return false;
 		}
 
@@ -64,7 +64,7 @@ public class SpeechRecognitionCtrl implements IModule {
 	public final void destroyModule() {
 		infinity_thread.interrupt();
 		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-		is_module_alive = false;
+		is_module_destroyed = true;
 	}
 
 	/**

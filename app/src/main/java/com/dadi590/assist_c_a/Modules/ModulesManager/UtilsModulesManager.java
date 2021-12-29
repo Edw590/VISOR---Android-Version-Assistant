@@ -56,7 +56,7 @@ public final class UtilsModulesManager {
 			}
 		} else {
 			// Else, if it the module implements the IModule interface, check by its functions.
-			if (!module.isModuleWorkingProperly()) {
+			if (!module.isModuleFullyWorking()) {
 				restart_module = true;
 			}
 		}
