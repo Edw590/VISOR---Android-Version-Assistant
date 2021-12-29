@@ -302,11 +302,6 @@ public class CmdsExecutor implements IModule {
 					break;
 				}
 				case (CommandsDetection_APU.CMD_TOGGLE_FLASHLIGHT): {
-					something_done = true;
-					if (only_returning) continue;
-
-					UtilsCameraManagerBC.useCamera(command.equals(CommandsDetection_APU.RET_8_ON) ?
-							CameraManagement.USAGE_FLASHLIGHT_ON : CameraManagement.USAGE_FLASHLIGHT_OFF);
 
 					break;
 				}
