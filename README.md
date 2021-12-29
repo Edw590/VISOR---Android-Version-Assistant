@@ -1,5 +1,6 @@
-
 # V.I.S.O.R. - A real assistant [Android/Client]
+
+Secondary project name: Assist_C_A (Assistant Client Android)
 
 ## Table of Contents
 - [Pictures](#pictures)
