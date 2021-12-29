@@ -91,8 +91,8 @@ android {
 
 	buildTypes {
 		debug {
-			minifyEnabled false // todo NPE
-			shrinkResources false // todo NPE
+			minifyEnabled true
+			shrinkResources true
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 			signingConfig signingConfigs.release
 		}

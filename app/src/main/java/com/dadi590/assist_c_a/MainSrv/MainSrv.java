@@ -196,23 +196,28 @@ public class MainSrv extends Service {
 				ModulesList.startModule(ModulesList.getModuleIndex(ModulesManager.class));
 				infinity_thread.start();
 
+
+				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in a loop or
+				//  whatever. Or with some event that the app could broadcast when it detects granted or denied permissions (this
+				//  could be useful...).
+
 				// Enable the power button long press detection.
-				switch (LongBtnsPressDetector.startDetector()) {
-					case LongBtnsPressDetector.UNSUPPORTED_OS_VERSION: {
+				switch (UtilsMainSrv.startLongPwrBtnDetection()) {
+					case UtilsMainSrv.UNSUPPORTED_OS_VERSION: {
 						final String speak = "The power button long press detection will not be available. Your " +
 								"Android version is not supported.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 						break;
 					}
-					case LongBtnsPressDetector.UNSUPPORTED_HARDWARE: {
+					case UtilsMainSrv.UNSUPPORTED_HARDWARE: {
 						final String speak = "The power button long press detection will not be available. " +
 								"Your hardware does not seem to support the detection.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 						break;
 					}
-					case LongBtnsPressDetector.PERMISSION_DENIED: {
+					case UtilsMainSrv.PERMISSION_DENIED: {
 						final String speak = "The power button long press detection will not be available. The " +
 								"permission to draw a system overlay was denied.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);

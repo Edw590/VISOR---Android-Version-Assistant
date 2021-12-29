@@ -32,35 +32,28 @@ import android.widget.LinearLayout;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.R;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
-import com.dadi590.assist_c_a.R;
 
 /**
- * <p>Class to instantiate to detect long power and home buttons presses and act accordingly.</p>
+ * <p>Main Service related utilities.</p>
  */
-public final class LongBtnsPressDetector {
-
-	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private LongBtnsPressDetector() {
-	}
-
-	// todo This is a module, right...? You have to instantiate it... --> Put it as a module on the app...
-
-	// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in a loop or
-	//  whatever. Or with some event that the app could broadcast when it detects granted or denied permissions (this
-	//  could be useful...).
-
-
+public final class UtilsMainSrv {
 
 	public static final int DETECTION_ACTIVATED = 0;
 	public static final int UNSUPPORTED_OS_VERSION = 1;
 	public static final int UNSUPPORTED_HARDWARE = 2;
 	public static final int PERMISSION_DENIED = 3;
+
 	/**
-	 * <p>This activates the detection of a long power and home buttons press.</p>
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private UtilsMainSrv() {
+	}
+
+	/**
+	 * <p>This activates the detection of a long power button press.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #DETECTION_ACTIVATED} --> for the returning value: the detection was activated successfully</p>
@@ -73,7 +66,7 @@ public final class LongBtnsPressDetector {
 	 *
 	 * @return one of the constants
 	 */
-	public static int startDetector() {
+	public static int startLongPwrBtnDetection() {
 
 		final int system_build = Build.VERSION.SDK_INT;
 		if (!(system_build >= 21 && system_build <= 27)) {
@@ -86,10 +79,9 @@ public final class LongBtnsPressDetector {
 
 		final LinearLayout linearLayout = new LinearLayout(UtilsGeneral.getContext()) {
 
-			//home or recent button
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
-				if ("globalactions".equals(reason)) {
+				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
 					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio);
 					if (null == is_recording_audio) {
 						is_recording_audio = false;
@@ -102,11 +94,11 @@ public final class LongBtnsPressDetector {
 						// If it's not recording audio, start the commands recognizer.
 						UtilsSpeechRecognizersBC.startGoogleRecognition();
 					}
-				} else if ("homekey".equals(reason)) {
+				}/* else if ("homekey".equals(reason)) {
 					// Here the recognizers are stopped because the user might be wanting to start Google's recognition
 					// from the Google App and the microphone would be in use - so this stops it.
-					UtilsSpeechRecognizersBC.stopRecognition();
-				}/* else if ("recentapps".equals(reason)) {
+					// Update: this just detects a home key PRESS, not hold. So it's of no use and is now disabled.
+				} else if ("recentapps".equals(reason)) {
                 }*/
 			}
 		};
