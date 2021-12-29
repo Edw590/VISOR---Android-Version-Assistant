@@ -189,6 +189,8 @@ public class ProtectedLockScrSrv extends Service {
 					Thread.sleep(1000L);
 				} catch (final InterruptedException ignored) {
 					Thread.currentThread().interrupt();
+
+					return;
 				}
 			}
 		}

@@ -25,9 +25,6 @@ import android.os.Environment;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -62,69 +59,65 @@ public final class UtilsMedia {
 	 *
 	 * @param media_type one of the constants
 	 *
-	 * @return the {@link File} in case it was possible to generate a file, null otherwise
+	 * @return the {@link File} in case it was possible to generate it, null otherwise (the external storage may not be
+	 * mounted or it was not possible to create the necessary sub-directories)
 	 */
 	@Nullable
 	public static File getOutputMediaFile(final int media_type){
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			String folder = Environment.getExternalStorageDirectory() + "/" + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
-			switch (media_type) {
-				case (AUDIO): {
-					folder += "Audio recordings/";
-					break;
-				}
-				case (PHOTO): {
-					folder += "Photos/";
-					break;
-				}
-				case (VIDEO): {
-					folder += "Video recordings/";
-					break;
-				}
-				case (SCREENSHOT): {
-					folder += "Screenshots/";
-					break;
-				}
-			}
-
-			// Create the storage directory if it does not exist
-			// In the beginning it's checked if the storage is available and that method returns true if and only if
-			// the storage has read/write access - so the folder can be created. No need to check for nullability.
-			final File media_folder = UtilsFilesDirs.createDirectory(folder);
-			if (media_folder == null) {
-				return null;
-			}
-
-			// Create a media file name
-			final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-					.format(System.currentTimeMillis());
-			File mediaFile = null;
-			switch (media_type) {
-				case (AUDIO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + time_stamp + ".aac");
-					break;
-				}
-				case (PHOTO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + time_stamp + ".jpg");
-					break;
-				}
-				case (VIDEO): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + time_stamp + ".mp4");
-					break;
-				}
-				case (SCREENSHOT): {
-					mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + time_stamp + ".jpg");
-					break;
-				}
-			}
-
-			return mediaFile;
-		} else {
-			final String speak = "Attention - There was a problem creating the media file in the device storage. " +
-					"It is not mounted with read and write permissions.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
+		if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			return null;
 		}
+		String folder = Environment.getExternalStorageDirectory() + File.separator + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
+		switch (media_type) {
+			case (AUDIO): {
+				folder += "Audio recordings" + File.separator;
+				break;
+			}
+			case (PHOTO): {
+				folder += "Photos" + File.separator;
+				break;
+			}
+			case (VIDEO): {
+				folder += "Video recordings" + File.separator;
+				break;
+			}
+			case (SCREENSHOT): {
+				folder += "Screenshots" + File.separator;
+				break;
+			}
+		}
+
+		// Create the storage directory if it does not exist
+		// In the beginning it's checked if the storage is available and that method returns true if and only if
+		// the storage has read/write access - so the folder can be created. No need to check for nullability.
+		final File media_folder = UtilsFilesDirs.createDirectory(folder);
+		if (media_folder == null) {
+			return null;
+		}
+
+		// Create a media file name
+		final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+				.format(System.currentTimeMillis());
+		File mediaFile = null;
+		switch (media_type) {
+			case (AUDIO): {
+				mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + time_stamp + ".aac");
+				break;
+			}
+			case (PHOTO): {
+				mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + time_stamp + ".jpg");
+				break;
+			}
+			case (VIDEO): {
+				mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + time_stamp + ".mp4");
+				break;
+			}
+			case (SCREENSHOT): {
+				mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + time_stamp + ".jpg");
+				break;
+			}
+		}
+
+		return mediaFile;
 	}
 }

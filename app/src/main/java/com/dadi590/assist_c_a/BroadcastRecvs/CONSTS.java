@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.BroadcastRecvs;
 
+import android.provider.Telephony;
+
 /**
  * <p>Constants related to the broadcast receivers.</p>
  */
@@ -33,8 +35,8 @@ public final class CONSTS {
 	// Below Android KitKat, there's no constant, but the string appears to exist, even without constant,
 	// so it should still work below KitKat. I'll leave it as a string, or the switch won't like 2 equal values.
 	// I'll leave the new one here uncommented and unused, but only for Android Studio to throw a warning in case it
-	// stops existing. EDIT: commented out now, or now idea if it throws errors in KitKat and below for only loading it
-	//private static final String NO_USE = Telephony.Sms.Intents.SMS_RECEIVED_ACTION; --> API 19 (KitKat) and above
+	// stops existing. It exists at least up until SDK 29 (using it now - 2021-12-28).
+	private static final String NO_USE = Telephony.Sms.Intents.SMS_RECEIVED_ACTION; // --> API 19 (KitKat) and above
 	static final String ACTION_SMS_RECEIVED_ALL_API = "android.provider.Telephony.SMS_RECEIVED";
 
 	// TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED - Android Studio doesn't find it, even though I see it there

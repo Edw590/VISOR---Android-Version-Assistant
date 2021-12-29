@@ -28,25 +28,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
-import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
-import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
+import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
+import com.dadi590.assist_c_a.Modules.ModulesManager.UtilsModulesManager;
+import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.ModulesList;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * The main {@link Service} of the application - MainService.
@@ -60,63 +55,6 @@ public class MainSrv extends Service {
 
 	//////////////////////////////////////
 
-	//////////////////////////////////////
-	// Getters and setters
-
-	/**
-	 * <p>Get the global {@link AudioRecorder} instance.</p>
-	 *
-	 * @return .
-	 */
-	@NonNull
-	public static AudioRecorder getAudioRecorder() {
-		UtilsServices.startMainService();
-
-		return (AudioRecorder) ModulesList.getModuleInstance(AudioRecorder.class);
-	}
-	/**
-	 * <p>Get the global {@link PhoneCallsProcessor} instance.</p>
-	 *
-	 * @return .
-	 */
-	@NonNull
-	public static PhoneCallsProcessor getPhoneCallsProcessor() {
-		UtilsServices.startMainService();
-
-		return (PhoneCallsProcessor) ModulesList.getModuleInstance(PhoneCallsProcessor.class);
-	}
-	/**
-	 * <p>Get the global {@link BatteryProcessor} instance.</p>
-	 *
-	 * @return .
-	 */
-	@NonNull
-	public static BatteryProcessor getBatteryProcessor() {
-		UtilsServices.startMainService();
-
-		return (BatteryProcessor) ModulesList.getModuleInstance(BatteryProcessor.class);
-	}
-	/**
-	 * <p>Get the global {@link CmdsExecutor} instance.</p>
-	 *
-	 * @return .
-	 */
-	@NonNull
-	public static CmdsExecutor getExecutor() {
-		UtilsServices.startMainService();
-
-		return (CmdsExecutor) ModulesList.getModuleInstance(CmdsExecutor.class);
-	}
-
-	//////////////////////////////////////
-
-
-	/**
-	 * <p>Just to have a constructor.</p>
-	 */
-	public MainSrv() {
-		// No need to implement.
-	}
 
 	@Override
 	public final void onCreate() {
@@ -136,14 +74,53 @@ public class MainSrv extends Service {
 		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
 		// Register the receiver before the speech module is started
-		UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+		try {
+			final IntentFilter intentFilter = new IntentFilter();
+
+			intentFilter.addAction(CONSTS_BC.ACTION_READY);
+
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+		} catch (final IllegalArgumentException ignored) {
+		}
 
 		// The speech module must be started before everything else for now - only way of him to communicate with the
 		// user. Later, notifications will be added. Emails would be a good idea too in more extreme notifications.
 		// After the speech module is ready, it will send a broadcast for the receiver below to activate the rest of
 		// the assistant.
-		UtilsServices.startService(Speech2.class, null, false);
+		ModulesList.startModule(ModulesList.getModuleIndex(Speech2.class));
 	}
+
+	final Thread infinity_thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			final int index_modules_manager = ModulesList.getModuleIndex(ModulesManager.class);
+			final Object[][] modules_list = ModulesList.getModulesList();
+			if (ModulesList.MODULE_TYPE_SERVICE != (int) modules_list[index_modules_manager][1] &&
+					ModulesList.MODULE_TYPE_INSTANCE != (int) modules_list[index_modules_manager][1]) {
+				final String speak = "WARNING - IT'S NOT POSSIBLE TO CHECK AND RESTART THE MODULES MANAGER IN CASE IT" +
+						"STOPS WORKING!!!";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_CRITICAL, null);
+
+				return;
+			}
+
+			// Keep checking if the Modules Manager is working and in case it's not, restart it.
+			while (true) {
+				if (UtilsModulesManager.checkRestartModule(index_modules_manager)) {
+					final String speak = "WARNING - Modules Manager!";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+				}
+
+				try {
+					Thread.sleep(10_000L);
+				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+
+					return;
+				}
+			}
+		}
+	});
 
 	/**
 	 * <p>The sole purpose of this receiver is detect when the speech module is ready so the Main Service can start
@@ -158,7 +135,7 @@ public class MainSrv extends Service {
 
 			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
-			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_READY)) {
+			if (intent.getAction().equals(CONSTS_BC.ACTION_READY)) {
 				// Start the main broadcast receivers before everything else, so stuff can start sending broadcasts
 				// right away after being ready.
 				MainRegBroadcastRecv.registerReceivers();
@@ -215,37 +192,9 @@ public class MainSrv extends Service {
 
 				//pressao_longa_botoes.ativar_detecao(Build.VERSION.SDK_INT);
 
-				// Start all modules in the order defined in GL_CONSTS.modules_list, in case they haven't been already
-				// (speech module failure, restart, send this action again, and that would restart all other modules -
-				// no thanks).
-				// The services will be started in background - no restrictions, since the Main Service is already in
-				// foreground.
-				int i = 0;
-				for (final Object[] module : ModulesList.getModulesList()) {
-					switch ((int) module[1]) {
-						case (ModulesList.MODULE_TYPE_SERVICE): {
-							// The call to startService() will already check if the service is running or not.
-							UtilsServices.startService((Class<?>) module[0], null, false);
-
-							break;
-						}
-						case (ModulesList.MODULE_TYPE_INSTANCE): {
-							// Here we check if the module is already running with the module_instances array.
-							if (!ModulesList.isModuleRunningByIndex(i)) {
-								try {
-									ModulesList.setModuleInstance(((Class<?>) module[0]).getConstructor().newInstance(), i);
-								} catch (final NoSuchMethodException ignored) {
-								} catch (final IllegalAccessException ignored) {
-								} catch (final InstantiationException ignored) {
-								} catch (final InvocationTargetException ignored) {
-								}
-							}
-
-							break;
-						}
-					}
-					++i;
-				}
+				// Start the Modules Manager.
+				ModulesList.startModule(ModulesList.getModuleIndex(ModulesManager.class));
+				infinity_thread.start();
 
 				// Enable the power button long press detection.
 				switch (LongBtnsPressDetector.startDetector()) {
@@ -288,12 +237,6 @@ public class MainSrv extends Service {
 	};
 
 	@Override
-	@Nullable
-	public final IBinder onBind(@Nullable final Intent intent) {
-		return null;
-	}
-
-	@Override
 	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
 		// Do this below every time the service is started/resumed/whatever
 
@@ -303,5 +246,11 @@ public class MainSrv extends Service {
 		// was just started.
 
 		return START_STICKY;
+	}
+
+	@Override
+	@Nullable
+	public final IBinder onBind(@Nullable final Intent intent) {
+		return null;
 	}
 }

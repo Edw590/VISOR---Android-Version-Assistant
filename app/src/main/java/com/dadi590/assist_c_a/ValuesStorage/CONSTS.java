@@ -19,10 +19,12 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.ValuesStorage;
+package com.dadi590.assist_c_a.ValuesStorage;
 
 /**
  * <p>Constants related to the Values Storage module.</p>
+ * <p>To know the type of the value, go to {@link ValuesStorage} and check the TYPE_-started constant on the wanted
+ * value.</p>
  */
 public final class CONSTS {
 
@@ -49,7 +51,10 @@ public final class CONSTS {
 	public static final String loc_weather_for_the_day = "loc_weather_for_the_day";
 
 	// Audio Recorder
-	public static final String recording_audio = "recording_audio";
+	public static final String is_recording_audio = "is_recording_audio";
+
+	// Flashlight
+	public static final String main_flashlight_enabled = "main_flashlight_enabled";
 
 	/////////////////////////////////////////////////////////////////
 

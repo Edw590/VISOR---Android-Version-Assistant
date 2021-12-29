@@ -19,20 +19,21 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.GlobalUtils;
+package com.dadi590.assist_c_a.Modules.SpeechRecognition;
 
 import android.content.Intent;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition;
 
 /**
  * <p>Utilities for use with Google and PocketSphinx speech recognizers.</p>
  */
-public final class UtilsSpeechRecognizers {
+final class UtilsSpeechRecognizers {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -41,10 +42,9 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>This starts Google's speech recognition, but first it calls automatically
-	 * {@link #terminateSpeechRecognizers()}.</p>
+	 * <p>Start Google's speech recognition, first calling automatically {@link #terminateSpeechRecognizers()}.</p>
 	 */
-	public static void startGoogleRecognition() {
+	static void startGoogleRecognition() {
 		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
 		final String google_app_package_name = "com.google.android.googlequicksearchbox";
 
@@ -62,10 +62,9 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>This starts PocketSphinx's speech recognition, but first it calls automatically
-	 * {@link #terminateSpeechRecognizers()}.</p>
+	 * <p>Start PocketSphinx's speech recognition, first calling automatically {@link #terminateSpeechRecognizers()}.</p>
 	 */
-	public static void startPocketSphinxRecognition() {
+	static void startPocketSphinxRecognition() {
 		System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 
 		terminateSpeechRecognizers();
@@ -76,9 +75,9 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>This terminates the PID of the PocketSphinx and Google speech recognizers' processes.</p>
+	 * <p>Terminate the PID of the PocketSphinx and Google speech recognizers' processes.</p>
 	 */
-	public static void terminateSpeechRecognizers() {
+	static void terminateSpeechRecognizers() {
 		System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
 		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(PocketSphinxRecognition.class));
 		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(GoogleRecognition.class));

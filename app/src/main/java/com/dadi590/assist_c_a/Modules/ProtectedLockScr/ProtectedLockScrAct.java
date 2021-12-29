@@ -198,6 +198,8 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 					Thread.sleep(25L);
 				} catch (final InterruptedException ignored) {
 					Thread.currentThread().interrupt();
+
+					return;
 				}
 				++count;
 			}

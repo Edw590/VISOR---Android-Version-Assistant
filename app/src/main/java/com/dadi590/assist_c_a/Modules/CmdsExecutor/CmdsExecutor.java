@@ -21,8 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.CmdsExecutor;
 
-import static android.content.Context.AUDIO_SERVICE;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,12 +34,15 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsAndroidSettings;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
+import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
+import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.Arrays;
 
@@ -50,11 +51,27 @@ import CommandsDetection_APU.CommandsDetection_APU;
 /**
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
  */
-public class CmdsExecutor {
+public class CmdsExecutor implements IModule {
 	// None of these variables can be local. They must memorize the last value, so they must always remain in memory.
 	// Also, because of that, the instance of this class must also remain in memory, as it's done in the Main Service.
-	boolean something_done = false;
-	boolean something_said = false;
+	// The variables are static to be able to be changed without needing the instance of the module.
+	private static boolean something_done = false;
+	static boolean something_said = false;
+
+	private boolean is_module_alive = true;
+	@Override
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
+		}
+
+		return true;
+	}
+	@Override
+	public final void destroyModule() {
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -120,7 +137,7 @@ public class CmdsExecutor {
 			switch (command.split("\\.")[0]) {
 				case (CommandsDetection_APU.CMD_TOGGLE_MEDIA): {
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext().getSystemService(AUDIO_SERVICE);
+						final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext().getSystemService(Context.AUDIO_SERVICE);
 						switch (command) {
 							case (CommandsDetection_APU.RET_1_STOP): {
 								something_done = true;
@@ -285,7 +302,11 @@ public class CmdsExecutor {
 					break;
 				}
 				case (CommandsDetection_APU.CMD_TOGGLE_FLASHLIGHT): {
-					// todo
+					something_done = true;
+					if (only_returning) continue;
+
+					UtilsCameraManagerBC.useCamera(command.equals(CommandsDetection_APU.RET_8_ON) ?
+							CameraManagement.USAGE_FLASHLIGHT_ON : CameraManagement.USAGE_FLASHLIGHT_OFF);
 
 					break;
 				}
@@ -375,8 +396,8 @@ public class CmdsExecutor {
 								something_done = true;
 								if (only_returning) continue;
 
-								UtilsSpeechRecognizers.terminateSpeechRecognizers();
-								MainSrv.getAudioRecorder().recordAudio(true, MediaRecorder.AudioSource.MIC);
+								UtilsSpeechRecognizersBC.stopRecognition();
+								UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC);
 							}
 
 							break;
@@ -435,6 +456,10 @@ public class CmdsExecutor {
 			}
 		}
 
+		// Vibrate to indicate it did something.
+		// Twice because vibrate once only is when he's listening for commands.
+		UtilsGeneral.vibrateDeviceOnce(200L);
+
 		System.out.println("EXECUTOR - SOMETHING_EXECUTED");
 
 		return SOMETHING_EXECUTED;
@@ -448,7 +473,7 @@ public class CmdsExecutor {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
-		intentFilter.addAction(BroadcastConstants.ACTION_CALL_PROCESS_TASK);
+		intentFilter.addAction(CONSTS_BC.ACTION_CALL_PROCESS_TASK);
 
 		try {
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
@@ -466,11 +491,11 @@ public class CmdsExecutor {
 			System.out.println("PPPPPPPPPPPPPPPPPP-Executor - " + intent.getAction());
 
 			switch (intent.getAction()) {
-				case (BroadcastConstants.ACTION_CALL_PROCESS_TASK): {
-					final String sentence_str = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_PROCESS_TASK_1);
-					final boolean partial_results = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_PROCESS_TASK_2,
+				case (CONSTS_BC.ACTION_CALL_PROCESS_TASK): {
+					final String sentence_str = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_1);
+					final boolean partial_results = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_2,
 							false);
-					final boolean only_returning = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_PROCESS_TASK_3,
+					final boolean only_returning = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_3,
 							false);
 					processTask(sentence_str, partial_results, only_returning);
 				}

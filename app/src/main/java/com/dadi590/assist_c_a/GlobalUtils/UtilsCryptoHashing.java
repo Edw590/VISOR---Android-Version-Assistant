@@ -28,7 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * <p>Utilities related with cryptographic hashing algorithms.</p>
+ * <p>Utilities related to cryptographic hashing algorithms.</p>
  */
 public final class UtilsCryptoHashing {
 

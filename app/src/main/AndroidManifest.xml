@@ -181,18 +181,16 @@
 		<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
 			android:exported="false"
-			android:directBootAware="true" />
-		<service android:name="com.dadi590.assist_c_a.Modules.Speech.Speech2"
-			android:exported="false"
-			android:directBootAware="true" />
+			android:directBootAware="true"
+			android:process=":Protected_Lock_Screen"/>
 		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition"
 			android:exported="false"
 			android:directBootAware="true"
-			android:process=":GoogleSpeechRecognition" />
+			android:process=":Google_Speech_Recognition" />
 		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition"
 			android:exported="false"
 			android:directBootAware="true"
-			android:process=":PocketSphinxSpeechRecognition" />
+			android:process=":PocketSphinx_Speech_Recognition" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:exported="true"

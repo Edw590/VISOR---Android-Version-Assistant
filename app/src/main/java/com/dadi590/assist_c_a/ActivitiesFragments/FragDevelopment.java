@@ -42,12 +42,14 @@ import androidx.fragment.app.Fragment;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 import com.dadi590.assist_c_a.R;
 
 import java.util.Locale;
@@ -97,7 +99,7 @@ public class FragDevelopment extends Fragment {
 
 				System.out.println("HHHHHHHHHHHHHHHHHH");
 				System.out.println(ValuesStorage.getValue(CONSTS.last_phone_call_time));
-				MainSrv.getExecutor().processTask("turn on wifi", false, false);
+				UtilsCmdsExecutorBC.processTask("turn on wifi", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
 				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
@@ -238,9 +240,10 @@ public class FragDevelopment extends Fragment {
 			public void onClick(final View v) {
 				final String inserted_text = txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
 				if ("stop".equals(inserted_text)) {
-					MainSrv.getAudioRecorder().recordAudio(false, -1);
+					UtilsAudioRecorderBC.recordAudio(false, -1);
+					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 				} else {
-					MainSrv.getExecutor().processTask(inserted_text, false, false);
+					UtilsCmdsExecutorBC.processTask(inserted_text, false, false);
 				}
 
 				/*final Intent broadcast_intent = new Intent(BroadcastReceivers_com_registo.ENVIAR_TAREFA);

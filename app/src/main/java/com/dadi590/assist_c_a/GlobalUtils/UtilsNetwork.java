@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Utilities related with network functions.</p>
+ * <p>Utilities related to network functions.</p>
  */
 public final class UtilsNetwork {
 

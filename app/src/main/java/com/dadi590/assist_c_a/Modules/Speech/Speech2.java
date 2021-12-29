@@ -22,7 +22,6 @@
 package com.dadi590.assist_c_a.Modules.Speech;
 
 import android.app.NotificationManager;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +32,6 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -41,7 +39,7 @@ import android.speech.tts.Voice;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
@@ -56,9 +54,9 @@ import java.util.Set;
  * speeches.</p>
  * <br>
  * <p>This fixes a bug described on a note in the end of {@link Speech#speak(String, int, boolean, Runnable)} and,
- * hopefully, any other bugs related with how {@link TextToSpeech} is implemented in the various devices.</p>
+ * hopefully, any other bugs related to how {@link TextToSpeech} is implemented in the various devices.</p>
  */
-public class Speech2 extends Service {
+public class Speech2 implements IModule {
 
 	/*
 	Main note of how this module works!!!
@@ -110,21 +108,28 @@ public class Speech2 extends Service {
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
-
+	private boolean is_module_alive = true;
 	@Override
-	public final void onCreate() {
-		super.onCreate();
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
+		}
 
+		return true;
+	}
+	@Override
+	public final void destroyModule() {
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
+
+	/**
+	 * <p>Main class constructor.</p>
+	 */
+	public Speech2() {
 		UtilsSpeech2.readyArrayLists(arrays_speech_objs);
 
 		initializeTts(true);
-	}
-
-	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-		// Do this below every time the service is started/resumed/whatever
-
-		return START_STICKY;
 	}
 
 	/**
@@ -176,9 +181,9 @@ public class Speech2 extends Service {
 
 					if (from_onCreate) {
 						registerReceiver();
-						UtilsApp.sendInternalBroadcast(new Intent(GL_BC_CONSTS.ACTION_SPEECH2_READY));
+						UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC.ACTION_READY));
 					} else {
-						UtilsApp.sendInternalBroadcast(new Intent(BroadcastConstants.ACTION_READY_AGAIN));
+						UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC.ACTION_READY_AGAIN));
 					}
 				} else {
 					// If he can't talk, won't be too much useful... So exit with an error to indicate something is very
@@ -945,11 +950,11 @@ public class Speech2 extends Service {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
-		intentFilter.addAction(BroadcastConstants.ACTION_READY_AGAIN);
+		intentFilter.addAction(CONSTS_BC.ACTION_READY_AGAIN);
 
-		intentFilter.addAction(BroadcastConstants.ACTION_CALL_SPEAK);
-		intentFilter.addAction(BroadcastConstants.ACTION_SKIP_SPEECH);
-		intentFilter.addAction(BroadcastConstants.ACTION_REMOVE_SPEECH);
+		intentFilter.addAction(CONSTS_BC.ACTION_CALL_SPEAK);
+		intentFilter.addAction(CONSTS_BC.ACTION_SKIP_SPEECH);
+		intentFilter.addAction(CONSTS_BC.ACTION_REMOVE_SPEECH);
 		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
 
 		try {
@@ -968,7 +973,7 @@ public class Speech2 extends Service {
 			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
-				case (BroadcastConstants.ACTION_READY_AGAIN): {
+				case (CONSTS_BC.ACTION_READY_AGAIN): {
 					// todo Warn there was an error with the selected engine and the TTS had to be reinitialized with
 					//  another engine
 					final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak,
@@ -981,17 +986,17 @@ public class Speech2 extends Service {
 
 					break;
 				}
-				case (BroadcastConstants.ACTION_CALL_SPEAK): {
-					final String txt_to_speak = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
-					final int additional_command = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
-					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, -1);
+				case (CONSTS_BC.ACTION_CALL_SPEAK): {
+					final String txt_to_speak = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_SPEAK_1);
+					final int additional_command = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
+					final int speech_priority = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_3, -1);
 					@Nullable final Integer after_speaking_code;
-					if (intent.hasExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4)) {
+					if (intent.hasExtra(CONSTS_BC.EXTRA_CALL_SPEAK_4)) {
 						// The -1 doesn't matter here, because if the extra doesn't exist, that means after_speaking_code is
 						// supposedly null but can't be sent as null because it's an int, so the extra is not sent at
 						// all. So in that case, here it's put as null too. If the extra exists, then a value other than
 						// null is to be put on after_speaking_code, and so it is. Conclusion: -1 is never used.
-						after_speaking_code = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_4, -1);
+						after_speaking_code = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_4, -1);
 					} else {
 						after_speaking_code = null;
 					}
@@ -1001,16 +1006,16 @@ public class Speech2 extends Service {
 					break;
 				}
 
-				case (BroadcastConstants.ACTION_SKIP_SPEECH): {
+				case (CONSTS_BC.ACTION_SKIP_SPEECH): {
 					skipCurrentSpeech();
 
 					break;
 				}
 
-				case (BroadcastConstants.ACTION_REMOVE_SPEECH): {
-					final String speech = intent.getStringExtra(BroadcastConstants.EXTRA_CALL_SPEAK_1);
-					final int speech_priority = intent.getIntExtra(BroadcastConstants.EXTRA_CALL_SPEAK_2, -1);
-					final boolean low_to_high = intent.getBooleanExtra(BroadcastConstants.EXTRA_CALL_SPEAK_3, true);
+				case (CONSTS_BC.ACTION_REMOVE_SPEECH): {
+					final String speech = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_SPEAK_1);
+					final int speech_priority = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, -1);
+					final boolean low_to_high = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_SPEAK_3, true);
 
 					final String speech_id = UtilsSpeech2.getSpeechIdBySpeech(speech, speech_priority, low_to_high,
 							arrays_speech_objs);
@@ -1030,13 +1035,4 @@ public class Speech2 extends Service {
 			}
 		}
 	};
-
-
-
-
-	@Nullable
-	@Override
-	public final IBinder onBind(@Nullable final Intent intent) {
-		return null;
-	}
 }

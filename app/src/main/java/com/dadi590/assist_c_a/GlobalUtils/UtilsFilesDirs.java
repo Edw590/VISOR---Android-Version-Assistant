@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Utilities related with files and directories.</p>
+ * <p>Utilities related to files and directories.</p>
  */
 public final class UtilsFilesDirs {
 

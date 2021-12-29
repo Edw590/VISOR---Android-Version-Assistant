@@ -19,17 +19,16 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.ValuesStorage;
+package com.dadi590.assist_c_a.ValuesStorage;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
- * <p>The class where all public values are stored.</p>
+ * <p>The class where all public values are stored statically.</p>
+ * <p>A null value means the value was not updated since the app startup.</p>
  */
 public final class ValuesStorage {
-
-	public static final String UNDEFINED_VALUE = null;
 
 	// If a new one is added below, add it on the function that returns the values too!
 	public static final String TYPE_BOOLEAN = "TYPE_BOOLEAN";
@@ -38,24 +37,28 @@ public final class ValuesStorage {
 	public static final String TYPE_LONG = "TYPE_LONG";
 	public static final String TYPE_STRING = "TYPE_STRING";
 	private static final String[][] values_arrays = {
+			// Note: the "Updating" means the value is currently being updated in some class, as opposite to no class at
+			// all being updating the value (and is therefore waiting to be used).
 			// Battery
-			{CONSTS.battery_percentage, "Battery - Battery Percentage", TYPE_INTEGER, UNDEFINED_VALUE}, // Updating
-			{CONSTS.power_connected, "Battery - Power Connected", TYPE_BOOLEAN, UNDEFINED_VALUE}, // Updating
+			{CONSTS.battery_percentage, "Battery - Battery Percentage", TYPE_INTEGER, null}, // Updating
+			{CONSTS.power_connected, "Battery - Power Connected", TYPE_BOOLEAN, null}, // Updating
 			// Telephony - Phone calls
-			{CONSTS.last_phone_call_time, "Telephony - Time of last call (milliseconds)", TYPE_LONG, UNDEFINED_VALUE}, // Updating
-			{CONSTS.curr_phone_call_number, "Telephony - Number of current call", TYPE_STRING, UNDEFINED_VALUE}, // Updating
+			{CONSTS.last_phone_call_time, "Telephony - Time of last call (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS.curr_phone_call_number, "Telephony - Number of current call", TYPE_STRING, null}, // Updating
 			// Telephony - SMS
-			{CONSTS.last_sms_msg_time, "Telephony - Time of last SMS msg (milliseconds)", TYPE_LONG, UNDEFINED_VALUE}, // Updating
-			{CONSTS.last_sms_msg_number, "Telephony - Number of last SMS msg sender", TYPE_STRING, UNDEFINED_VALUE}, // Updating
+			{CONSTS.last_sms_msg_time, "Telephony - Time of last SMS msg (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS.last_sms_msg_number, "Telephony - Number of last SMS msg sender", TYPE_STRING, null}, // Updating
 			// Date and time
-			{CONSTS.current_time, "Current time (" + CONSTS.CURRENT_TIME_FORMAT + ")", TYPE_STRING, UNDEFINED_VALUE}, // Updating
-			{CONSTS.current_date, "Current date (" + CONSTS.CURRENT_DATE_FORMAT + ")", TYPE_STRING, UNDEFINED_VALUE}, // Updating
+			{CONSTS.current_time, "Current time (" + CONSTS.CURRENT_TIME_FORMAT + ")", TYPE_STRING, null}, // Updating
+			{CONSTS.current_date, "Current date (" + CONSTS.CURRENT_DATE_FORMAT + ")", TYPE_STRING, null}, // Updating
 			// Weather
-			{CONSTS.loc_temp_for_the_day_c, "Location temperature for the day (C)", TYPE_DOUBLE, UNDEFINED_VALUE},
-			{CONSTS.loc_temp_for_the_day_f, "Location temperature for the day (F)", TYPE_DOUBLE, UNDEFINED_VALUE},
-			{CONSTS.loc_weather_for_the_day, "Location weather for the day", TYPE_STRING, UNDEFINED_VALUE},
+			{CONSTS.loc_temp_for_the_day_c, "Location temperature for the day (C)", TYPE_DOUBLE, null},
+			{CONSTS.loc_temp_for_the_day_f, "Location temperature for the day (F)", TYPE_DOUBLE, null},
+			{CONSTS.loc_weather_for_the_day, "Location weather for the day", TYPE_STRING, null},
 			// AudioRecorder
-			{CONSTS.recording_audio, "Recording audio", TYPE_BOOLEAN, UNDEFINED_VALUE}, // Updating
+			{CONSTS.is_recording_audio, "Recording audio", TYPE_BOOLEAN, null}, // Updating
+			// Flashlight
+			{CONSTS.main_flashlight_enabled, "Main flashlight enabled (Android 6 and up only)", TYPE_BOOLEAN, null}, // Updating
 	};
 
 	/**
@@ -71,7 +74,7 @@ public final class ValuesStorage {
 	 * @param key the key
 	 * @param new_value the new value
 	 */
-	public static void updateValue(@NonNull final String key, @Nullable final String new_value) {
+	public static void updateValue(@NonNull final String key, @NonNull final String new_value) {
 		for (int i = 0, length = values_arrays.length; i < length; ++i) {
 			if (values_arrays[i][0].equals(key)) {
 				values_arrays[i][3] = new_value;
@@ -86,15 +89,15 @@ public final class ValuesStorage {
 	 *
 	 * @param key the key associated with the wanted value
 	 *
-	 * @return the value for the given key, in the appropriate type; null in case the key does not have a value set
+	 * @return the value for the given key, in the appropriate type; null in case the key does not have a value set yet
 	 */
 	@Nullable
 	public static Object getValue(@NonNull final String key) {
 		for (final String[] value_array : values_arrays) {
 			if (value_array[0].equals(key)) {
 				final String value = value_array[3];
-				if (value == UNDEFINED_VALUE) {
-					return UNDEFINED_VALUE;
+				if (null == value) {
+					return null;
 				}
 
 				switch (value_array[2]) {

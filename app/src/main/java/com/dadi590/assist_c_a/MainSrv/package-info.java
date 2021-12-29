@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Everything directly related with the Main Service.</p>
+ * <p>Everything directly related to the Main Service.</p>
  */
 package com.dadi590.assist_c_a.MainSrv;

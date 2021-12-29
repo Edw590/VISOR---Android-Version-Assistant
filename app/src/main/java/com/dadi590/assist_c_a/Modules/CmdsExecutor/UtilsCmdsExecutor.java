@@ -24,7 +24,6 @@ package com.dadi590.assist_c_a.Modules.CmdsExecutor;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
@@ -48,6 +47,6 @@ final class UtilsCmdsExecutor {
 	 */
 	static void speak(@NonNull final String speak, @Nullable final Integer after_speaking_code) {
 		UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, after_speaking_code);
-		MainSrv.getExecutor().something_said = true;
+		CmdsExecutor.something_said = true;
 	}
 }

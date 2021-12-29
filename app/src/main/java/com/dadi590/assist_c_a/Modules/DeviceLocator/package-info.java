@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Everything directly related with the Device Locator module.</p>
+ * <p>Everything directly related to the Device Locator module.</p>
  */
 package com.dadi590.assist_c_a.Modules.DeviceLocator;

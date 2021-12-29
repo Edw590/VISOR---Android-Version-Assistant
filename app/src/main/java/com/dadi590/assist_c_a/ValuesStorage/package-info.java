@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Everything directly related with the assistant's value storage module.</p>
+ * <p>Everything directly related to the Values Storage.</p>
  */
-package com.dadi590.assist_c_a.Modules.ValuesStorage;
+package com.dadi590.assist_c_a.ValuesStorage;

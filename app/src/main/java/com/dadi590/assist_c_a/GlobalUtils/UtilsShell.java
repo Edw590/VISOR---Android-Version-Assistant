@@ -167,7 +167,6 @@ public final class UtilsShell {
 			exit_code = process.waitFor();
 		} catch (final IOException | SecurityException ignored) {
 		} catch (final InterruptedException ignored) {
-			Thread.currentThread().interrupt();
 		}
 
 		return new CmdOutputObj(exit_code, ret_streams.get(0), ret_streams.get(1));

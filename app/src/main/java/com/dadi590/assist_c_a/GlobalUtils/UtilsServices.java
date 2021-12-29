@@ -89,8 +89,10 @@ public final class UtilsServices {
 	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
 	 *                   false to start in background; below that, this value has no effect as the service is always
 	 *                   started in background
+	 *
+	 * @return true if the service was started, false if it was already running
 	 */
-	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
+	public static boolean startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
 									final boolean foreground) {
 		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
 		// the global variables declared on the service. Currently, that would mean instantiate the Speech again, for
@@ -110,14 +112,19 @@ public final class UtilsServices {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				if (foreground) {
 					context.startForegroundService(intent_to_use);
-					return;
+
+					return true;
 				}
 			}
 
 			// Do NOT call this in high frequency. It's said on the doc that it takes various milliseconds to process
 			// this call.
 			context.startService(intent_to_use);
+
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
@@ -148,8 +155,8 @@ public final class UtilsServices {
 	/**
 	 * <p>Checks if the given service is running.</p>
 	 * <br>
-	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app if the
-	 * app is not a system app!</p>
+	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app! (If the
+	 * app is a system app, all the services on the device will continue to be detected.)</p>
 	 *
 	 * @param service_class the class of the service to check
 	 *

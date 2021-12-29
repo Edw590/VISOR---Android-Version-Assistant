@@ -310,25 +310,7 @@ forever --> put a timer on onBeginningOfSpeech() or something.
 
 ## Executor
 
-The assistant no longer knows when the music is playing or not. See a new way of knowing that. Note: this was written
-about Lollipop 5.1. No idea if it still happens with Oreo.
-
-
-## Executor
-
 Put it enabling the Mobile Data in a decent way without root or system permissions if possible.
-
-
-## Executor
-
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
-ORGANIZE THE DAMN CLASS!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ## Speech
@@ -347,3 +329,9 @@ no call at all? Cool.
 Put all command executions running on a separate thread... Maybe put the Executor on a separate process?
 Turn on or off the airplane mode with the root commands option and see how infinite it takes and meanwhile, the app is
 not responding.
+
+
+## Speech Recognition
+
+Store the meaning of "it" and "and" with Java between the Platforms Unifier calls. This way I can say "turn the wifi on"
+and seconds later "and turn it off" - or "and the bluetooth too".

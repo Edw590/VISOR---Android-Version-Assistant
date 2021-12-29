@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * <p>Does various checks related with app special permissions and with system apps.</p>
+ * <p>Does various checks related to app special permissions and with system apps.</p>
  * <br>
  * <p>Here an explanation about permissions, which is useful to understand the terms used in this class.</p>
  * <p>Below KitKat 4.4, all apps in /system/app were given privileged permissions. Even the Calculator app had them.

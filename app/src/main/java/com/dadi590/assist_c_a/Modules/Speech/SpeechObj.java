@@ -30,6 +30,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
  * <p>Each speech is an instance of this class.</p>
+ * <p>Check the constructor for more information.</p>
  */
 class SpeechObj {
 

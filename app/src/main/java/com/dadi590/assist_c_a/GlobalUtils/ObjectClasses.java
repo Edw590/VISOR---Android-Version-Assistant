@@ -36,6 +36,7 @@ public class ObjectClasses {
 	/**
 	 * <p>Class to instantiate to give notification information to
 	 * {@link UtilsServices#getNotification(NotificationInfo)}.</p>
+	 * <p>Check the constructor for more information.</p>
 	 */
 	public static class NotificationInfo {
 
@@ -79,6 +80,7 @@ public class ObjectClasses {
 
 	/**
 	 * <p>Class to use as return value of {@link UtilsGeneral#getMethodClass(String)}.</p>
+	 * <p>Check the constructor for more information.</p>
 	 */
 	public static class GetMethodClassObj {
 

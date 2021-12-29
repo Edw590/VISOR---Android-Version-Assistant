@@ -21,8 +21,6 @@
 
 package com.dadi590.assist_c_a.MainSrv;
 
-import static android.content.Context.WINDOW_SERVICE;
-
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.view.Gravity;
@@ -32,7 +30,10 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -45,6 +46,14 @@ public final class LongBtnsPressDetector {
 	 */
 	private LongBtnsPressDetector() {
 	}
+
+	// todo This is a module, right...? You have to instantiate it... --> Put it as a module on the app...
+
+	// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in a loop or
+	//  whatever. Or with some event that the app could broadcast when it detects granted or denied permissions (this
+	//  could be useful...).
+
+
 
 	public static final int DETECTION_ACTIVATED = 0;
 	public static final int UNSUPPORTED_OS_VERSION = 1;
@@ -81,17 +90,22 @@ public final class LongBtnsPressDetector {
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) {
-					if (MainSrv.getAudioRecorder().isRecording()) {
-						MainSrv.getAudioRecorder().recordAudio(false, -1);
-						//UtilsSpeechRecognizers.iniciar_reconhecimento_pocketsphinx(); todo
-						UtilsSpeechRecognizers.startGoogleRecognition();
+					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio);
+					if (null == is_recording_audio) {
+						is_recording_audio = false;
+					}
+					if (is_recording_audio) {
+						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
+						UtilsAudioRecorderBC.recordAudio(false, -1);
+						UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 					} else {
-						UtilsSpeechRecognizers.startGoogleRecognition();
+						// If it's not recording audio, start the commands recognizer.
+						UtilsSpeechRecognizersBC.startGoogleRecognition();
 					}
 				} else if ("homekey".equals(reason)) {
 					// Here the recognizers are stopped because the user might be wanting to start Google's recognition
 					// from the Google App and the microphone would be in use - so this stops it.
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizersBC.stopRecognition();
 				}/* else if ("recentapps".equals(reason)) {
                 }*/
 			}
@@ -100,7 +114,8 @@ public final class LongBtnsPressDetector {
 		linearLayout.setFocusable(true);
 
 		final View view = LayoutInflater.from(UtilsGeneral.getContext()).inflate(R.layout.service_layout, linearLayout);
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().getSystemService(WINDOW_SERVICE);
+		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().
+				getSystemService(android.content.Context.WINDOW_SERVICE);
 
 		if (windowManager == null) {
 			return UNSUPPORTED_HARDWARE;

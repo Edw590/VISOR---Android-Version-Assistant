@@ -37,7 +37,7 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import java.util.ArrayList;
 
 /**
- * <p>Utilities related with checking and requesting permissions.</p>
+ * <p>Utilities related to checking and requesting permissions.</p>
  */
 public final class UtilsPermissions {
 

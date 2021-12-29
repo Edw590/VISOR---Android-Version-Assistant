@@ -28,68 +28,98 @@ import android.content.IntentFilter;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 
 /**
  * <p>This is the module which controls the assistant's speech recognition.</p>
  * <p>It may control one or more speech recognizers, like PocketSphinx and/or Google Speech Recognition.</p>
  */
-public class SpeechRecognitionCtrl {
+public class SpeechRecognitionCtrl implements IModule {
 
 	static final Class<?> NO_RECOGNIZER = null;
 	static final Class<?> POCKETSPHINX_RECOGNIZER = PocketSphinxRecognition.class;
 	static final Class<?> GOOGLE_RECOGNIZER = GoogleRecognition.class;
 
+	// In case it's to stop the recognition. For example an audio will be recorded or the microphone is being needed
+	// elsewhere.
+	boolean stop_speech_recognition = false;
+
 	@Nullable Class<?> current_recognizer = NO_RECOGNIZER;
 
-	private static final long default_wait_time = 2_500L;
+	private static final long default_wait_time = 5_000L;
 	long wait_time = default_wait_time;
 
-	private Thread infinity_loop = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			while (true) {
-				if (GOOGLE_RECOGNIZER == current_recognizer) {
-					if (!UtilsServices.isServiceRunning(GoogleRecognition.class)) {
-						current_recognizer = NO_RECOGNIZER;
-						wait_time = default_wait_time;
-					}
-				} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
-					if (!UtilsServices.isServiceRunning(PocketSphinxRecognition.class)) {
-						current_recognizer = NO_RECOGNIZER;
-						wait_time = default_wait_time;
-					}
-				}
-
-				if (NO_RECOGNIZER == current_recognizer) {
-					UtilsSpeechRecognizers.startPocketSphinxRecognition();
-					current_recognizer = POCKETSPHINX_RECOGNIZER;
-				}
-
-				try {
-					Thread.sleep(wait_time);
-				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-				}
-			}
+	private boolean is_module_alive = true;
+	@Override
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
 		}
-	});
+
+		return infinity_thread.isAlive();
+	}
+	@Override
+	public final void destroyModule() {
+		infinity_thread.interrupt();
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
 
 	/**
 	 * <p>Main class constructor.</p>
 	 */
 	public SpeechRecognitionCtrl() {
 		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver,
-					new IntentFilter(GL_BC_CONSTS.ACTION_GOOGLE_RECOG_STARTED));
+			final IntentFilter intentFilter = new IntentFilter();
+
+			intentFilter.addAction(CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED);
+			intentFilter.addAction(CONSTS_BC.ACTION_POCKETSPHINX_RECOG_STARTED);
+
+			intentFilter.addAction(CONSTS_BC.ACTION_START_GOOGLE);
+			intentFilter.addAction(CONSTS_BC.ACTION_START_POCKET_SPHINX);
+			intentFilter.addAction(CONSTS_BC.ACTION_STOP_RECOGNITION);
+
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
 		} catch (final IllegalArgumentException ignored) {
 		}
 
-		infinity_loop.start();
+		infinity_thread.start();
 	}
+
+	private final Thread infinity_thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) {
+				if (!stop_speech_recognition) {
+					if (GOOGLE_RECOGNIZER == current_recognizer) {
+						if (!UtilsServices.isServiceRunning(GoogleRecognition.class)) {
+							current_recognizer = NO_RECOGNIZER;
+							wait_time = default_wait_time;
+						}
+					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
+						if (!UtilsServices.isServiceRunning(PocketSphinxRecognition.class)) {
+							current_recognizer = NO_RECOGNIZER;
+							wait_time = default_wait_time;
+						}
+					}
+
+					if (NO_RECOGNIZER == current_recognizer) {
+						UtilsSpeechRecognizers.startPocketSphinxRecognition();
+					}
+				}
+
+				try {
+					Thread.sleep(wait_time);
+				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+
+					return;
+				}
+			}
+		}
+	});
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -101,15 +131,38 @@ public class SpeechRecognitionCtrl {
 			System.out.println("PPPPPPPPPPPPPPPPPP-SpeechRecognitionCtrl - " + intent.getAction());
 
 			switch (intent.getAction()) {
-				case GL_BC_CONSTS.ACTION_GOOGLE_RECOG_STARTED: {
+				case CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED: {
 					current_recognizer = GOOGLE_RECOGNIZER;
 					wait_time = 500L;
 
 					break;
 				}
-				case GL_BC_CONSTS.ACTION_POCKETSPHINX_RECOG_STARTED: {
+				case CONSTS_BC.ACTION_POCKETSPHINX_RECOG_STARTED: {
 					current_recognizer = POCKETSPHINX_RECOGNIZER;
 					wait_time = default_wait_time;
+
+					break;
+				}
+
+
+				case CONSTS_BC.ACTION_START_GOOGLE: {
+					stop_speech_recognition = false;
+					wait_time = default_wait_time;
+					UtilsSpeechRecognizers.startGoogleRecognition();
+
+					break;
+				}
+				case CONSTS_BC.ACTION_START_POCKET_SPHINX: {
+					stop_speech_recognition = false;
+					wait_time = default_wait_time;
+					UtilsSpeechRecognizers.startPocketSphinxRecognition();
+
+					break;
+				}
+				case CONSTS_BC.ACTION_STOP_RECOGNITION: {
+					stop_speech_recognition = true;
+					wait_time = default_wait_time;
+					UtilsSpeechRecognizers.terminateSpeechRecognizers();
 
 					break;
 				}

@@ -30,7 +30,10 @@ public final class CONSTS {
 	 * <p>Use this to start the services in this package and put on it the result of {@link System#currentTimeMillis()}
 	 * at the moment of calling with as little delay as possible.</p>
 	 */
-	public static final String EXTRA_TIME_START = "EXTRA_TIME_START";
+	static final String EXTRA_TIME_START = "EXTRA_TIME_START";
+
+	public static final Class<?> POCKETSPHINX_RECOG_CLASS = PocketSphinxRecognition.class;
+	public static final Class<?> GOOGLE_RECOG_CLASS = GoogleRecognition.class;
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>

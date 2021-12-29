@@ -28,33 +28,47 @@ import java.util.ArrayList;
  * <br>
  * <p>Check the doc on the action string to know what to do.</p>
  */
-final class BroadcastConstants {
+public final class CONSTS_BC {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private BroadcastConstants() {
+	private CONSTS_BC() {
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * <p>Explanation: warns when a speech that requested to broadcast a code after being finished, has finished.</p>
+	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
+	 * <p>To be received only by the class(es): any chosen class.</p>
+	 * <p>Extras:</p>
+	 * <p>- {@link #EXTRA_AFTER_SPEAK_CODE} (int): unique ID of the {@link Runnable} to run</p>
+	 */
+	public static final String ACTION_AFTER_SPEAK_CODE = "SPEECH2_ACTION_AFTER_SPEAK_CODE";
+	public static final String EXTRA_AFTER_SPEAK_CODE = "SPEECH2_EXTRA_AFTER_SPEAK_CODE";
+
+	/**
+	 * <p>Explanation: warns when the speech module is ready for use.</p>
+	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
+	 * <p>To be received only by the class(es): any chosen class.</p>
+	 * <p>Extras: none.</p>
+	 */
+	public static final String ACTION_READY = "SPEECH2_ACTION_READY";
 
 	/**
 	 * <p>Explanation: calls {@link Speech2#skipCurrentSpeech()}.</p>
-	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
-	 * <p>To be received only by the class: {@link Speech2}.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_SKIP_SPEECH = "SPEECH2_ACTION_SKIP_SPEECH";
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Explanation: removes a speech from the lists based on its speech string. More info on
 	 * {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)} and
 	 * {@link UtilsSpeech2#removeSpeechById(String, ArrayList)}.</p>
-	 * <p>Main executed function: {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}</p>
-	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
-	 * <p>To be received only by the class: {@link Speech2}.</p>
+	 * <p>Main executed function: {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_2}: mandatory</p>
@@ -65,12 +79,10 @@ final class BroadcastConstants {
 	static final String EXTRA_REMOVE_SPEECH_2 = "SPEECH2_EXTRA_REMOVE_SPEECH_2";
 	static final String EXTRA_REMOVE_SPEECH_3 = "SPEECH2_EXTRA_REMOVE_SPEECH_3";
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * <p>Executed function: {@link Speech2#speak(String, int, Integer)}.</p>
-	 * <p>Is broadcast by: {@link UtilsSpeech2BC}.</p>
-	 * <p>To be received only by the class: {@link Speech2}.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is {@link Speech2#NO_ADDITIONAL_COMMANDS})</p>
@@ -86,9 +98,9 @@ final class BroadcastConstants {
 	/**
 	 * <p>Explanation: warns when the speech module is ready for use after the first time (means any time other than
 	 * the module initialization time).</p>
-	 * <p>Is broadcast by: {@link Speech2}.</p>
-	 * <p>To be received only by the class: {@link Speech2}.</p>
+	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
+	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras: none.</p>
 	 */
-	static final String ACTION_READY_AGAIN = "ACTION_SPEECH2_READY_AGAIN";
+	static final String ACTION_READY_AGAIN = "SPEECH2_ACTION_READY_AGAIN";
 }

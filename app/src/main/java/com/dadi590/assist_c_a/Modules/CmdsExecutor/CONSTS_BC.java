@@ -26,12 +26,18 @@ package com.dadi590.assist_c_a.Modules.CmdsExecutor;
  * <br>
  * <p>Check the doc on the action string to know what to do.</p>
  */
-final class BroadcastConstants {
+final class CONSTS_BC {
+
+	/**
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private CONSTS_BC() {
+	}
 
 	/**
 	 * <p>Executed function: {@link CmdsExecutor#processTask(String, boolean, boolean)}.</p>
-	 * <p>Is broadcast by: {@link UtilsCmdsExecutorBC}.</p>
-	 * <p>To be received only by the class: {@link CmdsExecutor}.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsCmdsExecutorBC}.</p>
+	 * <p>To be received only by the class(es): {@link CmdsExecutor}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_2}: mandatory</p>
@@ -41,10 +47,4 @@ final class BroadcastConstants {
 	static final String EXTRA_CALL_PROCESS_TASK_1 = "SPEECH2_EXTRA_CALL_PROCESS_TASK_1";
 	static final String EXTRA_CALL_PROCESS_TASK_2 = "SPEECH2_EXTRA_CALL_PROCESS_TASK_2";
 	static final String EXTRA_CALL_PROCESS_TASK_3 = "SPEECH2_EXTRA_CALL_PROCESS_TASK_3";
-
-	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private BroadcastConstants() {
-	}
 }

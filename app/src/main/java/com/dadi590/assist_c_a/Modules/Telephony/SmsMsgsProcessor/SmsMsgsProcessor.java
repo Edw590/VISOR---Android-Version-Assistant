@@ -31,8 +31,8 @@ import androidx.annotation.NonNull;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 
 /**

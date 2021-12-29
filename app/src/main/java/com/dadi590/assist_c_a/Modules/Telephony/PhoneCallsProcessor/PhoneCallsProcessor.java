@@ -21,10 +21,10 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 
-import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
-import static android.telephony.TelephonyManager.CALL_STATE_OFFHOOK;
-import static android.telephony.TelephonyManager.CALL_STATE_RINGING;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.provider.CallLog;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
@@ -32,11 +32,13 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,7 +48,7 @@ import java.util.Objects;
 /**
  * <p>Processes all phone calls made/received on the phone.</p>
  */
-public class PhoneCallsProcessor {
+public class PhoneCallsProcessor implements IModule {
 
 	private final List<ArrayList<String>> calls_state = new ArrayList<>(0);
 
@@ -57,6 +59,21 @@ public class PhoneCallsProcessor {
 	 * <p>- mapCallLogToCALL_PHASE.put(MISSED_TYPE, CALL_PHASE_LOST)</p>
 	 */
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
+
+	private boolean is_module_alive = true;
+	@Override
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
+		}
+
+		return true;
+	}
+	@Override
+	public final void destroyModule() {
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -74,21 +91,31 @@ public class PhoneCallsProcessor {
                 mapCallLogToCALL_PHASE.put(CallLog.Calls.ANSWERED_EXTERNALLY_TYPE, CALL_PHASE_ANSWERED_EXTERNALLY);
             }
         }*/
+
+		try {
+			final IntentFilter intentFilter = new IntentFilter();
+
+			intentFilter.addAction(CONSTS_BC.ACTION_RECEIVE_CALL);
+
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 
 	/**
 	 * <p>Receives the state and phone number of a call and gets it ready to be processed by
 	 * {@link #whatToDo(NumAndPhase)}.</p>
 	 *
-	 * @param state one of the {@code CALL_STATE}s in {@link TelephonyManager} or one of the {@code PRECISE_CALL_STATE}s
+	 * @param call_state one of the {@code CALL_STATE}s in {@link TelephonyManager} or one of the {@code PRECISE_CALL_STATE}s
 	 *                 in {@link PreciseCallState}
-	 * @param phoneNumber the phone number retrieved directly from the extra of the intent
+	 * @param phone_number the phone number retrieved directly from the extra of the intent
 	 * @param precise_call_state true if it's a {@link PreciseCallState}, false if it's a {@link TelephonyManager} call
 	 *                              state
 	 */
-	public final void phoneNumRecv(final int state, @Nullable final String phoneNumber, final boolean precise_call_state) {
+	public final void receiveCall(final int call_state, @Nullable final String phone_number,
+								  final boolean precise_call_state) {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
-		System.out.println(phoneNumber);
+		System.out.println(phone_number);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 
 		// Update the values on the ValuesStorage
@@ -101,17 +128,17 @@ public class PhoneCallsProcessor {
 			}
 		}
 		if (!active_number) {
-			ValuesStorage.updateValue(CONSTS.curr_phone_call_number, ValuesStorage.UNDEFINED_VALUE);
+			ValuesStorage.updateValue(CONSTS.curr_phone_call_number, "");
 		}
 
 		if (precise_call_state) {
 			// todo There's no PRECISE_CALL_STATE_LOST... Implement that somehow
 			// Also don't forget there was some deprecated thing and PhoneStateListener should be used instead. Look
 			// for that in the hidden/internal APIs here.
-			final NumAndPhase sub_ret = new NumAndPhase(phoneNumber, state);
+			final NumAndPhase sub_ret = new NumAndPhase(phone_number, call_state);
 			whatToDo(sub_ret);
 		} else {
-			final NumAndPhase[] ret = getCallPhase(state, phoneNumber);
+			final NumAndPhase[] ret = getCallPhase(call_state, phone_number);
 			if (ret == null) {
 				return;
 			}
@@ -240,7 +267,7 @@ public class PhoneCallsProcessor {
 		//        	Sum up: no good for anything.
 
 		switch (state) {
-			case (CALL_STATE_RINGING): {
+			case (TelephonyManager.CALL_STATE_RINGING): {
 				//System.out.println("RINGING - " + incomingNumber);
 
 				// New incoming call (there are no calls in the current processing call list).
@@ -276,7 +303,7 @@ public class PhoneCallsProcessor {
 				break;
 			}
 
-			case (CALL_STATE_OFFHOOK): {
+			case (TelephonyManager.CALL_STATE_OFFHOOK): {
 				//System.out.println("OFFHOOK - " + incomingNumber);
 				NumAndPhase to_return = null;
                 /*if (calls_state.size() == 0) {
@@ -319,7 +346,7 @@ public class PhoneCallsProcessor {
 				// on the list.
 				for (int i = 0, size = calls_state.size(); i < size; ++i) {
 					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
-						calls_state.get(i).set(1, String.valueOf(CALL_STATE_OFFHOOK));
+						calls_state.get(i).set(1, String.valueOf(TelephonyManager.CALL_STATE_OFFHOOK));
 						break;
 					}
 				}
@@ -327,7 +354,7 @@ public class PhoneCallsProcessor {
 				//break;
 			}
 
-			case (CALL_STATE_IDLE): {
+			case (TelephonyManager.CALL_STATE_IDLE): {
 				//System.out.println("IDLE - " + incomingNumber);
 				final ArrayList<NumAndPhase> final_return = new ArrayList<>(0);
 				if (calls_state.isEmpty()) {
@@ -437,7 +464,7 @@ public class PhoneCallsProcessor {
 					// that call getting to IDLE itself.
 					// Getting the 1st one here on IDLE in the case of 2 calls or any other call in the case of 3 calls,
 					// then this last one was lost some time ago.
-					if (calls_state.get(calls_state.size() - 1).get(1).equals(String.valueOf(CALL_STATE_OFFHOOK))) {
+					if (calls_state.get(calls_state.size() - 1).get(1).equals(String.valueOf(TelephonyManager.CALL_STATE_OFFHOOK))) {
 
 						System.out.println(CALL_PHASE_LOST_LATE + " -> " + calls_state.get(calls_state.size() - 1).get(0));
 						final_return.add(new NumAndPhase(calls_state.get(calls_state.size() - 1).get(0),
@@ -480,4 +507,26 @@ public class PhoneCallsProcessor {
 		}
 		return null;
 	}
+
+	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (intent == null || intent.getAction() == null) {
+				return;
+			}
+
+			System.out.println("PPPPPPPPPPPPPPPPPP-PhoneCallsProcessor - " + intent.getAction());
+
+			switch (intent.getAction()) {
+				case (CONSTS_BC.ACTION_RECEIVE_CALL): {
+					final int call_state = intent.getIntExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, -1);
+					final String phone_number = intent.getStringExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1);
+					final boolean precise_call_state = intent.getBooleanExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, false);
+					receiveCall(call_state, phone_number, precise_call_state);
+
+					break;
+				}
+			}
+		}
+	};
 }

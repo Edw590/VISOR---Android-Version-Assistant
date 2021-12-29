@@ -27,12 +27,11 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
+import com.dadi590.assist_c_a.Modules.BatteryProcessor.UtilsBatteryProcessorBC;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.UtilsPhoneCallsProcessorBC;
 import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
 
 import java.util.LinkedHashMap;
@@ -116,7 +115,7 @@ final class UtilsIntentWhatToDo {
 					final String phoneNumber = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
 					final Integer call_state = map_EXTRA_STATE_CALL_STATE.get(state);
 					if (call_state != null) {
-						MainSrv.getPhoneCallsProcessor().phoneNumRecv(call_state, phoneNumber, false);
+						UtilsPhoneCallsProcessorBC.receiveCall(call_state, phoneNumber, false);
 					}
 					// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
 					// guess, unless the call states are updated to include a new one or something.
@@ -138,25 +137,25 @@ final class UtilsIntentWhatToDo {
 			/////////////////////////////////////
 			// Battery / Power
 			case (Intent.ACTION_BATTERY_CHANGED): {
-				MainSrv.getBatteryProcessor().processBatteryLvlChg(intent);
+				final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+				final int battery_lvl = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+				final int battery_lvl_scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+				UtilsBatteryProcessorBC.processBatteryLvlChg(battery_status, battery_lvl, battery_lvl_scale);
 
 				System.out.println("---------------");
-				final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
 				System.out.println(battery_status);
-				final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-				System.out.println(level);
-				final int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-				System.out.println(scale);
+				System.out.println(battery_lvl);
+				System.out.println(battery_lvl_scale);
 
 				break;
 			}
 			case (Intent.ACTION_POWER_CONNECTED): {
-				MainSrv.getBatteryProcessor().processBatteryPwrChg(true);
+				UtilsBatteryProcessorBC.processBatteryPwrChg(true);
 
 				break;
 			}
 			case (Intent.ACTION_POWER_DISCONNECTED): {
-				MainSrv.getBatteryProcessor().processBatteryPwrChg(false);
+				UtilsBatteryProcessorBC.processBatteryPwrChg(false);
 
 				break;
 			}

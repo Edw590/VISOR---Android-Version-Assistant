@@ -26,7 +26,6 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
@@ -136,13 +135,13 @@ final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Broadcast the {@code after_speaking_code} through {@link GL_BC_CONSTS#ACTION_SPEECH2_AFTER_SPEAK_CODE}.</p>
+	 * <p>Broadcast the {@code after_speaking_code} through {@link CONSTS_BC#ACTION_AFTER_SPEAK_CODE}.</p>
 	 *
 	 * @param code the code to broadcast
 	 */
 	static void broadcastAfterSpeakCode(final int code) {
-		final Intent intent = new Intent(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE);
-		intent.putExtra(GL_BC_CONSTS.EXTRA_SPEECH2_AFTER_SPEAK_CODE, code);
+		final Intent intent = new Intent(CONSTS_BC.ACTION_AFTER_SPEAK_CODE);
+		intent.putExtra(CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, code);
 
 		UtilsApp.sendInternalBroadcast(intent);
 	}

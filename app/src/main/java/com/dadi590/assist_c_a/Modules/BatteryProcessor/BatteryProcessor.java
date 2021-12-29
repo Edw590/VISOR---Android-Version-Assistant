@@ -21,20 +21,25 @@
 
 package com.dadi590.assist_c_a.Modules.BatteryProcessor;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.BatteryManager;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
  * <p>Processes changes in the battery levels or on battery power mode.</p>
  */
-public class BatteryProcessor {
+public class BatteryProcessor implements IModule {
 
 	// Minimum and maximum recommended battery percentage values to increase its life
 	private static final int PERCENT_MIN = 20;
@@ -45,12 +50,42 @@ public class BatteryProcessor {
 
 	private int last_detected_percent = -1;
 
+	private boolean is_module_alive = true;
+	@Override
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
+		}
+
+		return true;
+	}
+	@Override
+	public final void destroyModule() {
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
+
+	/**
+	 * <p>Main class constructor.</p>
+	 */
+	public BatteryProcessor() {
+		try {
+			final IntentFilter intentFilter = new IntentFilter();
+
+			intentFilter.addAction(CONSTS_BC.ACTION_PROCESS_PWR_CHG);
+			intentFilter.addAction(CONSTS_BC.ACTION_PROCESS_LVL_CHG);
+
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+		} catch (final IllegalArgumentException ignored) {
+		}
+	}
+
 	/**
 	 * <p>Processes changes in the device power mode.</p>
 	 *
 	 * @param power_connected true if external power was connected, false otherwise
 	 */
-	public final void processBatteryPwrChg(final boolean power_connected) {
+	final void processBatteryPwrChg(final boolean power_connected) {
 		// Update the value on the ValuesStorage
 		ValuesStorage.updateValue(CONSTS.power_connected, Boolean.toString(power_connected));
 
@@ -74,17 +109,16 @@ public class BatteryProcessor {
 	/**
 	 * <p>Processes changes in the battery levels.</p>
 	 *
-	 * @param intent the intent
+	 * @param battery_status the value from {@link BatteryManager#EXTRA_STATUS}
+	 * @param battery_lvl the value from {@link BatteryManager#EXTRA_LEVEL}
+	 * @param battery_lvl_scale the value from {@link BatteryManager#EXTRA_SCALE}
 	 */
-	public final void processBatteryLvlChg(@NonNull final Intent intent) {
-		final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-		final int battery_level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-		final int battery_level_scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-		if (battery_status == -1 || battery_level == -1 || battery_level_scale == -1) {
+	final void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale) {
+		if (battery_status == -1 || battery_lvl == -1 || battery_lvl_scale == -1) {
 			return;
 		}
 
-		final int battery_percentage = battery_level * 100 / battery_level_scale;
+		final int battery_percentage = battery_lvl * 100 / battery_lvl_scale;
 
 		// Update the value on the ValuesStorage
 		ValuesStorage.updateValue(CONSTS.battery_percentage, Integer.toString(battery_percentage));
@@ -157,4 +191,32 @@ public class BatteryProcessor {
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}
+
+	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (intent == null || intent.getAction() == null) {
+				return;
+			}
+
+			System.out.println("PPPPPPPPPPPPPPPPPP-BatteryStatus - " + intent.getAction());
+
+			switch (intent.getAction()) {
+				case (CONSTS_BC.ACTION_PROCESS_PWR_CHG): {
+					final boolean power_connected = intent.getBooleanExtra(CONSTS_BC.EXTRA_PROCESS_PWR_CHG_1, false);
+					processBatteryPwrChg(power_connected);
+
+					break;
+				}
+				case (CONSTS_BC.ACTION_PROCESS_LVL_CHG): {
+					final int battery_status = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_1, -1);
+					final int battery_lvl = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_2, -1);
+					final int battery_lvl_scale = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_3, -1);
+					processBatteryLvlChg(battery_status, battery_lvl, battery_lvl_scale);
+
+					break;
+				}
+			}
+		}
+	};
 }

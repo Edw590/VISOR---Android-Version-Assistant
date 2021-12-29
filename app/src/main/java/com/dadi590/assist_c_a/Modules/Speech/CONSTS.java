@@ -24,7 +24,7 @@ package com.dadi590.assist_c_a.Modules.Speech;
 /**
  * <p>Constants related to the Speech APIs.</p>
  */
-final class CONSTS {
+public final class CONSTS {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>

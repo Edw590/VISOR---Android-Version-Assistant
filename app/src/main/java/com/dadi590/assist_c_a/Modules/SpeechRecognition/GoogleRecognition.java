@@ -32,11 +32,9 @@ import android.speech.SpeechRecognizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 
 import java.util.LinkedHashMap;
@@ -47,6 +45,8 @@ import java.util.Map;
 /**
  * <p>This class activates Google's speech recognition and broadcasts the results.</p>
  * <p>The results can be either final results or partial results, and both will be processed.</p>
+ * <p>NOTE: the class is public but it's NOT to be used outside its package! It's only public for the service to be
+ * instantiated (meaning if it would be put package-private now, no error would appear on the entire project).</p>
  */
 public class GoogleRecognition extends Service {
 
@@ -77,13 +77,6 @@ public class GoogleRecognition extends Service {
 		}
 	};
 
-	/**
-	 * <p>Just to have a constructor.</p>
-	 */
-	public GoogleRecognition() {
-		// No need to implement.
-	}
-
 	@Override
 	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
         /*
@@ -110,7 +103,7 @@ public class GoogleRecognition extends Service {
 			return START_NOT_STICKY;
 		}
 
-		final Intent intent1 = new Intent(GL_BC_CONSTS.ACTION_GOOGLE_RECOG_STARTED);
+		final Intent intent1 = new Intent(CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED);
 		UtilsApp.sendInternalBroadcast(intent1);
 
 		// Start the recognition error checker by saying currently onEndOfSpeech() is the last one to have been
@@ -167,12 +160,6 @@ public class GoogleRecognition extends Service {
 	 */
 	final class SpeechRecognitionListener implements RecognitionListener {
 
-		/**
-		 * <p>Just to have an empty constructor - it's not a utility class though.</p>
-		 */
-		SpeechRecognitionListener() {
-		}
-
 		@Override
 		public final void onReadyForSpeech(final Bundle params) {
 			System.out.println("QQQQQQQQQQQQQQQ");
@@ -181,7 +168,7 @@ public class GoogleRecognition extends Service {
 
 
 			// Vibrate to indicate it's ready to listen.
-			UtilsGeneral.vibrateDevice(100L);
+			UtilsGeneral.vibrateDeviceOnce(100L);
 		}
 
 		@Override
@@ -324,6 +311,8 @@ public class GoogleRecognition extends Service {
 					Thread.sleep(1_000L);
 				} catch (final InterruptedException ignored) {
 					Thread.currentThread().interrupt();
+
+					return;
 				}
 			}
 		}

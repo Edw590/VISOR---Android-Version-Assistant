@@ -20,7 +20,7 @@
  */
 
 /**
- * <p>Everything directly related with the assistant's protected lock screen.</p>
+ * <p>Everything directly related to the assistant's protected lock screen.</p>
  * <br>
  * <p>First, thank you ESET for the idea haha. Loved it! Until you got it out of Mobile Security above 3.3 for some
  * reason. So here it is again.</p>

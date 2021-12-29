@@ -24,6 +24,7 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.Application;
 import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -164,8 +165,12 @@ public final class UtilsGeneral {
 	 */
 	@NonNull
 	public static Context getContext() {
-		Context context = ActivityThread.currentApplication().getApplicationContext();
-		if (context == null) {
+		Context context = null;
+		final Application application = ActivityThread.currentApplication();
+		if (null != application) { // Was null in various runs of the app on API 15
+			context = application.getApplicationContext();
+		}
+		if (null == context) {
 			System.out.println("/UJHGRGT%&/UGFFFT%YUYG");
 			context = ApplicationClass.applicationContext;
 		}
@@ -276,11 +281,11 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Vibrate the device for the amount of time given.</p>
+	 * <p>Vibrate the device once for the amount of time given.</p>
 	 *
 	 * @param duration milliseconds to vibrate
 	 */
-	public static void vibrateDevice(final long duration) {
+	public static void vibrateDeviceOnce(final long duration) {
 		final Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));

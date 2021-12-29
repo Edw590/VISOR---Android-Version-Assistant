@@ -28,10 +28,8 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,21 +45,16 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 /**
  * <p>This class activates PocketSphinx's speech recognition and automatically starts Google's if the assistant's name
  * is spoken.</p>
+ * <p>NOTE: the class is public but it's NOT to be used outside its package! It's only public for the service to be
+ * instantiated (meaning if it would be put package-private now, no error would appear on the entire project).</p>
  */
 public class PocketSphinxRecognition extends Service implements RecognitionListener {
 
 	@Nullable private SpeechRecognizer recognizer = null;
 
-	private static final String KEYWORD_WAKEUP = "3234_wakeup";
+	private static final String KEYWORD_WAKEUP = "WAKEUP";
 
 	private static final String KEYPHRASE = GL_CONSTS.ASSISTANT_NAME_WO_DOTS.toLowerCase(Locale.ENGLISH); // "visor"
-
-	/**
-	 * <p>Just to have a constructor.</p>
-	 */
-	public PocketSphinxRecognition() {
-		// No need to implement.
-	}
 
 	@Override
 	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
@@ -89,7 +82,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 			return START_NOT_STICKY;
 		}
 
-		final Intent intent1 = new Intent(GL_BC_CONSTS.ACTION_POCKETSPHINX_RECOG_STARTED);
+		final Intent intent1 = new Intent(CONSTS_BC.ACTION_POCKETSPHINX_RECOG_STARTED);
 		UtilsApp.sendInternalBroadcast(intent1);
 
 		new SetupTask_PocketSphinx(this).execute();
@@ -228,13 +221,14 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		recognizer = SpeechRecognizerSetup.defaultSetup()
 				.setAcousticModel(new File(assetsDir, "en-us-ptm"))
 				.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-				.setKeywordThreshold(0.25f) // Goes from 1e-45f to 1. Adjust for false positives. The greater, the
+				.setKeywordThreshold(1.0f) // Goes from 1e-45f to 1. Adjust for false positives. The greater, the
 				// less false positives - though, more probability to fail to a true match.
 				// If the Google Hotword recognizer could be put to work... Maybe it would be better (the normal
 				// recognition is very good).
 				// But this seems to be enough for now, I guess. 0.25f seems to be enough.
 
 				.getRecognizer();
+
 		recognizer.addListener(this);
 
 		// Create keyword-activation search.

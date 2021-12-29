@@ -30,7 +30,7 @@ import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
- * <p>Utilities related with the Protected Lock Screen.</p>
+ * <p>Utilities related to the Protected Lock Screen.</p>
  */
 public final class UtilsProtectedLockScr {
 

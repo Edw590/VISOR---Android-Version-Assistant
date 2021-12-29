@@ -53,13 +53,6 @@ public class FragModulesStatus extends Fragment {
 	final Object[][] modules_list = ModulesList.getModulesList();
 	final int modules_list_length = modules_list.length;
 
-	/**
-	 * <p>Just to have a constructor.</p>
-	 */
-	public FragModulesStatus() {
-		// No need to implement.
-	}
-
 	@Nullable
 	@Override
 	public final View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
@@ -140,6 +133,8 @@ public class FragModulesStatus extends Fragment {
 					Thread.sleep(1_000L);
 				} catch (final InterruptedException ignored) {
 					Thread.currentThread().interrupt();
+
+					return;
 				}
 			}
 		}

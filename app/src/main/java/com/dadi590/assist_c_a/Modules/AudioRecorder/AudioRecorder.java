@@ -29,14 +29,13 @@ import android.media.MediaRecorder;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.GL_BC_CONSTS;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsSpeechRecognizers;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.Modules.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,39 +45,57 @@ import java.util.List;
 /**
  * <p>The audio recorder module of the assistant.</p>
  */
-public class AudioRecorder {
+public class AudioRecorder implements IModule {
 
 	@Nullable private MediaRecorder recorder = null;
-	private boolean is_recording = false;
 
-	final List<Runnable> runnables = new ArrayList<>(5);
+	final List<Runnable> runnables = new ArrayList<>(1);
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
+
+	private boolean is_module_alive = true;
+	@Override
+	public final boolean isModuleWorkingProperly() {
+		if (!is_module_alive) {
+			return false;
+		}
+
+		return true;
+	}
+	@Override
+	public final void destroyModule() {
+		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		is_module_alive = false;
+	}
 
 	/**
 	 * <p>Main class constructor.</p>
 	 */
 	public AudioRecorder() {
-		super();
-	}
+		try {
+			final IntentFilter intentFilter = new IntentFilter();
 
-	/**
-	 * <p>Returns the {@link #is_recording} variable.</p>
-	 *
-	 * @return .
-	 */
-	public final boolean isRecording() {
-		return is_recording;
+			intentFilter.addAction(com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.ACTION_AFTER_SPEAK_CODE);
+			intentFilter.addAction(CONSTS_BC.ACTION_RECORD_AUDIO);
+
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 
 	/**
 	 * <p>Method to call instead of calling directly {@link #startRecording(int, boolean)}.</p>
 	 *
 	 * @param start true to start recording, false to stop recording
-	 * @param audioSource same as in {@link #startRecording(int, boolean)}, or as a standard, -1 if {@code start} is
+	 * @param audio_source same as in {@link #startRecording(int, boolean)}, or as a standard, -1 if {@code start} is
 	 *                    false (this parameter will be ignored if it's to stop recording).
 	 */
-	public final void recordAudio(final boolean start, final int audioSource) {
+	final void recordAudio(final boolean start, final int audio_source) {
+		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio);
+		if (null == is_recording) {
+			is_recording = false;
+		}
+
 		if (start) {
 			if (is_recording) {
 				final String speak = "Already on it sir.";
@@ -87,11 +104,8 @@ public class AudioRecorder {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						if (NO_ERRORS == startRecording(audioSource, false)) {
-							// Update the values on the ValuesStorage
-							ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(true));
-						}
-						/* todo if (audioSource == MediaRecorder.AudioSource.MIC && !recording) {
+						startRecording(audio_source, false);
+						/* todo if (audio_source == MediaRecorder.AudioSource.MIC && !recording) {
 							// In case of an error and that the microphone is the audio source, start the background
 							// recognition again.
 							Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
@@ -99,11 +113,6 @@ public class AudioRecorder {
 					}
 				};
 				runnables.add(runnable);
-				try {
-					UtilsGeneral.getContext().registerReceiver(broadcastReceiver,
-							new IntentFilter(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE));
-				} catch (final IllegalArgumentException ignored) {
-				}
 				final String speak = "Starting now, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, runnable.hashCode());
 			}
@@ -112,46 +121,13 @@ public class AudioRecorder {
 				stopRecording();
 				final String speak = "Stopped, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-				// Update the values on the ValuesStorage
-				ValuesStorage.updateValue(CONSTS.recording_audio, Boolean.toString(false));
+				runnables.remove(0);
 			} else {
 				final String speak = "Already stopped, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-				try {
-					// It's not supposed to be registered by now, but as a precaution.
-					UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
-				} catch (final IllegalArgumentException ignored) {
-				}
 			}
 		}
 	}
-
-	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			if (null == intent || null == intent.getAction()) {
-				return;
-			}
-
-			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
-
-			if (intent.getAction().equals(GL_BC_CONSTS.ACTION_SPEECH2_AFTER_SPEAK_CODE)) {
-				final int after_speak_code = intent.getIntExtra(GL_BC_CONSTS.EXTRA_SPEECH2_AFTER_SPEAK_CODE, -1);
-				for (final Runnable runnable : runnables) {
-					if (runnable.hashCode() == after_speak_code) {
-						System.out.println("TTTTTTTTTT");
-						runnable.run();
-						try {
-							UtilsGeneral.getContext().unregisterReceiver(this);
-						} catch (final IllegalArgumentException ignored) {
-						}
-						return;
-					}
-				}
-			}
-		}
-	};
 
 	public static final int NO_ERRORS = 0;
 	public static final int ERR_CREATE_FILE = 1;
@@ -190,17 +166,11 @@ public class AudioRecorder {
 			final String speak = "Error 1 sir.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
-			is_recording = false;
-
 			return ERR_CREATE_FILE;
 		}
 		final String fileName = file.getAbsolutePath();
 		recorder.setOutputFile(fileName);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
-
-        if (!check_recording_possible) {
-            UtilsSpeechRecognizers.terminateSpeechRecognizers();
-        }
 
 		try {
 			recorder.prepare();
@@ -212,8 +182,6 @@ public class AudioRecorder {
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
-
-			is_recording = false;
 
 			return ERR_PREP_RECORDING;
 		}
@@ -229,8 +197,6 @@ public class AudioRecorder {
 			}
 			file.delete();
 
-			is_recording = false;
-
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
 			/*int permission_status = UtilsPermissions.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT);
             if (permission_status == EPackageManager.PERMISSION_GRANTED) {
@@ -244,12 +210,11 @@ public class AudioRecorder {
 			recorder = null;
 			file.delete();
 
-			is_recording = false;
-
 			return UtilsGeneral.FONTE_DISPONIVEL;
 		}
 
-		is_recording = true;
+		// Update the values on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.is_recording_audio, Boolean.toString(true));
 
 		return NO_ERRORS;
 	}
@@ -266,6 +231,46 @@ public class AudioRecorder {
 			recorder.release();
 			recorder = null;
 		}
-		is_recording = false;
+
+		// Update the values on the ValuesStorage
+		ValuesStorage.updateValue(CONSTS.is_recording_audio, Boolean.toString(false));
 	}
+
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (null == intent || null == intent.getAction()) {
+				return;
+			}
+
+			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
+
+			switch (intent.getAction()) {
+				case CONSTS_BC.ACTION_RECORD_AUDIO: {
+					final boolean start = intent.getBooleanExtra(
+							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, false);
+					final int audio_source = intent.getIntExtra(
+							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, -1);
+					recordAudio(start, audio_source);
+
+					break;
+				}
+
+				case com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.ACTION_AFTER_SPEAK_CODE: {
+					final int after_speak_code = intent.getIntExtra(
+							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, -1);
+					for (final Runnable runnable : runnables) {
+						if (runnable.hashCode() == after_speak_code) {
+							System.out.println("TTTTTTTTTT");
+							runnable.run();
+
+							return;
+						}
+					}
+
+					break;
+				}
+			}
+		}
+	};
 }
