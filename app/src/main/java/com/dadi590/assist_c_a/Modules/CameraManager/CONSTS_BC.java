@@ -19,34 +19,29 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.AudioRecorder;
-
-import android.content.Intent;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+package com.dadi590.assist_c_a.Modules.CameraManager;
 
 /**
- * <p>Functions to call to send information to {@link AudioRecorder}, by using broadcasts.</p>
+ * <p>Actions, extras, and classes to use to send a broadcast to this module.</p>
+ * <br>
+ * <p>Check the doc on the action string to know what to do.</p>
  */
-public final class UtilsAudioRecorderBC {
+public final class CONSTS_BC {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private UtilsAudioRecorderBC() {
+	private CONSTS_BC() {
 	}
+
 
 	/**
-	 * <p>Broadcasts a request to execute {@link AudioRecorder#recordAudio(boolean, int)}.</p>
-	 *
-	 * @param start same as in the mentioned function
-	 * @param audio_source same as in the mentioned function
+	 * <p>Explanation: calls {@link CameraManagement#useCamera(int)}.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsCameraManagerBC}.</p>
+	 * <p>To be received only by the class(es): {@link CameraManagement}.</p>
+	 * <p>Extras (ordered parameters):</p>
+	 * <p>- {@link #EXTRA_USE_CAMERA_1}: mandatory</p>
 	 */
-	public static void recordAudio(final boolean start, final int audio_source) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_RECORD_AUDIO);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_1, start);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_1, audio_source);
-
-		UtilsApp.sendInternalBroadcast(broadcast_intent);
-	}
+	static final String ACTION_USE_CAMERA = "CAMERA_MANAGER_ACTION_USE_CAMERA";
+	static final String EXTRA_USE_CAMERA_1 = "CAMERA_MANAGER_EXTRA_USE_CAMERA_1";
 }

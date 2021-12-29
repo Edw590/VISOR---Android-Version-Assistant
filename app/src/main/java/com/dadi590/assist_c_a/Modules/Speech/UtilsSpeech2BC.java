@@ -31,7 +31,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import java.util.ArrayList;
 
 /**
- * <p>Functions to call to communicate with {@link Speech2}, by using broadcasts.</p>
+ * <p>Functions to call to send information to {@link Speech2}, by using broadcasts.</p>
  */
 public final class UtilsSpeech2BC {
 

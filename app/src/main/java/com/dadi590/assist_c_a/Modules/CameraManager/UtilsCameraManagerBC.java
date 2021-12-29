@@ -19,38 +19,31 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
+package com.dadi590.assist_c_a.Modules.CameraManager;
 
 import android.content.Intent;
-
-import androidx.annotation.NonNull;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
 /**
- * <p>Functions to call to send information to {@link PhoneCallsProcessor}, by using broadcasts.</p>
+ * <p>Functions to call to send information to {@link CameraManagement}, by using broadcasts.</p>
  */
-public final class UtilsPhoneCallsProcessorBC {
+public final class UtilsCameraManagerBC {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private UtilsPhoneCallsProcessorBC() {
+	private UtilsCameraManagerBC() {
 	}
 
 	/**
-	 * <p>Broadcasts a request to execute {@link PhoneCallsProcessor#receiveCall(int, String, boolean)}.</p>
+	 * <p>Broadcasts a request to execute {@link CameraManagement#useCamera(int)}.</p>
 	 *
-	 * @param call_state same as in the mentioned function
-	 * @param phone_number same as in the mentioned function
-	 * @param precise_call_state same as in the mentioned function
+	 * @param usage same as in {@link CameraManagement#useCamera(int)}
 	 */
-	public static void receiveCall(final int call_state, @NonNull final String phone_number,
-								   final boolean precise_call_state) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_RECEIVE_CALL);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, call_state);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_2, phone_number);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_3, precise_call_state);
+	public static void useCamera(final int usage) {
+		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_USE_CAMERA);
+		broadcast_intent.putExtra(CONSTS_BC.EXTRA_USE_CAMERA_1, usage);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

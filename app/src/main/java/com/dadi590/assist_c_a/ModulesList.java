@@ -29,15 +29,16 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
+import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
-import com.dadi590.assist_c_a.Modules.SomeValuesUpdater.SomeValuesUpdater;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.SomeValuesUpdater.SomeValuesUpdater;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -81,7 +82,7 @@ public final class ModulesList {
 			{PhoneCallsProcessor.class, MODULE_TYPE_INSTANCE, "Phone Calls Processor", null},
 			{SmsMsgsProcessor.class, MODULE_TYPE_STATIC, "SMS Messages Processor", null},
 			{AudioRecorder.class, MODULE_TYPE_INSTANCE, "Audio Recorder", null},
-			//{CameraManagement.class, MODULE_TYPE_INSTANCE, "Camera Manager", null},
+			{CameraManagement.class, MODULE_TYPE_INSTANCE, "Camera Manager", null},
 			{CmdsExecutor.class, MODULE_TYPE_INSTANCE, "Commands Executor", null},
 			{SpeechRecognitionCtrl.class, MODULE_TYPE_INSTANCE, "Speech Recognition Control", null},
 			{CONSTS.POCKETSPHINX_RECOG_CLASS, MODULE_TYPE_SERVICE_CHK_ONLY, "- Hotword recognizer", null},

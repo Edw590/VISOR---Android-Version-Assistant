@@ -26,7 +26,7 @@ import android.content.Intent;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
 /**
- * <p>Functions to call to communicate with {@link BatteryProcessor}, by using broadcasts.</p>
+ * <p>Functions to call to send information to {@link BatteryProcessor}, by using broadcasts.</p>
  */
 public final class UtilsBatteryProcessorBC {
 

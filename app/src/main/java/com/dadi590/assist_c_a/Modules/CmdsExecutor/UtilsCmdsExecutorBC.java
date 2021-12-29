@@ -28,8 +28,7 @@ import androidx.annotation.NonNull;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 
 /**
- * <p>Functions to call to communicate with {@link CmdsExecutor}, by using broadcasts (for example by a different process
- * than the main one - where the Executor is executed).</p>
+ * <p>Functions to call to send information to {@link CmdsExecutor}, by using broadcasts.</p>
  */
 public final class UtilsCmdsExecutorBC {
 
