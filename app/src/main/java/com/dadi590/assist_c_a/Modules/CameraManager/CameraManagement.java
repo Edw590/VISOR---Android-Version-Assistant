@@ -186,7 +186,7 @@ public class CameraManagement implements IModule {
 						if (turn_on_flashlight) {
 							if (null == camera_old) {
 								// Request the back camera, as that's the one that has the flashlight on it.
-								camera_old = UtilsCameraManager.openCamera(true);
+								camera_old = Camera.open();
 								if (null == camera_old) {
 									return CAMERA_IN_USAGE;
 								}
