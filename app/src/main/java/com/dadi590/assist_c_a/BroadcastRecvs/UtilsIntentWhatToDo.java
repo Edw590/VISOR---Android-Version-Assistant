@@ -112,10 +112,10 @@ final class UtilsIntentWhatToDo {
 					map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_OFFHOOK, TelephonyManager.CALL_STATE_OFFHOOK);
 
 					final String state = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
-					final String phoneNumber = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+					final String phone_number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
 					final Integer call_state = map_EXTRA_STATE_CALL_STATE.get(state);
 					if (call_state != null) {
-						UtilsPhoneCallsProcessorBC.receiveCall(call_state, phoneNumber, false);
+						UtilsPhoneCallsProcessorBC.receiveCall(call_state, phone_number, false);
 					}
 					// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
 					// guess, unless the call states are updated to include a new one or something.
@@ -124,7 +124,7 @@ final class UtilsIntentWhatToDo {
 				break;
 			}
 			case (CONSTS.ACTION_PRECISE_CALL_STATE_CHANGED): {
-				// See here for more: https://stackoverflow.com/questions/32821952/how-to-use-precisecallstate
+				// todo See here for more: https://stackoverflow.com/questions/32821952/how-to-use-precisecallstate
 				//MainSrv.getPhoneCallProcessor().phoneNumRecv(context, map_EXTRA_STATE_CALL_STATE.get(state), phoneNumber,
 				//		true);
 

@@ -520,8 +520,8 @@ public class PhoneCallsProcessor implements IModule {
 			switch (intent.getAction()) {
 				case (CONSTS_BC.ACTION_RECEIVE_CALL): {
 					final int call_state = intent.getIntExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, -1);
-					final String phone_number = intent.getStringExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1);
-					final boolean precise_call_state = intent.getBooleanExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, false);
+					final String phone_number = intent.getStringExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_2);
+					final boolean precise_call_state = intent.getBooleanExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_3, false);
 					receiveCall(call_state, phone_number, precise_call_state);
 
 					break;
