@@ -34,9 +34,9 @@ public final class CONSTS_BC {
 	private CONSTS_BC() {
 	}
 
-
 	/**
-	 * <p>Explanation: calls {@link CameraManagement#useCamera(int)}.</p>
+	 * <p>Explanation: same as the main executed function.</p>
+	 * <p>Main executed function: {@link CameraManagement#useCamera(int)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsCameraManagerBC}.</p>
 	 * <p>To be received only by the class(es): {@link CameraManagement}.</p>
 	 * <p>Extras (ordered parameters):</p>
