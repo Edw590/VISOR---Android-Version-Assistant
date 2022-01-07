@@ -100,14 +100,15 @@ public class GoogleRecognition extends Service {
 			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
 			stopSelf();
 			UtilsSpeechRecognizers.terminateSpeechRecognizers();
+
 			return START_NOT_STICKY;
 		}
 
 		final Intent intent1 = new Intent(CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED);
 		UtilsApp.sendInternalBroadcast(intent1);
 
-		// Start the recognition error checker by saying currently onEndOfSpeech() is the last one to have been
-		// called, when it was called, and to start to thread.
+		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
+		// service won't stop because it's frozen - the thread will take care of that and kill the service.
 		if (!frozen_methods_checker.isAlive()) {
 			// This check here is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
 			frozen_methods_checker.start();
@@ -263,18 +264,20 @@ public class GoogleRecognition extends Service {
 
 
 	/**
-	 * <p>This thread fixes a problem which Google doesn't seem to have fixed yet. Not the best solution, but don't have
-	 * a better one.</p>
+	 * <p>This thread fixes a problem which Google doesn't seem to have fixed yet. Not the best solution, but I don't
+	 * have a better one.</p>
 	 * <p>When the speech recognition ends on this class, it must call the always-listening recognizer - or at least
 	 * say the recognition finished. So on some function, after all ends, this sends a signal. Now the problem...</p>
-	 *
+	 * <br>
 	 * <p>onEndOfSpeech() is always called when a speech ends. When there are results, it's not the last one to be
 	 * called. When there are errors, onError() is called after onEndOfSpeech(). If there is a problem and onError() is
-	 * not called (which happens, it's just a possible problem - it's a real problem), onEndOfSpeech() is the last one.
-	 * Though, as there are other methods called after onEndOfSpeech() if there were no errors, I can't use it.</p>
-	 *
-	 * <p>When this happens, no signal is sent back - not supposed to happen. So the idea of this thread is to keep
-	 * checking if onEndOfSpeech() was the last one to be called with a timer (currently 10 seconds).</p>
+	 * not called (which happens, it's not just a possible problem - it's a real problem), onEndOfSpeech() is the last
+	 * one. Though, as there are other methods called after onEndOfSpeech() if there were no errors, I can't use it to
+	 * know an error happened.</p>
+	 * <br>
+	 * <p>When this happens, no signal of finished recognition is sent back, nor the service is stopped - not supposed
+	 * to happen. So the idea of this thread is to keep checking if onEndOfSpeech() was the last one to be called with a
+	 * timer (currently 10 seconds).</p>
 	 * <p>If it goes more than 10 seconds and no other function is called, signal that the recognition ended and kill
 	 * the service. Why 10 seconds? Because from onEndOfSpeech() to onResults() or onPartialResults() it takes a bit,
 	 * also depending on if there is Internet connection or not, and how slow it is. So 10 seconds seems a good trade-off
@@ -291,7 +294,8 @@ public class GoogleRecognition extends Service {
 	 * or on onBeginningOfSpeech (or on onEndOfSpeech...) - sometimes it happens on various functions, it seems. If it
 	 * freezes, the thread terminates the process. So, if it's to replace this, think in a way of replacing the other
 	 * checks too.</p>
-	 * <p>The thread stops when one of the results functions are called - everything went fine.</p>
+	 * <p>The thread stops when one of the results functions are called (which will terminate the process when it
+	 * finishes) - everything went fine.</p>
 	 */
 	Thread frozen_methods_checker = new Thread(new Runnable() {
 		@Override

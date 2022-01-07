@@ -25,6 +25,7 @@ import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.multidex.MultiDexApplication;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
@@ -40,28 +41,35 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * so you can just run normal threads doing what you need to."</p>
  * <p>"No, persistent applies only to your process. Your Application.onCreate() will be called, but services that called
  * stopSelf() are not automatically restarted."</p>
- * <p>So it seems Android will restart the process by calling only {@link Application#onCreate()} if the main app
- * process goes down.</p>
+ * <p>So it seems Android will restart the main app process if it goes down, by calling only
+ * {@link Application#onCreate()} if the main app.</p>
  */
 public final class ApplicationClass extends MultiDexApplication {
 
-	// Won't ever be null while the app is running because everything else will be called after MainApp.onCreate(), in
-	// which applicationContext is initialized. So it's fine not to initialize it here and say it's NonNull.
+	// Won't ever be null while the app is running because everything else will be called after
+	// ApplicationClass.onCreate(), after which applicationContext is initialized. So it's fine not to initialize it
+	// here and say it's NonNull.
 	// Except, it seems, with Content Providers, in which case the Application class may not have been initialized yet.
 	// But with Activities, Services and Receivers it's alright. Though, if called from this class's Constructor, this
 	// variable may not be ready yet. Not sure.
+	// EDIT: I've just put it @Nullable. @NonNull is now only on UtilsGeneral.getContext(), as it already was. @Nullable
+	// is here now too to indicate it can actually be null (only with Content Providers, as said above - but it can).
 	/**
 	 * <p>The main application's context.</p>
-	 * <p>Do NOT use with Content Provider classes! This context may not be ready in those cases!.</p>
-	 * <p>Use for Activities, Services and Receivers.</p>
+	 * <p>Do NOT use with Content Provider classes! This context may not be ready in those cases!</p>
+	 * <p>Use in Activities, Services and Receivers and everything else.</p>
 	 */
-	@NonNull public static Context applicationContext;
+	@Nullable public static Context applicationContext = null;
 
 	@Override
 	public final void onCreate() {
 		super.onCreate();
 
 		// To do exactly when the app's main process starts
+
+		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
+		// which returns null sometimes.
+		applicationContext = getApplicationContext();
 
 		// Setup handler for uncaught exceptions
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -70,10 +78,6 @@ public final class ApplicationClass extends MultiDexApplication {
 				handleUncaughtException (t, e);
 			}
 		});
-
-		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
-		// which returns null sometimes.
-		applicationContext = getApplicationContext();
 
 		// Clear the app cache as soon as the app starts not to take unnecessary space
 		UtilsApp.deleteAppCache();

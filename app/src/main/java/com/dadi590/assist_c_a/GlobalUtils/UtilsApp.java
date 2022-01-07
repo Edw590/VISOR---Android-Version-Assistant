@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv;
 
@@ -162,8 +161,9 @@ public final class UtilsApp {
 	 * @return one of the constants
 	 */
 	public static int appInstallationType() {
-		if (UtilsSysApp.mainFunction(UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
-			if (UtilsSysApp.mainFunction(UtilsSysApp.IS_UPDATED_SYSTEM_APP)) {
+		final Context context = UtilsGeneral.getContext();
+		if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
+			if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_UPDATED_SYSTEM_APP)) {
 				System.out.println("---------------PRIVILEGED WITH UPDATES---------------");
 				return PRIVILEGED_WITH_UPDATES;
 			} else {

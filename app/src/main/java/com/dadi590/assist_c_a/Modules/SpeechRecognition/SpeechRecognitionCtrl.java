@@ -131,6 +131,10 @@ public class SpeechRecognitionCtrl implements IModule {
 			System.out.println("PPPPPPPPPPPPPPPPPP-SpeechRecognitionCtrl - " + intent.getAction());
 
 			switch (intent.getAction()) {
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+
 				case CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED: {
 					current_recognizer = GOOGLE_RECOGNIZER;
 					wait_time = 500L;
@@ -167,6 +171,10 @@ public class SpeechRecognitionCtrl implements IModule {
 					break;
 				}
 			}
+
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 		}
 	};
 }

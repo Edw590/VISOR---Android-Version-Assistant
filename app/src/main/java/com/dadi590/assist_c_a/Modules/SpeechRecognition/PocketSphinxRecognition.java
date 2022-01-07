@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
@@ -79,6 +80,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 			System.out.println("2GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG2");
 			stopSelf();
 			UtilsSpeechRecognizers.terminateSpeechRecognizers();
+
 			return START_NOT_STICKY;
 		}
 
@@ -202,7 +204,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		}
 	}
 
-	void switchSearch(final String searchName) {
+	void switchSearch(@NonNull final String searchName) {
 		assert recognizer != null; // It's never null when it gets here. It's just to remove the warning.
 		recognizer.stop();
 
@@ -214,7 +216,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		}
 	}
 
-	void setupRecognizer(final File assetsDir) throws IOException {
+	void setupRecognizer(@NonNull final File assetsDir) throws IOException {
 		// The recognizer can be configured to perform multiple searches
 		// of different kind and switch between them
 

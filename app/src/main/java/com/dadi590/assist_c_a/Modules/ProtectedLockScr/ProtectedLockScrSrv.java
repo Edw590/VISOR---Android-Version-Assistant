@@ -32,7 +32,6 @@ import android.os.IBinder;
 import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
@@ -125,44 +124,35 @@ public class ProtectedLockScrSrv extends Service {
 	};
 
 	/**
-	 * <p>Checks if the lock screen enabled or not for the current user through
-	 * {@link LockPatternUtils#isLockScreenDisabled(int)} (though, this uses an older version which does not require the
-	 * {@code int} argument), which means, should check the same as {@link KeyguardManager#isDeviceSecure()}, but on
-	 * older API versions than Marshmallow (as of which the parameter was introduced).</p>
+	 * <p>Checks if the lock screen is enabled or not for the current user through
+	 * {@link LockPatternUtils#isLockScreenDisabled()}, which means, should check the same as
+	 * {@link KeyguardManager#isDeviceSecure()}, but on older API versions than Marshmallow (as of which the {@code int}
+	 * parameter was introduced on the first function).</p>
 	 * <br>
 	 * <p><strong>TO USE ONLY WITH API 22 OR OLDER!!!!!</strong></p>
-	 * <p>It's said on where I took this from (StackOverflow): "It should work with API level 14+", so I'm putting that
-	 * as the minimum Android version for this function to work on.</p>
+	 * <p>It's also said on where I took this from (StackOverflow): "It should work with API level 14+", so I'm putting
+	 * that as the minimum Android version for this function to work on.</p>
 	 *
-	 * @return true if the lock screen is enabled for the current user, false otherwise. If there's any error getting
-	 * the method mentioned above (gotten through reflection), false will be returned as the worst case.
+	 * @return true if the lock screen is enabled for the current user, false otherwise
 	 */
-	@RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	static boolean isLockScreenEnabled22Older() {
-		final String LockPatternUtils_location = "com.android.internal.widget.LockPatternUtils";
-
 		/*Testa isto com a meta-reflection para ver se ficou a funcionar!!!
 				Podia ser usado por algum atacante enviar MUITOS broadcasts e a app vai bloquear!
 			Arranja isso. Mete numa thread e impede de ser chamada mais que uma vez enquanto estiver a funcionar ou mete
 				a forçagem de permissões MEGA rápida --> tal como a função de iniciar o serviço, tenta metê-la ao máximo.*/
 
+		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsGeneral.getContext());
 		try {
-			final ObjectClasses.GetMethodClassObj getMethodClassObj = UtilsGeneral.getMethodClass(LockPatternUtils_location);
-			if (getMethodClassObj != null) {
-				final Class<?> lockUtilsClass = getMethodClassObj.hidden_class;
-				final Object lockUtils = lockUtilsClass.getConstructor(Context.class).newInstance(UtilsGeneral.getContext());
-				final Method method = (Method) getMethodClassObj.getMethod.invoke(lockUtilsClass, "isLockScreenDisabled");
-				if (method != null) {
-					return !Boolean.parseBoolean(String.valueOf(method.invoke(lockUtils)));
-				}
-			}
-		} catch (final InstantiationException ignored) {
+			final Method method = LockPatternUtils.class.getDeclaredMethod("isLockScreenDisabled");
+
+			return !Boolean.parseBoolean(String.valueOf(method.invoke(lockPatternUtils)));
 		} catch (final InvocationTargetException ignored) {
 		} catch (final NoSuchMethodException ignored) {
 		} catch (final IllegalAccessException ignored) {
 		}
 
-		return false; // In case the method can't be accessed for ANY reason, assume the worst case: no lock screen enabled.
+		// Won't happen - the function exists on said API levels
+		return false;
 	}
 
 	/**

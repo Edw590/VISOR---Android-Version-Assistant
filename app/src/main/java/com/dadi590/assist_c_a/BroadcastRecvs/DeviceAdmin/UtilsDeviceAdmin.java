@@ -40,8 +40,10 @@ public final class UtilsDeviceAdmin {
 
 	/**
 	 * <p>Locks the device immediately.</p>
+	 *
+	 * @return true if the device was locked, false if {@link DevicePolicyManager#lockNow()} thrown a SecurityException
 	 */
-	public static void lockDevice() {
+	public static boolean lockDevice() {
 		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext()
 				.getSystemService(Context.DEVICE_POLICY_SERVICE);
 		try {
@@ -50,18 +52,22 @@ public final class UtilsDeviceAdmin {
 				if (devicePolicyManager.getStorageEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER) {
 					devicePolicyManager.lockNow(DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY);
 					// From https://developer.android.com/reference/android/app/admin/DevicePolicyManager#lockNow(int):
-					// "NOTE: In order to lock the parent profile and evict the encryption key of the managed profile, lockNow()
-					// must be called twice: First, lockNow() should be called on the DevicePolicyManager instance returned by
-					// getParentProfileInstance(android.content.ComponentName), then lockNow(int) should be called on the
-					// DevicePolicyManager instance associated with the managed profile, with the
-					// FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY flag. Calling the method twice in this order ensures that all users
-					// are locked and does not stop the device admin on the managed profile from issuing a second call to lock
-					// its own profile."
+					// "NOTE: In order to lock the parent profile and evict the encryption key of the managed profile,
+					// lockNow() must be called twice: First, lockNow() should be called on the DevicePolicyManager
+					// instance returned by getParentProfileInstance(android.content.ComponentName), then lockNow(int)
+					// should be called on the DevicePolicyManager instance associated with the managed profile, with
+					// the FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY flag. Calling the method twice in this order ensures
+					// that all users are locked and does not stop the device admin on the managed profile from issuing
+					// a second call to lock its own profile."
 				}
 			}
+
+			return true;
 		} catch (final SecurityException ignored) {
 			// Could not lock the device, for example because the app is not a Device Administrator or (in case the app
 			// is running in Android 11 or above) the app does not hold the LOCK_DEVICE permission.
 		}
+
+		return false;
 	}
 }

@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.ActivitiesFragments;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -37,8 +38,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 
 import java.lang.reflect.Method;
-
-import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
  * Class only for testing purposes on the development fragment.
@@ -67,7 +66,7 @@ final class FragDevelopmentTests {
 			context.startActivityForResult(intent, REQUEST_CODE_ENABLE_ADMIN);
 		}*/
 
-		final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+		final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 		//telephonyManager.setDataEnabled(true);
 
 		//Pensar também sobre outras definições, como a Poupança de Energia.
@@ -140,16 +139,22 @@ final class FragDevelopmentTests {
 		final boolean protectionLevel = UtilsPermissions.checkSelfPermission("android.permission.UPDATE_APP_OPS_STATS");
 
 		System.out.println("------------------------");
-		System.out.println(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
-		System.out.println(ApplicationInfo.FLAG_SYSTEM);
-		System.out.println("---");
+		try {
+			final ApplicationInfo applicationInfo = context.getPackageManager().
+					getApplicationInfo(context.getPackageName(), 0);
+			System.out.println(applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM);
+			System.out.println(applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
+			System.out.println(applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+		} catch (final PackageManager.NameNotFoundException ignored) {}
+		System.out.println("-----");
 		System.out.println(protectionLevel);
-		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.MODIFY_PHONE_STATE"));
-		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.CALL_PRIVILEGED"));
-		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.REBOOT"));
-		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.SHUTDOWN"));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.SHUTDOWN));
 		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.ACCESS_SUPERUSER"));
-		System.out.println(UtilsPermissions.checkSelfPermission("android.permission.NETWORK_SETTINGS"));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.NETWORK_SETTINGS));
+		System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS));
 		System.out.println("------------------------");
 
             /*Gestor_camara gestor_camara = MainSrv.obter_gestor_camara();

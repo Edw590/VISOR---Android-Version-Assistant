@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 
 import java.util.ArrayList;
 
@@ -42,10 +43,11 @@ public final class UtilsSpeech2BC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to execute {@link Speech2#speak(String, int, Integer)}.</p>
-	 *  @param txt_to_speak same as in {@link Speech2#speak(String, int, Integer)}
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, Integer)}
-	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, Integer)}
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_CALL_SPEAK}.</p>
+	 *
+	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, boolean, Integer)}
 	 */
 	public static void speak(@NonNull final String txt_to_speak, final int speech_priority,
 							 @Nullable final Integer after_speaking_code) {
@@ -60,7 +62,29 @@ public final class UtilsSpeech2BC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to execute {@link Speech2#skipCurrentSpeech()}.</p>
+	 * <p>Same as {@link #speak(String, int, Integer)}, but strictly for {@link CmdsExecutor} internal usage.</p>
+	 * <p>Reason: has the {@code bypass_sound} parameter available, which is not for normal use.</p>
+	 *
+	 * @param txt_to_speak  same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * @param bypass_no_sound same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 */
+	public static void speakExecutor(@NonNull final String txt_to_speak, final int speech_priority,
+							 final boolean bypass_no_sound, @Nullable final Integer after_speaking_code) {
+		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_CALL_SPEAK);
+		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_SPEAK_1, txt_to_speak);
+		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, bypass_no_sound);
+		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_SPEAK_3, speech_priority);
+		if (after_speaking_code != null) {
+			broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_SPEAK_4, after_speaking_code);
+		}
+
+		UtilsApp.sendInternalBroadcast(broadcast_intent);
+	}
+
+	/**
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_SKIP_SPEECH}.</p>
 	 */
 	public static void skipCurrentSpeech() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_SKIP_SPEECH);
@@ -69,8 +93,7 @@ public final class UtilsSpeech2BC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to remove a speech by its speech string.</p>
-	 * <p>More info on {@link CONSTS_BC#ACTION_REMOVE_SPEECH}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_REMOVE_SPEECH}.</p>
 	 *
 	 * @param speech same as in {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}
 	 * @param speech_priority same as in {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}
@@ -82,6 +105,15 @@ public final class UtilsSpeech2BC {
 		broadcast_intent.putExtra(CONSTS_BC.EXTRA_REMOVE_SPEECH_1, speech);
 		broadcast_intent.putExtra(CONSTS_BC.EXTRA_REMOVE_SPEECH_2, speech_priority);
 		broadcast_intent.putExtra(CONSTS_BC.EXTRA_REMOVE_SPEECH_3, low_to_high);
+
+		UtilsApp.sendInternalBroadcast(broadcast_intent);
+	}
+
+	/**
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_SAY_AGAIN}.</p>
+	 */
+	public static void sayAgain() {
+		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_SAY_AGAIN);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

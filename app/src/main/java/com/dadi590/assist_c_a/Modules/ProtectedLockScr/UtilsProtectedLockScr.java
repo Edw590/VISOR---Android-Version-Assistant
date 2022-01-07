@@ -44,20 +44,24 @@ public final class UtilsProtectedLockScr {
 	 * <p>Locks the device and starts the Protected Lock Screen activity.</p>
 	 *
 	 * @param intent same as in {@link #showPLS(Intent)}
+	 *
+	 * @return same as in {@link UtilsDeviceAdmin#lockDevice()}
 	 */
-	public static void lockAndShowPLS(@NonNull final Intent intent) {
+	public static boolean lockAndShowPLS(@NonNull final Intent intent) {
 		// Do NOT remove this from here!!! It makes it so that the activity can start instantly even after pressing Home,
 		// whether the app is a Device Administrator or not - Android magic XD.
-		UtilsDeviceAdmin.lockDevice();
+		final boolean ret_var = UtilsDeviceAdmin.lockDevice();
 
 		showPLS(intent);
+
+		return ret_var;
 	}
 
 	/**
-	 * <p>ONLY starts the Protected Lock Screen - do NOT use except to keep restarting the PLS every second (we don't
-	 * want to lock the device every second...) to be sure it's always on top --> in ANY other case, use
-	 * {@link #lockAndShowPLS(Intent)} as a start for more security, and then because of the reason on the method
-	 * descrption.</p>
+	 * <p>ONLY starts the Protected Lock Screen (does NOT lock the device) - do NOT use except to keep restarting the
+	 * PLS every second (we don't want to lock the device every second...) to be sure it's always on top --> in ANY
+	 * other case, use {@link #lockAndShowPLS(Intent)}, as a start for more security, and then because of the reason on
+	 * the function descrption (it also starts the PLS by itself, so no need to call this function in those cases).</p>
 	 *
 	 * @param intent the intent to start the Protected Lock Screen activity, got from {@link #getPLSIntent()}
 	 */

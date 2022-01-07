@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,8 +35,6 @@ import java.util.List;
  * <p>Utility class with functions that directly use a shell.</p>
  */
 public final class UtilsShell {
-
-	public static final byte[] empty_byte_array = new byte[0];
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -59,32 +58,32 @@ public final class UtilsShell {
 	 * after exiting from the sub-shell, those are subsequent commands in the original shell and their output will not
 	 * be printed.</p>
 	 * <p>To print regardless of this, there is a special parameter, with a consequence - it will call /system/bin/sh as
-	 * a sub-shell. With root or WITH updates to AOSP, that could (or not) be removed - and the command will fail. So...
-	 * <u>USE ONLY IF <strong>REALLY</strong> NECESSARY!!!</u></p>
+	 * a sub-shell. With root access on the device, someone could remove that binary, or it could be removed in updates
+	 * to AOSP or something (or could not - who knows) - and the command will fail. So... <u>USE ONLY IF
+	 * <strong>REALLY</strong> NECESSARY!!!</u> - use one-line commands, for example ("this && that" instead of using 2
+	 * separate inputs for the commands).</p>
 	 * <br>
 	 * <p>Considerations to have:</p>
 	 * <p>- Don't put a new line at the end of each command since the function will automatically do that. In case for
 	 * some reason there's a new line character already as the last character, it won't put another one. In case the
-	 * command is empty (read below), a new line will not be added.</p>
+	 * command is empty, a new line will not be added.</p>
 	 * <p>- An empty command will not be recognized as a new line - it will be ignored. To enter a new line, simply
 	 * write yourself "\n" on the command string.</p>
-	 * <p>- The function will input "exit\n" as the last command in case the command to execute su was issued (not doing
-	 * so would result in an infinite wait for it to return).</p>
 	 * <p>- The return values are byte arrays. To get their printable form, use
 	 * {@link UtilsGeneral#bytesToPrintableChars(byte[], boolean)}.</p>
 	 *
 	 * @param commands_list list of commands to execute, each in a new index
-	 * @param print_only_1st_cmd true to print the output of only the output of the 1st command, false to print the output
-	 *                         of all commands (read above for more about this)
+	 * @param print_only_1st_cmd true to print the output of only the output of the 1st command, false to print the
+	 *                           output of all commands (read above for more about this)
 	 *
-	 * @return an instance of {@link CmdOutputObj}
+	 * @return an instance of {@link CmdOutputObj}, and if any error occurs, the streams will be null
 	 */
 	@NonNull
 	public static CmdOutputObj executeShellCmd(@NonNull final List<String> commands_list,
 											   final boolean print_only_1st_cmd) {
 		final List<byte[]> ret_streams = new ArrayList<>(2);
-		ret_streams.add(empty_byte_array);
-		ret_streams.add(empty_byte_array);
+		ret_streams.add(null);
+		ret_streams.add(null);
 		@Nullable Integer exit_code = null;
 
 		main_try: try {
@@ -98,7 +97,8 @@ public final class UtilsShell {
 				// still only print the output of the first command - which is this one below, and this one will have
 				// all commands inside it printed, and the result is the output of the first ever command --> the shell
 				// initialization command.
-				process = Runtime.getRuntime().exec("/system/bin/sh", null, null);
+				process = Runtime.getRuntime().exec(File.separator + "system" + File.separator + "bin" +
+						File.separator + "sh", null, null);
 			}
 
 			try (final DataOutputStream dataOutputStream = new DataOutputStream(process.getOutputStream())) {
@@ -167,10 +167,11 @@ public final class UtilsShell {
 			exit_code = process.waitFor();
 		} catch (final IOException | SecurityException ignored) {
 		} catch (final InterruptedException ignored) {
+			Thread.currentThread().interrupt();
 		}
 
 		return new CmdOutputObj(exit_code, ret_streams.get(0), ret_streams.get(1));
-		}
+	}
 	/**
 	 * <p>Class to use for the returning value of {@link #executeShellCmd(List, boolean)}.</p>
 	 * <p>Always check if the error_code is null. If it is, the streams will be of size 0.</p>

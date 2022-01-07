@@ -27,22 +27,27 @@
 	<fragment
 		android:id="@+id/frag_main"
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragMain"
-		android:label="@string/fragMain_title"
+		android:label="@string/fragMain_title_ACA"
 		tools:layout="@layout/frag_main" />
 	<fragment
 		android:id="@+id/frag_development"
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragDevelopment"
-		android:label="@string/fragDevelopment_title"
+		android:label="@string/fragDevelopment_title_ACA"
 		tools:layout="@layout/frag_development" />
 	<fragment
 		android:id="@+id/frag_modules_status"
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragModulesStatus"
-		android:label="@string/fragModulesStatus_title"
+		android:label="@string/fragModulesStatus_title_ACA"
 		tools:layout="@layout/frag_modules_status" />
+	<fragment
+		android:id="@+id/frag_values_storage_viewer"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragValuesStorageViewer"
+		android:label="@string/fragValuesStorageViewer_title_ACA"
+		tools:layout="@layout/frag_values_storage_viewer" />
 	<fragment
 		android:id="@+id/frag_events_scheduler"
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragEventsScheduler"
-		android:label="@string/fragEventsScheduler_title"
+		android:label="@string/fragEventsScheduler_title_ACA"
 		tools:layout="@layout/frag_events_scheduler" />
 
 </navigation>

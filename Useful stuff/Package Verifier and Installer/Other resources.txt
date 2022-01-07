@@ -1,0 +1,1 @@
+- Elenkov, N.: Android Security Internals: An In-Depth Guide to Android's Security Architecture. No Starch Press, 1st edn.

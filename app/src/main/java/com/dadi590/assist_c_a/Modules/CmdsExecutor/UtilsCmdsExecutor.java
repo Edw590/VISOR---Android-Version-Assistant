@@ -40,13 +40,14 @@ final class UtilsCmdsExecutor {
 
 	/**
 	 * <p>Calls {@link UtilsSpeech2BC#speak(String, int, Integer)} with the given parameters, except the priority is
-	 * always {@link Speech2#PRIORITY_USER_ACTION} - and {@link CmdsExecutor#something_said} is set to true too.</p>
+	 * always {@link Speech2#PRIORITY_USER_ACTION}.</p>
 	 *
 	 * @param speak same as in {@link UtilsSpeech2BC#speak(String, int, Integer)}
+	 * @param bypass_no_sound same as in {@link UtilsSpeech2BC#speak(String, int, Integer)}
 	 * @param after_speaking_code same as in {@link UtilsSpeech2BC#speak(String, int, Integer)}
 	 */
-	static void speak(@NonNull final String speak, @Nullable final Integer after_speaking_code) {
-		UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, after_speaking_code);
-		CmdsExecutor.something_said = true;
+	static void speak(@NonNull final String speak, final boolean bypass_no_sound,
+					  @Nullable final Integer after_speaking_code) {
+		UtilsSpeech2BC.speakExecutor(speak, Speech2.PRIORITY_USER_ACTION, bypass_no_sound, after_speaking_code);
 	}
 }

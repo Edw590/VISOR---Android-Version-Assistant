@@ -286,9 +286,10 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 		// From API 26 and above, TYPE_SYSTEM_ERROR (and others) can only be used if the app is a system app.
 		final int window_type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (Settings.canDrawOverlays(UtilsGeneral.getContext())) {
+			final Context context = UtilsGeneral.getContext();
+			if (Settings.canDrawOverlays(context)) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					if (UtilsSysApp.mainFunction(UtilsSysApp.IS_SYSTEM_APP)) {
+					if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_SYSTEM_APP)) {
 						layoutParams.type = window_type;
 						system_overlay = true;
 					}

@@ -19,24 +19,8 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.BroadcastRecvs;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-import androidx.annotation.Nullable;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-
 /**
- * <p>The {@link BroadcastReceiver} to be used ONLY to start the app at the device boot.</p>
- * <p>Explanation of the why on a comment on the manifest.</p>
+ * <p>Utilities related to changing parameters of the Android system.</p>
+ * <p>An example could be toggle the Wi-Fi or the Battery Saver mode, or reboot the system.</p>
  */
-public class BootBroadcastRecv extends BroadcastReceiver {
-
-	@Override
-	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-		UtilsServices.startMainService();
-	}
-}
+package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;

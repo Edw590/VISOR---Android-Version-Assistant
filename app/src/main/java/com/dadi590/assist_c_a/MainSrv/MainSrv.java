@@ -21,16 +21,19 @@
 
 package com.dadi590.assist_c_a.MainSrv;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.BroadcastRecvs.MainRegBroadcastRecv;
+import com.dadi590.assist_c_a.ActivitiesFragments.ActMain;
+import com.dadi590.assist_c_a.BroadcastRecvs.MainRegRecv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
@@ -62,6 +65,15 @@ public class MainSrv extends Service {
 
 		// Do this only once, when the service is created and while it's not destroyed
 
+		final Intent intent = new Intent(this, ActMain.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		int flag_immutable = 0;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			flag_immutable = PendingIntent.FLAG_IMMUTABLE;
+		}
+		final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, flag_immutable |
+				PendingIntent.FLAG_CANCEL_CURRENT);
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
 				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND,
 				"Main notification",
@@ -69,7 +81,7 @@ public class MainSrv extends Service {
 				UtilsServices.TYPE_FOREGROUND,
 				GL_CONSTS.ASSISTANT_NAME + " Systems running",
 				"",
-				null
+				pendingIntent
 		);
 		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
 
@@ -97,17 +109,15 @@ public class MainSrv extends Service {
 			final Object[][] modules_list = ModulesList.getModulesList();
 			if (ModulesList.MODULE_TYPE_SERVICE != (int) modules_list[index_modules_manager][1] &&
 					ModulesList.MODULE_TYPE_INSTANCE != (int) modules_list[index_modules_manager][1]) {
-				final String speak = "WARNING - IT'S NOT POSSIBLE TO CHECK AND RESTART THE MODULES MANAGER IN CASE IT" +
-						"STOPS WORKING!!!";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_CRITICAL, null);
-
-				return;
+				// Can't happen --> throw error immediately so it can be fixed right after starting the app with a wrong
+				// value.
+				throw new Error("IT'S NOT POSSIBLE TO CHECK AND RESTART THE MODULES MANAGER IN CASE IT STOPS WORKING!!!");
 			}
 
 			// Keep checking if the Modules Manager is working and in case it's not, restart it.
 			while (true) {
 				if (UtilsModulesManager.checkRestartModule(index_modules_manager)) {
-					final String speak = "WARNING - Modules Manager!";
+					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
 					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 
@@ -138,25 +148,28 @@ public class MainSrv extends Service {
 			if (intent.getAction().equals(CONSTS_BC.ACTION_READY)) {
 				// Start the main broadcast receivers before everything else, so stuff can start sending broadcasts
 				// right away after being ready.
-				MainRegBroadcastRecv.registerReceivers();
+				MainRegRecv.registerReceivers();
 
 				//UtilsGeneral.checkWarnRootAccess(false); Not supposed to be needed root access. Only system permissions.
 
 				switch (UtilsApp.appInstallationType()) {
 					case (UtilsApp.PRIVILEGED_WITHOUT_UPDATES): {
-						final String speak = "WARNING - Installed as privileged application but without updates. Only " +
-								"emergency code commands will be available.";
-						// todo Is it so? Even on Marshmallow and above with extractNativeLibs=false...? Test that.
-						//  Remember the user who said you could "potentially" emulate loading from the APK itself? Try
-						//  that below Marshmallow... Maybe read the APK? Or extract it to memory and load from memory?
-						//  (always from memory, preferably)
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+							final String speak = "WARNING - Installed as privileged application but without updates. " +
+									"Only emergency code commands will be available below Android Marshmallow.";
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						}
+						//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
+						//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
+						//   memory? (always from memory, preferably)
+
 						break;
 					}
 					case (UtilsApp.NON_PRIVILEGED): {
-						final String speak = "WARNING - Installed as non-privileged application! System features may " +
-								"not be available.";
+						final String speak = "WARNING - Installed as non-privileged application! Privileged app " +
+								"features may not be available.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+
 						break;
 					}
 				}
@@ -188,19 +201,13 @@ public class MainSrv extends Service {
 					}
 				}*/
 
-				//Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
-
-				//pressao_longa_botoes.ativar_detecao(Build.VERSION.SDK_INT);
-
 				// Start the Modules Manager.
 				ModulesList.startModule(ModulesList.getModuleIndex(ModulesManager.class));
 				infinity_thread.start();
 
-
 				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in a loop or
 				//  whatever. Or with some event that the app could broadcast when it detects granted or denied permissions (this
 				//  could be useful...).
-
 				// Enable the power button long press detection.
 				switch (UtilsMainSrv.startLongPwrBtnDetection()) {
 					case UtilsMainSrv.UNSUPPORTED_OS_VERSION: {

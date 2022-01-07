@@ -27,7 +27,7 @@ final JavaVersion APP_JAVA_VERSION = JavaVersion.VERSION_1_8
 if (JavaVersion.current() != APP_JAVA_VERSION) {
 	// Remove this when Gradle on Android has the --release parameter available... It doesn't on 2021-09-01.
 	throw new GradleException("ERROR: This project requires JDK " + APP_JAVA_VERSION + ", but it's being compiled " +
-			"with JDK " + JavaVersion.current() + ". Please use the AdoptOpenJDK (OpenJ9) 1.8.0_282.")
+			"with JDK " + JavaVersion.current() + ". Please use the Oracle JDK 1.8.0_202.")
 	// Do NOT attempt to compile with a different JDK version than the set above until this happens and the release
 	// parameter is set on this file. More about the why: https://stackoverflow.com/questions/43102787
 }

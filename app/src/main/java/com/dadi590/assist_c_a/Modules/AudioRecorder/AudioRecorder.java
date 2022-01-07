@@ -91,7 +91,7 @@ public class AudioRecorder implements IModule {
 	 *                    false (this parameter will be ignored if it's to stop recording).
 	 */
 	final void recordAudio(final boolean start, final int audio_source) {
-		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio);
+		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio_internally);
 		if (null == is_recording) {
 			is_recording = false;
 		}
@@ -214,7 +214,7 @@ public class AudioRecorder implements IModule {
 		}
 
 		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.is_recording_audio, Boolean.toString(true));
+		ValuesStorage.updateValue(CONSTS.is_recording_audio_internally, Boolean.toString(true));
 
 		return NO_ERRORS;
 	}
@@ -233,7 +233,7 @@ public class AudioRecorder implements IModule {
 		}
 
 		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.is_recording_audio, Boolean.toString(false));
+		ValuesStorage.updateValue(CONSTS.is_recording_audio_internally, Boolean.toString(false));
 	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -246,6 +246,10 @@ public class AudioRecorder implements IModule {
 			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
 
 			switch (intent.getAction()) {
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+
 				case CONSTS_BC.ACTION_RECORD_AUDIO: {
 					final boolean start = intent.getBooleanExtra(
 							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, false);
@@ -271,6 +275,10 @@ public class AudioRecorder implements IModule {
 					break;
 				}
 			}
+
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 		}
 	};
 }

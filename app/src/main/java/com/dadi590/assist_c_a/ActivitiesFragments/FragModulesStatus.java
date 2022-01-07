@@ -50,8 +50,8 @@ public class FragModulesStatus extends Fragment {
 	String color_accent;
 	String color_primary;
 
-	final Object[][] modules_list = ModulesList.getModulesList();
-	final int modules_list_length = modules_list.length;
+	static final Object[][] modules_list = ModulesList.getModulesList();
+	static final int modules_list_length = modules_list.length;
 
 	@Nullable
 	@Override
@@ -90,6 +90,7 @@ public class FragModulesStatus extends Fragment {
 			switchCompat.setTypeface(null, Typeface.BOLD);
 			switchCompat.setTextSize(20.0F);
 			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
+			switchCompat.setTextIsSelectable(true);
 
 			switchCompat.setText((CharSequence) module[2]); // Name the switch the module name.
 			final boolean module_running = ModulesList.isModuleRunningByIndex(i);

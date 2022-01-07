@@ -56,6 +56,7 @@ public final class UtilsSysApp {
 	///////////////////////////////////
 	// Removed flags with doc copied from source
 	/**
+	 * <p>From AOSP source:</p>
 	 * <p>"Value for {@link ApplicationInfo#flags}: set to {@code true} if the application
 	 * is permitted to hold privileged permissions."</p>
 	 * <br>
@@ -75,31 +76,39 @@ public final class UtilsSysApp {
 	public static final int IS_ORDINARY_SYSTEM_APP = 1 << 3;
 	public static final int IS_PRIVILEGED_SYSTEM_APP = 1 << 4;
 	/**
-	 * <p>Checks if an app is of one of the given types.</p>
+	 * <p>Checks if an app is of one or more of the given types.</p>
+	 * <p>For clarification about any of the terms below, check the class doc.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #IS_PLATFORM_SIGNED_APP} --> for {@code type_check}: check if the app is signed with the
+	 * <p>- {@link #IS_PLATFORM_SIGNED_APP} --> for {@code types_to_check}: check if the app is signed with the
 	 * platform/system key</p>
-	 * <p>- {@link #IS_SYSTEM_APP} --> for {@code type_check}: check if the app is installed on the system
+	 * <p>- {@link #IS_SYSTEM_APP} --> for {@code types_to_check}: check if the app is installed on the system
 	 * partitions</p>
-	 * <p>- {@link #IS_UPDATED_SYSTEM_APP} --> for {@code type_check}: check if the app, installed on the system
+	 * <p>- {@link #IS_UPDATED_SYSTEM_APP} --> for {@code types_to_check}: check if the app, installed on the system
 	 * partitions, was updated</p>
-	 * <p>- {@link #IS_ORDINARY_SYSTEM_APP} --> for {@code type_check}: check if the app is an ordinary system app</p>
-	 * <p>- {@link #IS_PRIVILEGED_SYSTEM_APP} --> for {@code type_check}: check if the app is a privileged system
+	 * <p>- {@link #IS_ORDINARY_SYSTEM_APP} --> for {@code types_to_check}: check if the app is an ordinary system app</p>
+	 * <p>- {@link #IS_PRIVILEGED_SYSTEM_APP} --> for {@code types_to_check}: check if the app is a privileged system
 	 * app</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
+	 *
+	 * @param package_name the package to check, or null to check this app (same as manually inserting
+	 *                     {@link Context#getPackageName()}
 	 * @param types_to_check a bitwise OR operation of the types needed to check (the constants)
 	 *
 	 * @return true if all the given types are true for the given app or if no types are provided, false otherwise
 	 */
-	public static boolean mainFunction(final int types_to_check) {
-		final String package_name = UtilsGeneral.getContext().getPackageName();
-
+	public static boolean mainFunction(@Nullable final String package_name, final int types_to_check) {
+		final Context context = UtilsGeneral.getContext();
+		final String package_name_to_use;
+		if (null == package_name) {
+			package_name_to_use = context.getPackageName();
+		} else {
+			package_name_to_use = package_name;
+		}
 		final ApplicationInfo applicationInfo;
 		try {
-			final Context context = UtilsGeneral.getContext();
-			applicationInfo = context.getPackageManager().getApplicationInfo(package_name, 0);
+			applicationInfo = context.getPackageManager().getApplicationInfo(package_name_to_use, 0);
 		} catch (final PackageManager.NameNotFoundException ignored) {
 			return false;
 		}
@@ -233,58 +242,58 @@ public final class UtilsSysApp {
 		return hasSystemSignaturePermissions(applicationInfo);
 	}
 
-/**
- * <p>Gets a list of folders a system app might be installed in, depending on the device's Android version.</p>
- * <p>Note that an updated system app will report as being installed in /data/app. For these locations to be
- * checked, the app must not have been updated. If it has, it's not possible to tell using the directory, I think.</p>
- *
- * @param privileged_app true if it's to return a list for privileged apps, false if it's for ordinary system apps,
- *                       null if it's to return a list for both types
- *
- * @return a list of folders its APK might be in
- */
-@NonNull
-private static String[] getAppPossibleFolders(@Nullable final Boolean privileged_app) {
-	final Collection<String> ret_folders = new ArrayList<>(5);
+	/**
+	 * <p>Gets a list of folders a system app might be installed in, depending on the device's Android version.</p>
+	 * <p>Note that an updated system app will report as being installed in /data/app. For these locations to be
+	 * checked, the app must not have been updated. If it has, it's not possible to tell using the directory, I think.</p>
+	 *
+	 * @param privileged_app true if it's to return a list for privileged apps, false if it's for ordinary system apps,
+	 *                       null if it's to return a list for both types
+	 *
+	 * @return a list of folders its APK might be in
+	 */
+	@NonNull
+	private static String[] getAppPossibleFolders(@Nullable final Boolean privileged_app) {
+		final Collection<String> ret_folders = new ArrayList<>(5);
 
-	final String PRIV_APP_FOLDER = "/system/priv-app";
-	final String ORD_APP_SYSTEM_FOLDER = "/system/app";
-	final String ORD_APP_VENDOR_FOLDER = "/vendor/app";
-	final String ORD_APP_PRODUCT_FOLDER = "/product/app";
+		final String PRIV_APP_FOLDER = "/system/priv-app";
+		final String ORD_APP_SYSTEM_FOLDER = "/system/app";
+		final String ORD_APP_VENDOR_FOLDER = "/vendor/app";
+		final String ORD_APP_PRODUCT_FOLDER = "/product/app";
 
-	if (privileged_app == null) {
-		ret_folders.add(PRIV_APP_FOLDER);
-		ret_folders.add(ORD_APP_SYSTEM_FOLDER);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-			ret_folders.add(ORD_APP_VENDOR_FOLDER);
-			ret_folders.add(ORD_APP_PRODUCT_FOLDER);
-		}
-	} else if (privileged_app) {
-		ret_folders.add(PRIV_APP_FOLDER);
-	} else {
-		ret_folders.add(ORD_APP_SYSTEM_FOLDER);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-			ret_folders.add(ORD_APP_VENDOR_FOLDER);
-			ret_folders.add(ORD_APP_PRODUCT_FOLDER);
-		}
-	}
-
-	// Leave it in 0 size allocation. Or null values will appear, and I don't want to need to be careful about it.
-	return ret_folders.toArray(new String[0]);
-
-	/*
-	Use with:
-
-	// If it's an updated system app, its APK will be said to be in /data/app, and the one on the system partitions
-	// will become unused. But if it's not updated, it's all fine and the APK path can be used to check if it's
-	// a privileged app or not.
-	if (!isUpdatedSystemApp(applicationInfo)) {
-		for (final String folder : getAppPossibleFolders(false)) {
-			if (applicationInfo.sourceDir.startsWith(folder)) {
-				return true;
+		if (privileged_app == null) {
+			ret_folders.add(PRIV_APP_FOLDER);
+			ret_folders.add(ORD_APP_SYSTEM_FOLDER);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+				ret_folders.add(ORD_APP_VENDOR_FOLDER);
+				ret_folders.add(ORD_APP_PRODUCT_FOLDER);
+			}
+		} else if (privileged_app) {
+			ret_folders.add(PRIV_APP_FOLDER);
+		} else {
+			ret_folders.add(ORD_APP_SYSTEM_FOLDER);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+				ret_folders.add(ORD_APP_VENDOR_FOLDER);
+				ret_folders.add(ORD_APP_PRODUCT_FOLDER);
 			}
 		}
+
+		// Leave it in 0 size allocation. Or null values will appear, and I don't want to need to be careful about it.
+		return ret_folders.toArray(new String[0]);
+
+		/*
+		Use with:
+
+		// If it's an updated system app, its APK will be said to be in /data/app, and the one on the system partitions
+		// will become unused. But if it's not updated, it's all fine and the APK path can be used to check if it's
+		// a privileged app or not.
+		if (!isUpdatedSystemApp(applicationInfo)) {
+			for (final String folder : getAppPossibleFolders(false)) {
+				if (applicationInfo.sourceDir.startsWith(folder)) {
+					return true;
+				}
+			}
+		}
+		*/
 	}
-	*/
-}
 }

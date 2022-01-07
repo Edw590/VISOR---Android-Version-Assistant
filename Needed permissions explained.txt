@@ -30,6 +30,12 @@ android.permission.CHANGE_WIFI_STATE
 android.permission.ACCESS_WIFI_STATE
 - To be able to get the Wi-Fi state
 
+android.permission.ACCESS_NETWORK_STATE
+- To be able to know the state of the Mobile Data connection
+
+android.permission.CHANGE_NETWORK_STATE
+- To be able to change the state of the Mobile Data connection
+
 ------------Dangerous permissions------------
 
 android.permission.RECEIVE_SMS
@@ -61,6 +67,9 @@ android.permission.SYSTEM_ALERT_WINDOW
 - To be able to draw a window above everything to block status and virtual buttons bar access with the Protected Lock
 Screen
 
+android.permission.WRITE_SETTINGS
+- To be able to change device settings, like the Airplane Mode below Android 4.2
+
 ------------Privileged apps' permissions------------
 
 android.permission.CAPTURE_AUDIO_OUTPUT
@@ -74,6 +83,24 @@ android.permission.READ_PRECISE_PHONE_STATE
 
 android.permission.LOCK_DEVICE
 - To be able to lock the device even without the app being a Device Administrator (only from Android 11 onwards)
+
+android.permission.WRITE_SECURE_SETTINGS
+- To be able to write secure settings, like Battery Saver Mode enabled or disabled
+
+android.permission.MODIFY_PHONE_STATE
+- To be able to change the Mobile Data connection state
+
+android.permission.POWER_SAVER
+- To be able to toggle the Battery Saver mode
+
+android.permission.SHUTDOWN
+- To be able to shut down the device
+
+android.permission.REBOOT
+- To be able to reboot the device
+
+android.permission.CONNECTIVITY_INTERNAL
+- To be able to toggle the Airplane Mode below Android 10
 
 ------------Verifier permissions------------
 
@@ -91,6 +118,13 @@ android.permission.INTERACT_ACROSS_USERS_FULL
 @Deprecated - if I declare the permissions, if any app uninstalls this app, installs some app that declares these
 permissions, and then the user attempts to install this app on Lollipop and above, they won't be able to, since they'll
 get a duplicate permissions error. So no custom permissions. Safer, I guess.
+Anyways,, there are security issues about them, so I had BIND_DEVICE_ADMIN as an <application> tag permission for only
+the system to be able to start the app. Too much hassle. For more about that, please read
+https://stackoverflow.com/questions/18573139 and
+https://commonsware.com/blog/2014/02/12/vulnerabilities-custom-permissions.html. I've since then just removed those
+permissions and put more care into the flags of each component, and if they're exported or not, and which exactly are
+exported. For internal app communication (or external), broadcasts to specific packages - for internal communications,
+the package is the app's package, so it's 100% safe.
 
 These permissions, whatever they do, are just for precautions. They'll be used to be more sure of something, but the
 app will NOT rely on them. Some other method will be made to do whatever they were supposed to do if there weren't

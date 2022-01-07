@@ -47,7 +47,7 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a prefix for the speech utterance ID based on the speech priority.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, boolean, Integer)}
 	 *
 	 * @return the prefix to add to the beginning of the utterance ID
 	 */
@@ -60,7 +60,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @param utteranceId the utterance ID of the speech to be analyzed
 	 *
-	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, Integer)}.
+	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, boolean, Integer)}.
 	 * In case an empty string is given, the lowest priority will be returned.
 	 */
 	static int getSpeechPriority(final String utteranceId) {
@@ -76,7 +76,7 @@ final class UtilsSpeech2 {
 	/**
 	 * <p>Generates a random utterance ID with the prefix for the given priority.</p>
 	 *
-	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, Integer)}
+	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, boolean, Integer)}
 	 *
 	 * @return the generated utterance ID
 	 */
@@ -200,7 +200,7 @@ final class UtilsSpeech2 {
 	 * <p>This method will return the ID of the <em>first</em> occurrence only in case there are multiple speeches with
 	 * the same string.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, boolean, Integer)}
 	 * @param speech the speech string to search the array for
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
 	 *
@@ -235,7 +235,7 @@ final class UtilsSpeech2 {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param speech the speech string to search the arrays for
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, Integer)} or the constant. If it's the
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, boolean, Integer)} or the constant. If it's the
 	 *                           constant, then the parameter {@code low_to_high} will be completely ignored
 	 * @param low_to_high true to search from lower priority arrays to higher ones, false to do the opposite
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance

@@ -1,6 +1,4 @@
 
-s
-Capp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/GL_CONSTS.java,d\3\d3e51b5682216dd12a4027ecac512e060b2f3739
 7
 LICENSE,0\3\0398ccd0f49298b10a3d76a47800d2ebecd49859
 ~
@@ -15,36 +13,20 @@ Oapp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsLocationAbsolute.java
 Napp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsCryptoEnDecrypt.java,9\3\9338967d357a7ef6cb21d5bbcb318316d19672a6
 X
 (gradle/wrapper/gradle-wrapper.properties,f\b\fbe448ebfc3eb2d4e308f6b8b043666f5b57235e
-à
-Xapp/src/main/java/com/dadi590/assist_c_a/BroadcastRecvs/DeviceAdmin/DeviceAdminRecv.java,f\4\f46ba38e88795a88e13362fb85cc3849a6be3f94
 9
 	COPYRIGHT,e\3\e352fc138c5e488dc34254c3ee2e99e3e9aaf288
 Ö
 Uapp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/FragEventsScheduler.java,b\9\b9c59a821d21d03ace030294eebcb0cc1d058cd0
-P
- Needed permissions explained.txt,9\6\96650eb3dba123333b7e2eb82b2354af25f5503a
 :
 
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
-s
-Capp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsRoot.java,a\9\a9de77cd298e5938c73087c68026e241a86e5808
-s
-Capp/src/main/java/com/dadi590/assist_c_a/Modules/Speech/Speech.java,7\1\71e6fa50c1dbdb57634be5bafcfd26597c5e06a2
-
-Oapp/src/main/java/com/dadi590/assist_c_a/BroadcastRecvs/DeviceAdmin/CONSTS.java,f\a\fa8a1a7a864c978d5773618f9aeccd331145c18c
 6
 NOTICE,f\e\fe71871083ca490e6bc0da33fb48ce231f820a94
 z
 Japp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/FragMain.java,c\3\c394c813b0477cace24f1e636f6a7cfa70d612a8
-~
-Napp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsAndroidSettings.java,9\c\9cdf9f7bdf532f7c736c7d6e7e9d8bc4319e018c
 x
 Happ/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsProcesses.java,6\9\691c0d5549908d82ff6ebd13c2d58a0933b53825
-y
-Iapp/src/main/java/com/dadi590/assist_c_a/Modules/Speech/TtsParamsObj.java,d\6\d6af6d5723f8b9d4f80e308a43aa4319f24433ba
-r
-Bapp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsApp.java,9\f\9fc60631e0f75da8d7d31f26b7086fa99e675753
-Å
-Qapp/src/main/java/com/dadi590/assist_c_a/BroadcastRecvs/MainRegBroadcastRecv.java,0\9\0945b00cbaae9c1111241c415ca0cdd6649b5c92
 Å
 Qapp/src/main/java/com/dadi590/assist_c_a/Modules/DeviceLocator/DeviceLocator.java,0\1\01884a3487a009d0c51907ca209d82e13958c4ec
+y
+Iapp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/ActMain.java,8\8\8839ccbe67ec562fb84702ff61d1af99e25518da

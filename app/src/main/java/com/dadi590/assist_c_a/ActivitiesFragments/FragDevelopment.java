@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.ActivitiesFragments;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,15 +43,16 @@ import androidx.fragment.app.Fragment;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.R;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
-import com.dadi590.assist_c_a.R;
 
 import java.util.Locale;
 
@@ -92,6 +94,8 @@ public class FragDevelopment extends Fragment {
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
 
+				final Context context = UtilsGeneral.getContext();
+
 				//UtilsLocationRelative.startIndRelDistance();
 
 				final Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
@@ -99,7 +103,7 @@ public class FragDevelopment extends Fragment {
 
 				System.out.println("HHHHHHHHHHHHHHHHHH");
 				System.out.println(ValuesStorage.getValue(CONSTS.last_phone_call_time));
-				UtilsCmdsExecutorBC.processTask("turn on wifi", false, false);
+				//UtilsCmdsExecutorBC.processTask("turn on wifi", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
 				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
@@ -145,6 +149,22 @@ public class FragDevelopment extends Fragment {
 
 				//MainActTests.for_tests();
 
+				System.out.println("------------------------");
+				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_SYSTEM_APP));
+				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_UPDATED_SYSTEM_APP));
+				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_ORDINARY_SYSTEM_APP));
+				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP));
+				System.out.println("-----");
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.PACKAGE_VERIFICATION_AGENT));
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS));
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL));
+				System.out.println(UtilsPermissions.checkSelfPermission("android.permission.USER_INSTALLER_V2"));
+				System.out.println("-----");
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT));
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL));
+				System.out.println("------------------------");
+
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
@@ -153,6 +173,7 @@ public class FragDevelopment extends Fragment {
 		requireView().findViewById(R.id.btn_perms).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
+				final Context context = UtilsGeneral.getContext();
 				int missing_authorizations = 0;
 
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -165,8 +186,8 @@ public class FragDevelopment extends Fragment {
 
 					// Check if the notification policy access has been granted for the app and if not, open the settings
 					// screen for the user to grant it.
-					final NotificationManager mNotificationManager = (NotificationManager)
-							UtilsGeneral.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+					final NotificationManager mNotificationManager = (NotificationManager) context.
+							getSystemService(Context.NOTIFICATION_SERVICE);
 					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
@@ -174,22 +195,30 @@ public class FragDevelopment extends Fragment {
 					}
 
 					// Check if the app can draw system overlays and open the settings screen if not
-					if (!Settings.canDrawOverlays(UtilsGeneral.getContext())) {
+					if (!Settings.canDrawOverlays(context)) {
 						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-								Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
+								Uri.parse("package:" + context.getPackageName()));
 						startActivity(intent);
 					}
 
 					// Check if the app can bypass battery optimizations and request it if not
-					final PowerManager powerManager = (PowerManager) UtilsGeneral.getContext()
-							.getSystemService(Context.POWER_SERVICE);
-					if (!powerManager.isIgnoringBatteryOptimizations(UtilsGeneral.getContext().getPackageName())) {
+					final PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+					if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
 						++missing_authorizations;
 						final Intent intent = new Intent();
 						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-						intent.setData(Uri.parse("package:" + UtilsGeneral.getContext().getPackageName()));
-						UtilsGeneral.getContext().startActivity(intent);
+						intent.setData(Uri.parse("package:" + context.getPackageName()));
+						context.startActivity(intent);
+					}
+
+					// Check if the app has the WRITE_SETTINGS permission (in AppOp mode) and request it if not
+					if (!Settings.System.canWrite(context)) {
+						++missing_authorizations;
+						final Intent intent = new Intent();
+						intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+						intent.setData(Uri.parse("package:" + context.getPackageName()));
+						context.startActivity(intent);
 					}
 				}
 

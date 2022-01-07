@@ -171,13 +171,13 @@ Get the app connecting to ANY open Wi-Fi networks while the Anti-Theft is enable
 next network (there are the networks which require signing in, so next to one that doesn't).
 
 
-## App as an Installer and/or Verifier
+## App as an Installer and/or Verifier, and Setup
 
 Take a look at PACKAGE_VERIFICATION_AGENT ;-) --> seems to transform the app in a Verifier app... Grant runtime
 permissions...?
 Also take a look at BIND_PACKAGE_VERIFIER.
-GRANT_RUNTIME_PERMISSIONS has "verifier" protection level since only Marshmallow MR1. The first release doesn't have
-verifier in the protection level. So try to get the app as an "installer" instead.
+GRANT_RUNTIME_PERMISSIONS has "verifier" protection level since only Marshmallow MR1. The first Marshmallow release
+doesn't have verifier in the protection level, so try to get the app as an "installer" instead.
 
 There's another one interesting too: USE_INSTALLER_V2.
 
@@ -185,6 +185,11 @@ Actually... Just root the BV9500 and test if by just installing the app as a sys
 try to add the PACKAGE_VERIFICAR_AGENT permission. If it's not a Verifier still, try to put the BIND_PACKAGE_VERIFIER
 where the INCOMING_EXT_COMMS is. If still not, try to add USE_INSTALLER_V2 to see if it does anything (probably not,
 since it's only granted to Signature or Verifier apps).
+
+Also, try to put the app being of the type Setup, which is needed for NETWORK_SETUP_WIZARD, needed to call
+setAirplaneModeEnabled on ConnectivityManager as of API 29.
+
+The StackOverflow question about this (which is updated from time to time): https://stackoverflow.com/questions/68278536
 
 
 ## Log the entire app
@@ -335,3 +340,9 @@ not responding.
 
 Store the meaning of "it" and "and" with Java between the Platforms Unifier calls. This way I can say "turn the wifi on"
 and seconds later "and turn it off" - or "and the bluetooth too".
+
+
+## API 15
+
+The Speech2 is not working very well. It says stuff twice, like the warning of the app not being a device administration
+and it said Ready sir again after clicking to grant permissions. Fix that.

@@ -31,19 +31,19 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
  * <p>The {@link BroadcastReceiver} to be used to start the Main Service with ANY broadcast detection (except boot
- * broadcasts) --> do NOT use to decide what to do with the broadcasts!!! For that, use the
- * {@link MainRegBroadcastRecv}.</p>
+ * broadcasts) --> do NOT use to decide what to do with the broadcasts!!! For that, use the {@link MainRegRecv}.</p>
  */
-public class MainBroadcastRecv extends BroadcastReceiver {
+public class WakeRecv extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 		UtilsServices.startMainService();
 
-		/*
-		UtilsIntentWhatToDo.intentWhatToDo(intent);
-		Do NOT enable this!!! I'm ignoring safety measures (see the Manifest where I'm ignoring possible spoofing of SMS)
-		with this received since ANY action received is supposed to get the app to start the main service and NOTHING ELSE.
-		*/
+		System.out.println("PPPPPPPPPPPPPPPPPP-WakeRcv - " + (null != intent ? intent.getAction() : null));
+
+		// Do NOT enable this!!! I'm ignoring safety measures (see the Manifest where I'm ignoring possible spoofing of
+		// SMS) with this receiver since ANY intent (null or not) received is supposed to get the app to start the main
+		// service and NOTHING ELSE.
+		//UtilsIntentWhatToDo.intentWhatToDo(intent);
 	}
 }

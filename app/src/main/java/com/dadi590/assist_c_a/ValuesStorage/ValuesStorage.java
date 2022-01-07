@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
- * <p>The class where all public values are stored statically.</p>
+ * <p>The class where all global values are stored statically.</p>
  * <p>A null value means the value was not updated since the app startup.</p>
  */
 public final class ValuesStorage {
@@ -36,12 +36,12 @@ public final class ValuesStorage {
 	public static final String TYPE_DOUBLE = "TYPE_DOUBLE";
 	public static final String TYPE_LONG = "TYPE_LONG";
 	public static final String TYPE_STRING = "TYPE_STRING";
-	private static final String[][] values_arrays = {
+	private static final String[][] values_list = {
 			// Note: the "Updating" means the value is currently being updated in some class, as opposite to no class at
 			// all being updating the value (and is therefore waiting to be used).
-			// Battery
-			{CONSTS.battery_percentage, "Battery - Battery Percentage", TYPE_INTEGER, null}, // Updating
-			{CONSTS.power_connected, "Battery - Power Connected", TYPE_BOOLEAN, null}, // Updating
+			// Power
+			{CONSTS.battery_percentage, "Power - Battery Percentage", TYPE_INTEGER, null}, // Updating
+			{CONSTS.power_connected, "Power - Power Connected", TYPE_BOOLEAN, null}, // Updating
 			// Telephony - Phone calls
 			{CONSTS.last_phone_call_time, "Telephony - Time of last call (milliseconds)", TYPE_LONG, null}, // Updating
 			{CONSTS.curr_phone_call_number, "Telephony - Number of current call", TYPE_STRING, null}, // Updating
@@ -56,7 +56,7 @@ public final class ValuesStorage {
 			{CONSTS.loc_temp_for_the_day_f, "Location temperature for the day (F)", TYPE_DOUBLE, null},
 			{CONSTS.loc_weather_for_the_day, "Location weather for the day", TYPE_STRING, null},
 			// AudioRecorder
-			{CONSTS.is_recording_audio, "Recording audio", TYPE_BOOLEAN, null}, // Updating
+			{CONSTS.is_recording_audio_internally, "Recording audio internally", TYPE_BOOLEAN, "false"}, // Updating
 			// Flashlight
 			{CONSTS.main_flashlight_enabled, "Main flashlight enabled (Android 6 and up only)", TYPE_BOOLEAN, null}, // Updating
 	};
@@ -75,9 +75,9 @@ public final class ValuesStorage {
 	 * @param new_value the new value
 	 */
 	public static void updateValue(@NonNull final String key, @NonNull final String new_value) {
-		for (int i = 0, length = values_arrays.length; i < length; ++i) {
-			if (values_arrays[i][0].equals(key)) {
-				values_arrays[i][3] = new_value;
+		for (int i = 0, length = values_list.length; i < length; ++i) {
+			if (values_list[i][0].equals(key)) {
+				values_list[i][3] = new_value;
 			}
 		}
 	}
@@ -85,7 +85,7 @@ public final class ValuesStorage {
 	/**
 	 * <p>Returns the value stored for the given key, in the correct type (check the type on the list of values).</p>
 	 * <p>If the value (always stored as a {@link String}) stored for the given key came from a {@code boolean}, this
-	 * function will return the value as a {@code boolean}, as it was original.</p>
+	 * function will return the value as a {@code boolean}, as it was originally, so just cast it and all is good.</p>
 	 *
 	 * @param key the key associated with the wanted value
 	 *
@@ -93,7 +93,7 @@ public final class ValuesStorage {
 	 */
 	@Nullable
 	public static Object getValue(@NonNull final String key) {
-		for (final String[] value_array : values_arrays) {
+		for (final String[] value_array : values_list) {
 			if (value_array[0].equals(key)) {
 				final String value = value_array[3];
 				if (null == value) {
@@ -123,15 +123,13 @@ public final class ValuesStorage {
 		return "Never happening - just don't be stupid and put everything right.";
 	}
 
-	/* *
-	 * <p>Get a clone of {@link #values_arrays}.</p>
+	/**
+	 * <p>Get a clone of {@link #values_list}.</p>
 	 *
 	 * @return .
 	 */
-	/*
-	Unused - if you change the format of the array, this way only this class must be updated
 	@NonNull
 	public static String[][] getValuesArrays() {
-		return values_arrays.clone();
-	}*/
+		return values_list.clone();
+	}
 }

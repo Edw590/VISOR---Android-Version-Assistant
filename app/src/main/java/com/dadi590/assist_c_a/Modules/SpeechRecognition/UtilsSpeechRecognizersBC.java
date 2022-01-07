@@ -37,7 +37,7 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to start Google speech recognition.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_START_GOOGLE}.</p>
 	 */
 	public static void startGoogleRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_START_GOOGLE);
@@ -46,7 +46,7 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to start PocketSphinx speech recognition.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_START_POCKET_SPHINX}.</p>
 	 */
 	public static void startPocketSphinxRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_START_POCKET_SPHINX);
@@ -55,8 +55,7 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to stop all speech recognizers until there is a specific request to enable them back by
-	 * their respective functions (calling any of them will restart the speech recognition system).</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_STOP_RECOGNITION}.</p>
 	 */
 	public static void stopRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_STOP_RECOGNITION);

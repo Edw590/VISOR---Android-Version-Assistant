@@ -25,9 +25,15 @@
 	package="com.dadi590.assist_c_a"
 	android:targetSandboxVersion="2"
 	android:installLocation="internalOnly"
+	android:sharedUserLabel="@string/app_name_ACA"
 	coreApp="true">
 	<!-- Regardless of being here or not, if the app is a system app (with or without updates), it will start in Safe
-	Mode. If it's not a system app, it won't. But leave it on true anyways. Could work somewhere. -->
+	 Mode. If it's not a system app, it won't. But leave it on true anyways. Could work somewhere. -->
+	<!-- sharedUserId has been deprecated on API 29, but on older Android versions I don't know if it's required for
+	 anything system-related (="android.uid.system") and then it's hours researching why something is not working. So
+	 I'll leave it here. Though, other methods to get the app working as system app will also be used, like setting
+	 'persistent' to true if needed. EDIT: removed at least on non-release APKs (too much hassle like with
+	 'persistent'). -->
 
 	<!-- Normal permissions -->
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -42,6 +48,8 @@
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
@@ -54,50 +62,132 @@
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+	<uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+	<uses-permission android:name="android.permission.CALL_PHONE" />
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 
 	<!-- AppOps permissions (those that have a specific settings screen for the user to grant them) -->
-	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+	<uses-permission android:name="android.permission.WRITE_SETTINGS" /> <!-- Or Pre-installed, not just AppOps. -->
 
 	<!-- Privileged apps' permissions (only by having the app installed in /system/priv-app, or below KitKat, in
 	/system/app) -->
 	<!-- For some of these permissions to work, hidden/internal APIs must be used to compile the app -->
+	<uses-permission android:name="android.permission.USE_INSTALLER_V2" /> <!-- Grant runtime permissions tests -->
+	<uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" /> <!-- Grant runtime permissions tests -->
 	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
 	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT" />
 	<uses-permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT" />
 	<uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
 	<uses-permission android:name="android.permission.LOCK_DEVICE" />
-	<uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
+	<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+	<uses-permission android:name="android.permission.SHUTDOWN" />
+	<uses-permission android:name="android.permission.REBOOT" />
+	<uses-permission android:name="android.permission.POWER_SAVER" />
 	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+	<uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
 
 	<!-- Verifier permissions -->
-	<uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" />
+	<uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" /> <!-- Grant runtime permissions tests -->
 
 	<!-- Installer permissions -->
-	<uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+	<uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" /> <!-- Grant runtime permissions tests -->
 
 	<!-- SuperSU permission -->
 	<uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
-
-
-	<uses-feature
-		android:name="android.hardware.telephony"
-		android:required="false" />
 
 
 	<!-- todo INSTALL THE APP AS SYSTEM-ONLY, -REMOVE THE ROOT- PERMISSION, AND FIX ALL THE ERRORS!!!!!!!!! -->
 	<!-- todo FORCE THE APP TO GRANT ITS OWN PERMISSIONS EACH SOME TIME WITH ROOT OR WITH SOME SYSTEM METHOD!!!!!!!! -->
 
 
+	<!-- Allow app installation through Google Play Store even if features are not available on the device -->
+	<!-- Keep checking this in https://developer.android.com/guide/topics/manifest/uses-feature-element#permissions!
+	 Last check on 2022-01-06. EDIT: Plan B to prevent future... All available on Android Studio set to false. -->
+	<uses-feature android:name="android.hardware.audio.low_latency" android:required="false" />
+	<uses-feature android:name="android.hardware.audio.output" android:required="false" />
+	<uses-feature android:name="android.hardware.audio.pro" android:required="false" />
+	<uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+	<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.any" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.ar" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.capability.manual_post_processing" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.capability.manual_sensor" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.capability.raw" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.external" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.flash" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.front" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.level.full" android:required="false" />
+	<uses-feature android:name="android.hardware.consumerir" android:required="false" />
+	<uses-feature android:name="android.hardware.ethernet" android:required="false" />
+	<uses-feature android:name="android.hardware.faketouch" android:required="false" />
+	<uses-feature android:name="android.hardware.faketouch.multitouch.distinct" android:required="false" />
+	<uses-feature android:name="android.hardware.faketouch.multitouch.jazzhand" android:required="false" />
+	<uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+	<uses-feature android:name="android.hardware.gamepad" android:required="false" />
+	<uses-feature android:name="android.hardware.location" android:required="false" />
+	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
+	<uses-feature android:name="android.hardware.location.network" android:required="false" />
+	<uses-feature android:name="android.hardware.microphone" android:required="false" />
+	<uses-feature android:name="android.hardware.nfc" android:required="false" />
+	<uses-feature android:name="android.hardware.nfc.hce" android:required="false" />
+	<uses-feature android:name="android.hardware.nfc.hcef" android:required="false" />
+	<uses-feature android:name="android.hardware.opengles.aep" android:required="false" />
+	<uses-feature android:name="android.hardware.ram.low" android:required="false" />
+	<uses-feature android:name="android.hardware.ram.normal" android:required="false" />
+	<uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
+	<uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.ambient_temperature" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.barometer" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.gyroscope" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.heartrate" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.heartrate.ecg" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.hifi_sensors" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.light" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.proximity" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.relative_humidity" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
+	<uses-feature android:name="android.hardware.sensor.stepdetector" android:required="false" />
+	<uses-feature android:name="android.hardware.strongbox_keystore" android:required="false" />
+	<uses-feature android:name="android.hardware.telephony" android:required="false" />
+	<uses-feature android:name="android.hardware.telephony.cdma" android:required="false" />
+	<uses-feature android:name="android.hardware.telephony.euicc" android:required="false" />
+	<uses-feature android:name="android.hardware.telephony.gsm" android:required="false" />
+	<uses-feature android:name="android.hardware.telephony.mbms" android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen.multitouch.distinct" android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen.multitouch.jazzhand" android:required="false" />
+	<uses-feature android:name="android.hardware.type.automotive" android:required="false" />
+	<uses-feature android:name="android.hardware.type.embedded" android:required="false" />
+	<uses-feature android:name="android.hardware.type.pc" android:required="false" />
+	<uses-feature android:name="android.hardware.type.television" android:required="false" />
+	<!--uses-feature android:name="android.hardware.type.watch" android:required="false"->Not supported here /-->
+	<uses-feature android:name="android.hardware.usb.accessory" android:required="false" />
+	<uses-feature android:name="android.hardware.usb.host" android:required="false" />
+	<uses-feature android:name="android.hardware.vr.headtracking" android:required="false" />
+	<uses-feature android:name="android.hardware.vr.high_performance" android:required="false" />
+	<uses-feature android:name="android.hardware.vulkan.compute" android:required="false" />
+	<uses-feature android:name="android.hardware.vulkan.level" android:required="false" />
+	<uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi.aware" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi.passpoint" android:required="false" />
+	<uses-feature android:name="android.hardware.wifi.rtt" android:required="false" />
+
 	<application
 		android:name="com.dadi590.assist_c_a.ApplicationClass"
 
-		android:label="@string/app_name"
-		android:description="@string/app_description"
-		android:icon="@mipmap/main_logo_legacy_and_adaptive"
-		android:roundIcon="@mipmap/main_logo_legacy_and_adaptive"
-		android:logo="@mipmap/main_logo_legacy_only"
+		android:label="@string/app_name_ACA"
+		android:description="@string/app_description_ACA"
+		android:icon="@mipmap/app_logo_legacy_and_adaptive"
+		android:roundIcon="@mipmap/app_logo_legacy_and_adaptive"
+		android:logo="@mipmap/app_logo_legacy_only"
 		android:theme="@style/AppTheme.NoActionBar"
 		android:appCategory="productivity"
 		android:directBootAware="true"
@@ -120,15 +210,9 @@
 		android:requiredForAllUsers="false"
 		android:usesCleartextTraffic="false"
 		android:resizeableActivity="true">
-		<!-- ^^^^ The attributes above and below the blank line are for maximum app security, hopefully -->
+		<!-- ^^^^ The attributes above but below the blank line are for maximum app security, hopefully -->
 		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
 		 without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
-		<!-- BIND_DEVICE_ADMIN is because of security issues below Android Lollipop 5.0 with custom permissions. See
-		 these 2: https://stackoverflow.com/questions/18573139/programmatically-alter-manifest-android-custom-permissions
-		 and https://commonsware.com/blog/2014/02/12/vulnerabilities-custom-permissions.html. So no custom permission
-		 now - it's a system-signature permission, so it comes installed with Android. No problem then. Only the system
-		 can start this app. Nothing else. Could be bad with custom ROMs though. This will be fixed decently some other
-		 time. -->
 
 		<!-- Below, everything I can has exported=false, so nothing outside this app can reach those components.
 		 Do NOT rely on custom permissions to ensure that only the app can call reach components. That may not be
@@ -139,12 +223,8 @@
 		<activity android:name="com.dadi590.assist_c_a.ActivitiesFragments.ActMain"
 			android:exported="true"
 			android:directBootAware="true"
-			android:autoRemoveFromRecents="true"
-			android:permission="">
+			android:autoRemoveFromRecents="true">
 			<!--android:excludeFromRecents="true"-->
-			<!-- The only external order that can supposedly be given to the app is to this activity and nothing else.
-			 That's the reason of permission="", so any app can start this app, but cannot do anything with any of the
-			 other components of the app -->
 			<!-- Don't think about putting noHistory to true, since it will stop the app from being able to request
 			 runtime permissions -->
 			<intent-filter>
@@ -192,6 +272,18 @@
 			android:directBootAware="true"
 			android:process=":PocketSphinx_Speech_Recognition" />
 
+		<!-- This one below is from the "Elenkov, N.: Android Security Internals: An In-Depth Guide to Android's Security
+		Architecture. No Starch Press, 1st edn." book, for tests with granting runtime permissions. -->
+		<receiver android:name=".BroadcastRecvs.PackageVerificationTest"
+			android:permission="android.permission.BIND_PACKAGE_VERIFIER"
+			android:directBootAware="true"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION" />
+				<action android:name="android.intent.action.PACKAGE_VERIFIED" />
+				<data android:mimeType="application/vnd.android.package-archive" />
+			</intent-filter>
+		</receiver>
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:exported="true"
 			android:permission="android.permission.BIND_DEVICE_ADMIN"
@@ -218,7 +310,7 @@
 		If it's to use the same receiver, put a delay of 10 seconds before starting the service (5 too low, 7.5 good on
 		BV9500, so 10 for slower devices) - have in mind that any attempts will result in 10 seconds wait time...
 		-->
-		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.BootBroadcastRecv"
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.BootRecv"
 			android:exported="true"
 			android:directBootAware="true">
 			<intent-filter android:priority="1000">
@@ -239,7 +331,7 @@
 				documentation. It’s sent on some devices and emulators when the device is restarted only." - StackOverflow -->
 			</intent-filter>
 		</receiver>
-		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.MainBroadcastRecv"
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.WakeRecv"
 			android:exported="true"
 			android:directBootAware="false"
 			tools:ignore="UnprotectedSMSBroadcastReceiver">
@@ -247,6 +339,8 @@
 				<!-- DO NOT USE THIS TO ACTUALLY DECIDE WHAT TO DO WITH STUFF!!! USE THE REGISTERED BROADCASTS FOR
 				 THAT!!! I'M IGNORING SAFETY MEASURES HERE BECAUSE THIS IS ONLY USED TO AUTOMATICALLY START THE MAIN
 				 SERVICE!!! -->
+
+				<!-- 1000 priority for the same reason on the receiver above -->
 
 				<!-- All of these are for the system to send ANYthing to start the Main Service in case it crashed or
 				something. See "List of all the Intent-Filters that I found.txt" for the list of these broadcasts. -->

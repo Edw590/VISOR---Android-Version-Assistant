@@ -26,14 +26,17 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.ApplicationClass;
 
@@ -45,7 +48,6 @@ import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Random;
 
-import CommandsDetection_APU.CommandsDetection_APU;
 import GlobalUtils_APU.GlobalUtils_APU;
 
 /**
@@ -62,13 +64,15 @@ public final class UtilsGeneral {
 	/**
 	 * <p>Returns the version of the Assistant Platforms Unifier if it's available.</p>
 	 * <p>Reason why it might not be available: if it's bundled as an external library and the file is not present -
-	 * like happens with Android Lollipop and below in which extract libraries is mandatory. From Marshmallow, it's
-	 * possible to use libraries inside the APK, so this should not happen - but better prevent anyways.</p>
+	 * like happens with Android Lollipop and below in which library files are extracted. From Marshmallow onwards, it's
+	 * possible to use libraries inside the APK, so this should not happen (assume it does not until it does, if it ever
+	 * does).</p>
 	 *
 	 * @return the version of the APU if it's available, null otherwise
 	 */
 	// Ignore the error below saying the method never returns null. It can be null - just remove the library file from
-	// due folder and see it happening... (if the app is run on below Marshmallow, where library files are extracted).
+	// due folder and see it happening... (if the app is ran on below Marshmallow, where library files are extracted).
+	@RequiresApi(api = Build.VERSION_CODES.M)
 	@Nullable
 	public static String platformUnifierVersion() {
 		// "You see, Java's exception hierarchy is a bit unintuitive. You have two classes, Exception and Error, each of
@@ -78,16 +82,17 @@ public final class UtilsGeneral {
 		// unsupported architecture like MIPS), which is part of the Error class, not Exception. But I want to catch ANY
 		// error to know if its or not, so I chose Throwable.
 		// EDIT: never mind. I'll stick to UnsatisfiedLinkError. Must only be changed if anything other than that
-		// happens.
+		// happens, which I'm not expecting.
 		try {
-			// Leave this as it is unless you have a better idea. I need to check if the Commands Detection submodule is
-			// present before returning the version (which also checks if the GlobalUtils are present or not - which
-			// must always be).
-			final String temp = CommandsDetection_APU.NONE;
+			// Leave only a check for the GlobalUtils. That one must always be exported. If it's not, error in the go
+			// with good reasons. All the other modules, if they're not compiled, run-time error immediately. Can't
+			// check each module... Just the main. All the others should be compiled too. If they're not, compilation
+			// error and the module must be recompiled.
 			return GlobalUtils_APU.VERSION;
 		} catch (final UnsatisfiedLinkError ignored) {
-			return null;
 		}
+
+		return null;
 	}
 
 	/**
@@ -152,10 +157,12 @@ public final class UtilsGeneral {
 	 * <p>Returns the Application Context.</p>
 	 * <p>Main note: probably not good idea to use on Content Provider classes. Only on Activities, Services and
 	 * Receivers. Read the doc of {@link ApplicationClass#applicationContext}.</p>
+	 * <br>
 	 * <p>It will use the way that doesn't get a null value from the 2 below, in this order. It's also not supposed to
 	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I'll
-	 * change NonNull to Nullable or something. Until then, assume it's never null. Ways:</p>
-	 * <p>- Calls {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
+	 * change @NonNull to @Nullable or something. Until then, assume it's never null (except on Content Providers, as
+	 * said above, which might be null). Ways:</p>
+	 * <p>- Returns {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
 	 * <p>Warning from {@link AppGlobals#getInitialApplication()}, which calls the last mentioned method above:</p>
 	 * <p>"Return the first Application object made in the process.</p>
 	 * <p>NOTE: Only works on the main thread."</p>
@@ -171,7 +178,7 @@ public final class UtilsGeneral {
 			context = application.getApplicationContext();
 		}
 		if (null == context) {
-			System.out.println("/UJHGRGT%&/UGFFFT%YUYG");
+			System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 			context = ApplicationClass.applicationContext;
 		}
 		return context;
@@ -200,9 +207,10 @@ public final class UtilsGeneral {
 	@Nullable
 	public static ObjectClasses.GetMethodClassObj getMethodClass(@NonNull final String wanted_class) {
 		try {
-			final Method forName = Class.class.getMethod("forName", String.class);
+			final Method forName = Class.class.getDeclaredMethod("forName", String.class);
 			final Class<?> hidden_class = (Class<?>) forName.invoke(null, wanted_class);
-			final Method getMethod = Class.class.getMethod("getMethod", String.class, Class[].class);
+			final Method getMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+
 			return new ObjectClasses.GetMethodClassObj(getMethod, hidden_class);
 		} catch (final NoSuchMethodException ignored) {
 		} catch (final IllegalAccessException ignored) {
@@ -292,6 +300,23 @@ public final class UtilsGeneral {
 		} else {
 			vibrator.vibrate(duration);
 		}
+	}
+
+	/**
+	 * <p>Broadcast a key press (key down and key up).</p>
+	 *
+	 * @param key_code one of the {@link KeyEvent}#KEYCODE_-started constants
+	 * @param permission the permission the receivers must hold to receive this broadcast, or null to don't require this
+	 *                   restriction
+	 */
+	public static void broadcastKeyEvent(final int key_code, @Nullable final String permission) {
+		final Context context = UtilsGeneral.getContext();
+		final Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, key_code));
+		context.sendBroadcast(intent, permission);
+		final Intent intent1 = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent1.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, key_code));
+		context.sendBroadcast(intent1, permission);
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

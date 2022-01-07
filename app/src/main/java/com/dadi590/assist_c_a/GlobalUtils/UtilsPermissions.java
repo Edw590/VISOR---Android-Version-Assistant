@@ -24,6 +24,7 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.server.LocalServices;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
@@ -69,12 +71,12 @@ public final class UtilsPermissions {
 	/**
 	 * <p>This method checks and requests permissions located on {@link PERMS_CONSTS#danger_perms_list}.</p>
 	 * <br>
-	 * <p>That lists must be an arrays of Strings, in which the first index is the permission itself, and the second is
-	 * the minimum SDK version in which the permission exists.</p>
+	 * <p>That lists must be arrays of Strings, in which the first index is the permission itself, and the second is the
+	 * minimum SDK version in which the permission exists.</p>
 	 * <br>
 	 * <p>Go to {@link PERMS_CONSTS} for examples.</p>
 	 *
-	 * @param activity the activity to ask the permissions from or null to force the permissions OR in case it's only to
+	 * @param activity the activity to ask the permissions from, or null to force the permissions OR in case it's only to
 	 *                 check the permissions (and hence, no activity is needed for that)
 	 * @param request true to request/force the permissions (depending on the {@code activity} parameter), false to only
 	 *                check them
@@ -87,7 +89,6 @@ public final class UtilsPermissions {
 
 		final boolean force_permissions = (activity == null && request);
 
-		final Context context = UtilsGeneral.getContext();
 		final int array_length = 50;
 
 		int num_forced_error_perms = 0;
@@ -109,10 +110,13 @@ public final class UtilsPermissions {
 								// This below needs the GRANT_RUNTIME_PERMISSIONS permission, which has
 								// protection level of "signature|installer|verifier"...
 
-								// System class - of no use, since there is one on the SDK (and both need the same
-								// permission, which can't be granted)
+								final Context context = UtilsGeneral.getContext();
+
+								// System class - no idea how to get it working at least on Oreo 8.1, as this below
+								// returns null. Could be better than the public SDK way which doesn't have the override
+								// policy parameter.
 								//final PackageManagerInternal packageManagerInternal = (PackageManagerInternal)
-								//		context.getSystemService(PackageManagerInternal.class.toString());
+								//		LocalServices.getService(PackageManagerInternal.class);
 
 								//packageManagerInternal.grantRuntimePermission(context.getPackageName(),
 								//		perm_name, android.os.Process.myUserHandle().getIdentifier(), true);
@@ -121,7 +125,7 @@ public final class UtilsPermissions {
 									// SDK class
 									context.getPackageManager().grantRuntimePermission(context.getPackageName(),
 											perm_name, android.os.Process.myUserHandle());
-									// GRANT_RUNTIME_PERMISSIONS and INTERACT_ACROSS_USERS_FULL needed here.
+									// todo GRANT_RUNTIME_PERMISSIONS and INTERACT_ACROSS_USERS_FULL needed here
 								} catch (final SecurityException ignored) {
 									++num_forced_error_perms;
 								}

@@ -19,13 +19,16 @@
   ~ under the License.
   -->
 
+<!-- The suffix ACA means Assist_C_A (the project name). It's to differentiate in case libraries I import use app_name
+ already inside, and this way there's no conflict. -->
 <resources>
-	<string name="app_name">V.I.S.O.R.</string>
-	<string name="app_description">Virtual Intelligence System for an Optimized Reality</string>
-	<string name="app_title">V.I.S.O.R. Systems</string>
+	<string name="app_name_ACA">V.I.S.O.R.</string>
+	<string name="app_description_ACA">Virtual Intelligence System for an Optimized Reality</string>
+	<string name="app_title_ACA">V.I.S.O.R. Systems</string>
 
-	<string name="fragDevelopment_title">Dev Mode</string>
-	<string name="fragMain_title">Home</string>
-	<string name="fragModulesStatus_title">Modules status</string>
-	<string name="fragEventsScheduler_title">Events Scheduler</string>
+	<string name="fragDevelopment_title_ACA">Dev Mode</string>
+	<string name="fragMain_title_ACA">Home</string>
+	<string name="fragModulesStatus_title_ACA">Modules status</string>
+	<string name="fragValuesStorageViewer_title_ACA">Global values</string>
+	<string name="fragEventsScheduler_title_ACA">Events Scheduler</string>
 </resources>

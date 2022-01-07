@@ -21,10 +21,6 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.EMERGENCY_ID_PREFIX;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.LENGTH_UTTERANCE_ID;
-import static com.dadi590.assist_c_a.Modules.Speech.CONSTS.WAS_SAYING_PREFIX_1;
-
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,7 +40,7 @@ import java.util.List;
 /**
  * <p>The speech module of the assistant, based on {@link TextToSpeech}'s internal queue.</p>
  *
- * @deprecated use the v2 API: {@link Speech2}. I've left this one here (Speech v1) in case it's needed again.
+ * @deprecated use the v2 API: {@link Speech2}. I've left this one here (Speech API v1) in case it's needed again.
  */
 @Deprecated
 public class Speech {
@@ -94,7 +90,7 @@ public class Speech {
 	 * @return true if it's an emergency speech, false otherwise
 	 */
 	private static boolean isEmergencySpeech(@NonNull final String utteranceId) {
-		return utteranceId.startsWith(EMERGENCY_ID_PREFIX);
+		return utteranceId.startsWith(CONSTS.EMERGENCY_ID_PREFIX);
 	}
 
 	//////////////////////////////////////
@@ -201,10 +197,10 @@ public class Speech {
 
 		final String currently_speaking_speech_ID;
 		if (speech_mode == TextToSpeech.QUEUE_FLUSH) {
-			final int length = LENGTH_UTTERANCE_ID - EMERGENCY_ID_PREFIX.length();
-			currently_speaking_speech_ID = EMERGENCY_ID_PREFIX + UtilsGeneral.generateRandomString(length);
+			final int length = CONSTS.LENGTH_UTTERANCE_ID - CONSTS.EMERGENCY_ID_PREFIX.length();
+			currently_speaking_speech_ID = CONSTS.EMERGENCY_ID_PREFIX + UtilsGeneral.generateRandomString(length);
 		} else {
-			currently_speaking_speech_ID = UtilsGeneral.generateRandomString(LENGTH_UTTERANCE_ID);
+			currently_speaking_speech_ID = UtilsGeneral.generateRandomString(CONSTS.LENGTH_UTTERANCE_ID);
 		}
 		utterance_ids.add(currently_speaking_speech_ID);
 		speeches.add(to_speak);
@@ -236,7 +232,7 @@ public class Speech {
 			// problem happen - will skip the current speech and continue the remaining ones.
 
 			// The below if statement is to only do this if the currently speaking speech is an emergency one.
-			if (!current_speech_id.startsWith(EMERGENCY_ID_PREFIX)) {
+			if (!current_speech_id.startsWith(CONSTS.EMERGENCY_ID_PREFIX)) {
 				// The 2 conditions on the below if statement that seem(?) to do the same are to be sure he's speaking
 				// when this occurs - might finish when it gets here, or isSpeaking() could return faster or slower than
 				// the currently_speaking_speech_ID variable is updated or vice-versa.
@@ -244,7 +240,7 @@ public class Speech {
 					for (int i = 0, size = utterance_ids.size(); i < size; ++i) {
 						if (utterance_ids.get(i).equals(current_speech_id)) {
 							utterance_ids.add(i + 1, utterance_ids.get(i));
-							speeches.add(i + 1, WAS_SAYING_PREFIX_1 + speeches.get(i));
+							speeches.add(i + 1, CONSTS.WAS_SAYING_PREFIX_1 + speeches.get(i));
 							runnables.add(i + 1, runnables.get(i));
 							break;
 						}

@@ -82,7 +82,7 @@ public final class UtilsMainSrv {
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
-					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio);
+					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio_internally);
 					if (null == is_recording_audio) {
 						is_recording_audio = false;
 					}

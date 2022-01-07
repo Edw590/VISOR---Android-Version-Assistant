@@ -85,8 +85,8 @@ public class Speech2 implements IModule {
 	TextToSpeech tts = null;
 	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
 	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
-	SpeechObj current_speech_obj = new SpeechObj("", "", true, null);
-	private String last_thing_said = "";
+	SpeechObj current_speech_obj = new SpeechObj("", "", true, false, null);
+	String last_thing_said = "";
 	@Nullable private AudioFocusRequest audioFocusRequest = null;
 	private final VolumeDndObj volumeDndObj = new VolumeDndObj();
 
@@ -201,19 +201,6 @@ public class Speech2 implements IModule {
 		}, GL_CONSTS.PREFERRED_TTS_ENGINE);
 	}
 
-	//////////////////////////////////////
-	// Getters
-
-	/**.
-	 * @return the variable {@link #last_thing_said}
-	 */
-	@NonNull
-	final String getLastThingSaid() {
-		return last_thing_said;
-	}
-
-	//////////////////////////////////////
-
 	/**
 	 * <p>Sets {@link #user_changed_volume} to true in case the audio stream of the changed volume equals the audio
 	 * stream currently being used to speak.</p>
@@ -301,13 +288,13 @@ public class Speech2 implements IModule {
 	 * called. With different priorities, higher priority speeches will be spoken first and only then will the lower
 	 * priorities speak.</p>
 	 * <br>
-	 * <p>From the first to the last speech, the assistant will try to (in this order) request audio focus and set the
+	 * <p>From the first to the last speech, normally the assistant will try to request audio focus and set the
 	 * volume of the stream to use to a predetermined level. After all speeches from a same audio stream are finished,
-	 * what the assistant changed before starting to speak will be undone and all will be left as was (unless the user
-	 * changed one of the changed things, and in that case, the changed thing(s) will remain changed. Also, if the
-	 * priority is {@link #PRIORITY_CRITICAL}, before both things I said, the assistant will attempt to disable any
-	 * Do Not Disturb setting and only then will proceed to the other 2 things. The volume will also be set to the
-	 * maximum the chosen audio stream can handle.</p>
+	 * what the assistant changed before starting to speak will be undone and all will be left as it was (unless the user
+	 * changed one of the changed things, and in that case, the changed thing(s) will remain changed). If the
+	 * priority is {@link #PRIORITY_CRITICAL}, before both things I said, the assistant will also attempt to disable any
+	 * Do Not Disturb setting. The volume will also be set to the maximum the chosen audio stream can handle (which will
+	 * be {@link SpeechObj#AUD_STREAM_PRIORITY_CRITICAL}).</p>
 	 * <br>
 	 * <p>If a speech is requested, this speech module had already been initialized, and the previously selected TTS
 	 * engine was uninstalled or there was some error attempting to send text to the engine, this module will restart
@@ -315,11 +302,11 @@ public class Speech2 implements IModule {
 	 * will continue to restart until it finds an available engine to speak again). It will only come back to the
 	 * preferred engine again if the module is restarted manually (for example by a force stop of the app).</p>
 	 * <br>
-	 * <p>If {@code AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL}, exactly nothing will be done (the
-	 * speech will be completely aborted), except broadcast {@code after_speaking_code}.
+	 * <p>If {@code AudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL} right before speaking, the speech
+	 * will be aborted and removed from the internal queues. Though {@code after_speaking_code} will still be broadcast.
 	 * <br>
 	 * <p>All the {@code PRIORITY_} constants except {@link #PRIORITY_USER_ACTION} are to be used only for speeches that
-	 * are not a response to a user action, for example automated tasks or broadcast receivers.</p>
+	 * are not a response to a user action - for example automated tasks or broadcast receivers.</p>
 	 * <p>The {@link #PRIORITY_USER_ACTION} is the only one to be used for speeches that are a response to a user
 	 * action. For example, for audio recording speeches - the assistant will not record audio unless the user asked him
 	 * to, either directly or to start recording in a defined time.</p>
@@ -342,6 +329,9 @@ public class Speech2 implements IModule {
 	 *
 	 * @param txt_to_speak what to speak
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
+	 * @param bypass_no_sound true to request a no-sound (like Do Not Disturb or Vibrate mode) bypass, false otherwise
+	 *                         (note: the device will be put back to the original state before calling this function
+	 *                         after the speech ends)
 	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for
 	 *                            example, a unique reference to a {@link Runnable} which is detected by a receiver and
 	 *                            which will execute the Runnable that corresponds to the reference); or null, if nothing
@@ -351,25 +341,27 @@ public class Speech2 implements IModule {
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
 	 * being spoken immediately; one of the constants otherwise.
 	 */
-	final int speak(@NonNull final String txt_to_speak, final int speech_priority,
+	final int speak(@NonNull final String txt_to_speak, final int speech_priority, final boolean bypass_no_sound,
 					@Nullable final Integer after_speaking_code) {
-		return speakInternal(txt_to_speak, speech_priority, null, after_speaking_code);
+
+		return speakInternal(txt_to_speak, speech_priority, bypass_no_sound, null, after_speaking_code);
 	}
 
 	/**
-	 * <p>Same as in {@link #speak(String, int, Integer)}, but with additional parameters to be used only
+	 * <p>Same as in {@link #speak(String, int, boolean, Integer)}, but with additional parameters to be used only
 	 * internally to the class - this is the main speak() method.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, Integer)}
-	 * @param priority same as in {@link #speak(String, int, Integer)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, boolean, Integer)}
+	 * @param priority same as in {@link #speak(String, int, boolean, Integer)}
+	 * @param bypass_no_sound same as in {@link #speak(String, int, boolean, Integer)}
 	 * @param utterance_id the utterance ID to be used to re-register the given speech in case it's already in the lists,
 	 *                     null if it's not already in the lists
-	 * @param after_speaking_code same as in {@link #speak(String, int, Integer)}
+	 * @param after_speaking_code same as in {@link #speak(String, int, boolean, Integer)}
 	 *
-	 * @return same as in {@link #speak(String, int, Integer)}
+	 * @return same as in {@link #speak(String, int, boolean, Integer)}
 	 */
-	private int speakInternal(final String txt_to_speak, final int priority, @Nullable final String utterance_id,
-							  @Nullable final Integer after_speaking_code) {
+	private int speakInternal(final String txt_to_speak, final int priority, final boolean bypass_no_sound,
+							  @Nullable final String utterance_id, @Nullable final Integer after_speaking_code) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
@@ -404,7 +396,7 @@ public class Speech2 implements IModule {
 					break;
 				}
 			}
-			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, after_speaking_code);
+			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, bypass_no_sound, after_speaking_code);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
 		} else {
 			utterance_id_to_use = utterance_id;
@@ -464,15 +456,15 @@ public class Speech2 implements IModule {
 	 * <p>Sends the specified string to {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)}.</p>
 	 * <br>
-	 * <p>Attention: not to be called except from inside {@link #speak(String, int, Integer)}.</p>
+	 * <p>Attention: not to be called except from inside {@link #speak(String, int, boolean, Integer)}.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, Integer)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, boolean, Integer)}
 	 * @param utterance_id the utterance ID to register the speech
 	 * @param audio_stream the audio stream to be used to speak the speech
 	 *
 	 * @return same as in {@link TextToSpeech}'s speak() methods
 	 */
-	int sendTtsSpeak(final String txt_to_speak, final String utterance_id, final int audio_stream) {
+	final int sendTtsSpeak(final String txt_to_speak, final String utterance_id, final int audio_stream) {
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);
@@ -502,7 +494,7 @@ public class Speech2 implements IModule {
 		// the program flow continue to be only one (onDone() is called in another thread but nothing is done, so we
 		// continue here to onStop()). Read also above the if statement on onDone().
 		final SpeechObj old_speech_obj = current_speech_obj;
-		current_speech_obj = new SpeechObj("", "", true, null);
+		current_speech_obj = new SpeechObj("", "", true, false, null);
 		if (tts.stop() == TextToSpeech.ERROR) {
 			current_speech_obj = old_speech_obj;
 
@@ -515,16 +507,20 @@ public class Speech2 implements IModule {
 	}
 
 	/**
-	 * <p>Sets the volume and Do Not Disturb to specific states for the assistant to speak (depending on the speech
-	 * priority), and also requests audio focus (if {@link AudioManager#getRingerMode()} != NORMAL).</p>
+	 * <p>Sets changes needed to be done for the assistant to speak.</p>
+	 * <p>List:</p>
+	 * <p>- set a new volume of the used audio stream, in case it needs to be changed</p>
+	 * <p>- request the audio focus</p>
+	 * <p>- set a new Interruption Filter, in case it needs to be changed</p>
+	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
-	private void setVolumeDndFocus() {
+	private void setToSpeakChanges() {
 		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 				.getSystemService(Context.AUDIO_SERVICE);
-		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) == PRIORITY_CRITICAL) {
+		if (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id)) {
 			audioFocus(true);
 
-			// Set Do Not Disturb
+			// Set Do Not Disturb to ALARMS (emergency speech)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
 						.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -535,17 +531,35 @@ public class Speech2 implements IModule {
 					notificationManager.setInterruptionFilter(volumeDndObj.new_interruption_filter);
 				}
 			}
+
 			// Set the volume
 			volumeDndObj.audio_stream = current_speech_obj.audio_stream;
 			volumeDndObj.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
-			volumeDndObj.new_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+			final int new_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
 
 			setResetWillChangeVolume(true);
 
-			audioManager.setStreamVolume(current_speech_obj.audio_stream, volumeDndObj.new_volume,
+			audioManager.setStreamVolume(current_speech_obj.audio_stream, new_volume,
 					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 		} else {
-			if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+			if (current_speech_obj.bypass_no_sound) {
+				volumeDndObj.old_ringer_mode = audioManager.getRingerMode();
+				audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+				// Set Do Not Disturb to ALL (normal speech)
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+					final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
+							.getSystemService(Context.NOTIFICATION_SERVICE);
+					if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALL) {
+						volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
+						volumeDndObj.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALL;
+
+						notificationManager.setInterruptionFilter(volumeDndObj.new_interruption_filter);
+					}
+				}
+			}
+
+			if (AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode()) {
 				audioFocus(true);
 
 				// Set the volume
@@ -557,7 +571,6 @@ public class Speech2 implements IModule {
 				if (current_volume < new_volume) {
 					volumeDndObj.audio_stream = current_speech_obj.audio_stream;
 					volumeDndObj.old_volume = current_volume;
-					volumeDndObj.new_volume = new_volume;
 
 					setResetWillChangeVolume(true);
 
@@ -571,17 +584,26 @@ public class Speech2 implements IModule {
 	}
 
 	/**
-	 * <p>Resets the old volume of the used stream in case the user didn't change it, the audio focus and Do Not
-	 * Disturb (DND).</p>
+	 * <p>Resets changes made for the assistant to speak.</p>
+	 * <p>List:</p>
+	 * <p>- reset the old volume of the used audio stream, in case it had to be changed</p>
+	 * <p>- reset the audio focus</p>
+	 * <p>- reset the old Interruption Filter, in case it had to be changed</p>
+	 * <p>- reset the old ringer mode, in case it had to be changed</p>
+	 *
+	 *
+	 * <p>Sets changes needed to be done for the assistant to speak.</p>
+	 * <p>List:</p>
+	 * <p>- set a new volume of the used audio stream, in case it needs to be changed</p>
+	 * <p>- request the audio focus</p>
+	 * <p>- set a new Interruption Filter, in case it needs to be changed</p>
+	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
-	final void resetVolumeDndFocus() {
+	final void resetToSpeakChanges() {
 		setResetWillChangeVolume(false);
 
-		// Reset the audio focus
-		audioFocus(false);
-
 		// Reset the volume
-		if (volumeDndObj.old_volume != VolumeDndObj.DEFAULT_VALUE) {
+		if (VolumeDndObj.DEFAULT_VALUE != volumeDndObj.old_volume) {
 			boolean carry_on = false;
 			if (stream_active_before_begin_all_speeches == volumeDndObj.audio_stream) {
 				stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
@@ -613,6 +635,12 @@ public class Speech2 implements IModule {
 			}
 		}
 
+		// Reset the ringer mode
+		if (VolumeDndObj.DEFAULT_VALUE != volumeDndObj.old_ringer_mode) {
+			((AudioManager) UtilsGeneral.getContext().getSystemService(Context.AUDIO_SERVICE)).
+					setRingerMode(volumeDndObj.old_ringer_mode);
+		}
+
 		// Reset Do Not Disturb
 		if (volumeDndObj.old_interruption_filter != VolumeDndObj.DEFAULT_VALUE) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -626,6 +654,9 @@ public class Speech2 implements IModule {
 				}
 			}
 		}
+
+		// Reset the audio focus
+		audioFocus(false);
 
 		volumeDndObj.setDefaultValues();
 
@@ -681,11 +712,11 @@ public class Speech2 implements IModule {
 			}
 		}
 	}
-
 	final AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener =
 			new AudioManager.OnAudioFocusChangeListener() {
 		@Override
 		public void onAudioFocusChange(final int focusChange) {
+			// No need to implement
 		}
 	};
 
@@ -711,14 +742,16 @@ public class Speech2 implements IModule {
 	 * <p>In case the ringer mode is not set to NORMAL (to be detected exactly before starting to speak), no callbacks
 	 * are triggered by calling this function, aside from {@link UtteranceProgressListener#onStop(String, boolean)},
 	 * which doesn't have an implementation in this app on purpose, so consider this as the last part of
-	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case.</p>
+	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case - unless there's a request to
+	 * bypass a no-sound setting, like Do Not Disturb or Vibrating mode, for example.</p>
 	 */
 	final void rightBeforeSpeaking() {
 		boolean skip_speech = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
-		// CRITICAL speech.
-		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL) {
+		// CRITICAL speech (except if it's to bypass a no-sound mode).
+		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL &&
+				!current_speech_obj.bypass_no_sound) {
 			final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 					.getSystemService(Context.AUDIO_SERVICE);
 			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
@@ -738,7 +771,7 @@ public class Speech2 implements IModule {
 		if (!skip_speech) {
 			// If it's to speak, prepare the app to speak.
 			if (!focus_volume_dnd_done) {
-				setVolumeDndFocus();
+				setToSpeakChanges();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
@@ -774,7 +807,7 @@ public class Speech2 implements IModule {
 			// be done, was already done by onStop(). This in case onDone is called. If it's not, no matter - onStop()
 			// already did onDone()'s job as a failsafe measure.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", true, null);
+				current_speech_obj = new SpeechObj("", "", true, false, null);
 				speechTreatment(utteranceId);
 			}
 		}
@@ -792,7 +825,7 @@ public class Speech2 implements IModule {
 			// both are called, which one is called first. So in any case, the first to be called will stop the other
 			// one from being called this way.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", true, null);
+				current_speech_obj = new SpeechObj("", "", true, false, null);
 				speechTreatment(utteranceId);
 			}
 		}
@@ -834,9 +867,9 @@ public class Speech2 implements IModule {
 		// current_speech_obj is already null here - this onStop() is only called from ttsStop(), which empties
 		// current_speech_obj by itself. Use utteranceId to get info about the speech that was stopped.
 		if (skip_speech) {
-			// If it's to skip the speech, just stop the current speech with tts.stop(), which will delete all the speeches
-			// on its list (which are none, according with the Speech2 implementation - nothing is ever on the list except
-			// the current speech).
+			// If it's to skip the speech, just stop the current speech with tts.stop(), which will delete all the
+			// speeches on its list (which are none, according with the Speech2 implementation - nothing is ever on the
+			// TextToSpeech list except the current speech, and all speeches are always on the Speech2 lists).
 			speechTreatment(utteranceId);
 		} else {
 			UtilsSpeech2.reSayRephraseSpeech(utteranceId, arrays_speech_objs);
@@ -853,14 +886,15 @@ public class Speech2 implements IModule {
 	 * {@link #onStop(String, boolean)}.</p>
 	 *
 	 * @param utteranceId same as in the method of {@link UtteranceProgressListener} that called this function (or
-	 * {@link #onStop(String, boolean)}
+	 *                    {@link #onStop(String, boolean)}), or an empty string to signal the function not to remove any
+	 *                    speech from the queues and only start the next one
 	 */
-	final void speechTreatment(final String utteranceId) {
+	final void speechTreatment(@NonNull final String utteranceId) {
 		// Main note: everything that calls this function empties current_speech_obj first.
 
 		// Why is this check here and not just the removal? Refer to the custom onStop().
 		if (!utteranceId.isEmpty()) {
-			// Won't happen - or the speech wouldn't have taken place.
+			// Won't happen, except from the custom onStop() - or the speech wouldn't have taken place.
 			last_thing_said = Objects.requireNonNull(UtilsSpeech2.removeSpeechById(utteranceId, arrays_speech_objs))
 					.txt_to_speak;
 		}
@@ -876,6 +910,7 @@ public class Speech2 implements IModule {
 				final String speech = correct_speech_obj.txt_to_speak;
 				final int audio_stream = correct_speech_obj.audio_stream;
 				final Integer runnable = correct_speech_obj.after_speaking_code;
+				final boolean bypass_no_sound = correct_speech_obj.bypass_no_sound;
 
 				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
@@ -883,7 +918,7 @@ public class Speech2 implements IModule {
 				// checked by verifying if the audio stream is the DEFAULT_VALUE or not).
 				if (volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && volumeDndObj.audio_stream != audio_stream) {
 					if (focus_volume_dnd_done) {
-						resetVolumeDndFocus();
+						resetToSpeakChanges();
 					}
 					if (assist_will_change_volume) {
 						// Just to be sure, in case there was an error and the assistant didn't change the volume after
@@ -896,7 +931,7 @@ public class Speech2 implements IModule {
 					user_changed_volume = false;
 				}
 
-				speakInternal(speech, speech_priority, utterance_id, runnable);
+				speakInternal(speech, speech_priority, bypass_no_sound, utterance_id, runnable);
 
 				try {
 					// This being here won't cause any stop in the assistant once this module is a Service in a separate
@@ -932,7 +967,7 @@ public class Speech2 implements IModule {
 		// Since there are no more speeches, reset the stream volume and abandon the audio focus of the last used audio
 		// stream.
 		if (focus_volume_dnd_done) {
-			resetVolumeDndFocus();
+			resetToSpeakChanges();
 		}
 
 		if (assist_will_change_volume) {
@@ -954,11 +989,12 @@ public class Speech2 implements IModule {
 		final IntentFilter intentFilter = new IntentFilter();
 
 		intentFilter.addAction(CONSTS_BC.ACTION_READY_AGAIN);
+		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
 
 		intentFilter.addAction(CONSTS_BC.ACTION_CALL_SPEAK);
 		intentFilter.addAction(CONSTS_BC.ACTION_SKIP_SPEECH);
 		intentFilter.addAction(CONSTS_BC.ACTION_REMOVE_SPEECH);
-		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
+		intentFilter.addAction(CONSTS_BC.ACTION_SAY_AGAIN);
 
 		try {
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
@@ -976,6 +1012,10 @@ public class Speech2 implements IModule {
 			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+
 				case (CONSTS_BC.ACTION_READY_AGAIN): {
 					// todo Warn there was an error with the selected engine and the TTS had to be reinitialized with
 					//  another engine
@@ -989,9 +1029,16 @@ public class Speech2 implements IModule {
 
 					break;
 				}
+				case (AudioManager.VOLUME_CHANGED_ACTION): {
+					setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+							Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
+
+					break;
+				}
+
 				case (CONSTS_BC.ACTION_CALL_SPEAK): {
 					final String txt_to_speak = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_SPEAK_1);
-					final int additional_command = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, NO_ADDITIONAL_COMMANDS);
+					final boolean bypass_no_sound = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, false);
 					final int speech_priority = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_3, -1);
 					@Nullable final Integer after_speaking_code;
 					if (intent.hasExtra(CONSTS_BC.EXTRA_CALL_SPEAK_4)) {
@@ -1004,17 +1051,15 @@ public class Speech2 implements IModule {
 						after_speaking_code = null;
 					}
 
-					speak(txt_to_speak, speech_priority, after_speaking_code);
+					speak(txt_to_speak, speech_priority, bypass_no_sound, after_speaking_code);
 
 					break;
 				}
-
 				case (CONSTS_BC.ACTION_SKIP_SPEECH): {
 					skipCurrentSpeech();
 
 					break;
 				}
-
 				case (CONSTS_BC.ACTION_REMOVE_SPEECH): {
 					final String speech = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_SPEAK_1);
 					final int speech_priority = intent.getIntExtra(CONSTS_BC.EXTRA_CALL_SPEAK_2, -1);
@@ -1028,14 +1073,23 @@ public class Speech2 implements IModule {
 
 					break;
 				}
-
-				case (AudioManager.VOLUME_CHANGED_ACTION): {
-					setUserChangedVolumeTrue(intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
-							Speech2.OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE));
+				case (CONSTS_BC.ACTION_SAY_AGAIN): {
+					// todo He shouldn't say what he said 2.4 hours ago. He wouldn't remember. 5 minutes at most or
+					//  something. Then he'd say he didn't say anything (a human wouldn't know what would have been said
+					//  5 minutes ago or more - just ask again if that much time passed already).
+					if (last_thing_said.isEmpty()) {
+						speak("I haven't said anything.", PRIORITY_USER_ACTION, true, null);
+					} else {
+						speak("I said: " + last_thing_said, PRIORITY_USER_ACTION, true, null);
+					}
 
 					break;
 				}
 			}
+
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 		}
 	};
 }

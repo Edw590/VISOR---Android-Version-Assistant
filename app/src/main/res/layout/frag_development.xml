@@ -24,7 +24,7 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	tools:context=".ActivitiesFragments.FragDevelopment">
+	tools:context=".ActivitiesFragments.ActMain">
 
 	<LinearLayout
 		android:orientation="vertical"
@@ -43,7 +43,7 @@
 			android:layout_height="wrap_content"
 			android:text="Open the Device Admins list (for testing only)" />
 
-		<Space
+		<androidx.legacy.widget.Space
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 
@@ -74,7 +74,7 @@
 			android:layout_height="wrap_content"
 			android:text="Skip current speech" />
 
-		<Space
+		<androidx.legacy.widget.Space
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 
@@ -95,7 +95,7 @@
 			android:layout_height="wrap_content"
 			android:text="Send text" />
 
-		<Space
+		<androidx.legacy.widget.Space
 			android:layout_width="match_parent"
 			android:layout_height="31dp" />
 

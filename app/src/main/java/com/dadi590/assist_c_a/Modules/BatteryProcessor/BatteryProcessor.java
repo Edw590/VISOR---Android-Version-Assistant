@@ -123,8 +123,6 @@ public class BatteryProcessor implements IModule {
 		// Update the value on the ValuesStorage
 		ValuesStorage.updateValue(CONSTS.battery_percentage, Integer.toString(battery_percentage));
 
-		System.out.println("> " + battery_percentage);
-
 		// If the class was just instantiated, store the current battery percentage and wait for the next change.
 		if (last_detected_percent == -1) {
 			last_detected_percent = battery_percentage;
@@ -202,6 +200,10 @@ public class BatteryProcessor implements IModule {
 			System.out.println("PPPPPPPPPPPPPPPPPP-BatteryStatus - " + intent.getAction());
 
 			switch (intent.getAction()) {
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+
 				case (CONSTS_BC.ACTION_PROCESS_PWR_CHG): {
 					final boolean power_connected = intent.getBooleanExtra(CONSTS_BC.EXTRA_PROCESS_PWR_CHG_1, false);
 					processBatteryPwrChg(power_connected);
@@ -217,6 +219,10 @@ public class BatteryProcessor implements IModule {
 					break;
 				}
 			}
+
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
+			////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 		}
 	};
 }

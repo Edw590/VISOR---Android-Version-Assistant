@@ -205,12 +205,13 @@ public final class UtilsServices {
 		builder.setShowWhen(true);
 		builder.setLocalOnly(true);
 		builder.setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
-		builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.main_logo_legacy_only));
+		builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.app_logo_legacy_only));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			builder.setSmallIcon(R.drawable.main_logo_transparent);
+			builder.setSmallIcon(R.drawable.app_logo_transparent);
 		} else {
-			builder.setSmallIcon(R.mipmap.main_logo_legacy_only);
+			builder.setSmallIcon(R.mipmap.app_logo_legacy_only);
 		}
+
 		if (notificationInfo.notification_type == TYPE_FOREGROUND) {
 			builder.setOngoing(true);
 			builder.setPriority(NotificationCompat.PRIORITY_MIN);

@@ -80,12 +80,12 @@ public final class CONSTS_BC {
 	static final String EXTRA_REMOVE_SPEECH_3 = "SPEECH2_EXTRA_REMOVE_SPEECH_3";
 
 	/**
-	 * <p>Executed function: {@link Speech2#speak(String, int, Integer)}.</p>
+	 * <p>Executed function: {@link Speech2#speak(String, int, boolean, Integer)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
 	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_1}: mandatory</p>
-	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is {@link Speech2#NO_ADDITIONAL_COMMANDS})</p>
+	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is false)</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_3}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_4}: optional (default is null)</p>
 	 */
@@ -103,4 +103,12 @@ public final class CONSTS_BC {
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_READY_AGAIN = "SPEECH2_ACTION_READY_AGAIN";
+
+	/**
+	 * <p>Explanation: requests the last speech to be spoken again.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
+	 * <p>To be received only by the class(es): {@link Speech2}.</p>
+	 * <p>Extras: none.</p>
+	 */
+	static final String ACTION_SAY_AGAIN = "SPEECH2_ACTION_SAY_AGAIN";
 }

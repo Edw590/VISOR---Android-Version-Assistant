@@ -46,15 +46,16 @@ class VolumeDndObj {
 
 	/** One of the {@code STREAM_} constants in {@link AudioManager}. */
 	int audio_stream;
-	/** The result of {@link AudioManager#getStreamVolume(int)}. */
+	/** The result of {@link AudioManager#getStreamVolume(int)} before making any changes. */
 	int old_volume;
-	/** The volume to be set with {@link AudioManager#setStreamVolume(int, int, int)}. */
-	int new_volume;
 
-	/** The result of {@link NotificationManager#getCurrentInterruptionFilter()}. */
+	/** The result of {@link NotificationManager#getCurrentInterruptionFilter()} before making any changes. */
 	int old_interruption_filter;
 	/** The interruption filter to be set with {@link NotificationManager#setInterruptionFilter(int)}. */
 	int new_interruption_filter;
+
+	/** The result of {@link AudioManager#getRingerMode()} before making any changes. */
+	int old_ringer_mode;
 
 	// To add a new attribute, update the DEFAULT_VALUE doc and the setDefaultValues() function.
 
@@ -71,8 +72,8 @@ class VolumeDndObj {
 	final void setDefaultValues() {
 		audio_stream = DEFAULT_VALUE;
 		old_volume = DEFAULT_VALUE;
-		new_volume = DEFAULT_VALUE;
 		old_interruption_filter = DEFAULT_VALUE;
 		new_interruption_filter = DEFAULT_VALUE;
+		old_ringer_mode = DEFAULT_VALUE;
 	}
 }

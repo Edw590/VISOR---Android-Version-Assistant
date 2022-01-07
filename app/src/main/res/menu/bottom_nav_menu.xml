@@ -23,19 +23,19 @@
 
 	<item
 		android:id="@+id/frag_main"
-		android:title="@string/fragMain_title"
+		android:title="@string/fragMain_title_ACA"
 		android:icon="@drawable/home" />
 	<item
 		android:id="@+id/frag_development"
-		android:title="@string/fragDevelopment_title"
+		android:title="@string/fragDevelopment_title_ACA"
 		android:icon="@drawable/development" />
 	<item
 		android:id="@+id/frag_modules_status"
-		android:title="@string/fragModulesStatus_title"
+		android:title="@string/fragModulesStatus_title_ACA"
 		android:icon="@drawable/development" />
 	<item
-		android:id="@+id/fragEventsScheduler"
-		android:title="@string/fragEventsScheduler_title"
+		android:id="@+id/frag_values_storage_viewer"
+		android:title="@string/fragValuesStorageViewer_title_ACA"
 		android:icon="@drawable/development" />
 
 </menu>

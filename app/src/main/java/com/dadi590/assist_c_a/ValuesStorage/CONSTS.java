@@ -30,7 +30,7 @@ public final class CONSTS {
 
 	/////////////////////////////////////////////////////////////////
 
-	// Battery
+	// Power
 	public static final String battery_percentage = "battery_percentage";
 	public static final String power_connected = "power_connected";
 
@@ -51,7 +51,7 @@ public final class CONSTS {
 	public static final String loc_weather_for_the_day = "loc_weather_for_the_day";
 
 	// Audio Recorder
-	public static final String is_recording_audio = "is_recording_audio";
+	public static final String is_recording_audio_internally = "is_recording_audio_internally";
 
 	// Flashlight
 	public static final String main_flashlight_enabled = "main_flashlight_enabled";

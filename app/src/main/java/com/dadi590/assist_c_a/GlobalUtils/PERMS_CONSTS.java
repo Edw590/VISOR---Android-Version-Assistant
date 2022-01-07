@@ -56,11 +56,12 @@ final class PERMS_CONSTS {
 			{Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(Build.VERSION_CODES.DONUT)},
 			{Manifest.permission.READ_PHONE_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.READ_CALL_LOG, String.valueOf(Build.VERSION_CODES.JELLY_BEAN)},
-			// todo {Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
 			{Manifest.permission.READ_CONTACTS, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.ACCESS_COARSE_LOCATION, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.ACCESS_FINE_LOCATION, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.ACCESS_BACKGROUND_LOCATION, String.valueOf(Build.VERSION_CODES.Q)},
+			{Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
+			{Manifest.permission.CALL_PHONE, String.valueOf(Build.VERSION_CODES.BASE)},
 	};
 	/*private static final String[][] sys_perms_list = {
 			{Manifest.permission.REBOOT, String.valueOf(Build.VERSION_CODES.BASE)},

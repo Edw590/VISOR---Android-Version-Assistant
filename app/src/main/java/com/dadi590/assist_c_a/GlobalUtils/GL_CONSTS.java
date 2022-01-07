@@ -40,15 +40,15 @@ public final class GL_CONSTS {
 
 	// Assistant name and description
 	/**
-	 * <p>The name of the assistant as it's on {@link R.string#app_name}, but only what's the before the first space -
+	 * <p>The name of the assistant as it's on {@link R.string#app_name_ACA}, but only what's the before the first space -
 	 * real location is on the strings.xml file.</p>
 	 */
-	public static final String ASSISTANT_NAME = UtilsGeneral.getContext().getString(R.string.app_name).split(" ")[0];
+	public static final String ASSISTANT_NAME = UtilsGeneral.getContext().getString(R.string.app_name_ACA).split(" ")[0];
 	/**
-	 * <p>The app description exactly as it's on {@link R.string#app_description} - real location is on the strings.xml
-	 * file.</p>
+	 * <p>The app description exactly as it's on {@link R.string#app_description_ACA} - real location is on the
+	 * strings.xml file.</p>
 	 */
-	public static final String APP_DESCRIPTION = UtilsGeneral.getContext().getString(R.string.app_description);
+	public static final String APP_DESCRIPTION = UtilsGeneral.getContext().getString(R.string.app_description_ACA);
 	/**
 	 * <p>The name of the assistant but with dots removed in case there are dots in {@link #ASSISTANT_NAME} (WO = W/O =
 	 * without).</p>
