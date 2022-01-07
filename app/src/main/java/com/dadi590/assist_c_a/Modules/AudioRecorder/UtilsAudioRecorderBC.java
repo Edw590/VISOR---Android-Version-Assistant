@@ -45,7 +45,7 @@ public final class UtilsAudioRecorderBC {
 	public static void recordAudio(final boolean start, final int audio_source) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_RECORD_AUDIO);
 		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_1, start);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_1, audio_source);
+		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_2, audio_source);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
