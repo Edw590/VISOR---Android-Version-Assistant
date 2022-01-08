@@ -320,6 +320,7 @@ public final class UtilsCryptoEnDecrypt {
 	 *
 	 * @return the ready AAD byte vector
 	 */
+	@NonNull
 	private static byte[] getAADReady(@NonNull final byte[] raw_aad_suffix) {
 		final byte[] raw_aad_ready = new byte[RAW_AAD_PREFIX.length + raw_aad_suffix.length];
 		System.arraycopy(RAW_AAD_PREFIX, 0, raw_aad_ready, 0, RAW_AAD_PREFIX.length);

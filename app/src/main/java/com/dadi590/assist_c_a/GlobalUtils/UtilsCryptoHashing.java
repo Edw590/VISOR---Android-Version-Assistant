@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 
 /**
  * <p>Utilities related to cryptographic hashing algorithms.</p>
@@ -83,7 +84,8 @@ public final class UtilsCryptoHashing {
 	 */
 	@NonNull
 	public static String getHashStringOfBytes(@NonNull final byte[] byte_array, final int index) {
-		return String.format("%" + possible_hashing_algorithms[index][1] + "X", new BigInteger(1,
+		final String format_specifier = "%" + possible_hashing_algorithms[index][1] + "X";
+		return String.format(Locale.getDefault(), format_specifier, new BigInteger(1,
 				getHashBytesOfBytes(byte_array, index)));
 	}
 

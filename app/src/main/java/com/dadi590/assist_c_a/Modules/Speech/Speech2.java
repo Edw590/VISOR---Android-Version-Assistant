@@ -262,7 +262,7 @@ public class Speech2 implements IModule {
 	/**
 	 * <p>Skips the currently speaking speech.</p>
 	 *
-	 * @return same as in {@link TextToSpeech#stop()}
+	 * @return same as in {@link #ttsStop(boolean)}}
 	 */
 	final int skipCurrentSpeech() {
 		return ttsStop(true);
@@ -464,7 +464,8 @@ public class Speech2 implements IModule {
 	 *
 	 * @return same as in {@link TextToSpeech}'s speak() methods
 	 */
-	final int sendTtsSpeak(final String txt_to_speak, final String utterance_id, final int audio_stream) {
+	final int sendTtsSpeak(@NonNull final String txt_to_speak, @NonNull final String utterance_id,
+						   final int audio_stream) {
 		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);

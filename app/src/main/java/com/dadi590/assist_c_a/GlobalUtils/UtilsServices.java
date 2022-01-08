@@ -229,8 +229,8 @@ public final class UtilsServices {
 	 * @param ch_description the description of the channel
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.O)
-	private static void createNotificationChannel(final int notification_type, final String channel_id,
-												  final String ch_name, final String ch_description) {
+	private static void createNotificationChannel(final int notification_type, @NonNull final String channel_id,
+												  @NonNull final String ch_name, @NonNull final String ch_description) {
 		String chName = ch_name;
 		if (chName.isEmpty()) {
 			// If it's an empty string, an error will be thrown. A space works.

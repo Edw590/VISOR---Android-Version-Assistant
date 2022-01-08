@@ -263,6 +263,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		@Override
 		protected void onLayout(final boolean changed, final int l, final int t, final int r, final int b) {
+			// No need to implement
 		}
 
 		@Override

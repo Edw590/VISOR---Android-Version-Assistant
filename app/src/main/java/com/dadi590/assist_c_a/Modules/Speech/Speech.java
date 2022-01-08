@@ -309,7 +309,7 @@ public class Speech {
 	 *
 	 * @param utteranceId same as in {@link UtteranceProgressListener}
 	 */
-	final void speechTreatment(final String utteranceId) {
+	final void speechTreatment(@NonNull final String utteranceId) {
 		boolean reset_speeches = true;
 		if (isEmergencySpeech(utterance_ids.get(0))) {
 			// This is in case it's requested an emergency speech and then a normal one.

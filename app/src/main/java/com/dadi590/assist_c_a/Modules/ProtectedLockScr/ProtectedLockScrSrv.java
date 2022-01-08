@@ -109,7 +109,7 @@ public class ProtectedLockScrSrv extends Service {
 					device_is_secured = keyguardManager.isDeviceSecure();
 				}
 			} else {
-				device_is_secured = isLockScreenEnabled22Older();
+				device_is_secured = UtilsProtectedLockScr.isLockScreenEnabled22Older();
 			}
 
 			// If the user unlocked the phone successfully, lock it again immediately.
@@ -122,38 +122,6 @@ public class ProtectedLockScrSrv extends Service {
 			}
 		}
 	};
-
-	/**
-	 * <p>Checks if the lock screen is enabled or not for the current user through
-	 * {@link LockPatternUtils#isLockScreenDisabled()}, which means, should check the same as
-	 * {@link KeyguardManager#isDeviceSecure()}, but on older API versions than Marshmallow (as of which the {@code int}
-	 * parameter was introduced on the first function).</p>
-	 * <br>
-	 * <p><strong>TO USE ONLY WITH API 22 OR OLDER!!!!!</strong></p>
-	 * <p>It's also said on where I took this from (StackOverflow): "It should work with API level 14+", so I'm putting
-	 * that as the minimum Android version for this function to work on.</p>
-	 *
-	 * @return true if the lock screen is enabled for the current user, false otherwise
-	 */
-	static boolean isLockScreenEnabled22Older() {
-		/*Testa isto com a meta-reflection para ver se ficou a funcionar!!!
-				Podia ser usado por algum atacante enviar MUITOS broadcasts e a app vai bloquear!
-			Arranja isso. Mete numa thread e impede de ser chamada mais que uma vez enquanto estiver a funcionar ou mete
-				a forçagem de permissões MEGA rápida --> tal como a função de iniciar o serviço, tenta metê-la ao máximo.*/
-
-		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsGeneral.getContext());
-		try {
-			final Method method = LockPatternUtils.class.getDeclaredMethod("isLockScreenDisabled");
-
-			return !Boolean.parseBoolean(String.valueOf(method.invoke(lockPatternUtils)));
-		} catch (final InvocationTargetException ignored) {
-		} catch (final NoSuchMethodException ignored) {
-		} catch (final IllegalAccessException ignored) {
-		}
-
-		// Won't happen - the function exists on said API levels
-		return false;
-	}
 
 	/**
 	 * <p>This will restart the {@link ProtectedLockScrAct} activity if there is some error and it is shut down if it

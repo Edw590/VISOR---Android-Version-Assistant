@@ -85,6 +85,7 @@ public final class UtilsPermissions {
 	 * of those that the app requires; the number of permissions that had an error while being forcibly granted, in case
 	 * that it was chosen to force permissions
 	 */
+	@NonNull
 	private static int[] checkRequestPerms(@Nullable final Activity activity, final boolean request) {
 
 		final boolean force_permissions = (activity == null && request);

@@ -30,6 +30,7 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
@@ -152,11 +153,7 @@ public class PhoneCallsProcessor implements IModule {
 	 * <p>Decides what the assistant should say to warn about the detected call.</p>
 	 * @param sub_ret the sub_ret variable from {@link #PhoneCallsProcessor()}
 	 */
-	private static void whatToDo(final NumAndPhase sub_ret) {
-		if (sub_ret == null) {
-			return;
-		}
-
+	private static void whatToDo(@NonNull final NumAndPhase sub_ret) {
 		final String number = sub_ret.phone_number;
 		switch (sub_ret.call_phase) {
 			case (PreciseCallState.PRECISE_CALL_STATE_INCOMING):

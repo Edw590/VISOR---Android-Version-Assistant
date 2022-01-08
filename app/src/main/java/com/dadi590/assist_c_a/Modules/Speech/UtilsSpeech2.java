@@ -51,6 +51,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @return the prefix to add to the beginning of the utterance ID
 	 */
+	@NonNull
 	private static String getUtteranceIdPrefix(final int priority) {
 		return CONSTS.UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
 	}
@@ -63,7 +64,7 @@ final class UtilsSpeech2 {
 	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, boolean, Integer)}.
 	 * In case an empty string is given, the lowest priority will be returned.
 	 */
-	static int getSpeechPriority(final String utteranceId) {
+	static int getSpeechPriority(@NonNull final String utteranceId) {
 		if (utteranceId.isEmpty()) {
 			// If no speech was being spoken, we'll supposed it has the minimum priority.
 			return Speech2.PRIORITY_LOW;
@@ -80,6 +81,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @return the generated utterance ID
 	 */
+	@NonNull
 	static String generateUtteranceId(final int priority) {
 		// The generation of a random string must NOT have the following characters on it: "_" and "-", as they're used
 		// as prefix to differentiate different priorities of speeches.
@@ -98,8 +100,8 @@ final class UtilsSpeech2 {
 	 * ID was not found
 	 */
 	@Nullable
-	static int[] getSpeechIndexesFromId(final String utterance_id,
-										final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
+	static int[] getSpeechIndexesFromId(@NonNull final String utterance_id,
+										@NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		final int priority = UtilsSpeech2.getSpeechPriority(utterance_id);
 
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
@@ -124,7 +126,7 @@ final class UtilsSpeech2 {
 	 * lists
 	 */
 	@Nullable
-	static SpeechObj getSpeechObjFromId(final String utterance_id,
+	static SpeechObj getSpeechObjFromId(@NonNull final String utterance_id,
 										@NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		final int[] indexes = getSpeechIndexesFromId(utterance_id, arrays_speech_objs);
 		if (indexes == null) {
@@ -207,8 +209,8 @@ final class UtilsSpeech2 {
 	 * @return the ID of the found speech
 	 */
 	@Nullable
-	static String internalGetSpeechIdBySpeech(final int priority, final String speech,
-											  final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
+	static String internalGetSpeechIdBySpeech(final int priority, @NonNull final String speech,
+											  @NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		// This variable below is for, hopefully, faster access than being getting the array inside the loop every time.
 		final List<SpeechObj> array_speech_objs = arrays_speech_objs.get(priority);
 
@@ -275,7 +277,7 @@ final class UtilsSpeech2 {
 	 * @param utterance_id the utterance ID of the speech to be rephrased
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
 	 */
-	static void reSayRephraseSpeech(final String utterance_id,
+	static void reSayRephraseSpeech(@NonNull final String utterance_id,
 									 @NonNull final ArrayList<? extends ArrayList<SpeechObj>> arrays_speech_objs) {
 		final int priority = UtilsSpeech2.getSpeechPriority(utterance_id);
 

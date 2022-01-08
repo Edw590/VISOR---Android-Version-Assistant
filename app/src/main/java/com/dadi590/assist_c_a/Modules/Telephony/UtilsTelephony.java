@@ -82,8 +82,7 @@ public final class UtilsTelephony {
 	 * @return the name of the contact or one of the constants
 	 */
 	@NonNull
-	public static String getNameFromNum(@NonNull final String number,
-										final int location_search) {
+	public static String getNameFromNum(@NonNull final String number, final int location_search) {
 		final Uri uri_to_use;
 		switch (location_search) {
 			case (ALL_CONTACTS):

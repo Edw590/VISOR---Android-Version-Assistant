@@ -1,32 +1,16 @@
 
 7
 LICENSE,0\3\0398ccd0f49298b10a3d76a47800d2ebecd49859
-~
-Napp/src/main/java/com/dadi590/assist_c_a/Modules/Telephony/UtilsTelephony.java,4\e\4ef912e39e1eed04367a88c1d20885aebf2f2edb
 
 Oapp/src/main/java/com/dadi590/assist_c_a/Modules/CmdsExecutor/package-info.java,7\6\76ca17820cf86fe8b1297d090560a85ea2fc47d1
 >
 app/assets.xml,7\c\7c6e18c76729302d42d632a239eb7652bed426da
-
-Oapp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsLocationAbsolute.java,b\d\bd6646115f6fd68b2601f83ddbc88e0d5670873d
-~
-Napp/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsCryptoEnDecrypt.java,9\3\9338967d357a7ef6cb21d5bbcb318316d19672a6
 X
 (gradle/wrapper/gradle-wrapper.properties,f\b\fbe448ebfc3eb2d4e308f6b8b043666f5b57235e
 9
 	COPYRIGHT,e\3\e352fc138c5e488dc34254c3ee2e99e3e9aaf288
-Ö
-Uapp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/FragEventsScheduler.java,b\9\b9c59a821d21d03ace030294eebcb0cc1d058cd0
 :
 
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
 6
 NOTICE,f\e\fe71871083ca490e6bc0da33fb48ce231f820a94
-z
-Japp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/FragMain.java,c\3\c394c813b0477cace24f1e636f6a7cfa70d612a8
-x
-Happ/src/main/java/com/dadi590/assist_c_a/GlobalUtils/UtilsProcesses.java,6\9\691c0d5549908d82ff6ebd13c2d58a0933b53825
-Å
-Qapp/src/main/java/com/dadi590/assist_c_a/Modules/DeviceLocator/DeviceLocator.java,0\1\01884a3487a009d0c51907ca209d82e13958c4ec
-y
-Iapp/src/main/java/com/dadi590/assist_c_a/ActivitiesFragments/ActMain.java,8\8\8839ccbe67ec562fb84702ff61d1af99e25518da
