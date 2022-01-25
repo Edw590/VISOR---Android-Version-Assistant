@@ -20,6 +20,8 @@ Secondary project name: Assist_C_A (Assistant Client Android)
 
 ## Pictures
 ![alt text](Pictures/Dev_Mode.png)
+![alt text](Pictures/Modules_Status.png)
+![alt text](Pictures/Global_values.png)
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
