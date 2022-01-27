@@ -96,5 +96,5 @@ If you have any questions, try the options below:
 - Create an Issue here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/issues
 - Create a Discussion here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/discussions
 
-## Final notes
-Hope you like the app! Any new ideas are welcomed! (I just may or may not implement them that fast - student)
+## Final notes and contributing
+Hope you like the app! Any new ideas and/or improvements are welcomed! (Just giving the idea and/or making a pull request)
