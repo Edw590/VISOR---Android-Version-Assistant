@@ -51,6 +51,8 @@ public class SpeechRecognitionCtrl implements IModule {
 	private static final long default_wait_time = 5_000L;
 	long wait_time = default_wait_time;
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -63,9 +65,14 @@ public class SpeechRecognitionCtrl implements IModule {
 	@Override
 	public final void destroyModule() {
 		infinity_thread.interrupt();
-		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -74,12 +81,12 @@ public class SpeechRecognitionCtrl implements IModule {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED);
-			intentFilter.addAction(CONSTS_BC.ACTION_POCKETSPHINX_RECOG_STARTED);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_POCKETSPHINX_RECOG_STARTED);
 
-			intentFilter.addAction(CONSTS_BC.ACTION_START_GOOGLE);
-			intentFilter.addAction(CONSTS_BC.ACTION_START_POCKET_SPHINX);
-			intentFilter.addAction(CONSTS_BC.ACTION_STOP_RECOGNITION);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
 		} catch (final IllegalArgumentException ignored) {
@@ -135,13 +142,13 @@ public class SpeechRecognitionCtrl implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED: {
+				case CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED: {
 					current_recognizer = GOOGLE_RECOGNIZER;
 					wait_time = 500L;
 
 					break;
 				}
-				case CONSTS_BC.ACTION_POCKETSPHINX_RECOG_STARTED: {
+				case CONSTS_BC_SpeechRecog.ACTION_POCKETSPHINX_RECOG_STARTED: {
 					current_recognizer = POCKETSPHINX_RECOGNIZER;
 					wait_time = default_wait_time;
 
@@ -149,24 +156,16 @@ public class SpeechRecognitionCtrl implements IModule {
 				}
 
 
-				case CONSTS_BC.ACTION_START_GOOGLE: {
+				case CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE:
+				case CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX: {
 					stop_speech_recognition = false;
 					wait_time = default_wait_time;
-					UtilsSpeechRecognizers.startGoogleRecognition();
 
 					break;
 				}
-				case CONSTS_BC.ACTION_START_POCKET_SPHINX: {
-					stop_speech_recognition = false;
-					wait_time = default_wait_time;
-					UtilsSpeechRecognizers.startPocketSphinxRecognition();
-
-					break;
-				}
-				case CONSTS_BC.ACTION_STOP_RECOGNITION: {
+				case CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION: {
 					stop_speech_recognition = true;
 					wait_time = default_wait_time;
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
 
 					break;
 				}

@@ -90,9 +90,9 @@ public class GoogleRecognition extends Service {
         or less ago relative to the current time, the service will be stopped immediately.
         */
 		final boolean stop_now;
-		if (intent != null && intent.hasExtra(CONSTS.EXTRA_TIME_START)) {
+		if (intent != null && intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
 			// Must have been called 1 second ago at most - else it was the system restarting it or something.
-			stop_now = intent.getLongExtra(CONSTS.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
+			stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
 		} else {
 			stop_now = true;
 		}
@@ -104,7 +104,7 @@ public class GoogleRecognition extends Service {
 			return START_NOT_STICKY;
 		}
 
-		final Intent intent1 = new Intent(CONSTS_BC.ACTION_GOOGLE_RECOG_STARTED);
+		final Intent intent1 = new Intent(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED);
 		UtilsApp.sendInternalBroadcast(intent1);
 
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the

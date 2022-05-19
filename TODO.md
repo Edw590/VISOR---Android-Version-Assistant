@@ -346,3 +346,10 @@ and seconds later "and turn it off" - or "and the bluetooth too".
 
 The Speech2 is not working very well. It says stuff twice, like the warning of the app not being a device administration
 and it said Ready sir again after clicking to grant permissions. Fix that.
+
+
+## Speech Recognition
+
+Get him to stop all other audios if he's called - and if the audios are being played on the speakers. This is not for us
+to stop hearing other stuff while we're talking. It's for him to understand what he's being told to do without other
+sounds in the background (in case he has managed to hear his name with music playing or something - wow, not normal).

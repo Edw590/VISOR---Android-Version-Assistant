@@ -31,10 +31,8 @@ import com.dadi590.assist_c_a.ModulesList;
  */
 public class ModulesManager implements IModule {
 
-	boolean module_startup = true;
-
-	static final Object[][] modules_list = ModulesList.getModulesList();
-
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -49,28 +47,57 @@ public class ModulesManager implements IModule {
 		infinity_thread.interrupt();
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
 	 */
 	public ModulesManager() {
+		for (int i = 0; i < ModulesList.modules_list_length; ++i) {
+			ModulesList.setModuleValue(i, ModulesList.MODULE_SUPPORTED, ModulesList.deviceSupportsModule(i));
+		}
+
 		infinity_thread.start();
 	}
 
 	final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
+			boolean module_startup = true;
 			while (true) {
-				for (int i = 1; i < ModulesList.modules_list_length; ++i) {
-					if (ModulesList.MODULE_TYPE_SERVICE != (int) modules_list[i][1] &&
-							ModulesList.MODULE_TYPE_INSTANCE != (int) modules_list[i][1]) {
+				for (int i = 0; i < ModulesList.modules_list_length; ++i) {
+					final int module_type1 = (int) ModulesList.getModuleValue(i, ModulesList.MODULE_TYPE1);
+					if (ModulesList.TYPE1_SERVICE != module_type1 &&
+							ModulesList.TYPE1_INSTANCE != module_type1) {
+						// If the module is not one of these 2 types, don't do anything.
 						continue;
 					}
 
-					if (UtilsModulesManager.checkRestartModule(i) && !module_startup) {
-						// Start everything the first time. If it has to restart a module, warn about it.
-						final String speak = "Attention - Module restarted: " + modules_list[i][2];
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					if ((boolean) ModulesList.getModuleValue(i, ModulesList.MODULE_SUPPORTED)) {
+						if (module_startup) {
+							ModulesList.startModule(i);
+						} else {
+							boolean module_restarted = false;
+							if (ModulesList.TYPE1_SERVICE == module_type1) {
+								if (!ModulesList.isModuleRunning(i)) {
+									ModulesList.restartModule(i);
+									module_restarted = true;
+								}
+							} else {
+								if (!ModulesList.isModuleFullyWorking(i)) {
+									ModulesList.restartModule(i);
+									module_restarted = true;
+								}
+							}
+
+							if (module_restarted) {
+								// Start everything the first time. If it has to restart a module, warn about it.
+								final String speak = "Attention - Module restarted: " +
+										ModulesList.getModuleValue(i, ModulesList.MODULE_NAME);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+							}
+						}
 					}
 				}
 

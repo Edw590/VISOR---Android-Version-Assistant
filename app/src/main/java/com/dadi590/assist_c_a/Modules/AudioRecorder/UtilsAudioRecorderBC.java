@@ -37,15 +37,15 @@ public final class UtilsAudioRecorderBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request to execute {@link AudioRecorder#recordAudio(boolean, int)}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_AudioRec#ACTION_RECORD_AUDIO}.</p>
 	 *
-	 * @param start same as in the mentioned function
-	 * @param audio_source same as in the mentioned function
+	 * @param start read the action's documentation
+	 * @param audio_source read the action's documentation
 	 */
 	public static void recordAudio(final boolean start, final int audio_source) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_RECORD_AUDIO);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_1, start);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_RECORD_AUDIO_2, audio_source);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO);
+		broadcast_intent.putExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_1, start);
+		broadcast_intent.putExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_2, audio_source);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

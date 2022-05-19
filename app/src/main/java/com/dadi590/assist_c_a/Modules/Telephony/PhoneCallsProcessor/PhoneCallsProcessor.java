@@ -38,7 +38,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.ArrayList;
@@ -51,7 +51,10 @@ import java.util.Objects;
  */
 public class PhoneCallsProcessor implements IModule {
 
-	private final List<ArrayList<String>> calls_state = new ArrayList<>(0);
+	// 50 call events from the point the phone receives a call to when it ends the last call. More than than that, wow,
+	// I guess. Amazingly busy person? In that case, the array will reallocate itself with the double of the size. Won't
+	// be normal anyway.
+	final List<ArrayList<String>> calls_state = new ArrayList<>(50);
 
 	/**
 	 * <p>A map with the {@link CallLog.Calls#TYPE}s on its keys, and on its values, the corresponding CALL_PHASEs.
@@ -61,6 +64,8 @@ public class PhoneCallsProcessor implements IModule {
 	 */
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -72,9 +77,14 @@ public class PhoneCallsProcessor implements IModule {
 	}
 	@Override
 	public final void destroyModule() {
-		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -96,7 +106,8 @@ public class PhoneCallsProcessor implements IModule {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC.ACTION_RECEIVE_CALL);
+			intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+			intentFilter.addAction(CONSTS_PhCallsProc.ACTION_PRECISE_CALL_STATE_CHANGED);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
@@ -113,23 +124,23 @@ public class PhoneCallsProcessor implements IModule {
 	 * @param precise_call_state true if it's a {@link PreciseCallState}, false if it's a {@link TelephonyManager} call
 	 *                              state
 	 */
-	public final void receiveCall(final int call_state, @Nullable final String phone_number,
+	final void processCall(final int call_state, @Nullable final String phone_number,
 								  final boolean precise_call_state) {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println(phone_number);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 
 		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.last_phone_call_time, Long.toString(System.currentTimeMillis()));
+		ValuesStorage.updateValue(CONSTS_ValueStorage.last_phone_call_time, Long.toString(System.currentTimeMillis()));
 		boolean active_number = false;
 		for (final ArrayList<String> call : calls_state) {
-			if (call.get(1).equals(BETTER_CALL_STATE_ACTIVE)) {
-				ValuesStorage.updateValue(CONSTS.curr_phone_call_number, call.get(0));
+			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
+				ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, call.get(0));
 				active_number = true;
 			}
 		}
 		if (!active_number) {
-			ValuesStorage.updateValue(CONSTS.curr_phone_call_number, "");
+			ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, "");
 		}
 
 		if (precise_call_state) {
@@ -202,6 +213,10 @@ public class PhoneCallsProcessor implements IModule {
 	}
 
 
+	// todo This below is not ready to handle PRECISE_CALL_STATEs. Also, read the call logs to know without the precise
+	//  ones the _LATE things.
+
+
 	private static final String BETTER_CALL_STATE_OUTGOING = "BETTER_CALL_STATE_OUTGOING";
 	private static final String BETTER_CALL_STATE_INCOMING = "BETTER_CALL_STATE_INCOMING";
 	private static final String BETTER_CALL_STATE_WAITING = "BETTER_CALL_STATE_WAITING";
@@ -220,40 +235,51 @@ public class PhoneCallsProcessor implements IModule {
 	private static final int CALL_PHASE_FINISHED = 3234_8;
 	private static final int CALL_PHASE_FINISHED_LATE = 3234_9;
 	/**
-	 * <p>This gets the phase of the call when a new phone state ({@link TelephonyManager}'s state) is detected.</p>
+	 * <p>Based on {@link #calls_state}, this function gets the phase of the telephony when a new phone state
+	 * ({@link TelephonyManager}'s states) is detected.</p>
 	 * <br>
-	 * <p>There are constants ending in "_LATE". Those are so because they're only detected after the end of all calls
-	 * are over and after the phone gets to IDLE state. Which means, they already happened some time ago (1 second,
+	 * <p>This is a function this completes the only 3 public {@link TelephonyManager} states (CALL_STATE_-started
+	 * constants), which can't be used to know too much about the calls by themselves. So, in conjunction with a list
+	 * of call states already taking place stored in {@link #calls_state}, this function attempts to understand what
+	 * the new CALL_STATE_x means. For example, if OFFHOOK is received, in case there was no call taking place, then it
+	 * means it's an outgoing call; but if a call was in its RINGING state and now is on OFFHOOK, that means an incoming
+	 * call was just accepted.</p>
+	 * <br>
+	 * <p>Note: there are constants ending in "_LATE". Those are so because they're only detected after the end of all
+	 * calls are over and after the phone gets to IDLE state. Which means, they already happened some time ago (1 second,
 	 * 10 minutes, unpredictable).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #CALL_PHASE_OUTGOING} --> returned in case an outgoing call was just started (whether it is answered
-	 * or not by the other party - it's not possible to detect that easily)</p>
-	 * <p>- {@link #CALL_PHASE_RINGING_NEW} --> returned in case it's a new incoming call</p>
-	 * <p>- {@link #CALL_PHASE_LOST} --> returned in case the call has just been lost</p>
-	 * <p>- {@link #CALL_PHASE_LOST_LATE} --> returned in case the call was lost some time ago already</p>
-	 * <p>- {@link #CALL_PHASE_RINGING_WAITING} --> returned in case there's a new call which is waiting to be answered
-	 * (some call is already active then)</p>
-	 * <p>- {@link #CALL_PHASE_ANSWERED} --> returned in case the call has just been answered</p>
-	 * <p>- {@link #CALL_PHASE_ANSWERED_LATE} --> returned in case the call was answered some time ago already</p>
-	 * <p>- {@link #CALL_PHASE_FINISHED} --> returned in case the call was just finished (after having been answered -
-	 * if it wasn't answered, it was LOST or LOST_LATE).</p>
-	 * <p>- {@link #CALL_PHASE_FINISHED_LATE} --> returned in case the call was finished some time ago already (the same
-	 * in parenthesis for FINISHED applies here).</p>
+	 * <p>- {@link #CALL_PHASE_OUTGOING} --> for the returning value: in case an outgoing call was just started (whether
+	 * it is answered or not by the other party - it's not possible to detect that easily)</p>
+	 * <p>- {@link #CALL_PHASE_RINGING_NEW} --> for the returning value: in case it's a new incoming call</p>
+	 * <p>- {@link #CALL_PHASE_RINGING_WAITING} --> for the returning value: in case there's a new call which is waiting
+	 * to be answered (some call is already active then)</p>
+	 * <p>- {@link #CALL_PHASE_LOST} --> for the returning value: in case the call has just been lost</p>
+	 * <p>- {@link #CALL_PHASE_LOST_LATE} --> for the returning value: in case the call was lost some time ago already</p>
+	 * <p>- {@link #CALL_PHASE_ANSWERED} --> for the returning value: in case the call has just been answered</p>
+	 * <p>- {@link #CALL_PHASE_ANSWERED_LATE} --> for the returning value: in case the call was answered some time ago
+	 * already</p>
+	 * <p>- {@link #CALL_PHASE_FINISHED} --> for the returning value: in case the call was just finished (after having
+	 * been answered - if it wasn't answered, it was LOST or LOST_LATE).</p>
+	 * <p>- {@link #CALL_PHASE_FINISHED_LATE} --> for the returning value: in case the call was finished some time ago
+	 * already (the same in parenthesis for FINISHED applies here).</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param state {@link TelephonyManager#CALL_STATE_IDLE}, {@link TelephonyManager#CALL_STATE_RINGING}, or
 	 * {@link TelephonyManager#CALL_STATE_OFFHOOK}
-	 * @param incomingNumber phone number that came with the state change
+	 * @param phone_number phone number that came with the state change
 	 *
-	 * @return a double array of Strings in which each element contains the number (index 0) and the phase call (index 1)
-	 * to which the number has just changed to. There can be more than one event in a state change. The events will always
-	 * be in the actual event order. If a call was lost before another was answered, then the order will be exactly that
+	 * @return an array of {@link NumAndPhase}, each element representing an event that happened for the given state to
+	 * have changed for the given number (an array because for example, in the case the _LATE events, which are returned
+	 * with instantaneous sometimes because they could not be detected earlier). When there are more than one events on
+	 * the array, they will always be in the actual event order - ff a call was lost before another was answered, then
+	 * the order will be exactly that.
 	 */
 	@Nullable
-	private NumAndPhase[] getCallPhase(final int state, @Nullable final String incomingNumber) {
+	private NumAndPhase[] getCallPhase(final int state, @Nullable final String phone_number) {
 
-		//--- What has been tried and for what end, but that didn't work for one or more things ---
+		//--- What has been tried and for what end, but that didn't work for one or more reasons ---
 		//        - Detect if call recording is possible or not (with or without root - works in both cases):
 		//        	It's not enough, since as soon as an outgoing call is made, the recording is possible, even without
 		//        	the call having been answered by the other party.
@@ -265,17 +291,17 @@ public class PhoneCallsProcessor implements IModule {
 
 		switch (state) {
 			case (TelephonyManager.CALL_STATE_RINGING): {
-				//System.out.println("RINGING - " + incomingNumber);
+				//System.out.println("RINGING - " + phone_number);
 
 				// New incoming call (there are no calls in the current processing call list).
-				if (calls_state.isEmpty()) { // Ou seja, estava em IDLE.
-					final ArrayList<String> arrayList = new ArrayList<>(0);
-					arrayList.add(incomingNumber);
+				if (calls_state.isEmpty()) { // Which means, was in IDLE.
+					final ArrayList<String> arrayList = new ArrayList<>(2);
+					arrayList.add(phone_number);
 					arrayList.add(BETTER_CALL_STATE_INCOMING);
 					calls_state.add(arrayList);
 
-					System.out.println(CALL_PHASE_RINGING_NEW + " -> " + incomingNumber);
-					return new NumAndPhase[]{new NumAndPhase(incomingNumber, CALL_PHASE_RINGING_NEW)};
+					System.out.println(CALL_PHASE_RINGING_NEW + " -> " + phone_number);
+					return new NumAndPhase[]{new NumAndPhase(phone_number, CALL_PHASE_RINGING_NEW)};
 				} else {
 					// New incoming call waiting
 					for (int i = 0, size = calls_state.size(); i < size; ++i) {
@@ -285,13 +311,13 @@ public class PhoneCallsProcessor implements IModule {
 							// This also works with 3 calls, even on case 8, since the state of the 1st call only changes
 							// on IDLE. Until then it remains ACTIVE, even having been already disconnected (don't know
 							// a way to detect it was disconnected).
-							final ArrayList<String> arrayList = new ArrayList<>(0);
-							arrayList.add(incomingNumber);
+							final ArrayList<String> arrayList = new ArrayList<>(2);
+							arrayList.add(phone_number);
 							arrayList.add(BETTER_CALL_STATE_WAITING);
 							calls_state.add(arrayList);
 
-							System.out.println(CALL_PHASE_RINGING_WAITING + " -> " + incomingNumber);
-							return new NumAndPhase[]{new NumAndPhase(incomingNumber, CALL_PHASE_RINGING_WAITING)};
+							System.out.println(CALL_PHASE_RINGING_WAITING + " -> " + phone_number);
+							return new NumAndPhase[]{new NumAndPhase(phone_number, CALL_PHASE_RINGING_WAITING)};
 							//break;
 						}
 					}
@@ -301,7 +327,7 @@ public class PhoneCallsProcessor implements IModule {
 			}
 
 			case (TelephonyManager.CALL_STATE_OFFHOOK): {
-				//System.out.println("OFFHOOK - " + incomingNumber);
+				//System.out.println("OFFHOOK - " + phone_number);
 				NumAndPhase to_return = null;
                 /*if (calls_state.size() == 0) {
                     // If there are no calls in processing (for example, the app was started with at least one call
@@ -313,25 +339,25 @@ public class PhoneCallsProcessor implements IModule {
 
 				// Check if it's an outgoing call.
 				if (calls_state.isEmpty()) { // Which means, was in IDLE.
-					final ArrayList<String> arrayList = new ArrayList<>(0);
-					arrayList.add(incomingNumber);
+					final ArrayList<String> arrayList = new ArrayList<>(2);
+					arrayList.add(phone_number);
 					arrayList.add(BETTER_CALL_STATE_OUTGOING);
 					calls_state.add(arrayList);
 
-					System.out.println(CALL_PHASE_OUTGOING + " -> " + incomingNumber);
-					to_return = new NumAndPhase(incomingNumber, CALL_PHASE_OUTGOING);
+					System.out.println(CALL_PHASE_OUTGOING + " -> " + phone_number);
+					to_return = new NumAndPhase(phone_number, CALL_PHASE_OUTGOING);
 				} else {
 					// Check if the 1st or only call was answered.
 					for (int i = 0, size = calls_state.size(); i < size; ++i) {
-						if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
+						if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), phone_number)) {
 							if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING)) {
 								// If the number was in INCOMING (not WAITING, because I don't know how to detect a call
 								// waiting that is answered)
 								// and we are now in the OFFHOOK state, then the call was answered.
 								calls_state.get(i).set(1, BETTER_CALL_STATE_ACTIVE);
 
-								System.out.println(CALL_PHASE_ANSWERED + " -> " + incomingNumber);
-								return new NumAndPhase[]{new NumAndPhase(incomingNumber, CALL_PHASE_ANSWERED)};
+								System.out.println(CALL_PHASE_ANSWERED + " -> " + phone_number);
+								return new NumAndPhase[]{new NumAndPhase(phone_number, CALL_PHASE_ANSWERED)};
 							}
 						}
 					}
@@ -342,7 +368,7 @@ public class PhoneCallsProcessor implements IModule {
 				// do with that - can't be rejected or answered). Then in that case, I leave the state CALL_STATE_OFFHOOK
 				// on the list.
 				for (int i = 0, size = calls_state.size(); i < size; ++i) {
-					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
+					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), phone_number)) {
 						calls_state.get(i).set(1, String.valueOf(TelephonyManager.CALL_STATE_OFFHOOK));
 						break;
 					}
@@ -352,8 +378,9 @@ public class PhoneCallsProcessor implements IModule {
 			}
 
 			case (TelephonyManager.CALL_STATE_IDLE): {
-				//System.out.println("IDLE - " + incomingNumber);
-				final ArrayList<NumAndPhase> final_return = new ArrayList<>(0);
+				//System.out.println("IDLE - " + phone_number);
+				// 20 events including various LATE ones? Not more than that, I guess.
+				final ArrayList<NumAndPhase> final_return = new ArrayList<>(20);
 				if (calls_state.isEmpty()) {
 					// If there are no calls in processing (for example, the app was started with at least one cal
 					// already in course), abort and do nothing at all.
@@ -368,7 +395,7 @@ public class PhoneCallsProcessor implements IModule {
 				//////////////////////////////////////
 				// Beginning of the LATE events
 
-				// We begin by the LATE events for the correct order to go inthe return array of all events, the closes
+				// We begin by the LATE events for the correct order to go in the return array of all events, the closes
 				// to reality possible.
 
 				// Below is the handling of all numbers that didn't came with the state IDLE. Only one can come with
@@ -384,7 +411,7 @@ public class PhoneCallsProcessor implements IModule {
 					// the 1st must have been answered. And if it was answered, it was finished in some moment.
 
 					// In case the 1st call wasn't the one that came in IDLE, then it was finished some time ago already.
-					if (!calls_state.get(0).get(0).equals(incomingNumber)) {
+					if (!calls_state.get(0).get(0).equals(phone_number)) {
 						// In 2 calls, if the 2nd comes on IDLE, then it means the 1st one was already finished a some
 						// time ago (because, again, if the 1st wasn't answered, there would be no 2nd). And this sets
 						// that state in the call and returns it.
@@ -397,7 +424,7 @@ public class PhoneCallsProcessor implements IModule {
 				}
 
 				for (int i = 0, size = calls_state.size(); i < size; ++i) {
-					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
+					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), phone_number)) {
 						if (!(calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING))) {
 							// In case the call didn't come from INCOMING or WAITING, then check if it was answered some
@@ -426,7 +453,7 @@ public class PhoneCallsProcessor implements IModule {
 				// call and before the handling of the last call. And on the LATE events.
 				if (calls_state.size() >= 3) {
 					for (int i = 1, size = calls_state.size(); i < size -1; ++i) {
-						if (calls_state.get(i).get(0).equals(incomingNumber)) {
+						if (calls_state.get(i).get(0).equals(phone_number)) {
 							continue;
 						}
 
@@ -448,7 +475,7 @@ public class PhoneCallsProcessor implements IModule {
 					// happen exactly. Only missed calls in the end and incoming calls in the beginning.
 				}
 
-				if (calls_state.size() > 1 && !calls_state.get(calls_state.size() - 1).get(0).equals(incomingNumber)) {
+				if (calls_state.size() > 1 && !calls_state.get(calls_state.size() - 1).get(0).equals(phone_number)) {
 					// The detection of the last call, in case it was lost some time ago, works both for 2 as for any
 					// other superior number of calls.
 					// For only one call it's not necessary, because on that case, we know exactly when it's lost.
@@ -476,12 +503,12 @@ public class PhoneCallsProcessor implements IModule {
 				// Now processing of the immediate events, so they get all in order (the late ones happened before the
 				// immediate ones).
 				for (int i = 0, size = calls_state.size(); i < size; ++i) {
-					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), incomingNumber)) {
+					if (PhoneNumberUtils.compareStrictly(calls_state.get(i).get(0), phone_number)) {
 						if (calls_state.get(i).get(1).equals(BETTER_CALL_STATE_INCOMING) ||
 								calls_state.get(i).get(1).equals(BETTER_CALL_STATE_WAITING)) {
 							// If it came directly from INCOMING or WAITING states to IDLE, then the call was lost right now.
-							System.out.println(CALL_PHASE_LOST + " -> " + incomingNumber);
-							final_return.add(new NumAndPhase(incomingNumber, CALL_PHASE_LOST));
+							System.out.println(CALL_PHASE_LOST + " -> " + phone_number);
+							final_return.add(new NumAndPhase(phone_number, CALL_PHASE_LOST));
 						} else {
 							// If the state is not INCOMING or WAITING, this in case will be OFFHOOK or ANSWERED. Which
 							// means, the call was finished right now (means was alreaedy answered some ago - or would
@@ -489,8 +516,8 @@ public class PhoneCallsProcessor implements IModule {
 							// In no case where a call goes from OFFHOOK to IDLE means the call was lost some time ago,
 							// from the testing. So the only option is the call having been finished, or lost, right now
 							// (which is handled on the above IF).
-							System.out.println(CALL_PHASE_FINISHED + " -> " + incomingNumber);
-							final_return.add(new NumAndPhase(incomingNumber, CALL_PHASE_FINISHED));
+							System.out.println(CALL_PHASE_FINISHED + " -> " + phone_number);
+							final_return.add(new NumAndPhase(phone_number, CALL_PHASE_FINISHED));
 						}
 						calls_state.get(i).set(1, BETTER_CALL_STATE_DISCONNECTED);
 						break;
@@ -498,10 +525,12 @@ public class PhoneCallsProcessor implements IModule {
 				}
 
 				calls_state.clear();
-				return final_return.toArray(new NumAndPhase[15]); // 15 things at most, hopefully
+				// 0 or it will put 0s in the array - it must not.
+				return final_return.toArray(new NumAndPhase[0]);
 				//break;
 			}
 		}
+
 		return null;
 	}
 
@@ -519,11 +548,37 @@ public class PhoneCallsProcessor implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case (CONSTS_BC.ACTION_RECEIVE_CALL): {
-					final int call_state = intent.getIntExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_1, -1);
-					final String phone_number = intent.getStringExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_2);
-					final boolean precise_call_state = intent.getBooleanExtra(CONSTS_BC.EXTRA_RECEIVE_CALL_3, false);
-					receiveCall(call_state, phone_number, precise_call_state);
+				case (TelephonyManager.ACTION_PHONE_STATE_CHANGED): {
+					if (intent.hasExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)) {
+						// According to Android Developers website, having both READ_CALL_LOG and READ_PHONE_STATE
+						// permissions (which I must, to receive the EXTRA_INCOMING_NUMBER), will make the app receive 2
+						// broadcasts. One with and one without the EXTRA_INCOMING_NUMBER (the one without comes from the
+						// READ_PHONE_STATE permission.
+						// This below is to link the EXTRA_STATEs to the CALL_STATEs.
+						final LinkedHashMap<String, Integer> map_EXTRA_STATE_CALL_STATE = new LinkedHashMap<>(3);
+						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_RINGING, TelephonyManager.CALL_STATE_RINGING);
+						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_IDLE, TelephonyManager.CALL_STATE_IDLE);
+						map_EXTRA_STATE_CALL_STATE.put(TelephonyManager.EXTRA_STATE_OFFHOOK, TelephonyManager.CALL_STATE_OFFHOOK);
+
+						final String state = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
+						final String phone_number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+						final Integer call_state = map_EXTRA_STATE_CALL_STATE.get(state);
+						if (call_state != null) {
+							processCall(call_state, phone_number, false);
+						}
+						// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
+						// guess, unless the call states are updated to include a new one or something.
+					}
+
+					break;
+				}
+				case (CONSTS_PhCallsProc.ACTION_PRECISE_CALL_STATE_CHANGED): {
+					// todo See here for more: https://stackoverflow.com/questions/32821952/how-to-use-precisecallstate
+					//MainSrv.getPhoneCallProcessor().phoneNumRecv(context, map_EXTRA_STATE_CALL_STATE.get(state), phoneNumber,
+					//		true);
+
+					// intent.getIntExtra(TelephonyManager.EXTRA_FOREGROUND_CALL_STATE, -2) --> why EXTRA_FOREGROUND_CALL_STATE?
+					// Why not the BACKGROUND one, or the other one, which I don't remember?
 
 					break;
 				}

@@ -33,7 +33,7 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 /**
  * <p>Utilities for use with Google and PocketSphinx speech recognizers.</p>
  */
-final class UtilsSpeechRecognizers {
+public final class UtilsSpeechRecognizers {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -42,17 +42,26 @@ final class UtilsSpeechRecognizers {
 	}
 
 	/**
+	 * <p>Checks if the Google speech recognition is available.</p>
+	 * <p>It does so by checking if the Google app is installed.</p>
+	 *
+	 * @return true if it is available for use (Google app installed and enabled), false otherwise
+	 */
+	public static boolean isGoogleRecogitionAvailable() {
+		return UtilsApp.APP_ENABLED == UtilsApp.appEnabledStatus("com.google.android.googlequicksearchbox");
+	}
+
+	/**
 	 * <p>Start Google's speech recognition, first calling automatically {@link #terminateSpeechRecognizers()}.</p>
 	 */
 	static void startGoogleRecognition() {
 		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-		final String google_app_package_name = "com.google.android.googlequicksearchbox";
 
-		if (UtilsApp.appEnabledStatus(google_app_package_name) == UtilsApp.APP_ENABLED) {
+		if (isGoogleRecogitionAvailable()) {
 			terminateSpeechRecognizers();
 
 			final Intent intent = new Intent(UtilsGeneral.getContext(), GoogleRecognition.class);
-			intent.putExtra(CONSTS.EXTRA_TIME_START, System.currentTimeMillis());
+			intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
 			UtilsServices.startService(GoogleRecognition.class, intent, false);
 		} else {
 			final String speak = "WARNING - The Google App is not enabled or installed!!! Speech recognition will " +
@@ -70,7 +79,7 @@ final class UtilsSpeechRecognizers {
 		terminateSpeechRecognizers();
 
 		final Intent intent = new Intent(UtilsGeneral.getContext(), PocketSphinxRecognition.class);
-		intent.putExtra(CONSTS.EXTRA_TIME_START, System.currentTimeMillis());
+		intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
 		UtilsServices.startService(PocketSphinxRecognition.class, intent, false);
 	}
 

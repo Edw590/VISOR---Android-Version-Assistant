@@ -1,9 +1,0 @@
-
-y
-java:S3252r"^Use static access with "android.provider.ContactsContract$ContactsColumns" for "DISPLAY_NAME".(‡ï¡Çúÿÿÿÿ
-}
-java:S3252u"bUse static access with "android.provider.ContactsContract$ContactsColumns" for "HAS_PHONE_NUMBER".(òþòœûÿÿÿÿ
-z
-java:S3252z"_Use static access with "android.provider.ContactsContract$RawContactsColumns" for "CONTACT_ID".( ½­ªÿÿÿÿÿ
-y
-java:S4087œ"bRemove this "close" call; closing the resource is handled automatically by the try-with-resources.(®¶ëü

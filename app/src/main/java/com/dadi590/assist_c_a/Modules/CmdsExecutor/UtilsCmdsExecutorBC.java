@@ -39,18 +39,18 @@ public final class UtilsCmdsExecutorBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_CALL_PROCESS_TASK}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_CmdsExec#ACTION_CALL_PROCESS_TASK}.</p>
 	 *
-	 * @param sentence_str same as in {@link CmdsExecutor#processTask(String, boolean, boolean)}
-	 * @param partial_results same as in {@link CmdsExecutor#processTask(String, boolean, boolean)}
-	 * @param only_returning same as in {@link CmdsExecutor#processTask(String, boolean, boolean)}
+	 * @param sentence_str read the action's documentation
+	 * @param partial_results read the action's documentation
+	 * @param only_returning read the action's documentation
 	 */
 	public static void processTask(@NonNull final String sentence_str, final boolean partial_results,
 								   final boolean only_returning) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_CALL_PROCESS_TASK);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_1, sentence_str);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_2, partial_results);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_3, only_returning);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
+		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_1, sentence_str);
+		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_2, partial_results);
+		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_3, only_returning);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

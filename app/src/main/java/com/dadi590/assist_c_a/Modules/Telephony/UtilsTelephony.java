@@ -22,12 +22,15 @@
 package com.dadi590.assist_c_a.Modules.Telephony;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -127,7 +130,6 @@ public final class UtilsTelephony {
 									//System.out.println("Number: " + phoneNo);
 
 									if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-										// Nota: os métodos compareStrictly() só estão disponíveis com as classes escondidas/internas ativadas (ver código-fonte --> @UnsupportedAppUsage).
 									/*System.out.println("---Name: " + name);
 									System.out.println("---Number: " + phoneNo);*/
 										boolean already_found = false;
@@ -313,6 +315,25 @@ public final class UtilsTelephony {
 		}
 
 		return -1;
+	}
+
+	/**
+	 * <p>Checks if a phone number is an emergency number.</p>
+	 *
+	 * @param phone_number the phone number to check
+	 *
+	 * @return true if it's an emergency number, false otherwise
+	 */
+	public static boolean isEmergencyNumber(@NonNull final String phone_number) {
+		final Context context = UtilsGeneral.getContext();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+			return telephonyManager.isEmergencyNumber(phone_number);
+		} else {
+			return PhoneNumberUtils.isEmergencyNumber(phone_number);
+		}
 	}
 
     /*public static void getCallLogs() {

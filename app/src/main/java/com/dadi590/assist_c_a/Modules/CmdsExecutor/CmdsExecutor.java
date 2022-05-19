@@ -41,12 +41,13 @@ import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidPower;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroid;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidTelephony;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsTimeDate;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.Arrays;
@@ -62,6 +63,8 @@ public class CmdsExecutor implements IModule {
 	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
 	private static boolean some_cmd_detected = false;
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -73,9 +76,14 @@ public class CmdsExecutor implements IModule {
 	}
 	@Override
 	public final void destroyModule() {
-		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -229,7 +237,7 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						final String speak = "It's " + ValuesStorage.getValue(CONSTS.current_time);
+						final String speak = "It's " + UtilsTimeDate.getTimeStr();
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 					}
 
@@ -240,7 +248,7 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						final String speak = "Today's " + ValuesStorage.getValue(CONSTS.current_date);
+						final String speak = "Today's " + UtilsTimeDate.getDateStr();
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 					}
 
@@ -479,7 +487,7 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						final String speak = "Battery percentage: " + ValuesStorage.getValue(CONSTS.battery_percentage) +
+						final String speak = "Battery percentage: " + ValuesStorage.getValue(CONSTS_ValueStorage.battery_percentage) +
 								"%.";
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 					}
@@ -491,10 +499,25 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						UtilsAndroidPower.shutDownDevice();
-
-						final String speak = "Shutting down the device, sir.";
+						String speak = "Shutting down the device, sir.";
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+						switch (UtilsAndroidPower.shutDownDevice()) {
+							//case (UtilsAndroid.NO_ERRORS): - can't exist, since the function may not return
+							case (UtilsAndroid.ERROR): {
+								speak = "Error shutting down the device.";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+								break;
+							}
+							case (UtilsAndroid.NO_ROOT): {
+								speak = "Error shutting down the device - no root user rights available nor app " +
+										"installed as system app.";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+								break;
+							}
+						}
 					}
 
 					break;
@@ -506,17 +529,7 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						final int reboot_mode;
-						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
-							reboot_mode = UtilsAndroidPower.MODE_NORMAL;
-						} else if (CommandsDetection_APU.RET_14_SAFE_MODE.equals(command)) {
-							reboot_mode = UtilsAndroidPower.MODE_SAFE;
-						} else {
-							reboot_mode = UtilsAndroidPower.MODE_RECOVERY;
-						}
-						UtilsAndroidPower.rebootDevice(reboot_mode);
-
-						final String speak;
+						String speak;
 						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
 							speak = "Rebooting the device, sir.";
 						} else if (CommandsDetection_APU.RET_14_SAFE_MODE.equals(command)) {
@@ -525,6 +538,31 @@ public class CmdsExecutor implements IModule {
 							speak = "Rebooting the device into the recovery, sir.";
 						}
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+						final int reboot_mode;
+						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
+							reboot_mode = UtilsAndroidPower.MODE_NORMAL;
+						} else if (CommandsDetection_APU.RET_14_SAFE_MODE.equals(command)) {
+							reboot_mode = UtilsAndroidPower.MODE_SAFE;
+						} else {
+							reboot_mode = UtilsAndroidPower.MODE_RECOVERY;
+						}
+						switch (UtilsAndroidPower.rebootDevice(reboot_mode)) {
+							//case (UtilsAndroid.NO_ERRORS): - can't exist, since the function may not return
+							case (UtilsAndroid.ERROR): {
+								speak = "Error rebooting down the device.";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+								break;
+							}
+							case (UtilsAndroid.NO_ROOT): {
+								speak = "Error rebooting down the device - no root user rights available nor app " +
+										"installed as system app.";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+								break;
+							}
+						}
 					}
 
 					break;
@@ -653,7 +691,7 @@ public class CmdsExecutor implements IModule {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
-		intentFilter.addAction(CONSTS_BC.ACTION_CALL_PROCESS_TASK);
+		intentFilter.addAction(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
 
 		try {
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
@@ -675,11 +713,11 @@ public class CmdsExecutor implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case (CONSTS_BC.ACTION_CALL_PROCESS_TASK): {
-					final String sentence_str = intent.getStringExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_1);
-					final boolean partial_results = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_2,
+				case (CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK): {
+					final String sentence_str = intent.getStringExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_1);
+					final boolean partial_results = intent.getBooleanExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_2,
 							false);
-					final boolean only_returning = intent.getBooleanExtra(CONSTS_BC.EXTRA_CALL_PROCESS_TASK_3,
+					final boolean only_returning = intent.getBooleanExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_3,
 							false);
 					processTask(sentence_str, partial_results, only_returning);
 				}

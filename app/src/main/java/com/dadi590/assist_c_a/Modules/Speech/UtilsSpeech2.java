@@ -53,7 +53,7 @@ final class UtilsSpeech2 {
 	 */
 	@NonNull
 	private static String getUtteranceIdPrefix(final int priority) {
-		return CONSTS.UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
+		return CONSTS_Speech.UTTERANCE_ID_PREFIX.replace("X", String.valueOf(priority));
 	}
 
 	/**
@@ -69,7 +69,7 @@ final class UtilsSpeech2 {
 			// If no speech was being spoken, we'll supposed it has the minimum priority.
 			return Speech2.PRIORITY_LOW;
 		}
-		final int index_hyphen = utteranceId.indexOf((int) CONSTS.UTTERANCE_ID_PREFIX_UNIQUE_CHAR);
+		final int index_hyphen = utteranceId.indexOf((int) CONSTS_Speech.UTTERANCE_ID_PREFIX_UNIQUE_CHAR);
 
 		return Integer.parseInt(utteranceId.substring(index_hyphen-1, index_hyphen));
 	}
@@ -87,7 +87,7 @@ final class UtilsSpeech2 {
 		// as prefix to differentiate different priorities of speeches.
 
 		final String utterance_id_prefix = getUtteranceIdPrefix(priority);
-		return utterance_id_prefix + UtilsGeneral.generateRandomString(CONSTS.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
+		return utterance_id_prefix + UtilsGeneral.generateRandomString(CONSTS_Speech.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
 	}
 
 	/**
@@ -137,13 +137,13 @@ final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Broadcast the {@code after_speaking_code} through {@link CONSTS_BC#ACTION_AFTER_SPEAK_CODE}.</p>
+	 * <p>Broadcast the {@code after_speaking_code} through {@link CONSTS_BC_Speech#ACTION_AFTER_SPEAK_CODE}.</p>
 	 *
 	 * @param code the code to broadcast
 	 */
 	static void broadcastAfterSpeakCode(final int code) {
-		final Intent intent = new Intent(CONSTS_BC.ACTION_AFTER_SPEAK_CODE);
-		intent.putExtra(CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, code);
+		final Intent intent = new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
+		intent.putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, code);
 
 		UtilsApp.sendInternalBroadcast(intent);
 	}
@@ -156,7 +156,7 @@ final class UtilsSpeech2 {
 	static void readyArrayLists(@NonNull final Collection<? super ArrayList<SpeechObj>> arrays_speech_objs) {
 		// Fill each ArrayList with a number of ArrayLists, which correspond to the number of existing priority values.
 		// 50 as the initial value because I don't think more than 50 speeches will be on a list... (wtf).
-		for (int i = 0; i < CONSTS.NUMBER_OF_PRIORITIES; ++i) {
+		for (int i = 0; i < CONSTS_Speech.NUMBER_OF_PRIORITIES; ++i) {
 			arrays_speech_objs.add(new ArrayList<>(50));
 			// Before you think in declaring a new variable to be the array to always add in the for loop, think again
 			// and realize it's a reference... So it will be the same array all over the indexes of the main one (copy
@@ -287,14 +287,14 @@ final class UtilsSpeech2 {
 			if (correct_sub_array.get(i).utterance_id.equals(utterance_id)) {
 				final SpeechObj speechObj = correct_sub_array.get(i);
 
-				if (speechObj.txt_to_speak.startsWith(CONSTS.WAS_SAYING_PREFIX_1)) {
-					final String new_speech = speechObj.txt_to_speak.substring(CONSTS.WAS_SAYING_PREFIX_1.length());
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS.WAS_SAYING_PREFIX_2 + new_speech;
-				} else if (speechObj.txt_to_speak.startsWith(CONSTS.WAS_SAYING_PREFIX_2)) {
-					final String new_speech = speechObj.txt_to_speak.substring(CONSTS.WAS_SAYING_PREFIX_2.length());
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS.WAS_SAYING_PREFIX_3 + new_speech;
-				} else if (!speechObj.txt_to_speak.startsWith(CONSTS.WAS_SAYING_PREFIX_3)) {
-					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS.WAS_SAYING_PREFIX_1 +
+				if (speechObj.txt_to_speak.startsWith(CONSTS_Speech.WAS_SAYING_PREFIX_1)) {
+					final String new_speech = speechObj.txt_to_speak.substring(CONSTS_Speech.WAS_SAYING_PREFIX_1.length());
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS_Speech.WAS_SAYING_PREFIX_2 + new_speech;
+				} else if (speechObj.txt_to_speak.startsWith(CONSTS_Speech.WAS_SAYING_PREFIX_2)) {
+					final String new_speech = speechObj.txt_to_speak.substring(CONSTS_Speech.WAS_SAYING_PREFIX_2.length());
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS_Speech.WAS_SAYING_PREFIX_3 + new_speech;
+				} else if (!speechObj.txt_to_speak.startsWith(CONSTS_Speech.WAS_SAYING_PREFIX_3)) {
+					arrays_speech_objs.get(priority).get(i).txt_to_speak = CONSTS_Speech.WAS_SAYING_PREFIX_1 +
 							speechObj.txt_to_speak;
 				}
 				break;

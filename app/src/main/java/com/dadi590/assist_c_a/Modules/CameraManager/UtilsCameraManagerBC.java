@@ -42,8 +42,8 @@ public final class UtilsCameraManagerBC {
 	 * @param usage same as in {@link CameraManagement#useCamera(int)}
 	 */
 	public static void useCamera(final int usage) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_USE_CAMERA);
-		broadcast_intent.putExtra(CONSTS_BC.EXTRA_USE_CAMERA_1, usage);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_USE_CAMERA);
+		broadcast_intent.putExtra(CONSTS_BC_CameraManag.EXTRA_USE_CAMERA_1, usage);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

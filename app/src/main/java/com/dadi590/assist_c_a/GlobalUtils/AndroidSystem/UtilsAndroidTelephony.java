@@ -23,15 +23,20 @@ package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.ServiceManager;
 import android.telecom.TelecomManager;
 import android.view.KeyEvent;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.telephony.ITelephony;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -115,8 +120,6 @@ public final class UtilsAndroidTelephony {
 	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
 	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
 	 * succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
-	 * required for the operation</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @return one of the constants
@@ -167,7 +170,7 @@ public final class UtilsAndroidTelephony {
 	}
 
 	/**
-	 * <p>Toggles the phone's speakerphone in a phone call.</p>
+	 * <p>Sets the phone's speakerphone in a phone call.</p>
 	 *
 	 * @param enabled true to enable it, false to disable it
 	 */
@@ -175,5 +178,46 @@ public final class UtilsAndroidTelephony {
 		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext().getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setMode(AudioManager.MODE_IN_CALL);
 		audioManager.setSpeakerphoneOn(enabled);
+	}
+
+	/**
+	 * <p>Places a phone call.</p>
+	 * <p>If the app is a privileged system app, it is possible to call emergency numbers - do not attempt without being
+	 * such an app, or a security exception will be thrown and not handled.</p>
+	 *
+	 * @param phone_number the phone number to call, with country prefix (for example, +351123456789 or +351112 for
+	 *                     Portugal)
+	 *
+	 * @return true if the call was placed, false if it was just dialed because there are not enough permissions to
+	 * place the call (either because there's no permission to place calls, or there's no permission to place emergency
+	 * calls)
+	 */
+	public static boolean makePhoneCall(@NonNull final String phone_number) {
+		final Context context = UtilsGeneral.getContext();
+
+		final Intent intent = new Intent("", Uri.fromParts("tel", phone_number, null));
+
+		final String action;
+		final boolean call_placed;
+		if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED)) {
+			action = Intent.ACTION_CALL_PRIVILEGED;
+			call_placed = true;
+		} else if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
+			if (UtilsTelephony.isEmergencyNumber(phone_number)) {
+				action = Intent.ACTION_DIAL_EMERGENCY;
+				call_placed = false;
+			} else {
+				action = Intent.ACTION_CALL;
+				call_placed = true;
+			}
+		} else {
+			action = UtilsTelephony.isEmergencyNumber(phone_number) ? Intent.ACTION_DIAL_EMERGENCY : Intent.ACTION_DIAL;
+			call_placed = false;
+		}
+		intent.setAction(action);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(intent);
+
+		return call_placed;
 	}
 }

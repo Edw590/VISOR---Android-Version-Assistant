@@ -33,7 +33,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
@@ -41,24 +41,23 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
  */
 public final class UtilsMainSrv {
 
-	public static final int DETECTION_ACTIVATED = 0;
-	public static final int UNSUPPORTED_OS_VERSION = 1;
-	public static final int UNSUPPORTED_HARDWARE = 2;
-	public static final int PERMISSION_DENIED = 3;
-
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
 	private UtilsMainSrv() {
 	}
 
+	public static final int DETECTION_ACTIVATED = 0;
+	public static final int UNSUPPORTED_OS_VERSION = 1;
+	public static final int UNSUPPORTED_HARDWARE = 2;
+	public static final int PERMISSION_DENIED = 3;
 	/**
 	 * <p>This activates the detection of a long power button press.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #DETECTION_ACTIVATED} --> for the returning value: the detection was activated successfully</p>
-	 * <p>- {@link #UNSUPPORTED_OS_VERSION} --> for the returning value: the OS is not in a supported version (API 21
-	 * through 27)</p>
+	 * <p>- {@link #UNSUPPORTED_OS_VERSION} --> for the returning value: the OS is not in a supported version (up until
+	 * API 27)</p>
 	 * <p>- {@link #UNSUPPORTED_HARDWARE} --> for the returning value: the hardware does not seem to support the
 	 * detection</p>
 	 * <p>- {@link #PERMISSION_DENIED} --> for the returning value: the permission to draw a screen overlay was denied</p>
@@ -68,21 +67,19 @@ public final class UtilsMainSrv {
 	 */
 	public static int startLongPwrBtnDetection() {
 
-		final int system_build = Build.VERSION.SDK_INT;
-		if (!(system_build >= 21 && system_build <= 27)) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			return UNSUPPORTED_OS_VERSION;
 		}
 
-		// ONLY AS OF ANDROID 5.0/Lollipop!!!!!!!!!!!!!!!!!!!!! (SDK 21)
-
 		// DOESN'T WORK AS OF ANDROID 9/Pie!!!!!!!!!!!!!!!! (SDK 28)
+		// Find another solution - on hold until I get an Android Pie device or something demands it.
 
 		final LinearLayout linearLayout = new LinearLayout(UtilsGeneral.getContext()) {
 
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
-					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio_internally);
+					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
 					if (null == is_recording_audio) {
 						is_recording_audio = false;
 					}

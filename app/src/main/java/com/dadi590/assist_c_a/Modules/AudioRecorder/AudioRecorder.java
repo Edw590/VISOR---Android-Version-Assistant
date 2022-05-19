@@ -32,9 +32,10 @@ import androidx.annotation.Nullable;
 import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
+import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.io.File;
@@ -53,6 +54,8 @@ public class AudioRecorder implements IModule {
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -64,9 +67,14 @@ public class AudioRecorder implements IModule {
 	}
 	@Override
 	public final void destroyModule() {
-		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -75,8 +83,8 @@ public class AudioRecorder implements IModule {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.ACTION_AFTER_SPEAK_CODE);
-			intentFilter.addAction(CONSTS_BC.ACTION_RECORD_AUDIO);
+			intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
+			intentFilter.addAction(CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
@@ -91,7 +99,7 @@ public class AudioRecorder implements IModule {
 	 *                    false (this parameter will be ignored if it's to stop recording).
 	 */
 	final void recordAudio(final boolean start, final int audio_source) {
-		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS.is_recording_audio_internally);
+		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
 		if (null == is_recording) {
 			is_recording = false;
 		}
@@ -132,7 +140,8 @@ public class AudioRecorder implements IModule {
 	public static final int NO_ERRORS = 0;
 	public static final int ERR_CREATE_FILE = 1;
 	public static final int ERR_PREP_RECORDING = 2;
-	public static final int ERR_PERM_CAP_AUDIO_OR_MIC_BUSY = 3;
+	public static final int ERR_PERM_CAP_AUDIO = 3;
+	public static final int ERR_PERM_CAP_AUDIO_OR_MIC_BUSY = 4;
 	/**
 	 * <p>Starts an audio recording, recording from the given audio source, to default media output files, given by
 	 * {@link UtilsMedia#getOutputMediaFile(int)}</p>.
@@ -141,6 +150,8 @@ public class AudioRecorder implements IModule {
 	 * <p>- {@link #NO_ERRORS} --> for the returning value: when the recording successfully started</p>
 	 * <p>- {@link #ERR_CREATE_FILE} --> for the returning value: when there was an error creating the recording file</p>
 	 * <p>- {@link #ERR_PREP_RECORDING} --> for the returning value: when there was an error preparing the recording</p>
+	 * <p>- {@link #ERR_PERM_CAP_AUDIO} --> for the returning value: when the permission to record from the given audio
+	 * source was not granted</p>
 	 * <p>- {@link #ERR_PERM_CAP_AUDIO_OR_MIC_BUSY} --> for the returning value: when the permission to record from the
 	 * given audio source was not granted, or if the microphone is already in use and the recording could not start</p>
 	 * <p><u>---CONSTANTS---</u></p>
@@ -151,10 +162,20 @@ public class AudioRecorder implements IModule {
 	 * @return one of the constants
 	 */
 	final int startRecording(final int audioSource, final boolean check_recording_possible) {
-		// Do NOT change the encoder and format settings. I've put those because they were compatible with all devices
-		// that the app supports, and still the sound is very good.
+		// Do NOT change the encoder and format settings. I've put those because they are compatible with all devices
+		// that the app supports, and the sound is still very good.
+
 		recorder = new MediaRecorder();
-		recorder.setAudioSource(audioSource);
+		try {
+			recorder.setAudioSource(audioSource);
+		} catch (final RuntimeException ignored) {
+			stopRecording();
+
+			final String speak = "Error 1 sir.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+			return ERR_PERM_CAP_AUDIO;
+		}
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		final File file;
 		if (check_recording_possible) {
@@ -163,7 +184,9 @@ public class AudioRecorder implements IModule {
 			file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
 		}
 		if (null == file) {
-			final String speak = "Error 1 sir.";
+			stopRecording();
+
+			final String speak = "Error 2 sir.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
 			return ERR_CREATE_FILE;
@@ -175,10 +198,10 @@ public class AudioRecorder implements IModule {
 		try {
 			recorder.prepare();
 		} catch (final IOException e) {
-			recorder.release();
-			recorder = null;
+			stopRecording();
+
 			if (!check_recording_possible) {
-				final String speak = "Error 2 sir.";
+				final String speak = "Error 3 sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
@@ -189,10 +212,11 @@ public class AudioRecorder implements IModule {
 		try {
 			recorder.start();
 		} catch (final IllegalStateException e) {
-			recorder.release();
-			recorder = null;
+			e.printStackTrace();
+			stopRecording();
+
 			if (!check_recording_possible) {
-				final String speak = "Error 3 sir.";
+				final String speak = "Error 4 sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			}
 			file.delete();
@@ -206,15 +230,15 @@ public class AudioRecorder implements IModule {
             }*/
 		}
 		if (check_recording_possible) {
-			recorder.release();
-			recorder = null;
+			stopRecording();
+
 			file.delete();
 
 			return UtilsGeneral.FONTE_DISPONIVEL;
 		}
 
 		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.is_recording_audio_internally, Boolean.toString(true));
+		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(true));
 
 		return NO_ERRORS;
 	}
@@ -233,7 +257,7 @@ public class AudioRecorder implements IModule {
 		}
 
 		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.is_recording_audio_internally, Boolean.toString(false));
+		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(false));
 	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -250,19 +274,17 @@ public class AudioRecorder implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case CONSTS_BC.ACTION_RECORD_AUDIO: {
-					final boolean start = intent.getBooleanExtra(
-							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, false);
-					final int audio_source = intent.getIntExtra(
-							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, -1);
+				case CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO: {
+					final boolean start = intent.getBooleanExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_1, false);
+					final int audio_source = intent.getIntExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_2, -1);
 					recordAudio(start, audio_source);
 
 					break;
 				}
 
-				case com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.ACTION_AFTER_SPEAK_CODE: {
+				case CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE: {
 					final int after_speak_code = intent.getIntExtra(
-							com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC.EXTRA_AFTER_SPEAK_CODE, -1);
+							CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, -1);
 					for (final Runnable runnable : runnables) {
 						if (runnable.hashCode() == after_speak_code) {
 							System.out.println("TTTTTTTTTT");

@@ -27,6 +27,8 @@ import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
@@ -45,6 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -317,6 +320,22 @@ public final class UtilsGeneral {
 		final Intent intent1 = new Intent(Intent.ACTION_MEDIA_BUTTON);
 		intent1.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, key_code));
 		context.sendBroadcast(intent1, permission);
+	}
+
+	/**
+	 * <p>Checks if an intent is recognized on the device (that includes any packages, not just system ones).</p>
+	 * <p>For example the intent of sending a message is not supposed to be available on a device which cannot send
+	 * SMS messages, and would be a way to check such thing.</p>
+	 *
+	 * @param intent the intent to check
+	 *
+	 * @return true if the intent is available, false otherwise
+	 */
+	public static boolean isIntentActionAvailable(@NonNull final Intent intent) {
+		final List<ResolveInfo> list = UtilsGeneral.getContext().getPackageManager().
+				queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+		return !list.isEmpty();
 	}
 
 	public static final int FONTE_DISPONIVEL = 0;

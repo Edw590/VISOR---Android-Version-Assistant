@@ -22,13 +22,6 @@
 package com.dadi590.assist_c_a.Modules.SomeValuesUpdater;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * <p>The module that periodically updates some values which no other module updates by an event.</p>
@@ -36,6 +29,8 @@ import java.util.TimeZone;
  */
 public class SomeValuesUpdater implements IModule {
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -50,6 +45,13 @@ public class SomeValuesUpdater implements IModule {
 		infinity_thread.interrupt();
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
+
+
+	// Maybe delete the module? Why updated time, wtf. Or at least disable it. There's no current usage for it.
+	// Done. Disabled and nothing being updated here. It's on hold until it's useful again.
+
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -62,16 +64,6 @@ public class SomeValuesUpdater implements IModule {
 		@Override
 		public void run() {
 			while (true) {
-				{
-					final SimpleDateFormat time = new SimpleDateFormat(CONSTS.CURRENT_TIME_FORMAT, Locale.getDefault());
-					time.setTimeZone(TimeZone.getDefault());
-					ValuesStorage.updateValue(CONSTS.current_time, time.format(new Date()));
-
-					// Keep the timezone in English here so he can say the weekday in English.
-					final SimpleDateFormat date = new SimpleDateFormat(CONSTS.CURRENT_DATE_FORMAT, Locale.US);
-					date.setTimeZone(TimeZone.getDefault());
-					ValuesStorage.updateValue(CONSTS.current_date, date.format(new Date()));
-				}
 
 
 				try {

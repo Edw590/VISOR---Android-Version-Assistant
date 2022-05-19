@@ -26,7 +26,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.multidex.MultiDexApplication;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
@@ -44,10 +43,10 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * <p>So it seems Android will restart the main app process if it goes down, by calling only
  * {@link Application#onCreate()} if the main app.</p>
  */
-public final class ApplicationClass extends MultiDexApplication {
+public final class ApplicationClass extends Application {
 
 	// Won't ever be null while the app is running because everything else will be called after
-	// ApplicationClass.onCreate(), after which applicationContext is initialized. So it's fine not to initialize it
+	// ApplicationClass.onCreate(), after which applicationContext is initialized. So it's fine to initialize it to null
 	// here and say it's NonNull.
 	// Except, it seems, with Content Providers, in which case the Application class may not have been initialized yet.
 	// But with Activities, Services and Receivers it's alright. Though, if called from this class's Constructor, this
@@ -101,10 +100,11 @@ public final class ApplicationClass extends MultiDexApplication {
 
 		System.exit(1); // kill off the crashed app*/
 
-		System.out.println("------------- CRITICAL APP ERROR -------------");
+		System.out.println("1------------- CRITICAL APP ERROR -------------1");
 		System.out.println("Thread: " + thread);
 		System.out.println("Error:");
 		throwable.printStackTrace();
+		System.out.println("2------------- CRITICAL APP ERROR -------------2");
 
 		// todo Put it writing some log or whatever here!!!
 		// If you need Context for anything, use getApplicationContext, since this is used before the static one is set.

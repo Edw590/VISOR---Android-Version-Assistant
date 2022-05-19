@@ -35,6 +35,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -50,7 +51,7 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>Additional information:</p>
  * <p>- Initialization Vector of 128 bits (16 bytes) for both AES-CBC-PKCS#7 and HMAC.</p>
  * <p>- Key of 256 bits (32 bytes) to encrypt the data using AES-CBC-PKCS#7.</p>
- * <p>- Key of 512 bits (64 bytes) to calculate the HMAC tag.</p>
+ * <p>- Key of 512 bits (64 bytes) to calculate the HMAC tag, which has a length of 512 bits (64 bytes).</p>
  * <p>- The keys are wiped from memory as soon as they're no longer needed.</p>
  * <p>- Constant-time preventions not taken in consideration.</p>
  * <p>- Data must be encoded in UTF-7 before being encrypted, and therefore, the result of the decryption will be UTF-7
@@ -141,7 +142,11 @@ public final class UtilsCryptoEnDecrypt {
 			// Again, won't happen - EXCEPT the last part where it says the exception will be thrown if the chosen
 			// encryption algorithm is unable to process the data provided.
 			return null;
-		}
+		}/* catch (final AEADBadTagException ignored) {
+			This can't be here. It's for KitKat or above only. Though, there seems to be no problem anyways because it
+			says it's already caught, as long as it appears after BadPaddingException (which probably includes this one).
+			return null;
+		}*/
 		final byte[] hmac_tag = getHmacTag(keys[1], iv, cipher_text, raw_aad_ready);
 		Arrays.fill(keys[1], (byte) 0); // Wipe the HMAC key
 
@@ -252,7 +257,7 @@ public final class UtilsCryptoEnDecrypt {
 	}
 
 	/**
-	 * <p>Randomizes UTF-7 encoded data for even safer encryption using this classes method.</p>
+	 * <p>Randomizes UTF-7 encoded data for even safer encryption using this class' method.</p>
 	 * <p>This is done by adding a random byte value from 128 to 255 in a random index each 16 elements. So, for example,
 	 * on index 5 a 173 byte is added, and on index 18 a 209 byte is added.</p>
 	 * <p>This means the new byte array will have {@code length = data.length + Math.ceil(data.length/16)}.</p>
@@ -345,7 +350,7 @@ public final class UtilsCryptoEnDecrypt {
 	}
 
 	/**
-	 * <p>Get the keys to be used with AES and MAC according with the class doc.</p>
+	 * <p>Get the keys to be used with AES and MAC according to the class doc.</p>
 	 * <br>
 	 * <p><strong>ATTENTION:</strong> the passwords' order must NOT be changed once the passwords are used to encrypt
 	 * some data! Use them always in the same order they were entered!</p>
@@ -360,15 +365,14 @@ public final class UtilsCryptoEnDecrypt {
 		final byte[] password1_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password1, 5);
 		final byte[] password2_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password2, 5);
 
-		//try {
-			return new byte[][]{
-					SCrypt.generate(password1_sha512, password2_sha512, SCRYPT_N, SCRYPT_R, SCRYPT_P, AES_KEY_SIZE),
-					SCrypt.generate(password2_sha512, password1_sha512, SCRYPT_N, SCRYPT_R, SCRYPT_P, HMAC_KEY_SIZE),
-			};
-		/*} catch (final OutOfMemoryError ignored) {
-			return null;
-		}*/
+		// No need to check for OutOfMemoryError because the encrypt and decrypt functions already check for low memory.
+		return new byte[][]{
+				SCrypt.generate(password1_sha512, password2_sha512, SCRYPT_N, SCRYPT_R, SCRYPT_P, AES_KEY_SIZE),
+				SCrypt.generate(password2_sha512, password1_sha512, SCRYPT_N, SCRYPT_R, SCRYPT_P, HMAC_KEY_SIZE),
+		};
 
+		// This below if before I found out about Scrypt and others. Though, the one I could get here was Scrypt and not
+		// the one above for some reason I don't remember (maybe not available for Android).
 		/*// This enormous list below is because I read multiple hashing is safer. And this doesn't impact at all on the
 		// performance (since this is not supposed to be done very much anyways - once in hours or something).
 		final byte[] md5 = UtilsCryptoHashing.getHashBytesOfBytes(password1, 0);
@@ -431,7 +435,7 @@ public final class UtilsCryptoEnDecrypt {
 	}
 
 	/**
-	 * <p>Creates a HMAC tag from the given bytes data using the algorithm defined in the class doc.</p>
+	 * <p>Creates an HMAC tag from the given data bytes using the algorithm defined in the class doc.</p>
 	 *
 	 * @param key_mac the key to create the tag
 	 * @param iv the initialization vector to get the tag from
@@ -460,8 +464,8 @@ public final class UtilsCryptoEnDecrypt {
 			return new byte[0];
 		}
 
-		// Don't delete this! It's wiping the variable.
-		secretKey_hmac = new SecretKeySpec(new byte[]{(byte) 0}, mac_algorithm);
+		// Don't delete this! It's wiping the variable the best way possible (no way of "filling with 0s" here).
+		secretKey_hmac = null;
 
 		hmac.update(iv);
 		hmac.update(cipher_text);

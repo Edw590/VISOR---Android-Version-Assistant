@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.Modules.ProtectedLockScr;
 
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,15 +33,14 @@ import android.os.IBinder;
 import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * <p>The Protected Lock Screen service, which is basically an insurance that the Protected Lock Screen activity is
@@ -64,12 +64,15 @@ public class ProtectedLockScrSrv extends Service {
 				GL_CONSTS.CH_ID_PLS_SRV_FOREGROUND,
 				"Protected Lock Screen notification",
 				"",
-				UtilsServices.TYPE_FOREGROUND,
+				NotificationManager.IMPORTANCE_MAX,
 				GL_CONSTS.ASSISTANT_NAME + "'s Protected Lock Screen running",
 				"",
 				null
 		);
-		startForeground(GL_CONSTS.NOTIF_ID_PLS_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
+		startForeground(GL_CONSTS.NOTIF_ID_PLS_SRV_FOREGROUND, UtilsNotifications.getNotification(notificationInfo).
+				setVisibility(NotificationCompat.VISIBILITY_PUBLIC).
+				setOngoing(true).
+				build());
 
 		UtilsServices.startMainService();
 

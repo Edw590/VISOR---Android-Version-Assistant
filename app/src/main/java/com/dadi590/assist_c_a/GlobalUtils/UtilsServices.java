@@ -23,22 +23,15 @@ package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.NotificationCompat;
 
 import com.dadi590.assist_c_a.MainSrv.MainSrv;
-import com.dadi590.assist_c_a.R;
 
 /**
  * <p>Global {@link Service}s-related utilities.</p>
@@ -138,14 +131,16 @@ public final class UtilsServices {
 	 */
 	@NonNull
 	public static int[] startMainService() {
-		if (UtilsCertificates.isThisAppCorrupted()) {
+		if (UtilsCertificates.isThisAppCorrupt()) {
 			// This is just in case it's possible to patch the APK like it is with binary files without needing the
 			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
 			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.
 			// It's also in case something changes on the APK because of some corruption. The app won't start.
 			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
+
 			return new int[0]; // Just to be sure it doesn't carry on.
 		}
+
 		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
 		UtilsServices.startService(MainSrv.class, null, true);
 
@@ -156,7 +151,7 @@ public final class UtilsServices {
 	 * <p>Checks if the given service is running.</p>
 	 * <br>
 	 * <p>Attention - as of {@link Build.VERSION_CODES#O}, this will only work for services internal to the app! (If the
-	 * app is a system app, all the services on the device will continue to be detected.)</p>
+	 * app is a system app though, all the services on the device will continue to be detected.)</p>
 	 *
 	 * @param service_class the class of the service to check
 	 *
@@ -177,83 +172,5 @@ public final class UtilsServices {
 		}
 
 		return false;
-	}
-
-	public static final int TYPE_FOREGROUND = 0;
-	/**
-	 * <p>Returns a {@link Notification} with the given title and content text.</p>
-	 *
-	 * @param notificationInfo an instance of {@link ObjectClasses.NotificationInfo}
-	 *
-	 * @return the {@link Notification}
-	 */
-	@NonNull
-	public static Notification getNotification(@NonNull final ObjectClasses.NotificationInfo notificationInfo) {
-		final Context context = UtilsGeneral.getContext();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			createNotificationChannel(notificationInfo.notification_type, notificationInfo.channel_id,
-					notificationInfo.channel_name, notificationInfo.channel_description);
-		}
-
-		final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notificationInfo.channel_id);
-		builder.setContentTitle(notificationInfo.notification_title);
-		builder.setContentText(notificationInfo.notification_content);
-		builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
-		builder.setContentIntent(notificationInfo.notif_content_intent);
-		builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
-		builder.setWhen(System.currentTimeMillis());
-		builder.setShowWhen(true);
-		builder.setLocalOnly(true);
-		builder.setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
-		builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.app_logo_legacy_only));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			builder.setSmallIcon(R.drawable.app_logo_transparent);
-		} else {
-			builder.setSmallIcon(R.mipmap.app_logo_legacy_only);
-		}
-
-		if (notificationInfo.notification_type == TYPE_FOREGROUND) {
-			builder.setOngoing(true);
-			builder.setPriority(NotificationCompat.PRIORITY_MIN);
-		}
-
-		return builder.build();
-	}
-
-	/**
-	 * <p>Creates a channel for notifications, required as of {@link Build.VERSION_CODES#O}.</p>
-	 *
-	 * @param notification_type same as in {@link #getNotification(ObjectClasses.NotificationInfo)} )}
-	 * @param channel_id the ID of the channel
-	 * @param ch_name the name of the channel
-	 * @param ch_description the description of the channel
-	 */
-	@RequiresApi(api = Build.VERSION_CODES.O)
-	private static void createNotificationChannel(final int notification_type, @NonNull final String channel_id,
-												  @NonNull final String ch_name, @NonNull final String ch_description) {
-		String chName = ch_name;
-		if (chName.isEmpty()) {
-			// If it's an empty string, an error will be thrown. A space works.
-			chName = " ";
-		}
-		int importance = NotificationManager.IMPORTANCE_DEFAULT;
-		if (notification_type == TYPE_FOREGROUND) {
-			importance = NotificationManager.IMPORTANCE_UNSPECIFIED;
-		}
-		final NotificationChannel channel = new NotificationChannel(channel_id, chName, importance);
-		channel.setDescription(ch_description);
-		// Register the channel with the system; you can't change the importance
-		// or other notification behaviors after this
-		final NotificationManager notificationManager = UtilsGeneral.getContext()
-				.getSystemService(NotificationManager.class);
-		try {
-			notificationManager.createNotificationChannel(channel);
-		} catch (final IllegalArgumentException ignored) {
-			// This might throw an error saying "java.lang.IllegalArgumentException: Invalid importance level".
-			// If that happens, the importance goes to MIN - if it's a system app, will remain on MIN; if it's a normal
-			// app, will be put in LOW (hopefully - it says "higher")
-			channel.setImportance(NotificationManager.IMPORTANCE_MIN);
-			notificationManager.createNotificationChannel(channel);
-		}
 	}
 }

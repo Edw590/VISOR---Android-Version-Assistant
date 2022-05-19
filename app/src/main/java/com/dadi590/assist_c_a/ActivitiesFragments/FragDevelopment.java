@@ -51,7 +51,7 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.Locale;
@@ -102,8 +102,8 @@ public class FragDevelopment extends Fragment {
 				//startActivity(intent);
 
 				System.out.println("HHHHHHHHHHHHHHHHHH");
-				System.out.println(ValuesStorage.getValue(CONSTS.last_phone_call_time));
-				//UtilsCmdsExecutorBC.processTask("turn on wifi", false, false);
+				System.out.println(ValuesStorage.getValue(CONSTS_ValueStorage.last_phone_call_time));
+				UtilsCmdsExecutorBC.processTask("take a picture", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
 				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
@@ -238,6 +238,12 @@ public class FragDevelopment extends Fragment {
 							"authorizations left to grant: " + missing_authorizations + ".";
 				}
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+				// todo YOU MUST RESTART THE APP AFTER THIS!!!!! IT MUST KNOW IT HAS ALL THESE PERMISSIONS AND STUFF!!!
+
+				// todo Also, you must put a warning saying to keep clicking on Back until nothing else appears aside
+				//  from the desktop because of, for example, the battery optimization confirmation, which only appears
+				//  after the app is closed by clicking on Back (others do this too).
 			}
 		});
 		requireView().findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {

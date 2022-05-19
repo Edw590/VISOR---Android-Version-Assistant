@@ -33,7 +33,7 @@ import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
@@ -50,6 +50,8 @@ public class BatteryProcessor implements IModule {
 
 	private int last_detected_percent = -1;
 
+	///////////////////////////////////////////////////////////////
+	// IModule stuff
 	private boolean is_module_destroyed = false;
 	@Override
 	public final boolean isModuleFullyWorking() {
@@ -61,9 +63,14 @@ public class BatteryProcessor implements IModule {
 	}
 	@Override
 	public final void destroyModule() {
-		UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 		is_module_destroyed = true;
 	}
+	// IModule stuff
+	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>
@@ -72,8 +79,9 @@ public class BatteryProcessor implements IModule {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC.ACTION_PROCESS_PWR_CHG);
-			intentFilter.addAction(CONSTS_BC.ACTION_PROCESS_LVL_CHG);
+			intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+			intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
+			intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
 		} catch (final IllegalArgumentException ignored) {
@@ -87,7 +95,7 @@ public class BatteryProcessor implements IModule {
 	 */
 	final void processBatteryPwrChg(final boolean power_connected) {
 		// Update the value on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.power_connected, Boolean.toString(power_connected));
+		ValuesStorage.updateValue(CONSTS_ValueStorage.power_connected, Boolean.toString(power_connected));
 
 		if (last_detected_percent == -1) {
 			return;
@@ -121,7 +129,7 @@ public class BatteryProcessor implements IModule {
 		final int battery_percentage = battery_lvl * 100 / battery_lvl_scale;
 
 		// Update the value on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS.battery_percentage, Integer.toString(battery_percentage));
+		ValuesStorage.updateValue(CONSTS_ValueStorage.battery_percentage, Integer.toString(battery_percentage));
 
 		// If the class was just instantiated, store the current battery percentage and wait for the next change.
 		if (last_detected_percent == -1) {
@@ -204,17 +212,21 @@ public class BatteryProcessor implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case (CONSTS_BC.ACTION_PROCESS_PWR_CHG): {
-					final boolean power_connected = intent.getBooleanExtra(CONSTS_BC.EXTRA_PROCESS_PWR_CHG_1, false);
-					processBatteryPwrChg(power_connected);
+				case (Intent.ACTION_BATTERY_CHANGED): {
+					final int battery_status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+					final int battery_lvl = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+					final int battery_lvl_scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+					processBatteryLvlChg(battery_status, battery_lvl, battery_lvl_scale);
 
 					break;
 				}
-				case (CONSTS_BC.ACTION_PROCESS_LVL_CHG): {
-					final int battery_status = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_1, -1);
-					final int battery_lvl = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_2, -1);
-					final int battery_lvl_scale = intent.getIntExtra(CONSTS_BC.EXTRA_PROCESS_LVL_CHG_3, -1);
-					processBatteryLvlChg(battery_status, battery_lvl, battery_lvl_scale);
+				case (Intent.ACTION_POWER_CONNECTED): {
+					processBatteryPwrChg(true);
+
+					break;
+				}
+				case (Intent.ACTION_POWER_DISCONNECTED): {
+					processBatteryPwrChg(false);
 
 					break;
 				}

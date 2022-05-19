@@ -80,8 +80,6 @@ android {
 		versionName "for development" // "version for development" will appear in Settings xD (at least in English...)
 
 		signingConfig signingConfigs.release
-
-		multiDexEnabled true
 	}
 
 	compileOptions {

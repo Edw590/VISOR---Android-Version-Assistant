@@ -59,11 +59,13 @@ public final class GL_CONSTS {
 	// Permission strings
 	//public static final String ASSIST_C_A_RECV_PERM = "com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS";
 
-	// Services
+	// Notifications
 	public static final int NOTIF_ID_MAIN_SRV_FOREGROUND = 1;
 	public static final int NOTIF_ID_PLS_SRV_FOREGROUND = 2; // PLS = Protected Lock Screen
+	public static final int NOTIF_ID_SPEECHES = 3;
 	public static final String CH_ID_MAIN_SRV_FOREGROUND = "MainSrv:FOREGROUND";
 	public static final String CH_ID_PLS_SRV_FOREGROUND = "ProtectedLockScrSrv:FOREGROUND";
+	public static final String CH_ID_SPEECHES = "Speech2:Speeches";
 
 	// Media
 	public static final String MEDIA_FOLDER_REL_PATH = ASSISTANT_NAME + File.separator;

@@ -75,8 +75,7 @@ public class FragEventsScheduler extends Fragment {
 		final String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
 
-		int i = 0;
-		for (final Object[] module : ModulesList.getModulesList()) { // Add a switch for each module.
+		for (int i = 0; i < ModulesList.modules_list_length; ++i) { // Add a switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
@@ -84,8 +83,8 @@ public class FragEventsScheduler extends Fragment {
 			switchCompat.setTextSize(20.0F);
 			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
 
-			switchCompat.setText((CharSequence) module[2]); // Name the switch the module name.
-			final boolean module_running = ModulesList.isModuleRunningByIndex(i);
+			switchCompat.setText((CharSequence) ModulesList.getModuleValue(i, ModulesList.MODULE_NAME)); // Name the switch the module name.
+			final boolean module_running = ModulesList.isModuleRunning(i);
 			switchCompat.setChecked(module_running);
 			if (module_running) {
 				// If the module is running, color the text green (Accent Color).
@@ -96,7 +95,6 @@ public class FragEventsScheduler extends Fragment {
 			}
 
 			linearLayout.addView(switchCompat);
-			++i;
 		}
 	}
 }

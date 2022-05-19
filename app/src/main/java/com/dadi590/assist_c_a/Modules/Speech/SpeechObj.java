@@ -63,9 +63,9 @@ class SpeechObj {
 
 	static final int DEFAULT_AUDIO_STREAM = -3234;
 
-	final String utterance_id;
-	final Integer after_speaking_code;
-	String txt_to_speak; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
+	@NonNull final String utterance_id;
+	@Nullable final Integer after_speaking_code;
+	@NonNull String txt_to_speak; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
 	final int audio_stream;
 	final boolean bypass_no_sound;
 

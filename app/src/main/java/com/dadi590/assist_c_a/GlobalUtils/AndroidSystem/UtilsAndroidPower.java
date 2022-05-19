@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Power related utilities.</p>
+ * <p>Power-related utilities.</p>
  * <p>For example reboot or change Battery Saver Mode.</p>
  */
 public final class UtilsAndroidPower {
@@ -58,8 +58,8 @@ public final class UtilsAndroidPower {
 	 * <p>Shut down the device.</p>
 	 * <p>Note: the app needs either to hold the {@link Manifest.permission#REBOOT} permission or to have root user
 	 * permissions.</p>
-	 * <p>In case the shutdown is issued with a shell command (mentioned permission not granted), this function will
-	 * NOT return (no idea how to change that, currently).</p>
+	 * <p>Attention: in case the shutdown is issued with a shell command (mentioned permission not granted), this
+	 * function will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
@@ -68,8 +68,10 @@ public final class UtilsAndroidPower {
 	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
 	 * required for the operation</p>
 	 * <p><u>---CONSTANTS---</u></p>
+	 *
+	 * @return one of the constants
 	 */
-	public static /*int*/ void shutDownDevice() {
+	public static int shutDownDevice() {
 		// The REBOOT permission is the one required here, not SHUTDOWN (tested and got an error saying it).
 		// No idea what's the use of SHUTDOWN. But I'll keep it in the Manifest in case it's needed to broadcast the
 		// ACTION_SHUTDOWN or something.
@@ -79,13 +81,13 @@ public final class UtilsAndroidPower {
 					getSystemService(Context.POWER_SERVICE);
 			powerManager.shutdown(false, PowerManager.SHUTDOWN_USER_REQUESTED, false);
 
-			//return UtilsAndroid.NO_ERRORS;
+			return UtilsAndroid.NO_ERRORS;
 		} else {
 			final List<String> commands = new ArrayList<>(4);
 			commands.add("su");
 			// To know more about the command just below, check libcutils/android_reboot.cpp on the Android source.
 			// Also, cmds/svc/src/com/android/commands/svc/PowerCommand.java, on run().
-			// And another note: the shut down will be done gracefully, unlike with the reboot binary.
+			// And another note: the shutdown will be done gracefully, unlike with the reboot binary.
 			// Update: Don't use "setprop sys.powerctl" (the command I mention above), as that doesn't seem to shut down
 			// gracefully (weird).
 			// No idea how to set the 3 PowerManager.shutdown() parameters with a shell command... I knew with the above
@@ -93,9 +95,11 @@ public final class UtilsAndroidPower {
 			commands.add("svc power shutdown");
 			commands.add("am broadcast -a " + Intent.ACTION_SHUTDOWN);
 			commands.add("exit");
-			/*final UtilsShell.CmdOutputObj cmdOutputObj = */UtilsShell.executeShellCmd(commands, true);
+			final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
 
-			//return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+			// As said in the function doc, the above command does not return if it's successful. So, if it gets here,
+			// it's because there's no root access on the device and it did return (with some error in this case).
+			return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
 		}
 	}
 
@@ -106,8 +110,8 @@ public final class UtilsAndroidPower {
 	 * <p>Reboot the device.</p>
 	 * <p>Note: the app needs either to be granted the {@link Manifest.permission#REBOOT} permission (for privileged
 	 * system apps) or to have root user permissions.</p>
-	 * <p>In case the reboot is issued with a shell command (mentioned permission not granted), this function will NOT
-	 * return (no idea how to change that, currently).</p>
+	 * <p>Attention: in case the reboot is issued with a shell command (mentioned permission not granted), this function
+	 * will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
@@ -121,8 +125,10 @@ public final class UtilsAndroidPower {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param mode one of the constants
+	 *
+	 * @return one of the constants
 	 */
-	public static /*int*/ void rebootDevice(final int mode) {
+	public static int rebootDevice(final int mode) {
 		if (UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT)) {
 			final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(ServiceManager.
 					getService(Context.POWER_SERVICE));
@@ -152,7 +158,7 @@ public final class UtilsAndroidPower {
 			// hopefully...). So I broadcast it manually.
 			//UtilsGeneral.getContext().sendBroadcast(new Intent(Intent.ACTION_REBOOT));
 
-			//return UtilsAndroid.NO_ERRORS;
+			return UtilsAndroid.NO_ERRORS;
 		} else {
 			// Note: the reboot will be done gracefully, unlike with the reboot binary.
 			final String reboot_command = "svc power reboot";
@@ -167,9 +173,10 @@ public final class UtilsAndroidPower {
 			}
 			commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
 			commands.add("exit");
-			/*final UtilsShell.CmdOutputObj cmdOutputObj = */UtilsShell.executeShellCmd(commands, true);
+			final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
 
-			//return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+			// As with the shutdown, execution will only get here if there was some error - but it can get here.
+			return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
 		}
 	}
 

@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.MainSrv;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -38,10 +39,11 @@ import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
-import com.dadi590.assist_c_a.Modules.ModulesManager.UtilsModulesManager;
-import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC;
+import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.ModulesList;
@@ -65,31 +67,47 @@ public class MainSrv extends Service {
 
 		// Do this only once, when the service is created and while it's not destroyed
 
-		final Intent intent = new Intent(this, ActMain.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		final Intent intent1 = new Intent(this, ActMain.class);
+		intent1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		int flag_immutable = 0;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			flag_immutable = PendingIntent.FLAG_IMMUTABLE;
 		}
-		final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, flag_immutable |
+		final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, flag_immutable |
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
 				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND,
 				"Main notification",
 				"",
-				UtilsServices.TYPE_FOREGROUND,
+				NotificationManager.IMPORTANCE_UNSPECIFIED,
+				// If I'm not forgetting anything (writing this much time after I put the code here), this (only) gets
+				// the notification in the bottom of the other ones with MIN importance. If it's MIN, the notification
+				// will be on the top of the list when it starts. With UNSPECIFIED, it gets to the bottom.
 				GL_CONSTS.ASSISTANT_NAME + " Systems running",
 				"",
 				pendingIntent
 		);
-		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsServices.getNotification(notificationInfo));
+		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsNotifications.getNotification(notificationInfo).
+				setOngoing(true).
+				build());
+
+		// All the rest moved to the onStartCommand(). Read why there. The notification is here so it doesn't get
+		// created again.
+	}
+
+	@Override
+	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+		// Do this below every time the service is started/resumed/whatever
+
+		// Keep all here. In case the system kills all threads because of low memory and the service is called again
+		// with onStartCommand() (or by any other reason), it will try to restart the modules.
 
 		// Register the receiver before the speech module is started
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC.ACTION_READY);
+			intentFilter.addAction(CONSTS_BC_Speech.ACTION_READY);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
@@ -99,16 +117,22 @@ public class MainSrv extends Service {
 		// user. Later, notifications will be added. Emails would be a good idea too in more extreme notifications.
 		// After the speech module is ready, it will send a broadcast for the receiver below to activate the rest of
 		// the assistant.
-		ModulesList.startModule(ModulesList.getModuleIndex(Speech2.class));
+		final int speech_mod_index = ModulesList.getModuleIndex(Speech2.class);
+		if (ModulesList.deviceSupportsModule(speech_mod_index)) {
+			ModulesList.startModule(speech_mod_index);
+		}
+		// todo ^^^^ Cool right? Except if audio is not available --> get on with the notifications...
+
+		return START_STICKY;
 	}
 
 	final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-			final int index_modules_manager = ModulesList.getModuleIndex(ModulesManager.class);
-			final Object[][] modules_list = ModulesList.getModulesList();
-			if (ModulesList.MODULE_TYPE_SERVICE != (int) modules_list[index_modules_manager][1] &&
-					ModulesList.MODULE_TYPE_INSTANCE != (int) modules_list[index_modules_manager][1]) {
+			final int mods_manager_index = ModulesList.getModuleIndex(ModulesManager.class);
+
+			final int mods_manager_type1 = (int) ModulesList.getModuleValue(mods_manager_index, ModulesList.MODULE_TYPE1);
+			if (ModulesList.TYPE1_SERVICE != mods_manager_type1 && ModulesList.TYPE1_INSTANCE != mods_manager_type1) {
 				// Can't happen --> throw error immediately so it can be fixed right after starting the app with a wrong
 				// value.
 				throw new Error("IT'S NOT POSSIBLE TO CHECK AND RESTART THE MODULES MANAGER IN CASE IT STOPS WORKING!!!");
@@ -116,7 +140,19 @@ public class MainSrv extends Service {
 
 			// Keep checking if the Modules Manager is working and in case it's not, restart it.
 			while (true) {
-				if (UtilsModulesManager.checkRestartModule(index_modules_manager)) {
+				boolean module_restarted = false;
+				if (ModulesList.TYPE1_SERVICE == mods_manager_type1) {
+					if (!ModulesList.isModuleRunning(mods_manager_index)) {
+						ModulesList.restartModule(mods_manager_index);
+						module_restarted = true;
+					}
+				} else {
+					if (!ModulesList.isModuleFullyWorking(mods_manager_index)) {
+						ModulesList.restartModule(mods_manager_index);
+						module_restarted = true;
+					}
+				}
+				if (module_restarted) {
 					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
 					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
@@ -145,7 +181,7 @@ public class MainSrv extends Service {
 
 			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
-			if (intent.getAction().equals(CONSTS_BC.ACTION_READY)) {
+			if (intent.getAction().equals(CONSTS_BC_Speech.ACTION_READY)) {
 				// Start the main broadcast receivers before everything else, so stuff can start sending broadcasts
 				// right away after being ready.
 				MainRegRecv.registerReceivers();
@@ -240,6 +276,9 @@ public class MainSrv extends Service {
 				final String speak = "Ready, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
+				final int perms_left = UtilsServices.startMainService()[1];
+				UtilsPermissions.warnPermissions(perms_left, false);
+
 				try {
 					UtilsGeneral.getContext().unregisterReceiver(this);
 				} catch (final IllegalArgumentException ignored) {
@@ -247,18 +286,6 @@ public class MainSrv extends Service {
 			}
 		}
 	};
-
-	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-		// Do this below every time the service is started/resumed/whatever
-
-		// Do NOT put ANYTHING here!!!
-		// MANY places starting this service don't check if it's already started or not, so this method will be called
-		// many times randomly. Put everything on onCreate(), which is called only if the service was not running and
-		// was just started.
-
-		return START_STICKY;
-	}
 
 	@Override
 	@Nullable

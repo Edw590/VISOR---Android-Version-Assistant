@@ -1,5 +1,8 @@
 Give this to some tool that removes duplicated lines and you'll get the total permissions on this file.
-PS: don't forget to remove separator lines and links that I've put here (and these 2 too xD)
+PS: don't forget to remove separator lines, links that I've put here, and these 2 lines.
+
+From a Github file updates notifier
+android.intent.action.PACKAGES_SUSPENSION_CHANGED
 
 https://chromium.googlesource.com/android_tools/+/refs/heads/main/sdk/platforms/android-28/data/broadcast_actions.txt
 

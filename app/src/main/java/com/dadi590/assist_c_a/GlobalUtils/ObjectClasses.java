@@ -35,45 +35,45 @@ public class ObjectClasses {
 
 	/**
 	 * <p>Class to instantiate to give notification information to
-	 * {@link UtilsServices#getNotification(NotificationInfo)}.</p>
+	 * {@link UtilsNotifications#getNotification(NotificationInfo)}.</p>
 	 * <p>Check the constructor for more information.</p>
 	 */
 	public static class NotificationInfo {
 
-		final String channel_id;
-		final String channel_name;
-		final String channel_description;
-		final int notification_type;
-		final String notification_title;
-		final String notification_content;
-		final PendingIntent notif_content_intent;
+		@NonNull final String ch_id;
+		@Nullable final String ch_name;
+		@Nullable final String ch_description;
+		@NonNull final Integer ch_importance;
+		@NonNull final String notif_title;
+		@NonNull final String notif_content;
+		@Nullable final PendingIntent notif_content_intent;
 
 		/**
 		 * <p>Main class constructor.</p>
-		 * <br>
-		 * <p><u>---CONSTANTS---</u></p>
-		 * <p>- {@link UtilsServices#TYPE_FOREGROUND} --> for {@code notification_type}: a notification for a foreground
-		 * service</p>
-		 * <p><u>---CONSTANTS---</u></p>
+		 * <p>If the name or the description are given null values, the channel will NOT be created (meaning it already
+		 * exists).</p>
+		 * <p>The setPriority() method will be called automatically based on the importance parameter (both are
+		 * matched), so no need to set it manually.</p>
 		 *
-		 * @param channel_id the ID of the channel the notification is in
-		 * @param channel_name the name of the channel the notification is in
-		 * @param channel_description the description of the channel the notification is in
-		 * @param notification_type one of the constants
-		 * @param notification_title the title of the notification
-		 * @param notification_content the content of the notification
-		 * @param notif_content_intent the intent to use for when the user clicks on the notification
+		 * @param ch_id the ID of the channel the notification is in
+		 * @param ch_name the name of the channel the notification is in
+		 * @param ch_description the description of the channel the notification is in
+		 * @param ch_importance the importance of the channel the notification is in (don't worry about the old
+		 * PRIORITYs, as that's automatically addressed based on the IMPORTANCE)
+		 * @param notif_title the title of the notification
+		 * @param notif_content the content of the notification
+		 * @param notif_content_intent the pending intent to use for when the user clicks on the notification
 		 */
-		public NotificationInfo(@NonNull final String channel_id, @NonNull final String channel_name,
-								@NonNull final String channel_description, final int notification_type,
-								@NonNull final String notification_title, @NonNull final String notification_content,
-								@Nullable final PendingIntent notif_content_intent) {
-			this.channel_id = channel_id;
-			this.channel_name = channel_name;
-			this.channel_description = channel_description;
-			this.notification_type = notification_type;
-			this.notification_title = notification_title;
-			this.notification_content = notification_content;
+		public NotificationInfo(@NonNull final String ch_id, @Nullable final String ch_name,
+								@Nullable final String ch_description, @NonNull final Integer ch_importance,
+								@NonNull final String notif_title,
+								@NonNull final String notif_content, @Nullable final PendingIntent notif_content_intent) {
+			this.ch_id = ch_id;
+			this.ch_name = ch_name;
+			this.ch_description = ch_description;
+			this.ch_importance = ch_importance;
+			this.notif_title = notif_title;
+			this.notif_content = notif_content;
 			this.notif_content_intent = notif_content_intent;
 		}
 	}
@@ -84,8 +84,8 @@ public class ObjectClasses {
 	 */
 	public static class GetMethodClassObj {
 
-		public final Method getMethod;
-		public final Class<?> hidden_class;
+		@Nullable public final Method getMethod;
+		@Nullable public final Class<?> hidden_class;
 
 		/**
 		 * <p>Main class constructor.</p>

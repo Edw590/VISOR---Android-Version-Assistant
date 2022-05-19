@@ -214,7 +214,7 @@ public final class UtilsPermissions {
 	 * <p>Same as in {@link ContextCompat#checkSelfPermission(Context, String)}.</p>
 	 * <p>It just takes less space on a code line (no need to provide a Context instance nor check an int parameter).</p>
 	 *
-	 * @param permission Same as in {@link ContextCompat#checkSelfPermission(Context, String)}.
+	 * @param permission same as in {@link ContextCompat#checkSelfPermission(Context, String)}.
 	 *
 	 * @return true if the app has the permission, false otherwise
 	 */

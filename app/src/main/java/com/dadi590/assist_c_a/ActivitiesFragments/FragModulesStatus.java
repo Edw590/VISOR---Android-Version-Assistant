@@ -37,6 +37,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.R;
 
@@ -49,9 +50,6 @@ public class FragModulesStatus extends Fragment {
 
 	String color_accent;
 	String color_primary;
-
-	static final Object[][] modules_list = ModulesList.getModulesList();
-	static final int modules_list_length = modules_list.length;
 
 	@Nullable
 	@Override
@@ -81,30 +79,41 @@ public class FragModulesStatus extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		int i = 0;
-		for (final Object[] module : modules_list) { // Add a switch for each module.
+		for (int i = 0; i < ModulesList.modules_list_length; ++i) { // Add a switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
 			switchCompat.setId(i); // Set the ID to be the index of the module in the list
+			switchCompat.setText((CharSequence) ModulesList.getModuleValue(i, ModulesList.MODULE_NAME)); // Name the switch the module name.
+			//switchCompat.setEnabled(true);
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
 			switchCompat.setTypeface(null, Typeface.BOLD);
 			switchCompat.setTextSize(20.0F);
 			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
 			switchCompat.setTextIsSelectable(true);
+			switchCompat.setBackgroundColor(Color.WHITE);
+			switchCompat.setChecked(false);
 
-			switchCompat.setText((CharSequence) module[2]); // Name the switch the module name.
-			final boolean module_running = ModulesList.isModuleRunningByIndex(i);
+			if (!(boolean) ModulesList.getModuleValue(i, ModulesList.MODULE_SUPPORTED)) {
+				switchCompat.setEnabled(false);
+				switchCompat.setTextColor(Color.parseColor(color_primary));
+				switchCompat.setBackgroundColor(Color.GRAY);
+			}
+			// This below was supposed to be in the else statement of the module supported part, but leave it separated.
+			// In case something was done wrong in the Modules Manager, the modules may start even if they're not
+			// supported, as just happened. This way I can still see there's something wrong (gray background with
+			// green letters is not supposed to happen).
+			final boolean module_running = ModulesList.isModuleRunning(i);
 			switchCompat.setChecked(module_running);
 			if (module_running) {
-				// If the module is running, color the text green (Accent Color).
-				switchCompat.setTextColor(Color.parseColor(color_accent));
+				// If the module is fully working, color the text green (Accent Color), else with orange (holo_orange_dark).
+				switchCompat.setTextColor(ModulesList.isModuleFullyWorking(i) ? Color.parseColor(color_accent) :
+						Color.parseColor("#FFFF8800"));
 			} else {
 				// If it's not running, color it red (Primary Color).
 				switchCompat.setTextColor(Color.parseColor(color_primary));
 			}
 
 			linearLayout.addView(switchCompat);
-			++i;
 		}
 
 		// Thread disabled temporarily. Put it stopping after the user leaves this fragment.
@@ -116,10 +125,10 @@ public class FragModulesStatus extends Fragment {
 		public void run() {
 			while (true) { // Keep checking the modules' status.
 				System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-				for (int i = 0; i < modules_list_length; ++i) {
+				for (int i = 0; i < ModulesList.modules_list_length; ++i) {
 					final SwitchCompat switchCompat = current_view.findViewById(i);
 
-					final boolean module_running = ModulesList.isModuleRunningByIndex(i);
+					final boolean module_running = ModulesList.isModuleRunning(i);
 					switchCompat.setChecked(module_running); // --> "Animators may only be run on Looper threads"
 					if (module_running) {
 						// If the module is running, color the text green (Accent Color).

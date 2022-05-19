@@ -83,9 +83,9 @@ public final class UtilsCertificates {
 	/**
 	 * <p>Checks if the app became corrupt (done by checking its certificates).</p>
 	 *
-	 * @return true if it's not corrupted, false otherwise
+	 * @return true if it's not corrupt, false otherwise
 	 */
-	public static boolean isThisAppCorrupted() {
+	public static boolean isThisAppCorrupt() {
 		// Below will never be null. Else, how is the app installed.
 		final Boolean is_app_fine = Objects.requireNonNull(checkCertsPkg(UtilsGeneral.getContext().getPackageName(),
 				ASSIST_C_A_RSA_CERT_FINGERPRINT));

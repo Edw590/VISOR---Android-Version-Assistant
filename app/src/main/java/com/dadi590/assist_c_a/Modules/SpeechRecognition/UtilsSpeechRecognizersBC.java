@@ -37,29 +37,35 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_START_GOOGLE}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_GOOGLE} and executes
+	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately.</p>
 	 */
 	public static void startGoogleRecognition() {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_START_GOOGLE);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
+		UtilsSpeechRecognizers.startGoogleRecognition();
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_START_POCKET_SPHINX}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_POCKET_SPHINX} and executes
+	 * {@link UtilsSpeechRecognizers#startPocketSphinxRecognition()} immediately.</p>
 	 */
 	public static void startPocketSphinxRecognition() {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_START_POCKET_SPHINX);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
+		UtilsSpeechRecognizers.startPocketSphinxRecognition();
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC#ACTION_STOP_RECOGNITION}.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION} and executes
+	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
 	 */
 	public static void stopRecognition() {
-		final Intent broadcast_intent = new Intent(CONSTS_BC.ACTION_STOP_RECOGNITION);
+		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
+		UtilsSpeechRecognizers.terminateSpeechRecognizers();
 	}
 }
