@@ -16,10 +16,10 @@ Secondary project name: Assist_C_A (Assistant Client Android)
 - - [Project status](#--project-status)
 - - [License](#--license)
 - [Support](#support)
-- [Final notes](#final-notes)
+- [Final notes and contributing](#final-notes-and-contributing)
 
 ## Pictures
-![alt text](Pictures/Dev_Mode.png)
+<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300">
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
@@ -33,21 +33,21 @@ I've now finally decided to make it public, after vastly improving its coding st
 ## Explanation of the assistant
 Its command recognition submodule is not a simple recognition (have a look on the Platforms Unifier module) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words inbetween some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
 
-It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - hmm, nah... xD.
+It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - doesn't seem a good idea... xD
 
 For now it's also an app that has everything hard-coded, so no options to customize in the UI. Feel free to change whatever you'd like and use it yourself, for example. If I decide to publish it on some store, an UI will be made for users to be able to choose as many things as I can make choosable.
 
-I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my atempts to force permissions to be granted (which I could not do yet). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it.
+I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my atempts to force permissions to be granted (which I could not do yet). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it (it will probably cut features if I do it though).
 
 The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards). Though, I'm only testing the app on Lollipop 5.1, on Oreo 8.1 (my 2 phones), and on Lollipop 4.4.2 (my tablet). Other Android versions only with the emulator, and more rarely.
 
-The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are ONLY available with one or more of the 3 mentioned ways, they will be added. So to have full functionality, install it that way.
+The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are ONLY available with one or more of the 3 mentioned ways, they will be added. So to have full functionality, install it that way. Btw, you could also install it as a system-signature app (signed with the system key) to have even more features - except you won't have more, because I'm not making the app supposing that case, because as a start, I could not test it. So the maximum is what I wrote above. In the app I suppose that's the maximum "God level".
 
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
-- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, currently just write "start" on the text to send box, and to stop, write "stop".
+- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, use the appropiate command from Platforms Unifier's Command Recognition submodule. To stop, long press the power button, or write "stop" on the text to send box.
 - **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (always keep it from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
-- **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website.
+- **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website. If you'd like to see it working, give the app Device Administration privileges and then remove them. The supposed only way to get back to the device (without restarting - didn't take care of that yet) is to click Unlock.
 - **Speech module** --> Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. Some important notes here:
 - - About the Critical priority: it will take your phone out of Do Not Disturb mode, get it to full volume, and say what it has to say (currently only if you disable the Device Administration Mode).
 - - Another important thing is: the assistant will NOT speak if the phone's ringer mode is not the Normal one (which means, only if you have sound enabled for calls and messages). If it's on Vibrating or Do Not Disturb, it won't speak - unless again, Critical speech priority, which bypasses everything I found that could be bypassed to speak xD.
@@ -59,8 +59,7 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 - **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
-- **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
-- **Values Storage** --> It's a module on which all other modules dump values. Like battery percentage, or current caller, or if it's recording audio or not. Then when the user (or the app internally) needs one of those values for anything (the app could be checking the battery percentage to automatically warn the user, or the user specifically asked the battery percentage), the module needing the value will get it from this Values Storage module. The idea is having a global place where to get needed values and in a global way.
+- **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier (link for it on the Notice) for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
 
 ## Installation/Usage
 Install the app either as a perfectly normal app, or as a privileged system app (below KitKat 4.4, in /system/app; on 4.4 and above, in /system/priv-app/). Grant it root access, if you'd like, and also enable Device Administration for it, if you want. Privileged system app + root access + Device Administration will give you full functionality of the app.
@@ -95,5 +94,5 @@ If you have any questions, try the options below:
 - Create an Issue here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/issues
 - Create a Discussion here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/discussions
 
-## Final notes
-Hope you like the app! Any new ideas are welcomed! (I just may or may not implement them that fast - student)
+## Final notes and contributing
+Hope you like the app! Any new ideas and/or improvements are welcomed! (Just giving the idea and/or making a pull request)
