@@ -24,22 +24,22 @@ package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 import androidx.annotation.Nullable;
 
 /**
- * <p>A class to be used as an "multi-type array" for the returning value of
+ * <p>A class to be used as a "multi-type array" for the returning value of
  * {@link PhoneCallsProcessor#getCallPhase(int, String)}.</p>
  */
 class NumAndPhase {
 
-	final String phone_number;
+	@Nullable final String phone_number;
 	final int call_phase;
 
 	/**
 	 * <p>Main class constructor.</p>
 	 *
-	 * @param phoneNumber the phone number directly from the intent extra (null or not --> directly)
-	 * @param callPhase one of the {@code CALL_PHASE_} constants in {@link PhoneCallsProcessor}
+	 * @param phone_number the phone number directly from the intent extra (null or not --> directly)
+	 * @param call_phase one of the {@code CALL_PHASE_} constants in {@link PhoneCallsProcessor}
 	 */
-	NumAndPhase(@Nullable final String phoneNumber, final int callPhase) {
-		phone_number = phoneNumber;
-		call_phase = callPhase;
+	NumAndPhase(@Nullable final String phone_number, final int call_phase) {
+		this.phone_number = phone_number;
+		this.call_phase = call_phase;
 	}
 }

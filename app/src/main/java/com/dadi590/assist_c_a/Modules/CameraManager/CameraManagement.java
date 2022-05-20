@@ -210,9 +210,9 @@ public class CameraManagement implements IModule {
 						if (turn_on_flashlight) {
 							if (null == camera_old) {
 								// Request the back camera, as that's the one that has the flashlight on it.
-								camera_old = Camera.open();
+								camera_old = UtilsCameraManager.openCamera(true);
 								if (null == camera_old) {
-									final String speak = "Error - Camera already in usage.";
+									final String speak = "Error - Camera already in use.";
 									UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
 									return CAMERA_IN_USAGE;
@@ -230,19 +230,38 @@ public class CameraManagement implements IModule {
 				}
 			}
 
-			/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
-				if (USAGE_PHOTO == usage) {
-					// todo
-				} else if (USAGE_VIDEO == usage) {
-					// todo
+			switch (usage) {
+				case USAGE_TAKE_REAR_PHOTO:
+				case USAGE_TAKE_FRONTAL_PHOTO: {
+					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
+						if (null == takePictureOld && null == camera_old) {
+							first_pic_of_two = true;
+							takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_OFF_ON, 100);
+
+							System.out.println("################################");
+						} else {
+							final String speak = "Error - Camera already in use.";
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+							return CAMERA_IN_USAGE;
+						}
+					}/* else {
+						// todo
+					}*/
+
+					break;
 				}
-			} else {
-				if (USAGE_PHOTO == usage) {
-					// todo
-				} else if (USAGE_VIDEO == usage) {
-                    // todo
-                }
-			}*/
+				/*case USAGE_RECORD_REAR_VIDEO:
+				case USAGE_RECORD_FRONTAL_VIDEO: {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+						// todo
+					} else {
+						// todo
+					}
+
+					break;
+				}*/
+			}
 		} else {
 			final String speak = "Error - No cameras in the device.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);

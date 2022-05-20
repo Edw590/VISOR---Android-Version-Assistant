@@ -1,4 +1,0 @@
-
-l	java:S127V"XRefactor the code in order to not assign to this loop counter from within the loop body.(¨…ÄK
-Y
-java:S3518w"CMake sure this expression can't be zero before doing this division.(Ý¥«Õ

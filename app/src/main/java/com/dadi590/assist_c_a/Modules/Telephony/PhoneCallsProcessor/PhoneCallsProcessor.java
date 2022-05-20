@@ -238,7 +238,7 @@ public class PhoneCallsProcessor implements IModule {
 	 * <p>Based on {@link #calls_state}, this function gets the phase of the telephony when a new phone state
 	 * ({@link TelephonyManager}'s states) is detected.</p>
 	 * <br>
-	 * <p>This is a function this completes the only 3 public {@link TelephonyManager} states (CALL_STATE_-started
+	 * <p>This is a function that completes the only 3 public {@link TelephonyManager} states (CALL_STATE_-started
 	 * constants), which can't be used to know too much about the calls by themselves. So, in conjunction with a list
 	 * of call states already taking place stored in {@link #calls_state}, this function attempts to understand what
 	 * the new CALL_STATE_x means. For example, if OFFHOOK is received, in case there was no call taking place, then it

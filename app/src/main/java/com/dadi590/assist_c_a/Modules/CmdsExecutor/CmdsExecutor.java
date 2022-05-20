@@ -568,7 +568,11 @@ public class CmdsExecutor implements IModule {
 					break;
 				}
 				case (CommandsDetection_APU.CMD_TAKE_PHOTO): {
-					// todo
+					some_cmd_detected = true;
+					if (only_returning) continue;
+
+					UtilsCameraManagerBC.useCamera(CommandsDetection_APU.RET_15_REAR.equals(command) ?
+							CameraManagement.USAGE_TAKE_REAR_PHOTO : CameraManagement.USAGE_TAKE_FRONTAL_PHOTO);
 
 					break;
 				}
