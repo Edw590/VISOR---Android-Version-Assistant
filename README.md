@@ -1,3 +1,4 @@
+
 # V.I.S.O.R. - A real assistant [Android/Client]
 
 Secondary project name: Assist_C_A (Assistant Client Android)
@@ -60,6 +61,7 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 - **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
 - **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier (link for it on the Notice) for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
+- **Camera Manager** --> Manages the camera usage. It's supposeed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
 
 ## Installation/Usage
 Install the app either as a perfectly normal app, or as a privileged system app (below KitKat 4.4, in /system/app; on 4.4 and above, in /system/priv-app/). Grant it root access, if you'd like, and also enable Device Administration for it, if you want. Privileged system app + root access + Device Administration will give you full functionality of the app.
