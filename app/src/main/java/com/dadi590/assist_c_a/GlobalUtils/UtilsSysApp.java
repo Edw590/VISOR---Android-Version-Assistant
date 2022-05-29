@@ -167,7 +167,7 @@ public final class UtilsSysApp {
 	/**
 	 * <p>Checks if an app is an ordinary system app (installed on the system partitions, but no privileged or signature
 	 * permissions granted to it).</p>
-	 * <p>Note: will return false for any app on KitKat 4.4 and below.</p>
+	 * <p>Note: will return false for any app on KitKat 4.4W and below.</p>
 	 *
 	 * @param applicationInfo an instance of {@link ApplicationInfo} for the package to be checked
 	 *
@@ -178,7 +178,7 @@ public final class UtilsSysApp {
 		// nor is it signed with the system key).
 		boolean ret_value = isSystemApp(applicationInfo) && !hasPrivilegedPermissions(applicationInfo);
 		final boolean signed_system_key = hasSystemSignaturePermissions(applicationInfo);
-		ret_value = ret_value && signed_system_key;
+		ret_value = ret_value && !signed_system_key;
 
 		return ret_value;
 	}
@@ -231,7 +231,7 @@ public final class UtilsSysApp {
 				}
 			}
 
-			// If between KitKat 4.4 and Lollipop 5.1, use a deleted flag.
+			// If between KitKat 4.4W and Lollipop 5.1, use a deleted flag.
 			if ((applicationInfo.flags & FLAG_PRIVILEGED) != 0) {
 				return true;
 			}
@@ -253,7 +253,7 @@ public final class UtilsSysApp {
 	 * @return a list of folders its APK might be in
 	 */
 	@NonNull
-	private static String[] getAppPossibleFolders(@Nullable final Boolean privileged_app) {
+	private static String[] getSysAppPossibleFolders(@Nullable final Boolean privileged_app) {
 		final Collection<String> ret_folders = new ArrayList<>(5);
 
 		final String PRIV_APP_FOLDER = "/system/priv-app";

@@ -128,15 +128,15 @@ public final class UtilsApp {
 	 * <p>- {@link #APP_NOT_INSTALLED} --> for the returning value: the app is not installed</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param packageName the name of the package of the app to be checked
+	 * @param package_name the package name of the app to be checked
 	 *
 	 * @return one of the constants
 	 */
-	public static int appEnabledStatus(@NonNull final String packageName) {
+	public static int appEnabledStatus(@NonNull final String package_name) {
 		final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
 		final int app_enabled_setting;
 		try {
-			app_enabled_setting = packageManager.getApplicationEnabledSetting(packageName);
+			app_enabled_setting = packageManager.getApplicationEnabledSetting(package_name);
 		} catch (final IllegalArgumentException ignored) {
 			return APP_NOT_INSTALLED;
 		}
@@ -161,17 +161,11 @@ public final class UtilsApp {
 	 * @return one of the constants
 	 */
 	public static int appInstallationType() {
-		final Context context = UtilsGeneral.getContext();
-		if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
-			if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_UPDATED_SYSTEM_APP)) {
-				System.out.println("---------------PRIVILEGED WITH UPDATES---------------");
-				return PRIVILEGED_WITH_UPDATES;
-			} else {
-				System.out.println("---------------PRIVILEGED WITHOUT UPDATES---------------");
-				return PRIVILEGED_WITHOUT_UPDATES;
-			}
+		final String package_name = UtilsGeneral.getContext().getPackageName();
+		if (UtilsSysApp.mainFunction(package_name, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
+			return UtilsSysApp.mainFunction(package_name, UtilsSysApp.IS_UPDATED_SYSTEM_APP) ?
+					PRIVILEGED_WITH_UPDATES : PRIVILEGED_WITHOUT_UPDATES;
 		} else {
-			System.out.println("---------------NON-PRIVILEGED---------------");
 			return NON_PRIVILEGED;
 		}
 	}

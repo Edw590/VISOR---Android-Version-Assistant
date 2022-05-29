@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2021 DADi590
+  ~ Copyright 2022 DADi590
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -20,10 +20,8 @@
   ~ under the License.
   -->
 
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical">
-
-</LinearLayout>
+<voice-enrollment-application xmlns:android="http://schemas.android.com/apk/res/android"
+	android:searchKeyphraseId="101"
+	android:searchKeyphrase="Hello There"
+	android:searchKeyphraseSupportedLocales="en-US,en-GB"
+	android:searchKeyphraseRecognitionFlags="voiceTrigger" />

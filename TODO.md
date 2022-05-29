@@ -1,5 +1,12 @@
 # To-do/To-fix/To-improve/To-everything list
 
+## Preferences on system partition and recognition of system wipe
+
+Save EVERYTHING on the system partition, so that even if someone formats the phone, the assistant is there like nothing
+happened at all. Useful for stolen phones, for example - the assistant will detect a wipe and will notify the emergency
+phone number and emails stored on the preferences or something.
+
+
 ## Permissions
 
 Missing to put the assistant asking the permissions in case it wants to execute something that needs the permission and

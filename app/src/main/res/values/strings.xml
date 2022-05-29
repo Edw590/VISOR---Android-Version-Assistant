@@ -31,4 +31,13 @@
 	<string name="fragModulesStatus_title_ACA">Modules status</string>
 	<string name="fragValuesStorageViewer_title_ACA">Global values</string>
 	<string name="fragEventsScheduler_title_ACA">Events Scheduler</string>
+
+
+
+	<string name="start">Start</string>
+	<string name="confirm">Confirm</string>
+	<string name="abort">Abort</string>
+	<string name="complete">Complete</string>
+	<string name="abortVoice">Abort Voice</string>
+	<string name="completeVoice">Complete Voice</string>
 </resources>

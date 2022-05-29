@@ -30,7 +30,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.AudioDeviceInfo;
+import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -38,7 +40,6 @@ import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.ApplicationClass;
 
@@ -68,16 +69,15 @@ public final class UtilsGeneral {
 	 * <p>Returns the version of the Assistant Platforms Unifier if it's available.</p>
 	 * <p>Reason why it might not be available: if it's bundled as an external library and the file is not present -
 	 * like happens with Android Lollipop and below in which library files are extracted. From Marshmallow onwards, it's
-	 * possible to use libraries inside the APK, so this should not happen (assume it does not until it does, if it ever
-	 * does).</p>
+	 * possible to use libraries inside the APK, so this should not happen - UNLESS the app is installed as a system
+	 * app, and in that case, it seems the libraries must be extracted anyway.</p>
 	 *
 	 * @return the version of the APU if it's available, null otherwise
 	 */
 	// Ignore the error below saying the method never returns null. It can be null - just remove the library file from
-	// due folder and see it happening... (if the app is ran on below Marshmallow, where library files are extracted).
-	@RequiresApi(api = Build.VERSION_CODES.M)
+	// due folder on the device and see it happening... (on the conditions wrote on the function doc).
 	@Nullable
-	public static String platformUnifierVersion() {
+	public static String getPlatformUnifierVersion() {
 		// "You see, Java's exception hierarchy is a bit unintuitive. You have two classes, Exception and Error, each of
 		// which extends Throwable. Thus, if you want to catch absolutely everything you need to catch Throwable (not
 		// recommended)."
@@ -134,10 +134,7 @@ public final class UtilsGeneral {
 	public static boolean areExtSpeakersOn() {
 		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 				.getSystemService(Context.AUDIO_SERVICE);
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-			return audioManager.isWiredHeadsetOn() || audioManager.isBluetoothScoOn()
-					|| audioManager.isBluetoothA2dpOn();
-		} else {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			final AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
 
 			for (final AudioDeviceInfo device : devices) {
@@ -151,6 +148,9 @@ public final class UtilsGeneral {
 					return true;
 				}
 			}
+		} else {
+			return audioManager.isWiredHeadsetOn() || audioManager.isBluetoothScoOn()
+					|| audioManager.isBluetoothA2dpOn();
 		}
 
 		return false;
@@ -328,18 +328,54 @@ public final class UtilsGeneral {
 	 * SMS messages, and would be a way to check such thing.</p>
 	 *
 	 * @param intent the intent to check
+	 * @param flags same as in {@link PackageManager#queryIntentActivities(Intent, int)}
 	 *
 	 * @return true if the intent is available, false otherwise
 	 */
-	public static boolean isIntentActionAvailable(@NonNull final Intent intent) {
+	public static boolean isIntentActionAvailable(@NonNull final Intent intent, final int flags) {
 		final List<ResolveInfo> list = UtilsGeneral.getContext().getPackageManager().
-				queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+				queryIntentActivities(intent, flags);
 
 		return !list.isEmpty();
 	}
 
-	public static final int FONTE_DISPONIVEL = 0;
-	public static final int FONTE_INDISPONIVEL = 1;
-	public static final int ERRO_NA_DETECAO = 2;
-	// todo Falta a função "fonte_audio_grav_disp" aqui abaixo
+	/**
+	 * <p>Checks if a {@link android.media.MediaRecorder.AudioSource} is available for immediate use.</p>
+	 *
+	 * @param audio_source the audio source to check
+	 *
+	 * @return true if it's available for immediate use, false otherwise (doesn't exist on the device or is busy)
+	 */
+	public static boolean isAudioSourceAvailable(final int audio_source) {
+		final int sample_rate = 44100;
+		final int channel_config = AudioFormat.CHANNEL_IN_MONO;
+		final int audio_format = AudioFormat.ENCODING_PCM_16BIT;
+
+		final AudioRecord audioRecord;
+		try {
+			audioRecord = new AudioRecord(audio_source, sample_rate, channel_config, audio_format,
+					AudioRecord.getMinBufferSize(sample_rate, channel_config, audio_format));
+		} catch (final IllegalStateException ignored) {
+			return false;
+		}
+
+		final boolean initialized = AudioRecord.STATE_INITIALIZED == audioRecord.getState();
+
+		boolean success_recording = false;
+		if (initialized) {
+			try {
+				audioRecord.startRecording();
+				success_recording = audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING;
+			} catch (final IllegalStateException ignored) {
+			}
+		}
+
+		if (initialized) {
+			// If it's initialized, stop it.
+			audioRecord.stop();
+		}
+		audioRecord.release();
+
+		return success_recording;
+	}
 }

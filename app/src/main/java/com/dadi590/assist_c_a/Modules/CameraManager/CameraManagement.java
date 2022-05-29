@@ -108,7 +108,7 @@ public class CameraManagement implements IModule {
 
 		// Set the main camera ID for the callback to work right away if the camera state is changed externally to the
 		// app.
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final CameraManager camera_new = (CameraManager) UtilsGeneral.getContext()
 					.getSystemService(Context.CAMERA_SERVICE);
 			try {

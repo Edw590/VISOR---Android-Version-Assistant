@@ -25,6 +25,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -145,7 +146,7 @@ public final class UtilsCertificates {
 			}
 
 			if (match_found) {
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 					// If we're on Pie or above, then GET_SIGNING_CERTIFICATES was used. That means all certificates
 					// are authorized to be on the app (we don't need to make checks for that, as opposite to
 					// GET_SIGNATURES). So if one of them are my certificates, cool, since the app is authorized to used
@@ -155,7 +156,7 @@ public final class UtilsCertificates {
 				}
 				// Else, keep searching for at least one certificate without whitelist matches.
 			} else {
-				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) {
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
 					// Below Pie (using GET_SIGNATURES then), if ANY of the certificates on the other app are not
 					// whitelisted here, it's not signed by me. This mitigates the FakeID vulnerability mentioned on
 					// getAppSignatures().
@@ -206,7 +207,7 @@ public final class UtilsCertificates {
 	@Nullable
 	private static Signature[] getAppSignatures(@NonNull final String package_name) {
 		final PackageInfo packageInfo;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 			try {
 				packageInfo = UtilsGeneral.getContext().getPackageManager().getPackageInfo(package_name,
 						PackageManager.GET_SIGNING_CERTIFICATES);

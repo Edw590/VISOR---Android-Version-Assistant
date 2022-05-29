@@ -67,6 +67,13 @@ android {
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	// ----- WARNING ----
+	// When you change the compileSdkVersion, ALWAYS increment it!!! Don't jump one or more versions!!!
+	// This way, because of being using hidden/internal APIs that can be changed and no backwards compatibility given,
+	// Android Studio will warn if a change happened in the hidden/internal SDK (something deleted or changed, like
+	// method signature), and then you can take care of it immediately: reflection to the old way, direct SDK usage for
+	// the new way, so that Android Studio warns of changes (it won't if reflection is always used - but if will if
+	// direct usage is used).
 	compileSdkVersion 29
 	buildToolsVersion "30.0.3"
 
@@ -122,13 +129,13 @@ dependencies {
 
 	// General
 	implementation "androidx.appcompat:appcompat:1.3.1" // 1.4.0 --> compileSdkVersion needed = 31
-	implementation "androidx.constraintlayout:constraintlayout:2.1.2"
+	implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 	implementation "androidx.multidex:multidex:2.0.1"
-	implementation "androidx.preference:preference:1.1.1"
+	implementation "androidx.preference:preference:1.1.1" // 1.2.0 --> compileSdkVersion needed = 31
 
 	// Navigation
-	implementation "androidx.navigation:navigation-fragment:2.3.5"
-	implementation "androidx.navigation:navigation-ui:2.3.5"
+	implementation "androidx.navigation:navigation-fragment:2.3.5" // 2.4.2 --> compileSdkVersion needed = 31
+	implementation "androidx.navigation:navigation-ui:2.3.5" // 2.4.2 --> compileSdkVersion needed = 31
 
 	// External
 	implementation "org.gavaghan:geodesy:1.1.3"

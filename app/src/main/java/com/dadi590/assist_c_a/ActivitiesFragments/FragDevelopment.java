@@ -51,8 +51,7 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.VoiceEnrollment.TestEnrollmentActivity;
 
 import java.util.Locale;
 
@@ -98,12 +97,17 @@ public class FragDevelopment extends Fragment {
 
 				//UtilsLocationRelative.startIndRelDistance();
 
-				final Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
+				Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
 
-				System.out.println("HHHHHHHHHHHHHHHHHH");
-				System.out.println(ValuesStorage.getValue(CONSTS_ValueStorage.last_phone_call_time));
-				UtilsCmdsExecutorBC.processTask("take a picture", false, false);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					intent = new Intent(getActivity(), TestEnrollmentActivity.class);
+					startActivity(intent);
+				}
+
+				//System.out.println("HHHHHHHHHHHHHHHHHH");
+				//System.out.println(ValuesStorage.getValue(CONSTS_ValueStorage.last_phone_call_time));
+				//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
 				final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
@@ -163,6 +167,7 @@ public class FragDevelopment extends Fragment {
 				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
 				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT));
 				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL));
+				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD));
 				System.out.println("------------------------");
 
 				// BUTTON FOR TESTING
@@ -191,6 +196,7 @@ public class FragDevelopment extends Fragment {
 					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						startActivity(intent);
 					}
 
@@ -199,6 +205,7 @@ public class FragDevelopment extends Fragment {
 						++missing_authorizations;
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 								Uri.parse("package:" + context.getPackageName()));
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						startActivity(intent);
 					}
 
@@ -207,6 +214,7 @@ public class FragDevelopment extends Fragment {
 					if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
 						++missing_authorizations;
 						final Intent intent = new Intent();
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 						intent.setData(Uri.parse("package:" + context.getPackageName()));
 						context.startActivity(intent);
@@ -216,6 +224,7 @@ public class FragDevelopment extends Fragment {
 					if (!Settings.System.canWrite(context)) {
 						++missing_authorizations;
 						final Intent intent = new Intent();
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
 						intent.setData(Uri.parse("package:" + context.getPackageName()));
 						context.startActivity(intent);
@@ -226,8 +235,11 @@ public class FragDevelopment extends Fragment {
 
 				if (!UtilsApp.isDeviceAdmin()) {
 					++missing_authorizations;
-					startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
-							"com.android.settings.DeviceAdminSettings")));
+					final Intent intent = new Intent();
+					intent.setComponent(new ComponentName("com.android.settings",
+							"com.android.settings.DeviceAdminSettings"));
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
 				}
 
 				final String speak;

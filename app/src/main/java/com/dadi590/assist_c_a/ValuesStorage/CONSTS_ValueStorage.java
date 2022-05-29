@@ -50,6 +50,10 @@ public final class CONSTS_ValueStorage {
 	// Flashlight
 	public static final String main_flashlight_enabled = "main_flashlight_enabled";
 
+	// Flashlight
+	public static final String google_recog_available = "google_recog_available";
+	public static final String pocketsphinx_recog_available = "pocketsphinx_recog_available";
+
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */

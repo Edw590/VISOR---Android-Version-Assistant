@@ -29,6 +29,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -85,6 +86,7 @@ public final class UtilsPermissions {
 	 * of those that the app requires; the number of permissions that had an error while being forcibly granted, in case
 	 * that it was chosen to force permissions
 	 */
+	@RequiresApi(api = Build.VERSION_CODES.M)
 	@NonNull
 	private static int[] checkRequestPerms(@Nullable final Activity activity, final boolean request) {
 
@@ -107,33 +109,31 @@ public final class UtilsPermissions {
 					// If the permission has not been granted already...
 					if (!checkSelfPermission(perm_name)) {
 						if (force_permissions) {
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-								// This below needs the GRANT_RUNTIME_PERMISSIONS permission, which has
-								// protection level of "signature|installer|verifier"...
+							// This below needs the GRANT_RUNTIME_PERMISSIONS permission, which has
+							// protection level of "signature|installer|verifier"...
 
-								final Context context = UtilsGeneral.getContext();
+							final Context context = UtilsGeneral.getContext();
 
-								// System class - no idea how to get it working at least on Oreo 8.1, as this below
-								// returns null. Could be better than the public SDK way which doesn't have the override
-								// policy parameter.
-								//final PackageManagerInternal packageManagerInternal = (PackageManagerInternal)
-								//		LocalServices.getService(PackageManagerInternal.class);
+							// System class - no idea how to get it working at least on Oreo 8.1, as this below
+							// returns null. Could be better than the public SDK way which doesn't have the override
+							// policy parameter.
+							//final PackageManagerInternal packageManagerInternal = (PackageManagerInternal)
+							//		LocalServices.getService(PackageManagerInternal.class);
 
-								//packageManagerInternal.grantRuntimePermission(context.getPackageName(),
-								//		perm_name, android.os.Process.myUserHandle().getIdentifier(), true);
+							//packageManagerInternal.grantRuntimePermission(context.getPackageName(),
+							//		perm_name, android.os.Process.myUserHandle().getIdentifier(), true);
 
-								try {
-									// SDK class
-									context.getPackageManager().grantRuntimePermission(context.getPackageName(),
-											perm_name, android.os.Process.myUserHandle());
-									// todo GRANT_RUNTIME_PERMISSIONS and INTERACT_ACROSS_USERS_FULL needed here
-								} catch (final SecurityException ignored) {
-									++num_forced_error_perms;
-								}
+							try {
+								// SDK class
+								context.getPackageManager().grantRuntimePermission(context.getPackageName(),
+										perm_name, android.os.Process.myUserHandle());
+								// todo GRANT_RUNTIME_PERMISSIONS and INTERACT_ACROSS_USERS_FULL needed here
+							} catch (final SecurityException ignored) {
+								++num_forced_error_perms;
+							}
 
-								if (!checkSelfPermission(perm_name)) {
-									++num_not_granted_perms;
-								}
+							if (!checkSelfPermission(perm_name)) {
+								++num_not_granted_perms;
 							}
 						} else {
 							// Add permission to a list to be requested normally below

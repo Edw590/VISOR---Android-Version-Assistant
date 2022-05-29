@@ -86,6 +86,12 @@ public class Speech2 implements IModule {
 	synchronous class on the speech processing part to be easy to think on).
 	*/
 
+	// todo With the Ivona TTS, configure it to work normally, then take the voices out of the folder and try to speak -
+	// it won't notice it's not speaking. So get it to notice it. Check if the callbacks are called, and if not, put
+	// some timer checking that whenever there is a speech taking place (else it would be wasting battery).
+	// Also, after getting the voices back on their folder, this still doesn't work and I had to restart the app (not
+	// even changing the voices and the engine for it to restart the speech worked - I really had to restart the app.
+
 	boolean tts_working = false;
 	boolean audio_output_supported = false;
 
@@ -624,12 +630,12 @@ public class Speech2 implements IModule {
 		if (!tts.getCurrentEngine().equals(tts.getDefaultEngine())) {
 			reload_tts = true;
 		}
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final Voice voice = tts.getVoice();
 			if (null == voice || !voice.equals(tts.getDefaultVoice())) {
 				reload_tts = true;
 			}
-		} else if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
 			final Locale language = tts.getLanguage();
 			if (null == language || !language.equals(tts.getDefaultLanguage())) {
 				reload_tts = true;
@@ -912,14 +918,10 @@ public class Speech2 implements IModule {
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL &&
-				!current_speech_obj.bypass_no_sound) {
-			final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
-					.getSystemService(Context.AUDIO_SERVICE);
-			if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-
-				skip_speech = true;
-			}
+		if (AudioManager.RINGER_MODE_NORMAL != ((AudioManager) UtilsGeneral.getContext().getSystemService(
+				Context.AUDIO_SERVICE)).getRingerMode()) {
+			skip_speech = (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) ||
+					!current_speech_obj.bypass_no_sound);
 		}
 
 		if (skip_speech) {

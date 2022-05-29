@@ -109,13 +109,11 @@ public final class UtilsProtectedLockScr {
 	 * parameter was introduced on the first function).</p>
 	 * <br>
 	 * <p><strong>TO USE ONLY WITH API 22 OR OLDER!!!!!</strong></p>
-	 * <p>It's also said on where I took this from (StackOverflow): "It should work with API level 14+", so I'm putting
-	 * that as the minimum Android version for this function to work on.</p>
 	 *
 	 * @return true if the lock screen is enabled for the current user, false otherwise
 	 */
 	static boolean isLockScreenEnabled22Older() {
-		/*Testa isto com a meta-reflection para ver se ficou a funcionar!!!
+		/* todo Testa isto com a meta-reflection para ver se ficou a funcionar!!!
 				Podia ser usado por algum atacante enviar MUITOS broadcasts e a app vai bloquear!
 			Arranja isso. Mete numa thread e impede de ser chamada mais que uma vez enquanto estiver a funcionar ou mete
 				a forçagem de permissões MEGA rápida --> tal como a função de iniciar o serviço, tenta metê-la ao máximo.*/

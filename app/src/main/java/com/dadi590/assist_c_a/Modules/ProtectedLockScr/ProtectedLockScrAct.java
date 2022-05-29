@@ -158,6 +158,9 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 		UtilsServices.startMainService();
 	}
 
+	// todo In Samsung A50, the activity takes too much time to get back to foreground and we can mess with the status
+	// bar with no problems for 1-2 seconds. Keep it always collapsing, even if the Device Admin mode is enabled.
+
 	/**
 	 * <p>Collapses the status bar every some time.</p>
 	 */

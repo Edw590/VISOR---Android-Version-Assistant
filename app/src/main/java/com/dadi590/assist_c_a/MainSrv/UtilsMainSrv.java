@@ -67,12 +67,11 @@ public final class UtilsMainSrv {
 	 */
 	public static int startLongPwrBtnDetection() {
 
+		// DOESN'T WORK AS OF ANDROID 9/Pie!!!!!!!!!!!!!!!! (SDK 28)
+		// Find another solution - on hold until I get an Android Pie device or something that demands it.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			return UNSUPPORTED_OS_VERSION;
 		}
-
-		// DOESN'T WORK AS OF ANDROID 9/Pie!!!!!!!!!!!!!!!! (SDK 28)
-		// Find another solution - on hold until I get an Android Pie device or something demands it.
 
 		final LinearLayout linearLayout = new LinearLayout(UtilsGeneral.getContext()) {
 
@@ -102,7 +101,7 @@ public final class UtilsMainSrv {
 
 		linearLayout.setFocusable(true);
 
-		final View view = LayoutInflater.from(UtilsGeneral.getContext()).inflate(R.layout.service_layout, linearLayout);
+		final View view = LayoutInflater.from(UtilsGeneral.getContext()).inflate(R.layout.power_long_press_service_layout, linearLayout);
 		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().
 				getSystemService(android.content.Context.WINDOW_SERVICE);
 

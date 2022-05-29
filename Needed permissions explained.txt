@@ -61,6 +61,12 @@ android.permission.ACCESS_FINE_LOCATION
 android.permission.ACCESS_BACKGROUND_LOCATION
 - For the alarms system to know where the user is at the moment to fire the alarm at the right time
 
+android.permission.ANSWER_PHONE_CALLS
+- To be able to answer and end phone calls from Android Oreo onwards
+
+android.permission.CALL_PHONE
+- To be able to end phone calls below Android Oreo and to place calls
+
 ------------AppOps permissions------------
 
 android.permission.SYSTEM_ALERT_WINDOW
@@ -101,6 +107,12 @@ android.permission.REBOOT
 
 android.permission.CONNECTIVITY_INTERNAL
 - To be able to toggle the Airplane Mode below Android 10
+
+android.permission.CAPTURE_AUDIO_HOTWORD
+- To be able to run the background hotword recognition while allowing other devices to use the microphone (the
+  background recognition will be stopped until the other app stops using the microphone). Without this permission, this
+  app remains in control of the microphone even if another app requests it (recording audio or camera,
+  Internet call...), and I don't know how to detect when another app is requesting the mic so that this one stops.
 
 ------------Verifier permissions------------
 

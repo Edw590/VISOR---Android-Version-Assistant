@@ -25,6 +25,7 @@ import android.Manifest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
@@ -242,7 +243,7 @@ public final class UtilsLocationAbsolute {
 	 * @return the age in seconds
 	 */
 	private static long getAgeOfFix(@NonNull final Location location) {
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			return ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) * 1000L * 1000L);
 		} else {
 			return System.currentTimeMillis() - location.getTime();

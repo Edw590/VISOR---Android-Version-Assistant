@@ -117,6 +117,8 @@ public class MainSrv extends Service {
 		// user. Later, notifications will be added. Emails would be a good idea too in more extreme notifications.
 		// After the speech module is ready, it will send a broadcast for the receiver below to activate the rest of
 		// the assistant.
+		// EDIT: the Speech2 module has now notifications integrated into it, so it's still the thing to start before
+		// everything else.
 		final int speech_mod_index = ModulesList.getModuleIndex(Speech2.class);
 		if (ModulesList.deviceSupportsModule(speech_mod_index)) {
 			ModulesList.startModule(speech_mod_index);
@@ -241,9 +243,9 @@ public class MainSrv extends Service {
 				ModulesList.startModule(ModulesList.getModuleIndex(ModulesManager.class));
 				infinity_thread.start();
 
-				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in a loop or
-				//  whatever. Or with some event that the app could broadcast when it detects granted or denied permissions (this
-				//  could be useful...).
+				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in
+				//  a loop or whatever. Or with some event that the app could broadcast when it detects granted or
+				//  denied permissions (this could be useful...).
 				// Enable the power button long press detection.
 				switch (UtilsMainSrv.startLongPwrBtnDetection()) {
 					case UtilsMainSrv.UNSUPPORTED_OS_VERSION: {
