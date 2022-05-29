@@ -47,6 +47,8 @@ import java.util.Map;
  * <p>The results can be either final results or partial results, and both will be processed.</p>
  * <p>NOTE: the class is public but it's NOT to be used outside its package! It's only public for the service to be
  * instantiated (meaning if it would be put package-private now, no error would appear on the entire project).</p>
+ * <br>
+ * <p>Only start this service if the Google app is available, else it won't work.</p>
  */
 public class GoogleRecognition extends Service {
 
@@ -118,6 +120,7 @@ public class GoogleRecognition extends Service {
 		last_method_called = ON_START_COMMAND_STR;
 
 		final Intent speech_recognizer_intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		speech_recognizer_intent.setPackage(UtilsSpeechRecognizers.google_app_pkg_name);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, UtilsGeneral.getContext().getPackageName());

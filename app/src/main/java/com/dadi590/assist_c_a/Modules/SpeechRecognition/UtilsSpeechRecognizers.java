@@ -40,6 +40,8 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
  */
 public final class UtilsSpeechRecognizers {
 
+	static final String google_app_pkg_name = "com.google.android.googlequicksearchbox";
+
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
@@ -53,7 +55,7 @@ public final class UtilsSpeechRecognizers {
 	 * @return true if it is available for use (Google app installed and enabled), false otherwise
 	 */
 	public static boolean isGoogleRecogAvailable() {
-		return UtilsApp.APP_ENABLED == UtilsApp.appEnabledStatus("com.google.android.googlequicksearchbox");
+		return UtilsApp.APP_ENABLED == UtilsApp.appEnabledStatus(google_app_pkg_name);
 	}
 
 	/**
