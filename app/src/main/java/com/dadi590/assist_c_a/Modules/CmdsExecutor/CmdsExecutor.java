@@ -98,19 +98,17 @@ public class CmdsExecutor implements IModule {
 	public static final int NOTHING_EXECUTED = 0;
 	public static final int SOMETHING_EXECUTED = 1;
 	public static final int ERR_PROC_CMDS = -1;
-	public static final int UNAVAILABLE_APU = -2;
+	public static final int APU_UNAVAILABLE = -2;
 	/**
 	 * <p>This function checks and executes all tasks included in a string.</p>
-	 * <br>
-	 * <p>Note: the {@code only_returning} parameter is currently implemented only for partial results.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #NOTHING_EXECUTED} --> for the returning value: if no task was detected</p>
 	 * <p>- {@link #SOMETHING_EXECUTED} --> for the returning value: if some task was detected</p>
 	 * <p>- {@link #ERR_PROC_CMDS} --> for the returning value: if there was an internal error with
 	 * {@link CommandsDetection_APU#main(String, String)}</p>
-	 * <p>- {@link #UNAVAILABLE_APU} --> for the returning value: if the Assistant Platforms Unifier module is not
-	 * available, and only on API levels below {@link Build.VERSION_CODES#M}</p>
+	 * <p>- {@link #APU_UNAVAILABLE} --> for the returning value: if the Assistant Platforms Unifier module is not
+	 * available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param sentence_str the string to be analyzed for commands
@@ -121,11 +119,12 @@ public class CmdsExecutor implements IModule {
 	 *
 	 * @return one of the constants
 	 */
-	public final int processTask(@NonNull final String sentence_str, final boolean partial_results,
+	final int processTask(@NonNull final String sentence_str, final boolean partial_results,
 						  final boolean only_returning) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && UtilsGeneral.platformUnifierVersion() == null) {
+		if (UtilsGeneral.getPlatformUnifierVersion() == null) {
 			System.out.println("EXECUTOR - UNAVAILABLE_APU");
-			return UNAVAILABLE_APU;
+
+			return APU_UNAVAILABLE;
 		}
 
 		some_cmd_detected = false;
@@ -140,15 +139,18 @@ public class CmdsExecutor implements IModule {
 		if (detected_cmds_str.startsWith(CommandsDetection_APU.ERR_CMD_DETECT)) {
 			// PS: until he stops listening himself, the "You said" part is commented out, or he'll process what was
 			// said that generated the error --> infinite loop.
+			// EDIT: now this restarts PocketSphinx, which will make it not hear the "You said" part.
+			UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 			final String speak = "WARNING! There was a problem processing the commands sir. Please fix this. " +
-					"The error was the following: " + detected_cmds_str/* + ". You said: " + frase_str*/;
+					"The error was the following: " + detected_cmds_str + ". You said: " + sentence_str;
 			UtilsCmdsExecutor.speak(speak, false, null);
 			System.out.println("EXECUTOR - ERR_PROC_CMDS");
+
 			return ERR_PROC_CMDS;
 		}
 
 		for (final String command : detected_cmds) {
-			final String cmd_constant = command.split("\\.")[0];
+			final String cmd_constant = command.split("\\.")[0]; // "14.3" --> "14"
 
 			final boolean cmdi_only_speak = CommandsDetection_APU.CMDi_INF1_ONLY_SPEAK.equals(CommandsDetection_APU.
 					getCmdAdditionalInfo(cmd_constant, CommandsDetection_APU.CMDi_INDEX_INF1));
@@ -499,20 +501,18 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						String speak = "Shutting down the device, sir.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+						// Don't say anything if it's successful - he will already say "Shutdown detected".
 
 						switch (UtilsAndroidPower.shutDownDevice()) {
-							//case (UtilsAndroid.NO_ERRORS): - can't exist, since the function may not return
 							case (UtilsAndroid.ERROR): {
-								speak = "Error shutting down the device.";
+								final String speak = "Error shutting down the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
 							case (UtilsAndroid.NO_ROOT): {
-								speak = "Error shutting down the device - no root user rights available nor app " +
-										"installed as system app.";
+								final String speak = "Error shutting down the device - no root user rights available " +
+										"nor app installed as system app.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
@@ -529,15 +529,7 @@ public class CmdsExecutor implements IModule {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						String speak;
-						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
-							speak = "Rebooting the device, sir.";
-						} else if (CommandsDetection_APU.RET_14_SAFE_MODE.equals(command)) {
-							speak = "Rebooting the device into safe mode, sir.";
-						} else {
-							speak = "Rebooting the device into the recovery, sir.";
-						}
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+						// Don't say anything if it's successful - he will already say "Shutdown detected".
 
 						final int reboot_mode;
 						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
@@ -548,16 +540,15 @@ public class CmdsExecutor implements IModule {
 							reboot_mode = UtilsAndroidPower.MODE_RECOVERY;
 						}
 						switch (UtilsAndroidPower.rebootDevice(reboot_mode)) {
-							//case (UtilsAndroid.NO_ERRORS): - can't exist, since the function may not return
 							case (UtilsAndroid.ERROR): {
-								speak = "Error rebooting down the device.";
+								final String speak = "Error rebooting down the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
 							case (UtilsAndroid.NO_ROOT): {
-								speak = "Error rebooting down the device - no root user rights available nor app " +
-										"installed as system app.";
+								final String speak = "Error rebooting down the device - no root user rights available " +
+										"nor app installed as system app.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
