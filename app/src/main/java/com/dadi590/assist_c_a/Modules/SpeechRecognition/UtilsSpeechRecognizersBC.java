@@ -24,6 +24,7 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognition;
 import android.content.Intent;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.ModulesList;
 
 /**
  * <p>Functions to call to send information to {@link SpeechRecognitionCtrl}, by using broadcasts.</p>
@@ -36,36 +37,45 @@ public final class UtilsSpeechRecognizersBC {
 	private UtilsSpeechRecognizersBC() {
 	}
 
+	// Keep it checking if the controller is running. If it's not running, could mean it's not supported, not just that
+	// it broke down - leave the manager to keep modules working only, not these failsafe measures that are not too good.
+
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_GOOGLE} and executes
-	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately.</p>
+	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately, if the controller is running.</p>
 	 */
 	public static void startGoogleRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		UtilsSpeechRecognizers.startGoogleRecognition();
+		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
+			UtilsSpeechRecognizers.startGoogleRecognition();
+		}
 	}
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_POCKET_SPHINX} and executes
-	 * {@link UtilsSpeechRecognizers#startPocketSphinxRecognition()} immediately.</p>
+	 * {@link UtilsSpeechRecognizers#startPocketSphinxRecognition()} immediately, if the controller is running.</p>
 	 */
 	public static void startPocketSphinxRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		UtilsSpeechRecognizers.startPocketSphinxRecognition();
+		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
+			UtilsSpeechRecognizers.startPocketSphinxRecognition();
+		}
 	}
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION} and executes
-	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
+	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately, if the controller is running.</p>
 	 */
 	public static void stopRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		UtilsSpeechRecognizers.terminateSpeechRecognizers();
+		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
+			UtilsSpeechRecognizers.terminateSpeechRecognizers();
+		}
 	}
 }

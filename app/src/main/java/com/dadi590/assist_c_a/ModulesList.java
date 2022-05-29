@@ -52,7 +52,6 @@ import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizers;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
-import com.dadi590.assist_c_a.Modules.SomeValuesUpdater.SomeValuesUpdater;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -62,15 +61,17 @@ import java.util.List;
  * <p>Various modules just need to be instantiated to start working. The references to those instances are stored here
  * too statically, and there's no problem with that because all those the modules are instantiated inside the main app
  * process.</p>
+ * <p>Check the module index before sending it into any of the functions of this class. The index is not checked inside
+ * them! They will throw exceptions when they try to use the invalid index!</p>
  */
 public final class ModulesList {
 
 
-	// todo The 'disable' parameter is not being used at all yet
+	// todo The 'disable_mod' parameter is not being used at all yet
 
 
 	// In case it's not a module and it's just wanted to check if it's running or not. Could be a submodule. For example
-	// the Google and PocketSphinx speech recognizers. That's why the constant is private. It's not to be used externally.
+	// the Google and PocketSphinx speech recognizers. That's why the constant is private - it's not to be used externally.
 	private static final int TYPE1_SERVICE_CHK_ONLY = -1;
 	public static final int TYPE1_SERVICE = 0;
 	public static final int TYPE1_INSTANCE = 1;
@@ -85,6 +86,8 @@ public final class ModulesList {
 	public static final int TYPE2_SMS_READER = 7;
 	public static final int TYPE2_SPEECH_RECOGNITION_CTRL = 8;
 
+	// To disable a module, just comment its line here and be sure you disable its usages everywhere else or pray the
+	// app won't crash because of negative index from getModuleIndex() in case it's used for the disabled module.
 	private static final ModuleObj[] modules_list = {
 			new ModuleObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, TYPE2_NOT_SPECIAL, true), // supported = true in the initialization because it must always run, so it's made not to need anything special
 			//new ModuleObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE, TYPE2_NOT_SPECIAL, false),
@@ -115,10 +118,11 @@ public final class ModulesList {
 		public boolean mod_supported;
 
 		@Nullable public Object mod_instance = null;
-		public boolean mod_disable = false;
+		public boolean disable_mod = false;
 
 		/**
 		 * <p>Main class constructor.</p>
+		 *
 		 * @param mod_class the class of the module
 		 * @param mod_name the name of the module to present to users
 		 * @param mod_type1 the type 1 of the module
@@ -194,7 +198,7 @@ public final class ModulesList {
 				return modules_list[module_index].mod_supported;
 			}
 			case MODULE_DISABLE: {
-				return modules_list[module_index].mod_disable;
+				return modules_list[module_index].disable_mod;
 			}
 		}
 
@@ -230,7 +234,7 @@ public final class ModulesList {
 				break;
 			}
 			case MODULE_DISABLE: {
-				modules_list[module_index].mod_disable = (boolean) value;
+				modules_list[module_index].disable_mod = (boolean) value;
 
 				break;
 			}
@@ -453,7 +457,7 @@ public final class ModulesList {
 			case TYPE2_SPEECH_RECOGNITION_CTRL:
 			case TYPE2_MIC_INPUT: {
 				if (TYPE2_SPEECH_RECOGNITION_CTRL == module_type) {
-					if (!UtilsSpeechRecognizers.isGoogleRecogitionAvailable()) {
+					if (!UtilsSpeechRecognizers.isGoogleRecogAvailable()) {
 						return false;
 					}
 				}
@@ -509,7 +513,8 @@ public final class ModulesList {
 				}
 				final Intent intent = new Intent(intent_action, Uri.fromParts(scheme, "+351000000000", null));
 
-				return UtilsGeneral.isIntentActionAvailable(intent);
+				// No problem in MATCH_ALL being available only from API 23 onwards. Below that it will just be ignored.
+				return UtilsGeneral.isIntentActionAvailable(intent, PackageManager.MATCH_ALL);
 			}
 			case TYPE2_AUDIO_OUTPUT: {
 				final PackageManager packageManager = context.getPackageManager();

@@ -35,6 +35,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
@@ -92,11 +93,11 @@ public class AudioRecorder implements IModule {
 	}
 
 	/**
-	 * <p>Method to call instead of calling directly {@link #startRecording(int, boolean)}.</p>
+	 * <p>Method to call instead of calling directly {@link #startRecording(int)}.</p>
 	 *
 	 * @param start true to start recording, false to stop recording
-	 * @param audio_source same as in {@link #startRecording(int, boolean)}, or as a standard, -1 if {@code start} is
-	 *                    false (this parameter will be ignored if it's to stop recording).
+	 * @param audio_source same as in {@link #startRecording(int)}, or as a standard, -1 if {@code start} is false (this
+	 * parameter will be ignored if it's to stop recording).
 	 */
 	final void recordAudio(final boolean start, final int audio_source) {
 		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
@@ -112,12 +113,17 @@ public class AudioRecorder implements IModule {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						startRecording(audio_source, false);
-						/* todo if (audio_source == MediaRecorder.AudioSource.MIC && !recording) {
+						startRecording(audio_source);
+						Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
+						if (null == is_recording) {
+							is_recording = false;
+						}
+						if (audio_source == MediaRecorder.AudioSource.MIC && !is_recording) {
 							// In case of an error and that the microphone is the audio source, start the background
-							// recognition again.
-							Utils_reconhecimentos_voz.iniciar_reconhecimento_pocketsphinx();
-						}*/
+							// recognition again (if it's not the microphone, then the speech recognition didn't stop
+							// in the first place).
+							UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+						}
 					}
 				};
 				runnables.add(runnable);
@@ -157,11 +163,9 @@ public class AudioRecorder implements IModule {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param audioSource one of {@link MediaRecorder#setAudioSource(int)}'s parameters
-	 * @param check_recording_possible true to check if it's possible to record from the given audio source, false
-	 *                                 otherwise
 	 * @return one of the constants
 	 */
-	final int startRecording(final int audioSource, final boolean check_recording_possible) {
+	final int startRecording(final int audioSource) {
 		// Do NOT change the encoder and format settings. I've put those because they are compatible with all devices
 		// that the app supports, and the sound is still very good.
 
@@ -178,11 +182,7 @@ public class AudioRecorder implements IModule {
 		}
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		final File file;
-		if (check_recording_possible) {
-			file = new File(UtilsGeneral.getContext().getCacheDir(), aud_src_tmp_file);
-		} else {
-			file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
-		}
+		file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
 		if (null == file) {
 			stopRecording();
 
@@ -200,10 +200,8 @@ public class AudioRecorder implements IModule {
 		} catch (final IOException e) {
 			stopRecording();
 
-			if (!check_recording_possible) {
-				final String speak = "Error 3 sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-			}
+			final String speak = "Error 3 sir.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			file.delete();
 
 			return ERR_PREP_RECORDING;
@@ -215,10 +213,8 @@ public class AudioRecorder implements IModule {
 			e.printStackTrace();
 			stopRecording();
 
-			if (!check_recording_possible) {
-				final String speak = "Error 4 sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-			}
+			final String speak = "Error 4 sir.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 			file.delete();
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
@@ -228,13 +224,6 @@ public class AudioRecorder implements IModule {
             } else {
                 return SEM_PERMISSAO_CAPTURE_AUDIO_OUTPUT;
             }*/
-		}
-		if (check_recording_possible) {
-			stopRecording();
-
-			file.delete();
-
-			return UtilsGeneral.FONTE_DISPONIVEL;
 		}
 
 		// Update the values on the ValuesStorage
