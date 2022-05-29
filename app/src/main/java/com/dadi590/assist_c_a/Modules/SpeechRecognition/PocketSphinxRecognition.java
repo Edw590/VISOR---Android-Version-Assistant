@@ -40,8 +40,8 @@ import java.util.Locale;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.SpeechRecognizer;
-import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+import edu.cmu.pocketsphinx1.SpeechRecognizer;
+import edu.cmu.pocketsphinx1.SpeechRecognizerSetup;
 
 /**
  * <p>This class activates PocketSphinx's speech recognition and automatically starts Google's if the assistant's name
@@ -239,6 +239,10 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 
 	@Override
 	public final void onError(@Nullable final Exception e) {
+		// If something requires the microphone while this is recognizing, an error will be thrown. Let the Controller be
+		// the one to restart this every some seconds and not instantly to kill the battery for no reason (since the
+		// user is recording audio in some other app) - which means, kill the service, so the Controller knows it has to
+		// restart it.
 		stopRecognizer();
 		stopSelf();
 		UtilsSpeechRecognizers.terminateSpeechRecognizers();

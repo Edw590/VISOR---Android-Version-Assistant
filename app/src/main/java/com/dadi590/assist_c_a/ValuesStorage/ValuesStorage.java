@@ -43,10 +43,10 @@ public final class ValuesStorage {
 			{CONSTS_ValueStorage.battery_percentage, "Power - Battery Percentage", TYPE_INTEGER, null}, // Updating
 			{CONSTS_ValueStorage.power_connected, "Power - Power Connected", TYPE_BOOLEAN, null}, // Updating
 			// Telephony - Phone calls
-			{CONSTS_ValueStorage.last_phone_call_time, "Telephony - Time of last call (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS_ValueStorage.last_phone_call_time, "Telephony - Last call when (milliseconds)", TYPE_LONG, null}, // Updating
 			{CONSTS_ValueStorage.curr_phone_call_number, "Telephony - Number of current call", TYPE_STRING, null}, // Updating
 			// Telephony - SMS
-			{CONSTS_ValueStorage.last_sms_msg_time, "Telephony - Time of last SMS msg (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS_ValueStorage.last_sms_msg_time, "Telephony - Last SMS msg when (milliseconds)", TYPE_LONG, null}, // Updating
 			{CONSTS_ValueStorage.last_sms_msg_number, "Telephony - Number of last SMS msg sender", TYPE_STRING, null}, // Updating
 			// Weather
 			{CONSTS_ValueStorage.loc_temp_for_the_day_c, "Location temperature for the day (C)", TYPE_DOUBLE, null},
@@ -56,6 +56,9 @@ public final class ValuesStorage {
 			{CONSTS_ValueStorage.is_recording_audio_internally, "Recording audio internally", TYPE_BOOLEAN, "false"}, // Updating
 			// Flashlight
 			{CONSTS_ValueStorage.main_flashlight_enabled, "Main flashlight enabled (Android 6 and up only)", TYPE_BOOLEAN, null}, // Updating
+			// Speech Recognizers
+			{CONSTS_ValueStorage.google_recog_available, "Google speech recognition available", TYPE_BOOLEAN, null}, // Updating
+			{CONSTS_ValueStorage.pocketsphinx_recog_available, "PocketSphinx speech recognition available", TYPE_BOOLEAN, null}, // Updating
 	};
 
 	/**
