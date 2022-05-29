@@ -68,7 +68,18 @@ public final class UtilsAndroidTelephony {
 	 */
 	public static int answerPhoneCall() {
 		final Context context = UtilsGeneral.getContext();
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
+					UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
+				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
+				try {
+					telecomManager.acceptRingingCall();
+
+					return UtilsAndroid.NO_ERRORS;
+				} catch (final Exception ignored) {
+				}
+			}
+		} else {
 			if (UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final ITelephony iTelephony = ITelephony.Stub.asInterface(ServiceManager.
 						getService(Context.TELEPHONY_SERVICE));
@@ -77,26 +88,15 @@ public final class UtilsAndroidTelephony {
 
 				// Deprecated and removed as of Android 10 (returns "void").
 				try {
-					final Method setMobileDataEnabled = ITelephony.class.getDeclaredMethod("answerRingingCall");
-					setMobileDataEnabled.setAccessible(true);
-					setMobileDataEnabled.invoke(iTelephony);
+					final Method method = ITelephony.class.getDeclaredMethod("answerRingingCall");
+					method.setAccessible(true);
+					method.invoke(iTelephony);
 
 					return UtilsAndroid.NO_ERRORS;
 				} catch (final NoSuchMethodException ignored) {
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
-
-				// Won't happen.
-				return 23456;
-			}
-		} else {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
-					UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
-				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
-				telecomManager.acceptRingingCall();
-
-				return UtilsAndroid.NO_ERRORS;
 			}
 		}
 
@@ -126,7 +126,16 @@ public final class UtilsAndroidTelephony {
 	 */
 	public static int endPhoneCall() {
 		final Context context = UtilsGeneral.getContext();
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
+				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
+
+				try {
+					return telecomManager.endCall() ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
+				} catch (final Exception ignored) {
+				}
+			}
+		} else {
 			if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 				final ITelephony iTelephony = ITelephony.Stub.asInterface(ServiceManager.
 						getService(Context.TELEPHONY_SERVICE));
@@ -135,10 +144,10 @@ public final class UtilsAndroidTelephony {
 
 				// Deprecated and removed as of Android 10 (returns a boolean).
 				try {
-					final Method setMobileDataEnabled = ITelephony.class.getDeclaredMethod("endCall");
-					setMobileDataEnabled.setAccessible(true);
+					final Method method = ITelephony.class.getDeclaredMethod("endCall");
+					method.setAccessible(true);
 
-					final Boolean ret_method = (Boolean) setMobileDataEnabled.invoke(iTelephony);
+					final Boolean ret_method = (Boolean) method.invoke(iTelephony);
 					assert ret_method != null; // Which will never be... (but the warning is gone now)
 
 					return ret_method ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
@@ -146,15 +155,6 @@ public final class UtilsAndroidTelephony {
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
-
-				// Won't happen.
-				return 23456;
-			}
-		} else {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
-				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
-
-				return telecomManager.endCall() ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
 			}
 		}
 
@@ -197,6 +197,10 @@ public final class UtilsAndroidTelephony {
 
 		final Intent intent = new Intent("", Uri.fromParts("tel", phone_number, null));
 
+		// I think below Android 11, ACTION_DIAL can be used to dial emergency numbers (haven't tested it yet though).
+		final String action_dial_emergency = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ?
+				Intent.ACTION_DIAL_EMERGENCY : Intent.ACTION_DIAL;
+
 		final String action;
 		final boolean call_placed;
 		if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED)) {
@@ -204,14 +208,14 @@ public final class UtilsAndroidTelephony {
 			call_placed = true;
 		} else if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 			if (UtilsTelephony.isEmergencyNumber(phone_number)) {
-				action = Intent.ACTION_DIAL_EMERGENCY;
+				action = action_dial_emergency;
 				call_placed = false;
 			} else {
 				action = Intent.ACTION_CALL;
 				call_placed = true;
 			}
 		} else {
-			action = UtilsTelephony.isEmergencyNumber(phone_number) ? Intent.ACTION_DIAL_EMERGENCY : Intent.ACTION_DIAL;
+			action = UtilsTelephony.isEmergencyNumber(phone_number) ? action_dial_emergency : Intent.ACTION_DIAL;
 			call_placed = false;
 		}
 		intent.setAction(action);

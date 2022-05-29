@@ -80,28 +80,28 @@ public final class UtilsAndroidConnectivity {
 		}
 
 		// To understand the meaning of the if statement, check the doc of the setWifiEnabled method.
-		if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.Q ||
-				Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-
-			return wifiManager.setWifiEnabled(enabled) ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
-		} else {
-			final List<String> commands = new ArrayList<>(3);
-			commands.add("su");
-			commands.add("svc wifi " + (enabled ? "enabled" : "disabled"));
-			commands.add("exit");
-			final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-
-			final int ret_var = UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
-			if (UtilsAndroid.NO_ERRORS == ret_var) {
-				final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
-				intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, wifi_state);
-				intent.putExtra(WifiManager.EXTRA_WIFI_STATE,
-						enabled ? WifiManager.WIFI_STATE_ENABLED : WifiManager.WIFI_STATE_DISABLED);
-				context.sendBroadcast(intent);
+		if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.Q) {
+			if (wifiManager.setWifiEnabled(enabled)) {
+				return UtilsAndroid.NO_ERRORS;
 			}
-
-			return ret_var;
 		}
+
+		final List<String> commands = new ArrayList<>(3);
+		commands.add("su");
+		commands.add("svc wifi " + (enabled ? "enabled" : "disabled"));
+		commands.add("exit");
+		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+
+		final int ret_var = UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		if (UtilsAndroid.NO_ERRORS == ret_var) {
+			final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
+			intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, wifi_state);
+			intent.putExtra(WifiManager.EXTRA_WIFI_STATE,
+					enabled ? WifiManager.WIFI_STATE_ENABLED : WifiManager.WIFI_STATE_DISABLED);
+			context.sendBroadcast(intent);
+		}
+
+		return ret_var;
 	}
 
 	public static final int NO_BLUETOOTH_ADAPTER = -55;
@@ -223,21 +223,23 @@ public final class UtilsAndroidConnectivity {
 				commands.add("su");
 				commands.add(broadcast_string);
 				commands.add("exit");
-				UtilsShell.executeShellCmd(commands, true);
 				// Hopefully it's not too bad if the broadcast is not sent in this case. Because part will have
 				// been done by this point (setting set), and it's a hassle to check for both operations.
+				UtilsShell.executeShellCmd(commands, true);
 			}
 
+			// The operation finished, so it was successful. If the broadcast was sent or not is secondary and not
+			// really important for the user, I think.
 			return UtilsAndroid.NO_ERRORS;
 		}
 
-		// Forget the idea below. The function requires at least one of 3 permissions, which are only granted to
+		// Forget the idea below. The function requires at least one of 4 permissions, all of which are only granted to
 		// system-signed apps, or one of them to "setup" apps (no idea what that is).
 		//final ConnectivityManager connectivityManager = (ConnectivityManager) context.
 		//		getSystemService(Context.CONNECTIVITY_SERVICE);
 		//connectivityManager.setAirplaneMode(enabled);
 
-		final List<String> commands = new ArrayList<>(4);
+		final List<String> commands = new ArrayList<>(3);
 		commands.add("su");
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			commands.add("settings put system " + Settings.System.AIRPLANE_MODE_ON + " " + (enabled ? "1" : "0"));
@@ -275,9 +277,13 @@ public final class UtilsAndroidConnectivity {
 		final ConnectivityManager connectivityManager = (ConnectivityManager) context.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		final boolean mobile_data_active;
+		boolean mobile_data_active;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			mobile_data_active = telephonyManager.isDataEnabled();
+			try {
+				mobile_data_active = telephonyManager.isDataEnabled();
+			} catch (final Exception ignored) {
+				mobile_data_active = false;
+			}
 		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
 			// Deprecated as of Lollipop 5.0
 			mobile_data_active = connectivityManager.getMobileDataEnabled();
@@ -293,14 +299,17 @@ public final class UtilsAndroidConnectivity {
 		}
 
 		if (UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
-			// With the magical permission, we can use official methods.
+			// With the magical permission, we can use SDK methods.
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
 				// Ignore the warning. The function exists since Lollipop (check the AOSP source), not since Oreo.
-				telephonyManager.setDataEnabled(enabled);
+				try {
+					telephonyManager.setDataEnabled(enabled);
 
-				return UtilsAndroid.NO_ERRORS;
+					return UtilsAndroid.NO_ERRORS;
+				} catch (final Exception ignored) {
+				}
 			} else {
-				// Deprecated as of Lollipop 5.0 (returns "void").
+				// Deprecated as of Lollipop 5.0.
 				try {
 					final Method setMobileDataEnabled = ConnectivityManager.class.
 							getDeclaredMethod("setMobileDataEnabled", boolean.class);
@@ -312,19 +321,16 @@ public final class UtilsAndroidConnectivity {
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
-
-				// Won't happen.
-				return 23456;
 			}
-		} else {
-			// Without the magical permission, plan B: shell commands.
-			final List<String> commands = new ArrayList<>(3);
-			commands.add("su");
-			commands.add("svc data " + (enabled ? "enable" : "disable"));
-			commands.add("exit");
-			final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-
-			return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
 		}
+
+		// Without the magical permission or in case the newest function stops being available, plan B: shell commands.
+		final List<String> commands = new ArrayList<>(3);
+		commands.add("su");
+		commands.add("svc data " + (enabled ? "enable" : "disable"));
+		commands.add("exit");
+		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+
+		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
 	}
 }
