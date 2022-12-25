@@ -3,6 +3,11 @@
 
 Secondary project name: Assist_C_A (Assistant Client Android)
 
+## Notice
+This project is a part of a bigger project, consisting of the following:
+- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client)
+- [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
+
 ## Table of Contents
 - [Pictures](#pictures)
 - [Notice](#notice)
@@ -21,11 +26,6 @@ Secondary project name: Assist_C_A (Assistant Client Android)
 
 ## Pictures
 <img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300">
-
-## Notice
-This project is a part of a bigger project, consisting of the following:
-- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client)
-- [V.I.S.O.R. - A real assistant [Platforms Unifier]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Platforms-Unifier)
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
