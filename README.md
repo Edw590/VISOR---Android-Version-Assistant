@@ -1,16 +1,13 @@
-
-# V.I.S.O.R. - A real assistant [Android/Client]
-
+# V.I.S.O.R. - A better Android assistant
 Secondary project name: Assist_C_A (Assistant Client Android)
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
-- [V.I.S.O.R. - A real assistant [Android/Client]](https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client)
+- [V.I.S.O.R. - A better Android assistant](https://github.com/DADi590/VISOR---A-better-Android-assistant)
 - [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
 
 ## Table of Contents
 - [Pictures](#pictures)
-- [Notice](#notice)
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
 - [Current modules (features)](#current-modules-features)
@@ -29,20 +26,23 @@ This project is a part of a bigger project, consisting of the following:
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
+
 I've now finally decided to make it public, after vastly improving its coding style (<3 IntelliJ's Inspections...) and translating the code to English (was in Portuguese, even though speeches and recognition were already in English).
 
+"A better Android assistant" because it's supposed to help handling the phone, even if it has no screen (my original use for the app with an older phone of mine with a broken screen), or even in the future, with time, one of the ideas is to have it knowing exactly where the user is (**no sharing of anything, all local** - everything will be only local when I create the file to store them) to remind them of something they might need to do (leaving the house, good idea to bring the wallet and the keys, for example. Or going near a supermarket - "You wanted to buy food"). It's all open-source code, so... nothing bad in the background. Don't really trust? - check the code and compile yourself and use it (same app anyways).
+
 ## Explanation of the assistant
-Its command recognition submodule is not a simple recognition (have a look on the Platforms Unifier module) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words inbetween some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
+Its command recognition submodule is not a simple recognition (have a look on the Advanced Commands Detection module mentioned in the Notice) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words in-between some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
 
 It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - doesn't seem a good idea... xD
 
-For now it's also an app that has everything hard-coded, so no options to customize in the UI. Feel free to change whatever you'd like and use it yourself, for example. If I decide to publish it on some store, an UI will be made for users to be able to choose as many things as I can make choosable.
+For now it's also an app that has everything hard-coded, so no options to customize in the UI. Feel free to change whatever you'd like and use it yourself, for example. If I decide to publish it on some store, an UI will be made for users to be able to choose as many things as I can make choosable - or with time, even if I don't publish it (for now I'd just like everything implemented and working).
 
 I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my atempts to force permissions to be granted (which I could not do yet). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it (it will probably cut features if I do it though).
 
 The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards). Though, I'm only testing the app on Lollipop 5.1, on Oreo 8.1 (my 2 phones), and on Lollipop 4.4.2 (my tablet). Other Android versions only with the emulator, and more rarely.
 
-The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are ONLY available with one or more of the 3 mentioned ways, they will be added. So to have full functionality, install it that way. Btw, you could also install it as a system-signature app (signed with the system key) to have even more features - except you won't have more, because I'm not making the app supposing that case, because as a start, I could not test it. So the maximum is what I wrote above. In the app I suppose that's the maximum "God level".
+The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
@@ -63,6 +63,8 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier (link for it on the Notice) for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
 - **Camera Manager** --> Manages the camera usage. It's supposeed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
 
+Note: not all the modules are here. Some are just for internal management or other minor things (like Modules Manager, which makes sure all the other modules are working perfectly - this is not really a "feature", so I didn't include it above).
+
 ## Installation/Usage
 Install the app either as a perfectly normal app, or as a privileged system app (below KitKat 4.4, in /system/app; on 4.4 and above, in /system/priv-app/). Grant it root access, if you'd like, and also enable Device Administration for it, if you want. Privileged system app + root access + Device Administration will give you full functionality of the app.
 
@@ -71,9 +73,9 @@ After that, currently just click on the permissions button and accept everything
 ## For developers
 ### - To compile the app
 - I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
-- Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api.
-- Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature check on startMainService().
-- I have also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
+- Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api and/or https://github.com/Reginer/aosp-android-jar.
+- Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature/app corruption check on startMainService().
+- I have may also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
 
 Now a small explanation of the app structure:
 - All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder.
@@ -83,7 +85,7 @@ Now a small explanation of the app structure:
 
 ## About
 ### - Roadmap
-Have a look on the "TODO.md" file.
+Have a look on the "TODO.md" file (note: it's not always updated. But it has some things there).
 
 ### - Project status
 Ongoing, but possibly slowly since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
@@ -93,8 +95,8 @@ This project is licensed under Apache 2.0 License - http://www.apache.org/licens
 
 ## Support
 If you have any questions, try the options below:
-- Create an Issue here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/issues
-- Create a Discussion here: https://github.com/DADi590/V.I.S.O.R.---A-real-assistant--Android-Client/discussions
+- Create an Issue here: https://github.com/DADi590/VISOR---A-better-Android-assistant/issues
+- Create a Discussion here: https://github.com/DADi590/VISOR---A-better-Android-assistant/discussions
 
 ## Final notes and contributing
 Hope you like the app! Any new ideas and/or improvements are welcomed! (Just giving the idea and/or making a pull request)
