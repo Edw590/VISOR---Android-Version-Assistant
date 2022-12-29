@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,30 +21,17 @@
 
 package com.dadi590.assist_c_a.GlobalInterfaces;
 
-/**
- * <p>All modules must implement this interface.</p>
- * <p>Note: no module running on a process other than the main app process must implement this interface, so that it's
- * possible to call these methods directly on their instances. For example {@link android.app.Service}s running on
- * separate processes - in these cases no idea yet on how to implement the idea of the methods of this interface.</p>
- */
-public interface IModule {
+interface IModule {
 
 	/**
-	 * <p>Checks if the module is working as it should (fully working).</p>
-	 * <p>Suppose a module has 2 threads running and one of them dies: the module is no longer working properly - but
-	 * it's still alive. Then the module is no longer working as it should.</p>
-	 * <p>So how to know the module stopped working properly so it can be restarted? The module-specific implementation
-	 * of this method says if the module has died internally or not (meaning any of the things it was supposed to be
-	 * doing stopped - "any" also means all, as in the module completely stopped working).</p>
+	 * <p><u><strong>ATTENTION: DO NOT CALL THIS METHOD!!!!!!</strong></u></p>
+	 * <p>This method is only here so that I don't forget to implement the <em>static</em> one to actually be called:
+	 * the one named this method's name minus the "wrong" on it. I've even set the return to a wrong type on purpose.</p>
+	 * <br>
+	 * <p>Checks if the module is supported by whatever is required for it to work, be it another app available on the
+	 * device, the device hardware, or permissions.</p>
 	 *
-	 * @return true if the module is still working properly, false if it's malfunctioning/stopped
+	 * @return true if hardware-supported, false otherwise
 	 */
-	boolean isModuleFullyWorking();
-
-	/**
-	 * <p>Before restarting the module in case something happened, call this function which will stop all module
-	 * functions that were not stopped, allowing the Garbage Collector to do its job.</p>
-	 * <p>After calling this function, any subsequent calls to {@link #isModuleFullyWorking()} will return false.</p>
-	 */
-	void destroyModule();
+	int wrongIsSupported();
 }

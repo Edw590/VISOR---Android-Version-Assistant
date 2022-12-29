@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -47,8 +48,8 @@ public final class UtilsCertificates {
 	private UtilsCertificates() {
 	}
 
-	// App certificates fingerprint whitelist (one or more)
-	private static final Map<?, ?>[] ASSIST_C_A_RSA_CERT_FINGERPRINT = {
+	/** App certificates fingerprints whitelist (one or more). */
+	private static final Map<?, ?>[] ASSIST_C_A_RSA_CERTS_FINGERPRINTS = {
 			// Certificate 1
 			new HashMap<String, String>() {
 				private static final long serialVersionUID = -8864195772334229619L;
@@ -70,27 +71,26 @@ public final class UtilsCertificates {
 	};
 
 	/**
-	 * <p>Checks if the given package is signed with the same certificate(s) as this app (my certificate(s)).</p>
+	 * <p>Checks if the given package is signed with the same certificate(s) as this app.</p>
 	 *
 	 * @param package_name same as in {@link #checkCertsPkg(String, Map[])}
 	 *
 	 * @return same as in {@link #checkCertsPkg(String, Map[])}
 	 */
 	@Nullable
-	public static Boolean isOtherPackageMine(@NonNull final String package_name) {
-		return checkCertsPkg(package_name, ASSIST_C_A_RSA_CERT_FINGERPRINT);
+	public static Boolean isOtherPkgSignedSame(@NonNull final String package_name) {
+		return checkCertsPkg(package_name, ASSIST_C_A_RSA_CERTS_FINGERPRINTS);
 	}
 
 	/**
-	 * <p>Checks if the app became corrupt (done by checking its certificates).</p>
+	 * <p>Checks if the app became corrupt (done by checking its signatures).</p>
 	 *
 	 * @return true if it's not corrupt, false otherwise
 	 */
 	public static boolean isThisAppCorrupt() {
 		// Below will never be null. Else, how is the app installed.
-		final Boolean is_app_fine = Objects.requireNonNull(checkCertsPkg(UtilsGeneral.getContext().getPackageName(),
-				ASSIST_C_A_RSA_CERT_FINGERPRINT));
-		return !is_app_fine;
+		return !Objects.requireNonNull(checkCertsPkg(UtilsGeneral.getContext().getPackageName(),
+				ASSIST_C_A_RSA_CERTS_FINGERPRINTS));
 	}
 
 	/**
@@ -107,20 +107,11 @@ public final class UtilsCertificates {
 	@Nullable
 	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map<?, ?>[] list_cert_hashes) {
 		final String[][] possible_hash_algos = UtilsCryptoHashing.getPossibleHashAlgorithms();
-		int hash_algo_to_use = -1;
-		for (int i = possible_hash_algos.length -1; i >= 0; i--) {
-			try {
-				MessageDigest.getInstance(possible_hash_algos[i][0]);
-				hash_algo_to_use = i;
-				break;
-			} catch (final NoSuchAlgorithmException ignored) {
-			}
-		}
-		if (hash_algo_to_use == -1) {
-			// Will never happen, supposedly. I'm checking all hashing algorithms. If NONE is available, wow. Someone
-			// must have deeply modified the ROM or something (and other apps wouldn't run, so no - at least one must
-			// exist).
-			return null;
+		final int hash_algo_to_use = possible_hash_algos.length - 1; // Last one (safest)
+		try {
+			MessageDigest.getInstance(possible_hash_algos[hash_algo_to_use][0]);
+		} catch (final NoSuchAlgorithmException ignored) {
+			// Will never happen.
 		}
 
 		final Signature[] other_app_signatures = getAppSignatures(package_name);
@@ -131,10 +122,8 @@ public final class UtilsCertificates {
 		// For each certificate of the other app, check if it matches any of the certificates in the given list.
 		boolean no_matches_at_all = true;
 		for (final Signature signature : other_app_signatures) {
-			final String other_app_sig_hash = Objects.requireNonNull(UtilsCryptoHashing.getHashStringOfBytes(signature.toByteArray(),
-					hash_algo_to_use));
-			// It will always be non-null though, since if it would be null, then we wouldn't get here, because the
-			// function would have returned null by now on other_app_signatures.
+			final String other_app_sig_hash = UtilsCryptoHashing.getHashStringOfBytes(signature.toByteArray(),
+					hash_algo_to_use);
 
 			boolean match_found = false;
 			for (final Map<?, ?> cert_hash : list_cert_hashes) {
@@ -204,6 +193,7 @@ public final class UtilsCertificates {
 	 *
 	 * @return the app signatures, or null if the app is not installed
 	 */
+	@SuppressLint("PackageManagerGetSignatures")
 	@Nullable
 	private static Signature[] getAppSignatures(@NonNull final String package_name) {
 		final PackageInfo packageInfo;

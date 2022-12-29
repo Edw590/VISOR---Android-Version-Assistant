@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -57,29 +57,26 @@ public final class UtilsNotifications {
 	public static NotificationCompat.Builder getNotification(@NonNull final ObjectClasses.NotificationInfo notificationInfo) {
 		final Context context = UtilsGeneral.getContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			// Faster than making a map...
+			int importance = NotificationManager.IMPORTANCE_UNSPECIFIED;
+			switch (notificationInfo.ch_priotiy) {
+				case NotificationCompat.PRIORITY_MIN:
+					break;
+				case NotificationCompat.PRIORITY_LOW:
+					importance = NotificationManager.IMPORTANCE_LOW;
+					break;
+				case NotificationCompat.PRIORITY_DEFAULT:
+					importance = NotificationManager.IMPORTANCE_DEFAULT;
+					break;
+				case NotificationCompat.PRIORITY_HIGH:
+					importance = NotificationManager.IMPORTANCE_HIGH;
+					break;
+				case NotificationCompat.PRIORITY_MAX:
+					importance = NotificationManager.IMPORTANCE_MAX;
+					break;
+			}
 			createNotifChannel(notificationInfo.ch_id, notificationInfo.ch_name, notificationInfo.ch_description,
-					notificationInfo.ch_importance);
-		}
-
-		// Faster than making a map...
-		int priority = NotificationCompat.PRIORITY_MIN;
-		switch (notificationInfo.ch_importance) {
-			case NotificationManager.IMPORTANCE_NONE:
-			case NotificationManager.IMPORTANCE_UNSPECIFIED:
-			case NotificationManager.IMPORTANCE_MIN:
-				break;
-			case NotificationManager.IMPORTANCE_LOW:
-				priority = NotificationCompat.PRIORITY_LOW;
-				break;
-			case NotificationManager.IMPORTANCE_DEFAULT:
-				priority = NotificationCompat.PRIORITY_DEFAULT;
-				break;
-			case NotificationManager.IMPORTANCE_HIGH:
-				priority = NotificationCompat.PRIORITY_HIGH;
-				break;
-			case NotificationManager.IMPORTANCE_MAX:
-				priority = NotificationCompat.PRIORITY_MAX;
-				break;
+					importance);
 		}
 
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notificationInfo.ch_id).
@@ -91,7 +88,7 @@ public final class UtilsNotifications {
 			setShowWhen(true).
 			setLocalOnly(true).
 			setOngoing(false).
-			setPriority(priority).
+			setPriority(notificationInfo.ch_priotiy).
 			//setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE);
 			setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.app_logo_legacy_only));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -112,7 +109,7 @@ public final class UtilsNotifications {
 	 * @param description the description of the channel
 	 * @param importance the importance of the channel
 	 */
-	@RequiresApi(api = Build.VERSION_CODES.O)
+	@RequiresApi(Build.VERSION_CODES.O)
 	public static void createNotifChannel(@NonNull final String id, @Nullable final String name,
 										  @Nullable final String description, @NonNull final Integer importance) {
 		if (null == name || null == description) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,18 +35,22 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroid;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidPower;
-import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroid;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidTelephony;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNativeLibs;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsTimeDate;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
@@ -57,17 +61,17 @@ import CommandsDetection_APU.CommandsDetection_APU;
 /**
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
  */
-public class CmdsExecutor implements IModule {
+public class CmdsExecutor implements IModuleInst {
 	// This variable can't be local. It must memorize the last value, so they must always remain in memory.
 	// Also, because of that, the instance of this class must also remain in memory, as it's done in the ModulesList.
 	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
 	private static boolean some_cmd_detected = false;
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -75,14 +79,21 @@ public class CmdsExecutor implements IModule {
 		return true;
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		return true;
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -121,8 +132,10 @@ public class CmdsExecutor implements IModule {
 	 */
 	final int processTask(@NonNull final String sentence_str, final boolean partial_results,
 						  final boolean only_returning) {
-		if (UtilsGeneral.getPlatformUnifierVersion() == null) {
-			System.out.println("EXECUTOR - UNAVAILABLE_APU");
+		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.APU_LIB_NAME)) {
+			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
+					"detected.";
+			UtilsCmdsExecutor.speak(speak, false, null);
 
 			return APU_UNAVAILABLE;
 		}
@@ -261,21 +274,14 @@ public class CmdsExecutor implements IModule {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setWifiEnabled(CommandsDetection_APU.RET_4_ON.equals(command))) {
-						case (UtilsAndroid.NO_ERRORS): {
+						case (UtilsAndroid.NO_ERR): {
 							final String speak = "Wi-Fi toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.ERROR): {
-							final String speak = "Error toggling the Wi-Fi.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-
-							break;
-						}
-						case (UtilsAndroid.NO_ROOT): {
-							final String speak = "Error toggling the Wi-Fi state - no root user rights available nor " +
-									"app installed as system app.";
+						case (UtilsAndroid.PERM_DENIED): {
+							final String speak = "No permission to toggle the Wi-Fi.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
@@ -304,6 +310,12 @@ public class CmdsExecutor implements IModule {
 
 							break;
 						}
+						default: {
+							final String speak = "Unspecified error toggling the Wi-Fi.";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+							break;
+						}
 					}
 
 					break;
@@ -313,21 +325,20 @@ public class CmdsExecutor implements IModule {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setMobileDataEnabled(CommandsDetection_APU.RET_5_ON.equals(command))) {
-						case (UtilsAndroid.NO_ERRORS): {
+						case (UtilsShell.NO_ERR): {
 							final String speak = "Mobile Data connection toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.ERROR): {
-							final String speak = "Error toggling the Mobile Data connection.";
+						case (UtilsAndroid.PERM_DENIED): {
+							final String speak = "No permission to toggle the Mobile Data connection.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.NO_ROOT): {
-							final String speak = "Error toggling the Mobile Data connection - no root user rights " +
-									"available nor app installed as system app.";
+						default: {
+							final String speak = "Unspecified error toggling the Mobile Data connection.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
@@ -341,19 +352,25 @@ public class CmdsExecutor implements IModule {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setBluetoothEnabled(CommandsDetection_APU.RET_6_ON.equals(command))) {
-						case (UtilsAndroid.NO_ERRORS): {
+						case (UtilsAndroid.NO_ERR): {
 							final String speak = "Bluetooth toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.ERROR): {
+						case (UtilsAndroid.GEN_ERR): {
 							final String speak = "Error toggling the Bluetooth.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroidConnectivity.NO_BLUETOOTH_ADAPTER): {
+						case (UtilsAndroid.PERM_DENIED): {
+							final String speak = "No permission to toggle the Bluetooth.";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+							break;
+						}
+						case (UtilsAndroid.NO_BLUETOOTH_ADAPTER): {
 							final String speak = "The device does not feature a Bluetooth adapter.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -383,6 +400,12 @@ public class CmdsExecutor implements IModule {
 
 							break;
 						}
+						default: {
+							final String speak = "Unspecified error toggling the Bluetooth.";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+							break;
+						}
 					}
 
 					break;
@@ -390,13 +413,13 @@ public class CmdsExecutor implements IModule {
 				case (CommandsDetection_APU.CMD_ANSWER_CALL): {
 					if (CommandsDetection_APU.RET_7.equals(command)) {
 						switch (UtilsAndroidTelephony.answerPhoneCall()) {
-							case (UtilsAndroid.NO_ERRORS): {
+							case (UtilsAndroid.NO_ERR): {
 								final String speak = "Call answered.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.ERROR): {
+							case (UtilsAndroid.GEN_ERR): {
 								final String speak = "Error answering the call.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -419,13 +442,13 @@ public class CmdsExecutor implements IModule {
 				case (CommandsDetection_APU.CMD_END_CALL): {
 					if (CommandsDetection_APU.RET_9.equals(command)) {
 						switch (UtilsAndroidTelephony.endPhoneCall()) {
-							case (UtilsAndroid.NO_ERRORS): {
+							case (UtilsAndroid.NO_ERR): {
 								final String speak = "Call ended.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.ERROR): {
+							case (UtilsAndroid.GEN_ERR): {
 								final String speak = "Error ending the call.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -449,33 +472,32 @@ public class CmdsExecutor implements IModule {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(CommandsDetection_APU.RET_11_ON.equals(command))) {
-						case (UtilsAndroid.NO_ERRORS): {
+						case (UtilsShell.NO_ERR): {
 							final String speak = "Airplane Mode toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.ERROR): {
-							final String speak = "Error toggling the Airplane Mode.";
+						case (UtilsAndroid.PERM_DENIED): {
+							final String speak = "No permission to toggle the Airplane Mode.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroid.NO_ROOT): {
-							final String speak = "Error toggling the Airplane Mode - no root user rights available " +
-									"nor app installed as system app.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-
-							break;
-						}
-						case (UtilsAndroidConnectivity.ALREADY_DISABLED): {
+						case (UtilsAndroid.ALREADY_DISABLED): {
 							final String speak = "The Airplane Mode is already disabled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
 						}
-						case (UtilsAndroidConnectivity.ALREADY_ENABLED): {
+						case (UtilsAndroid.ALREADY_ENABLED): {
 							final String speak = "The Airplane Mode is already enabled.";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+							break;
+						}
+						default: {
+							final String speak = "Unspecified error toggling the Airplane Mode.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 							break;
@@ -485,12 +507,26 @@ public class CmdsExecutor implements IModule {
 					break;
 				}
 				case (CommandsDetection_APU.CMD_ASK_BATTERY_PERCENT): {
+					if (!only_returning) {
+						final Boolean battery_present = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.battery_present);
+						if (null != battery_present && !battery_present) {
+							final String speak = "There is no battery present on the device.";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+						}
+					}
+
 					if (CommandsDetection_APU.RET_12.equals(command)) {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						final String speak = "Battery percentage: " + ValuesStorage.getValue(CONSTS_ValueStorage.battery_percentage) +
-								"%.";
+						final Integer battery_percentage = (Integer) ValuesStorage
+								.getValue(CONSTS_ValueStorage.battery_percentage);
+						final String speak;
+						if (null == battery_percentage) {
+							speak = "Battery percentage not available yet.";
+						} else {
+							speak = "Battery percentage: " + battery_percentage + "%.";
+						}
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 					}
 
@@ -504,15 +540,14 @@ public class CmdsExecutor implements IModule {
 						// Don't say anything if it's successful - he will already say "Shutdown detected".
 
 						switch (UtilsAndroidPower.shutDownDevice()) {
-							case (UtilsAndroid.ERROR): {
-								final String speak = "Error shutting down the device.";
+							case (UtilsAndroid.PERM_DENIED): {
+								final String speak = "No permission to shut down the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.NO_ROOT): {
-								final String speak = "Error shutting down the device - no root user rights available " +
-										"nor app installed as system app.";
+							default: {
+								final String speak = "Unspecified error shutting down the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
@@ -533,22 +568,24 @@ public class CmdsExecutor implements IModule {
 
 						final int reboot_mode;
 						if (CommandsDetection_APU.RET_14_NORMAL.equals(command)) {
-							reboot_mode = UtilsAndroidPower.MODE_NORMAL;
+							reboot_mode = UtilsAndroid.MODE_NORMAL;
 						} else if (CommandsDetection_APU.RET_14_SAFE_MODE.equals(command)) {
-							reboot_mode = UtilsAndroidPower.MODE_SAFE;
+							reboot_mode = UtilsAndroid.MODE_SAFE;
 						} else {
-							reboot_mode = UtilsAndroidPower.MODE_RECOVERY;
+							reboot_mode = UtilsAndroid.MODE_RECOVERY;
 						}
+
+						// todo New reboot modes available. Update the APU and add them here.
+
 						switch (UtilsAndroidPower.rebootDevice(reboot_mode)) {
-							case (UtilsAndroid.ERROR): {
-								final String speak = "Error rebooting down the device.";
+							case (UtilsAndroid.PERM_DENIED): {
+								final String speak = "No permission to reboot the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.NO_ROOT): {
-								final String speak = "Error rebooting down the device - no root user rights available " +
-										"nor app installed as system app.";
+							default: {
+								final String speak = "Unspecified error rebooting the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
@@ -570,6 +607,17 @@ public class CmdsExecutor implements IModule {
 				case (CommandsDetection_APU.CMD_RECORD_MEDIA): {
 					switch (command) {
 						case (CommandsDetection_APU.RET_16_AUDIO): {
+							if (!only_returning) {
+								if (!(boolean) ModulesList.getElementValue(
+										ModulesList.getElementIndex(AudioRecorder.class), ModulesList.MODULE_SUPPORTED)) {
+									final String speak = "Audio recording is not supported on this device through either " +
+											"hardware or application permissions limitations.";
+									UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+									continue;
+								}
+							}
+
 							// Can only start recording when the Google speech recognition has finished. Not before, or
 							// other things the user might want to say will be ignored (not cool).
 							if (!partial_results) {
@@ -577,7 +625,7 @@ public class CmdsExecutor implements IModule {
 								if (only_returning) continue;
 
 								UtilsSpeechRecognizersBC.stopRecognition();
-								UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC);
+								UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC, false);
 							}
 
 							break;
@@ -616,21 +664,20 @@ public class CmdsExecutor implements IModule {
 						UtilsCmdsExecutor.speak(speak, true, null);
 					} else {
 						switch (UtilsAndroidPower.setBatterySaverModeEnabled(CommandsDetection_APU.RET_19_ON.equals(command))) {
-							case (UtilsAndroid.NO_ERRORS): {
+							case (UtilsShell.NO_ERR): {
 								final String speak = "Battery Saver Mode toggled.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.ERROR): {
-								final String speak = "Error toggling the Battery Saver Mode.";
+							case (UtilsAndroid.PERM_DENIED): {
+								final String speak = "No permission to toggle the Battery Saver Mode.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
 							}
-							case (UtilsAndroid.NO_ROOT): {
-								final String speak = "Error toggling the Battery Saver Mode - no root user rights " +
-										"available nor app installed as system app.";
+							default: {
+								final String speak = "Unspecified error toggling the Battery Saver Mode.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
 								break;
@@ -668,12 +715,8 @@ public class CmdsExecutor implements IModule {
 			// Twice because vibrate once only is when he's listening for commands.
 			UtilsGeneral.vibrateDeviceOnce(200L);
 
-			System.out.println("EXECUTOR - SOMETHING_EXECUTED");
-
 			return SOMETHING_EXECUTED;
 		} else {
-			System.out.println("EXECUTOR - NOTHING_EXECUTED");
-
 			return NOTHING_EXECUTED;
 		}
 	}

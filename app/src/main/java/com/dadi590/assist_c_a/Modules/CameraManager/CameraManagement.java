@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -37,7 +37,8 @@ import android.util.AndroidException;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -49,7 +50,7 @@ import java.util.List;
 /**
  * <p>The module that manages the device camera, to take photos, record a video, or toggle the flashlight.</p>
  */
-public class CameraManagement implements IModule {
+public class CameraManagement implements IModuleInst {
 
 	@Nullable private Camera camera_old = null;
 	@Nullable TakePictureOld takePictureOld = null;
@@ -64,10 +65,10 @@ public class CameraManagement implements IModule {
 	boolean first_pic_of_two = false;
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -75,14 +76,21 @@ public class CameraManagement implements IModule {
 		return true;
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		return UtilsCheckHardwareFeatures.isCameraSupported();
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -129,7 +137,7 @@ public class CameraManagement implements IModule {
 					super.onTorchModeChanged(cameraId, enabled);
 
 					if (!main_camera_id.isEmpty() && main_camera_id.equals(cameraId)) {
-						// Update the values on the ValuesStorage
+						// Update the Values Storage
 						ValuesStorage.updateValue(CONSTS_ValueStorage.main_flashlight_enabled, Boolean.toString(enabled));
 					}
 				}
@@ -236,7 +244,7 @@ public class CameraManagement implements IModule {
 					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
 						if (null == takePictureOld && null == camera_old) {
 							first_pic_of_two = true;
-							takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_OFF_ON, 100);
+							takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_MODE_OFF_ON, 100);
 
 							System.out.println("################################");
 						} else {
@@ -378,7 +386,7 @@ public class CameraManagement implements IModule {
 	 *
 	 * @return one of the constants
 	 */
-	@RequiresApi(api = Build.VERSION_CODES.M) // Because of setTorchMode()
+	@RequiresApi(Build.VERSION_CODES.M) // Because of setTorchMode()
 	private int flashlightNew(final boolean set_enabled) {
 		// The API warnings here are wrong, I think - I believe the condition is correct. Either API >= 21 or 23.
 		final CameraManager camera_new = (CameraManager) UtilsGeneral.getContext().getSystemService(Context.CAMERA_SERVICE);

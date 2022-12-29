@@ -62,6 +62,8 @@ Detect the app uninstallation
 
 https://stackoverflow.com/questions/18692571/how-can-an-app-detect-that-its-going-to-be-uninstalled
 
+Plan B: use the Insurance app, when it's ready.
+
 
 ## Dangerous commands
 

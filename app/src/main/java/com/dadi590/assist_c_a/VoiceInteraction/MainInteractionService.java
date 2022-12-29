@@ -1,17 +1,22 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright 2022 DADi590
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package com.dadi590.assist_c_a.VoiceInteraction;
@@ -25,43 +30,42 @@ import android.service.voice.AlwaysOnHotwordDetector.Callback;
 import android.service.voice.AlwaysOnHotwordDetector.EventPayload;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import java.util.Arrays;
 import java.util.Locale;
 
-@RequiresApi(api = Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.L)
 public class MainInteractionService extends VoiceInteractionService {
 	static final String TAG = "MainInteractionService";
 
 	private final Callback mHotwordCallback = new Callback() {
 		@Override
 		public void onAvailabilityChanged(int status) {
-			Log.i(TAG, "onAvailabilityChanged(" + status + ")");
+			//Log.ii(TAG, "onAvailabilityChanged(" + status + ")");
 			hotwordAvailabilityChangeHelper(status);
 		}
 
+		@RequiresApi(Build.VERSION_CODES.M)
 		@Override
 		public void onDetected(EventPayload eventPayload) {
-			Log.i(TAG, "onDetected");
+			//Log.ii(TAG, "onDetected");
 			showSession(new Bundle(), VoiceInteractionSession.SHOW_WITH_ASSIST);
 		}
 
 		@Override
 		public void onError() {
-			Log.i(TAG, "onError");
+			//Log.ii(TAG, "onError");
 		}
 
 		@Override
 		public void onRecognitionPaused() {
-			Log.i(TAG, "onRecognitionPaused");
+			//Log.ii(TAG, "onRecognitionPaused");
 		}
 
 		@Override
 		public void onRecognitionResumed() {
-			Log.i(TAG, "onRecognitionResumed");
+			//Log.ii(TAG, "onRecognitionResumed");
 		}
 	};
 
@@ -78,9 +82,9 @@ public class MainInteractionService extends VoiceInteractionService {
 	public void onReady() {
 		super.onReady();
 		System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNN");
-		Log.i(TAG, "Creating " + this);
-		Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
-		//Log.i(TAG, "Keyphrase enrollment meta-data: " + getKeyphraseEnrollmentInfo().listKeyphraseMetadata().toArray().toString());
+		//Log.ii(TAG, "Creating " + this);
+		//Log.ii(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
+		////Log.ii(TAG, "Keyphrase enrollment meta-data: " + getKeyphraseEnrollmentInfo().listKeyphraseMetadata().toArray().toString());
 
 		mHotwordDetector = createAlwaysOnHotwordDetector("Ok Google", Locale.forLanguageTag("en-US"), mHotwordCallback);
 	}
@@ -96,25 +100,25 @@ public class MainInteractionService extends VoiceInteractionService {
 	}
 
 	private void hotwordAvailabilityChangeHelper(int availability) {
-		Log.i(TAG, "Hotword availability = " + availability);
+		//Log.ii(TAG, "Hotword availability = " + availability);
 		switch (availability) {
 			case AlwaysOnHotwordDetector.STATE_HARDWARE_UNAVAILABLE:
-				Log.i(TAG, "STATE_HARDWARE_UNAVAILABLE");
+				//Log.ii(TAG, "STATE_HARDWARE_UNAVAILABLE");
 				break;
 			case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNSUPPORTED:
-				Log.i(TAG, "STATE_KEYPHRASE_UNSUPPORTED");
+				//Log.ii(TAG, "STATE_KEYPHRASE_UNSUPPORTED");
 				break;
 			case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNENROLLED:
-				Log.i(TAG, "STATE_KEYPHRASE_UNENROLLED");
+				//Log.ii(TAG, "STATE_KEYPHRASE_UNENROLLED");
 				Intent enroll = mHotwordDetector.createEnrollIntent();
-				Log.i(TAG, "Need to enroll with " + enroll);
+				//Log.ii(TAG, "Need to enroll with " + enroll);
 				break;
 			case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
-				Log.i(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
+				//Log.ii(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
 				if (mHotwordDetector.startRecognition(AlwaysOnHotwordDetector.RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS)) {
-					Log.i(TAG, "startRecognition succeeded");
+					//Log.ii(TAG, "startRecognition succeeded");
 				} else {
-					Log.i(TAG, "startRecognition failed");
+					//Log.ii(TAG, "startRecognition failed");
 				}
 				break;
 		}

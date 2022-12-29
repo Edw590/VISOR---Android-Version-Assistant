@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -275,8 +275,8 @@ public final class UtilsLocationAbsolute {
 		final LocationManager locationManager = (LocationManager) UtilsGeneral.getContext()
 				.getSystemService(Context.LOCATION_SERVICE);
 
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-				&& UtilsPermissions.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+				&& UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
 			for (int i = 0, length = providers_to_try.length; i < length; ++i) {
 				final Location location = locationManager.getLastKnownLocation(providers_to_try[i]);
 				if (location != null && getAgeOfFix(location) <= (long) map_LOCATION_to_AGE.get(accuracy_type)) {

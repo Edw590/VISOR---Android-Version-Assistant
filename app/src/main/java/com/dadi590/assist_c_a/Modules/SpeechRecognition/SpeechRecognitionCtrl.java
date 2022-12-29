@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.Modules.SpeechRecognition;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,15 +29,19 @@ import android.content.IntentFilter;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
  * <p>This is the module which controls the assistant's speech recognition.</p>
  * <p>It may control one or more speech recognizers, like PocketSphinx and/or Google Speech Recognition.</p>
  */
-public class SpeechRecognitionCtrl implements IModule {
+public class SpeechRecognitionCtrl implements IModuleInst {
 
 	static final Class<?> NO_RECOGNIZER = null;
 	static final Class<?> POCKETSPHINX_RECOGNIZER = PocketSphinxRecognition.class;
@@ -52,10 +57,10 @@ public class SpeechRecognitionCtrl implements IModule {
 	long wait_time = default_wait_time;
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -63,7 +68,7 @@ public class SpeechRecognitionCtrl implements IModule {
 		return infinity_thread.isAlive();
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		infinity_thread.interrupt();
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
@@ -71,7 +76,24 @@ public class SpeechRecognitionCtrl implements IModule {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		final String[][] min_required_permissions = {{
+				Manifest.permission.RECORD_AUDIO,
+		}};
+
+		final boolean google_recog_available = UtilsSpeechRecognizers.isGoogleAppEnabled();
+
+		// Update the Values Storage
+		ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(google_recog_available));
+
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0] &&
+				UtilsCheckHardwareFeatures.isMicrophoneSupported() && google_recog_available;
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -99,20 +121,38 @@ public class SpeechRecognitionCtrl implements IModule {
 		@Override
 		public void run() {
 			while (true) {
+				// Also keep updating the ValuesStorage values in case there is some issue and the services don't get to
+				// update the value to false when they stop running (for example process killed by the system).
+
 				if (!stop_speech_recognition) {
 					if (GOOGLE_RECOGNIZER == current_recognizer) {
-						if (!UtilsServices.isServiceRunning(GoogleRecognition.class)) {
+						final boolean is_running = UtilsServices.isServiceRunning(GoogleRecognition.class);
+
+						// Update the Values Storage
+						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(is_running));
+
+						if (!is_running) {
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = default_wait_time;
 						}
 					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
-						if (!UtilsServices.isServiceRunning(PocketSphinxRecognition.class)) {
+						final boolean is_running = UtilsServices.isServiceRunning(PocketSphinxRecognition.class);
+
+						// Update the Values Storage
+						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(is_running));
+
+						if (!is_running) {
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = default_wait_time;
 						}
 					}
 
 					if (NO_RECOGNIZER == current_recognizer) {
+						// Update the Values Storage
+						ValuesStorage.updateValue(CONSTS_ValueStorage.pocketsphinx_recog_available, String.valueOf(false));
+						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(false));
+
+						UtilsSpeechRecognizers.terminateSpeechRecognizers();
 						UtilsSpeechRecognizers.startPocketSphinxRecognition();
 					}
 				}
@@ -156,8 +196,19 @@ public class SpeechRecognitionCtrl implements IModule {
 				}
 
 
-				case CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE:
+				case CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE: {
+					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.startGoogleRecognition();
+
+					stop_speech_recognition = false;
+					wait_time = default_wait_time;
+
+					break;
+				}
 				case CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX: {
+					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.startPocketSphinxRecognition();
+
 					stop_speech_recognition = false;
 					wait_time = default_wait_time;
 
@@ -166,6 +217,16 @@ public class SpeechRecognitionCtrl implements IModule {
 				case CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION: {
 					stop_speech_recognition = true;
 					wait_time = default_wait_time;
+
+					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+
+					break;
+				}
+				case CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS: {
+					//stop_speech_recognition = false; - this doesn't change with this call
+					wait_time = default_wait_time;
+
+					UtilsSpeechRecognizers.terminateSpeechRecognizers();
 
 					break;
 				}

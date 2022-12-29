@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -68,6 +68,17 @@ public final class UtilsSysApp {
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
 	private UtilsSysApp() {
+	}
+
+	/**
+	 * <p>Wrapper for {@link #mainFunction(String, int)} but that checks this app itself.</p>
+	 *
+	 * @param types_to_check same as in {@link #mainFunction(String, int)}
+	 *
+	 * @return same as in {@link #mainFunction(String, int)}
+	 */
+	public static boolean mainFunctionSelf(final int types_to_check) {
+		return mainFunction(UtilsGeneral.getContext().getPackageName(), types_to_check);
 	}
 
 	public static final int IS_PLATFORM_SIGNED_APP = 1;

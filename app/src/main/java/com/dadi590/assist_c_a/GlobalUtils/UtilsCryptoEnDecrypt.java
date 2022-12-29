@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,7 +35,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -308,9 +307,9 @@ public final class UtilsCryptoEnDecrypt {
 		final int data_length = (int) ((double) randomized_data.length / (1.0 + (1.0 / 16.0)));
 		final byte[] data = new byte[data_length];
 		int i = 0;
-		for (final byte _byte : randomized_data) {
-			if (UtilsGeneral.byteToIntUnsigned(_byte) <= 127) {
-				data[i] = _byte;
+		for (final byte b : randomized_data) {
+			if (UtilsDataConv.byteToUnsigned(b) <= 127) {
+				data[i] = b;
 				++i;
 			}
 		}
@@ -377,8 +376,7 @@ public final class UtilsCryptoEnDecrypt {
 		// performance (since this is not supposed to be done very much anyways - once in hours or something).
 		final byte[] md5 = UtilsCryptoHashing.getHashBytesOfBytes(password1, 0);
 		final byte[] sha1 = UtilsCryptoHashing.getHashBytesOfBytes(md5, 1);
-		final byte[] sha224 = UtilsCryptoHashing.getHashBytesOfBytes(sha1, 2);
-		final byte[] sha256 = UtilsCryptoHashing.getHashBytesOfBytes(sha224, 3);
+		final byte[] sha256 = UtilsCryptoHashing.getHashBytesOfBytes(sha1, 3);
 		final byte[] sha384 = UtilsCryptoHashing.getHashBytesOfBytes(sha256, 4);
 		final byte[] sha512 = UtilsCryptoHashing.getHashBytesOfBytes(sha384, 5);
 

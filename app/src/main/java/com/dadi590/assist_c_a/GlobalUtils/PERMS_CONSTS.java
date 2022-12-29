@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.os.Build;
 
 /**
@@ -50,7 +51,8 @@ final class PERMS_CONSTS {
 			{Manifest.permission.FOREGROUND_SERVICE, String.valueOf(Build.VERSION_CODES.P)},
 			{Manifest.permission.MODIFY_AUDIO_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
 	};*/
-	static final String[][] danger_perms_list = {
+	@SuppressLint("InlinedApi")
+	private static final String[][] danger_perms_list = {
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECORD_AUDIO, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(Build.VERSION_CODES.DONUT)},
@@ -63,6 +65,11 @@ final class PERMS_CONSTS {
 			{Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
 			{Manifest.permission.CALL_PHONE, String.valueOf(Build.VERSION_CODES.BASE)},
 	};
+	private static final String[][] dev_perms_list = {
+			// Only from Jelly Bean 4.2 this permission began being of development type, and hence can only be granted
+			// through ADB commands from that point onwards.
+			{Manifest.permission.WRITE_SECURE_SETTINGS, String.valueOf(Build.VERSION_CODES.JELLY_BEAN)},
+	};
 	/*private static final String[][] sys_perms_list = {
 			{Manifest.permission.REBOOT, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.SHUTDOWN, String.valueOf(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)},
@@ -73,5 +80,9 @@ final class PERMS_CONSTS {
 			{Manifest.permission.CAPTURE_AUDIO_OUTPUT, String.valueOf(Build.VERSION_CODES.KITKAT)},
 	};*/
 
-	//static final String[][][] list_of_perms_lists = {danger_perms_list};
+	// NOTICE: keep the dangerous permissions list on the index 0 of the array. On the permissions checker function,
+	// only the permissions from the list on index 0 here are counted as not granted and warned to the user. With all
+	// other indexes no permissions are counted (the user can't do anything about them - development permissions can be
+	// granted with root permissions allowed to the app, and that's it - without root, no way to grant the permissions).
+	static final String[][][] list_of_perms_lists = {danger_perms_list, dev_perms_list};
 }

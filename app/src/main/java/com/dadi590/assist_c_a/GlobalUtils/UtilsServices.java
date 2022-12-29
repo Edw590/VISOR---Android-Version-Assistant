@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,6 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
@@ -45,7 +44,7 @@ public final class UtilsServices {
 	}
 
 	/**
-	 * <p>Restarts a service by either terminating it's PID (thus forcing the shut down), or stopping it normally;
+	 * <p>Restarts a service by either stopping it normally or terminating it's PID (TERMINATING THE WHOLE PROCESS), and
 	 * then starts it again normally (unless it was already started, like by the system).</p>
 	 *
 	 * @param service_class the class of the service to restart
@@ -59,7 +58,7 @@ public final class UtilsServices {
 		} else {
 			stopService(service_class);
 		}
-		startService(service_class, intent, true);
+		startService(service_class, intent, true, true);
 	}
 
 	/**
@@ -69,8 +68,7 @@ public final class UtilsServices {
 	 */
 	public static void stopService(@NonNull final Class<?> service_class) {
 		final Context context = UtilsGeneral.getContext();
-		final Intent intent = new Intent(context, service_class);
-		context.stopService(intent);
+		context.stopService(new Intent(context, service_class));
 	}
 
 	/**
@@ -82,55 +80,40 @@ public final class UtilsServices {
 	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
 	 *                   false to start in background; below that, this value has no effect as the service is always
 	 *                   started in background
-	 *
-	 * @return true if the service was started, false if it was already running
+	 * @param check_already_running if true, the startService() will only be called if the service is not running; if
+	 *                              false, the function will be called anyways (note that that means onStartCommand()
+	 *                              will be called again, as it's called every time startService() is called)
 	 */
-	public static boolean startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
-									final boolean foreground) {
-		// Don't put this allowing to choose to start even if the service is already running. Imagine that triggers all
-		// the global variables declared on the service. Currently, that would mean instantiate the Speech again, for
-		// example. It shouldn't. If this doesn't happen, you can put the parameter back to check if it's running or not.
-		// While you don't see about that, it will only start if it's not already running.
-		// Note: this above is referring to when I had a parameter to be possible to tell the function to check or not
-		// if the service is running or not (would call it anyways if it would not be to check if it's running or not).
-
-		if (!isServiceRunning(service_class)) {
-			final Context context = UtilsGeneral.getContext();
-			final Intent intent_to_use;
-			if (intent == null) {
-				intent_to_use = new Intent(context, service_class);
-			} else {
-				intent_to_use = intent;
-			}
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				if (foreground) {
-					context.startForegroundService(intent_to_use);
-
-					return true;
-				}
-			}
-
-			// Do NOT call this in high frequency. It's said on the doc that it takes various milliseconds to process
-			// this call.
-			context.startService(intent_to_use);
-
-			return true;
+	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
+									final boolean foreground, final boolean check_already_running) {
+		if (check_already_running && isServiceRunning(service_class)) {
+			return;
 		}
 
-		return false;
+		final Context context = UtilsGeneral.getContext();
+		final Intent intent_to_use;
+		if (intent == null) {
+			intent_to_use = new Intent(context, service_class);
+		} else {
+			intent_to_use = intent;
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			if (foreground) {
+				context.startForegroundService(intent_to_use);
+			}
+		}
+		// Do NOT call this in high frequency. It's said on the docs that it takes various milliseconds to process this
+		// call.
+		context.startService(intent_to_use);
 	}
 
 	/**
 	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
 	 * <p>What it does:</p>
-	 * <p>- Checks if the app is signed by me, and if it's not, it will kill itself silently;</p>
-	 * <p>- Attempts to force all permissions to be granted;</p>
+	 * <p>- Checks if the app is signed by its supposed certificates, and if it's not, it will kill itself silently;</p>
 	 * <p>- Starts the Main Service.</p>
-	 *
-	 * @return same as in {@link UtilsPermissions#wrapperRequestPerms(Activity, boolean)}
 	 */
-	@NonNull
-	public static int[] startMainService() {
+	public static void startMainService() {
 		if (UtilsCertificates.isThisAppCorrupt()) {
 			// This is just in case it's possible to patch the APK like it is with binary files without needing the
 			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
@@ -138,13 +121,10 @@ public final class UtilsServices {
 			// It's also in case something changes on the APK because of some corruption. The app won't start.
 			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
 
-			return new int[0]; // Just to be sure it doesn't carry on.
+			return;
 		}
 
-		final int[] ret = UtilsPermissions.wrapperRequestPerms(null, false);
-		UtilsServices.startService(MainSrv.class, null, true);
-
-		return ret;
+		UtilsServices.startService(MainSrv.class, null, true, false);
 	}
 
 	/**
@@ -158,8 +138,8 @@ public final class UtilsServices {
 	 * @return true if the service is running, false otherwise
 	 */
 	public static boolean isServiceRunning(@NonNull final Class<?> service_class) {
-
-		// NOTE: this method is called MANY times, so don't put it using too much CPU time. Must be as fast as possible.
+		// Note: this method is called automatically before starting services, if it's chosen for it to - so don't put
+		// it using too much CPU time. Must be as fast as possible.
 
 		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getContext()
 				.getSystemService(Context.ACTIVITY_SERVICE);

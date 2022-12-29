@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,17 +21,12 @@
 
 package com.dadi590.assist_c_a.Modules.CameraManager;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
  * <p>Camera Manager related utilities.</p>
@@ -95,22 +90,8 @@ public final class UtilsCameraManager {
 		}
 
 		// It's never null - read the documentation of getSupportedPictureSizes()
+		assert null != result;
 		return result;
-	}
-
-	/**
-	 * <p>Check if this device has a camera.</p>
-	 *
-	 * @return true if the device features any camera, false otherwise
-	 */
-	public static boolean deviceHasAnyCamera() {
-		final Context context = UtilsGeneral.getContext();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-		} else {
-			return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
-					context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
-		}
 	}
 
 	/**

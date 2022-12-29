@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -34,8 +35,10 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,6 +88,7 @@ public final class UtilsTelephony {
 	 * @return the name of the contact or one of the constants
 	 */
 	@NonNull
+	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static String getNameFromNum(@NonNull final String number, final int location_search) {
 		final Uri uri_to_use;
 		switch (location_search) {
@@ -112,11 +116,17 @@ public final class UtilsTelephony {
 			if (location_search == ALL_CONTACTS) {
 				if ((cursor != null ? cursor.getCount() : 0) > 0) {
 					while (cursor.moveToNext()) {
-						final String id = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
-						final String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+						final int col1_idx = cursor.getColumnIndex(BaseColumns._ID);
+						final int col2_idx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+						if (col1_idx < 0 || col2_idx < 0) {
+							continue;
+						}
+						final String id = cursor.getString(col1_idx);
+						final String name = cursor.getString(col2_idx);
 						//System.out.println("Name: " + name);
 
-						if (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+						final int col3_idx = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
+						if (col3_idx >= 0 && cursor.getInt(col3_idx) > 0) {
 							try (
 									final Cursor cursor1 = contentResolver.query(
 									ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -125,8 +135,12 @@ public final class UtilsTelephony {
 									new String[]{id}, null)
 							) {
 								while (cursor1.moveToNext()) {
-									final String phoneNo = cursor1.getString(cursor1.getColumnIndex(
-											ContactsContract.CommonDataKinds.Phone.NUMBER));
+									final int col4_idx = cursor1.getColumnIndex(
+											ContactsContract.CommonDataKinds.Phone.NUMBER);
+									if (col4_idx < 0) {
+										continue;
+									}
+									final String phoneNo = cursor1.getString(col4_idx);
 									//System.out.println("Number: " + phoneNo);
 
 									if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
@@ -153,9 +167,17 @@ public final class UtilsTelephony {
 			} else if (location_search == CONTACTS_SIM) {
 				// Leave it even being "always true" - until another location is added... Might prevent bugs.
 				while (cursor.moveToNext()) {
-					final String name = cursor.getString(cursor.getColumnIndex("name"));
+					final int col1_idx = cursor.getColumnIndex("name");
+					if (col1_idx < 0) {
+						continue;
+					}
+					final String name = cursor.getString(col1_idx);
 					//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
-					final String phoneNo = cursor.getString(cursor.getColumnIndex("number"));
+					final int col2_idx = cursor.getColumnIndex("number");
+					if (col2_idx < 0) {
+						continue;
+					}
+					final String phoneNo = cursor.getString(col2_idx);
 					/*System.out.println("Name: " + name);
 					System.out.println("Phone Number: " + phoneNo);*/
 
@@ -226,7 +248,7 @@ public final class UtilsTelephony {
 	}
 
 	/**
-	 * <p>Returns what the assistant should say about the given number.</p>
+	 * <p>Returns what the assistant should say about the given number to continue the sentence "Call from...".</p>
 	 * <br>
 	 * <p>For example, for a phone number, it will separate all digits, so the assistant can spell the number. For
 	 * an alphanumeric number (like PayPal), it will return a string to warn it's a alphanumeric number. Will also warn
@@ -238,7 +260,13 @@ public final class UtilsTelephony {
 	 */
 	@NonNull
 	public static String getWhatToSayAboutNumber(@NonNull final String number) {
-		final String ret = getNameFromNum(number, ALL_CONTACTS);
+		final String ret;
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
+			ret = getNameFromNum(number, ALL_CONTACTS);
+		} else {
+			ret = NO_MATCHES;
+		}
+
 		if (ret.equals(NO_MATCHES)) {
 			if (PhoneNumberUtils.isGlobalPhoneNumber(number)) {
 				// In case it's a phone number, separate each digit and spell. So +351123456789 will be rewritten as
@@ -282,7 +310,6 @@ public final class UtilsTelephony {
 			if (cursor.moveToLast()) { //starts pulling logs from last - you can use moveToFirst() for first logs
 				final String phNumber = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
 				final String type = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.TYPE));
-				cursor.close();
 
 				return new String[]{phNumber, type};
 			}

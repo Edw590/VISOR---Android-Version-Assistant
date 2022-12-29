@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -67,33 +67,34 @@ public final class UtilsMedia {
 		if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			return null;
 		}
-		String folder = Environment.getExternalStorageDirectory() + File.separator + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
+		String folder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
 		switch (media_type) {
 			case (AUDIO): {
-				folder += "Audio recordings" + File.separator;
+				folder += "Audio recordings/";
 				break;
 			}
 			case (PHOTO): {
-				folder += "Photos" + File.separator;
+				folder += "Photos/";
 				break;
 			}
 			case (VIDEO): {
-				folder += "Video recordings" + File.separator;
+				folder += "Video recordings/";
 				break;
 			}
 			case (SCREENSHOT): {
-				folder += "Screenshots" + File.separator;
+				folder += "Screenshots/";
 				break;
 			}
+		}
+
+		if (UtilsShell.NO_ERR != UtilsFilesDirs.createDirectory(folder)) {
+			return null;
 		}
 
 		// Create the storage directory if it does not exist
 		// In the beginning it's checked if the storage is available and that method returns true if and only if
 		// the storage has read/write access - so the folder can be created. No need to check for nullability.
-		final File media_folder = UtilsFilesDirs.createDirectory(folder);
-		if (media_folder == null) {
-			return null;
-		}
+		final File media_folder = new File(folder);
 
 		// Create a media file name
 		final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
@@ -101,19 +102,19 @@ public final class UtilsMedia {
 		File mediaFile = null;
 		switch (media_type) {
 			case (AUDIO): {
-				mediaFile = new File(media_folder.getPath() + File.separator + "AUD_" + time_stamp + ".aac");
+				mediaFile = new File(media_folder.getPath() + "/AUD_" + time_stamp + ".aac");
 				break;
 			}
 			case (PHOTO): {
-				mediaFile = new File(media_folder.getPath() + File.separator + "PHO_" + time_stamp + ".jpg");
+				mediaFile = new File(media_folder.getPath() + "/PHO_" + time_stamp + ".jpg");
 				break;
 			}
 			case (VIDEO): {
-				mediaFile = new File(media_folder.getPath() + File.separator + "VID_" + time_stamp + ".mp4");
+				mediaFile = new File(media_folder.getPath() + "/VID_" + time_stamp + ".mp4");
 				break;
 			}
 			case (SCREENSHOT): {
-				mediaFile = new File(media_folder.getPath() + File.separator + "SCR_" + time_stamp + ".jpg");
+				mediaFile = new File(media_folder.getPath() + "/SCR_" + time_stamp + ".jpg");
 				break;
 			}
 		}

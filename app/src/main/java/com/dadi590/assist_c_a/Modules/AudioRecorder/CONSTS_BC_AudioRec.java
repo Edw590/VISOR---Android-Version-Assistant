@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -36,14 +36,16 @@ public final class CONSTS_BC_AudioRec {
 
 	/**
 	 * <p>Explanation: same as the main executed function.</p>
-	 * <p>Main executed function: {@link AudioRecorder#recordAudio(boolean, int)}.</p>
+	 * <p>Main executed function: {@link AudioRecorder#recordAudio(boolean, int, boolean)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsAudioRecorderBC}.</p>
 	 * <p>To be received only by the class(es): {@link AudioRecorder}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_RECORD_AUDIO_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_RECORD_AUDIO_2}: mandatory</p>
+	 * <p>- {@link #EXTRA_RECORD_AUDIO_3}: mandatory</p>
 	 */
 	static final String ACTION_RECORD_AUDIO = "AudioRecorder_ACTION_RECORD_AUDIO";
 	static final String EXTRA_RECORD_AUDIO_1 = "AudioRecorder_EXTRA_RECORD_AUDIO_1";
 	static final String EXTRA_RECORD_AUDIO_2 = "AudioRecorder_EXTRA_RECORD_AUDIO_2";
+	static final String EXTRA_RECORD_AUDIO_3 = "AudioRecorder_EXTRA_RECORD_AUDIO_3";
 }

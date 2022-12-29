@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,17 +21,13 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Utilities related to files and directories.</p>
@@ -44,169 +40,167 @@ public final class UtilsFilesDirs {
 	private UtilsFilesDirs() {
 	}
 
-	/**
-	 * <p>Deletes a file or directory (empty or not).</p>
-	 *
-	 * @param abs_file_path the absolute file or directory path
-	 *
-	 * @return true if deletion was completely successful, including all files if a non-empty folder was selected for
-	 * deletion; false if the app has no read and/or write permissions on the chosen file, directory, or at least one of
-	 * child element(s)
-	 */
-	public static boolean deletePath(@NonNull final File abs_file_path) {
-		if (abs_file_path.isDirectory()) {
-			final String[] children = abs_file_path.list();
-			boolean success = true;
-			if (children == null) {
-				return false;
-			} else {
-				for (final String child : children) {
-					success = success && deletePath(new File(abs_file_path, child));
-				}
-			}
 
-			return success && abs_file_path.delete();
-		} else if (abs_file_path.isFile()) {
-			return abs_file_path.delete();
-		} else {
-			return false;
-		}
+
+	// todo Use SDK methods (faster) unless some error happens, and only then use shell commands
+
+
+
+	/**
+	 * <p>Removes a path (to whatever), empty or not, using the rm shell command.</p>
+	 *
+	 * @param path the path
+	 * @param recursive same as rm's "r" parameter
+	 *
+	 * @return a SH shell exit code
+	 */
+	public static int removePath(@NonNull final File path, final boolean recursive) {
+		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path + "'";
+
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}
 
 	/**
-	 * <p>Write a file to the External Storage.</p>
+	 * <p>Creates a path and all necessary but non-existent parent directories.</p>
 	 *
-	 * @param abs_file_path the absolute file path
-	 * @param data the data to be written to the file
-	 * @param append true to append, false to write from the beginning
+	 * @param path the path to the create
 	 *
-	 * @return true if the operation exited successfully, false otherwise; null if the app has no write permissions on
-	 * the chosen file
+	 * @return a SH shell exit code
 	 */
-	@Nullable
-	public static Boolean writeFile(@NonNull final String abs_file_path, @NonNull final byte[] data,
-									final boolean append) {
-		final String abs_file_path_corrected = abs_file_path.replace('\\', '/');
-		final File file = new File(abs_file_path_corrected);
-		try {
-			// This creates all directories needed to get to the file.
-			new File(abs_file_path_corrected.substring(0, abs_file_path_corrected.lastIndexOf((int) '/'))).mkdirs();
-		} catch (final SecurityException ignored) {
-			return null;
-		}
+	public static int createDirectory(@NonNull final String path) {
+		final String command = "mkdir -p '" + path + "'";
 
-		try (final FileOutputStream fileOutputStream = new FileOutputStream(file, append)) {
-			fileOutputStream.write(data);
-
-			System.out.println("GGGGGGGGGGGGGGGG");
-
-			return true;
-		} catch (final FileNotFoundException ignored) {
-			return null;
-		} catch (final IOException ignored) {
-		}
-
-		return false;
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}
 
 	/**
-	 * <p>Reads a file and stores its data in a byte array.</p>
-	 * <p>ATTENTION: no more than 10 MiB can be loaded using this function, to prevent bugs (and associated crashes).</p>
+	 * <p>Gets the size of a file.</p>
 	 *
-	 * @param abs_file_path the absolute file path
+	 * @param file_path the path to the file
 	 *
-	 * @return a byte array with the contents of the file; null if more than the said file size was requested to be
-	 * loaded, there was no file, the path is to a folder, there are no read permissions on the file for the app, or
-	 * there is no memory available to read the file to RAM
+	 * @return the file size in bytes, or -1 if an error occurred (no permissions or no file)
+	 */
+	public static int getFileSize(@NonNull final String file_path) {
+		final String command = "ls -l '" + file_path + "'";
+		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(command, true, true);
+		final String output_data = UtilsDataConv.bytesToPrintable(cmdOutputObj.output_stream, false);
+
+		if (0 != cmdOutputObj.error_code) {
+			return -1;
+		}
+
+		return Integer.parseInt(output_data.split(" ")[3]);
+	}
+
+	/**
+	 * <p>Reads the bytes from the given file using the cat shell command.</p>
+	 * <p>ATTENTION: no more than 10 MiB can be read using this function, to prevent out of memory errors.</p>
+	 *
+	 * @param file_path the path to the file
+	 *
+	 * @return the bytes of the file or null in case there was an error reading the file or the file size was greater
+	 * than 10 MiB
 	 */
 	@Nullable
-	public static byte[] readFileExtStge(@NonNull final String abs_file_path) {
-		final File file = new File(abs_file_path);
-		final int file_size = (int) file.length();
-		if (file_size > 10_485_760) {
+	public static byte[] readFileBytes(@NonNull final String file_path) {
+		final int file_size = getFileSize(file_path);
+		if (-1 == file_size || file_size > 10_485_760) {
 			// Not larger than 10 MiB, at least for now (not needed).
 			return null;
 		}
-		final byte[] file_bytes;
-		try {
-			file_bytes = new byte[file_size];
-		} catch (final OutOfMemoryError ignored) {
-			return null;
-		}
-		try (final BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file))) {
-			// Don't use read(byte[]) here. That one says it blocks waiting for input (not sure what that means). This
-			// one I think it doesn't.
-			bufferedInputStream.read(file_bytes, 0, file_bytes.length);
 
-			return file_bytes;
-		} catch (final FileNotFoundException ignored) {
-		} catch (final IOException ignored) {
-		} catch (final SecurityException ignored) {
-		}
+		final String command = "cat '" + file_path + "'";
 
-		return null;
+		// Ignore the warning about the clone. No problem with it. This is a utility method. It won't use the object
+		// for anything other than to return it. Performance gained (imagine it's a big file...).
+		return UtilsShell.executeShellCmd(command, true, true).output_stream;
 	}
 
 	/**
-	 * <p>Creates a directory in the external storage and all necessary but non-existent parent directories.</p>
+	 * <p>Writes the given files bytes to a file (replaces all file contents).</p>
+	 * <p>Only ONLY with small files!!! <strong>This function requires allocating 3-4 times the file size into
+	 * memory!</strong></p>
 	 *
-	 * @param abs_folder_path the absolute folder path
+	 * @param file_path the path to the file
+	 * @param file_bytes the bytes to write
 	 *
-	 * @return the {@link File} instance for the chosen directory if the operation exited successfully (the directory(ies)
-	 * already existed or was/were created); null if the app has no read and/or write permissions on the chosen directory
-	 * or there was some other problem with {@link File#mkdirs()}
+	 * @return a SH shell exit code
 	 */
-	@Nullable
-	public static File createDirectory(@NonNull final String abs_folder_path) {
-		final File folder = new File(abs_folder_path);
-
-		try {
-			// Create the storage directory if it does not exist
-			if (folder.exists()) {
-				return folder;
-			} else {
-				if (folder.mkdirs()) {
-					return folder;
-				}
-			}
-		} catch (final SecurityException ignored) {
-			// No read and/or write permissions.
-		}
-
-		return null;
-	}
-
-	/**
-	 * <p>Gets the access rights of a file or folder.</p>
-	 *
-	 * @param path the path to the file or folder
-	 * @param human_readable true to return "drwxr-xr-x", for example; false to return in octal form (for example, 755)
-	 *
-	 * @return one of the strings mentioned in {@code human_readable} parameter
-	 */
-	@NonNull
-	public static String getAccessRights(@NonNull final String path, final boolean human_readable) {
-		final String parameter;
-		if (human_readable) {
-			parameter = "%A";
+	public static int writeSmallFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
+		final String bytes_data;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			// This is here because hex takes less size on memory than octal when in string representation (2 vs 3 chars).
+			// On miTab Advance (KitKat 4.4.2), hex is supported, so I'm putting it as minimum for it (didn't check
+			// APIs 16-18 though).
+			bytes_data = "\\x" + UtilsDataConv.bytesToHex(file_bytes).replace(" ", "\\x"); // 3 * file size
 		} else {
-			parameter = "%a";
+			// Leave it in octal form here. Android 4.0.3 doesn't support hex with echo, it seems - but supports octal.
+			bytes_data = "\\0" + UtilsDataConv.bytesToOctal(file_bytes).replace(" ", "\\0"); // 4 * file size
 		}
 
-		// todo When you need to use the function, put it checking if without "su" the permission is denied, and if it
-		//  is, run the command again but with root user rights
+		final String command = "echo -ne '" + bytes_data + "' > '" + file_path + "'";
 
-		final List<String> commands = new ArrayList<>(3);
-		commands.add("su");
-		commands.add("stat -c " + parameter + " " + path);
-		commands.add("exit");
-
-		final UtilsShell.CmdOutputObj commands_output = UtilsShell.executeShellCmd(commands, true);
-
-		return UtilsGeneral.bytesToPrintableChars(commands_output.output_stream, false);
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}
 
-	/*public static boolean createFile(@NonNull final String complete_name) {
-		final String partition = complete_name.split("/")[1];
-	}*/
+	/**
+	 * <p>Copies the file on the source path to another file on the destination path.</p>
+	 * <p>Only ONLY with small files!!! <strong>This function requires allocating 4-5 times the file size into
+	 * memory!</strong></p>
+	 *
+	 * @param src_path the source file path
+	 * @param dest_path the destination file path
+	 *
+	 * @return a SH shell exit code, or also -1 if the source file could not be read
+	 */
+	public static int copySmallFile(@NonNull final String src_path, @NonNull final String dest_path) {
+		final byte[] src_bytes = readFileBytes(src_path); // First time with the file bytes
+		if (null == src_bytes) {
+			return -1;
+		}
+
+		return writeSmallFile(src_path, src_bytes); // Plus 3 or 4 times the size, depending on the API level
+	}
+
+	/**
+	 * <p>Copies the source path to the destination path (file, directory, whatever).</p>
+	 *
+	 * @param src_path the source path
+	 * @param dest_path the destination path
+	 *
+	 * @return a SH shell exit code
+	 */
+	@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+	public static int copyPath(@NonNull final String src_path, @NonNull final String dest_path) {
+		final String command = "cp -rf '" + src_path + "' '" + dest_path + "'";
+
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
+	}
+
+	/**
+	 * <p>Sets the permissions of a path (to a file or folder or whatever it is).</p>
+	 *
+	 * @param path the path
+	 * @param permissions the permissions
+	 *
+	 * @return a SH shell exit code
+	 */
+	public static int chmod(@NonNull final String path, final int permissions, final boolean recursive) {
+		final String command = "chmod " + permissions + (recursive ? " -R " : " ") + "'" + path + "'";
+
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
+	}
+
+	/**
+	 * <p>Checks if a path exists (file, directory, whatever).</p>
+	 *
+	 * @param path the path
+	 *
+	 * @return a SH shell exit code
+	 */
+	public static int checkPathExists(@NonNull final String path) {
+		final String command = "ls '" + path+ "'";
+
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
+	}
 }

@@ -7,12 +7,6 @@ assignees: ''
 
 ---
 
-<!--
-[Issue; Type: 4; Version: 1.0;]
-
-Do NOT delete/change anything inside < ! - - and - - >!!!
--->
-
 **What is the question about?** <!--[Title;]-->
 
 

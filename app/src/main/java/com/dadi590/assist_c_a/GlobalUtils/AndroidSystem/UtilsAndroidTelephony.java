@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,7 +35,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.telephony.ITelephony;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
 
 import java.lang.reflect.InvocationTargetException;
@@ -53,15 +54,18 @@ public final class UtilsAndroidTelephony {
 	private UtilsAndroidTelephony() {
 	}
 
-	// todo Check if the call was answered or ended based on the current call state
+	// todo Check if the call was answered or ended based on the current call state (in case the broadcast way was not
+	//  used, as that has some delay)
+
+
+	// todo Use ADB commands here too. Example: "adb shell service call phone 5" for answerRingingCall(), but hopefully
+	//  with root permissions and not needing the ANSWER_PHONE_CALLS one, or the MODIFY_PHONE_STATE, or whatever else.
 
 	/**
 	 * <p>Answer a ringing phone call.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @return one of the constants
@@ -69,31 +73,30 @@ public final class UtilsAndroidTelephony {
 	public static int answerPhoneCall() {
 		final Context context = UtilsGeneral.getContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
-					UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
+					UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
 				try {
 					telecomManager.acceptRingingCall();
 
-					return UtilsAndroid.NO_ERRORS;
+					return UtilsAndroid.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			}
 		} else {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final ITelephony iTelephony = ITelephony.Stub.asInterface(ServiceManager.
 						getService(Context.TELEPHONY_SERVICE));
 				// There's also TelephonyManager.answerRingingCall(), but this one exists for many API levels, so why
 				// not use it for all possible ones.
 
 				// Deprecated and removed as of Android 10 (returns "void").
+				final Method method = UtilsReflection.getMethod(ITelephony.class, "answerRingingCall");
+				assert null != method; // Will never happen.
 				try {
-					final Method method = ITelephony.class.getDeclaredMethod("answerRingingCall");
-					method.setAccessible(true);
 					method.invoke(iTelephony);
 
-					return UtilsAndroid.NO_ERRORS;
-				} catch (final NoSuchMethodException ignored) {
+					return UtilsAndroid.NO_ERR;
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
@@ -110,15 +113,15 @@ public final class UtilsAndroidTelephony {
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_HEADSETHOOK, Manifest.permission.CALL_PRIVILEGED);
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_CALL, Manifest.permission.CALL_PRIVILEGED);
 
-		return UtilsAndroid.NO_ERRORS;
+		return UtilsAndroid.NO_ERR;
 	}
 
 	/**
 	 * <p>End the current phone call.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
+	 * <p>- {@link UtilsAndroid#GEN_ERR} --> for the returning value: if an error occurred and the operation did not
 	 * succeed</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
@@ -127,31 +130,29 @@ public final class UtilsAndroidTelephony {
 	public static int endPhoneCall() {
 		final Context context = UtilsGeneral.getContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
 				final TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
 
 				try {
-					return telecomManager.endCall() ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
+					return telecomManager.endCall() ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
 				} catch (final Exception ignored) {
 				}
 			}
 		} else {
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 				final ITelephony iTelephony = ITelephony.Stub.asInterface(ServiceManager.
 						getService(Context.TELEPHONY_SERVICE));
 				// There's also TelephonyManager.endCall(), but this one exists for many API levels, so why not use it
 				// for all possible ones.
 
 				// Deprecated and removed as of Android 10 (returns a boolean).
+				final Method method = UtilsReflection.getMethod(ITelephony.class, "endCall");
+				assert null != method; // Will never happen.
 				try {
-					final Method method = ITelephony.class.getDeclaredMethod("endCall");
-					method.setAccessible(true);
-
 					final Boolean ret_method = (Boolean) method.invoke(iTelephony);
 					assert ret_method != null; // Which will never be... (but the warning is gone now)
 
-					return ret_method ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
-				} catch (final NoSuchMethodException ignored) {
+					return ret_method ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
@@ -166,7 +167,7 @@ public final class UtilsAndroidTelephony {
 		// it works... When it doesn't, well, what can we do...
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_ENDCALL, Manifest.permission.CALL_PRIVILEGED);
 
-		return UtilsAndroid.NO_ERRORS;
+		return UtilsAndroid.NO_ERR;
 	}
 
 	/**
@@ -203,10 +204,10 @@ public final class UtilsAndroidTelephony {
 
 		final String action;
 		final boolean call_placed;
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED)) {
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED)) {
 			action = Intent.ACTION_CALL_PRIVILEGED;
 			call_placed = true;
-		} else if (UtilsPermissions.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
+		} else if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 			if (UtilsTelephony.isEmergencyNumber(phone_number)) {
 				action = action_dial_emergency;
 				call_placed = false;

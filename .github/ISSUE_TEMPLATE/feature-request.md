@@ -7,12 +7,6 @@ assignees: DADi590
 
 ---
 
-<!--
-[Issue; Type: 2; Version: 1.0;]
-
-Do NOT delete/change anything inside < ! - - and - - >!!!
--->
-
 **Is your feature request related to a problem? Please describe.** <!--[Title;]-->
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 

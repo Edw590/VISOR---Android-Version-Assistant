@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -99,12 +99,12 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	 * take 2 pictures anymore (or any, anyway).</p> */
 	boolean flash_off_on;
 
-	public static final String FLASH_OFF_ON = "FLASH_OFF_ON";
+	public static final String FLASH_MODE_OFF_ON = "FLASH_MODE_OFF_ON";
 	/**
 	 * <p>Main class constructor.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #FLASH_OFF_ON} --> for {@code chosen_flash_mode}: first take a picture with the flash off and then
+	 * <p>- {@link #FLASH_MODE_OFF_ON} --> for {@code chosen_flash_mode}: first take a picture with the flash off and then
 	 * another one with it on. Might be useful in case the user didn't select a flash mode, and also because the auto
 	 * flash is not implemented, at least yet. So one of the pictures taken by this method will be good, hopefully.</p>
 	 * <p><u>---CONSTANTS---</u></p>
@@ -120,7 +120,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 		this.chosen_flash_mode = chosen_flash_mode;
 		this.chosen_quality_mode = chosen_quality_mode;
 
-		flash_off_on = FLASH_OFF_ON.equals(chosen_flash_mode);
+		flash_off_on = FLASH_MODE_OFF_ON.equals(chosen_flash_mode);
 
 		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().
 				getSystemService(Context.WINDOW_SERVICE);
@@ -167,11 +167,6 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	 * <p>Takes a picture with the chosen settings.</p>
 	 */
 	final void takeImage() {
-		if (!UtilsCameraManager.deviceHasAnyCamera()) {
-			// If there are no cameras, stop the service.
-			return;
-		}
-
 		final Camera camera = UtilsCameraManager.openCamera(rear_picture_requested);
 		if (null == camera) {
 			final Intent broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_ERR_CANT_OPEN_CAM);
@@ -203,7 +198,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 		@Override
 		public void onPictureTaken(@NonNull final byte[] data, @NonNull final Camera camera) {
 			// decode the data obtained by the camera into a Bitmap
-			//Log.d("ImageTakin", "Done");
+			////Log.id("ImageTakin", "Done");
 			final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 			@Nullable Bitmap bitmap = UtilsCameraManager.decodeBitmap(data);
 			bitmap.compress(PICTURE_FORMAT, chosen_quality_mode, bytes);

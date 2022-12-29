@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -32,14 +33,13 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Connectivity related utilities.</p>
@@ -53,21 +53,23 @@ public final class UtilsAndroidConnectivity {
 	private UtilsAndroidConnectivity() {
 	}
 
+	// todo The error codes are all wrong here. All mixed up. Create checkCmdErrorCode() again, put it in UtilsAndroid,
+	//  and say WHY it exists --> TO NOT MIX THE ERROR CODES WITH SDK CONSTANTS
+
+	// todo Toggling the airplane mode freezes the app.... --> another thread
+
 	/**
 	 * <p>Toggles the Wi-Fi state.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are required for the
-	 * operation</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to turn on, false to turn off
 	 *
 	 * @return same as in {@link WifiManager#setWifiEnabled(boolean)} if the Wi-Fi state is the same as requested or is
 	 * alreaedy being changed to the requested state (which means {@link WifiManager#WIFI_STATE_UNKNOWN} will not be
-	 * returned), or one of the constants
+	 * returned), or a SH shell exit code other than {@link UtilsShell#NO_ERR}
 	 */
 	public static int setWifiEnabled(final boolean enabled) {
 		final Context context = UtilsGeneral.getContext();
@@ -82,36 +84,25 @@ public final class UtilsAndroidConnectivity {
 		// To understand the meaning of the if statement, check the doc of the setWifiEnabled method.
 		if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.Q) {
 			if (wifiManager.setWifiEnabled(enabled)) {
-				return UtilsAndroid.NO_ERRORS;
+				return UtilsAndroid.NO_ERR;
 			}
 		}
 
-		final List<String> commands = new ArrayList<>(3);
-		commands.add("su");
-		commands.add("svc wifi " + (enabled ? "enabled" : "disabled"));
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+		final String command = "svc wifi " + (enabled ? "enabled" : "disabled");
+		final int error_code = UtilsShell.executeShellCmd(command, false, true).error_code;
 
-		final int ret_var = UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
-		if (UtilsAndroid.NO_ERRORS == ret_var) {
-			final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
-			intent.putExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, wifi_state);
-			intent.putExtra(WifiManager.EXTRA_WIFI_STATE,
-					enabled ? WifiManager.WIFI_STATE_ENABLED : WifiManager.WIFI_STATE_DISABLED);
-			context.sendBroadcast(intent);
-		}
-
-		return ret_var;
+		return UtilsShell.NO_ERR == error_code ? UtilsAndroid.NO_ERR : error_code;
 	}
 
-	public static final int NO_BLUETOOTH_ADAPTER = -55;
 	/**
 	 * <p>Toggles the Bluetooth state.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not succeed</p>
-	 * <p>- {@link #NO_BLUETOOTH_ADAPTER} --> for the returning value: if the device has no Bluetooth adapter</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
+	 * <p>- {@link UtilsAndroid#PERM_DENIED} --> for the returning value: no root access available</p>
+	 * <p>- {@link UtilsAndroid#GEN_ERR} --> for the returning value: if an error occurred and the operation did not
+	 * succeed</p>
+	 * <p>- {@link UtilsAndroid#NO_BLUETOOTH_ADAPTER} --> for the returning value: no bluetooth adapter available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to turn on, false to turn off
@@ -123,7 +114,7 @@ public final class UtilsAndroidConnectivity {
 	public static int setBluetoothEnabled(final boolean enabled) {
 		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bluetoothAdapter == null) {
-			return NO_BLUETOOTH_ADAPTER;
+			return UtilsAndroid.NO_BLUETOOTH_ADAPTER;
 		} else {
 			final int bluetooth_state = bluetoothAdapter.getState();
 			if ((enabled && bluetooth_state == BluetoothAdapter.STATE_ON || bluetooth_state == BluetoothAdapter.STATE_TURNING_ON) ||
@@ -132,31 +123,26 @@ public final class UtilsAndroidConnectivity {
 			}
 
 			if (enabled) {
-				return bluetoothAdapter.enable() ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
+				return bluetoothAdapter.enable() ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
 			} else {
-				return bluetoothAdapter.disable() ? UtilsAndroid.NO_ERRORS : UtilsAndroid.ERROR;
+				return bluetoothAdapter.disable() ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
 			}
 		}
 	}
 
-	public static final int ALREADY_ENABLED = -53;
-	public static final int ALREADY_DISABLED = -54;
 	/**
 	 * <p>Toggles the Airplane Mode state.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
-	 * required for the operation</p>
-	 * <p>- {@link #ALREADY_ENABLED} --> for the returning value: if the airplane mode was already enabled</p>
-	 * <p>- {@link #ALREADY_DISABLED} --> for the returning value: if the airplane mode was already disabled</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
+	 * <p>- {@link UtilsAndroid#PERM_DENIED} --> for the returning value: no root access available</p>
+	 * <p>- {@link UtilsAndroid#ALREADY_ENABLED} --> for the returning value: if the airplane mode was already enabled</p>
+	 * <p>- {@link UtilsAndroid#ALREADY_DISABLED} --> for the returning value: if the airplane mode was already disabled</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to turn on, false to turn off
-	 *
-	 * @return one of the constants
+	 **
+	 * @return one of the constants or a SH shell exit code
 	 */
 	public static int setAirplaneModeEnabled(final boolean enabled) {
 		final Context context = UtilsGeneral.getContext();
@@ -171,153 +157,124 @@ public final class UtilsAndroidConnectivity {
 		}
 
 		if (enabled && airplane_mode_active) {
-			return ALREADY_ENABLED;
+			return UtilsAndroid.ALREADY_ENABLED;
 		} else if (!enabled && !airplane_mode_active) {
-			return ALREADY_DISABLED;
+			return UtilsAndroid.ALREADY_DISABLED;
 		}
 
-		final String broadcast_string = "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state " +
-				(enabled ? "true" : "false");
-		boolean operation_finished = false;
+		boolean needs_broadcast = false;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			// Below API 17
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.WRITE_SETTINGS)) {
-				operation_finished = Settings.System.putString(context.getContentResolver(),
-						Settings.System.AIRPLANE_MODE_ON, enabled ? "1" : "0");
-			}
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+			needs_broadcast = Settings.System.putString(context.getContentResolver(),
+					Settings.System.AIRPLANE_MODE_ON, enabled ? "1" : "0");
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
 			// Between API 19 and API 28
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL)) {
 				final ConnectivityManager connectivityManager = (ConnectivityManager) context.
 						getSystemService(Context.CONNECTIVITY_SERVICE);
 				connectivityManager.setAirplaneMode(enabled);
 
-				return UtilsAndroid.NO_ERRORS;
-			} else if (UtilsPermissions.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
-				operation_finished = Settings.Global.putString(context.getContentResolver(),
+				return UtilsAndroid.NO_ERR;
+			} else if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
+				needs_broadcast = Settings.Global.putString(context.getContentResolver(),
 						Settings.Global.AIRPLANE_MODE_ON, enabled ? "1" : "0");
 			}
 		} else {
 			// Anything else (on API 17 and 18, and above API 29)
-			if (UtilsPermissions.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
-				operation_finished = Settings.Global.putString(context.getContentResolver(),
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
+				needs_broadcast = Settings.Global.putString(context.getContentResolver(),
 						Settings.Global.AIRPLANE_MODE_ON, enabled ? "1" : "0");
 				// Note: on API 29 and above, NETWORK_SETTINGS, NETWORK_SETUP_WIZARD, or NETWORK_STACK is needed to call
 				// the function on ConnectivityManager --> signature-only permissions, which means, forget about it.
-				// Except NETWORK_SETUP_WIZARD, which is also a 'setup' permission, but no idea (yet?) how to make the
-				// app be of that type.
 			}
 		}
-		if (operation_finished) {
+		if (needs_broadcast) {
 			if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_SYSTEM_APP)) {
 				// WRITE_SETTINGS is for system apps (or AppOps, but doesn't matter). WRITE_SECURE_SETTINGS is for
 				// privileged apps.
-				// ACTION_AIRPLANE_MODE_CHANGED is sent by the system, so any system app, I guess.
+				// ACTION_AIRPLANE_MODE_CHANGED is only sent by system apps, so any system app, I guess.
 				// Therefore, this check is only to ensure the app is not a normal app with permission granted
 				// by AppOps and it's yes a system app one.
 				context.sendBroadcast(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state",
 						(enabled ? "true" : "false")));
+
+				return UtilsShell.NO_ERR;
 			} else {
 				// Broadcast
-				final List<String> commands = new ArrayList<>(3);
-				commands.add("su");
-				commands.add(broadcast_string);
-				commands.add("exit");
+				final String broadcast_string = "am broadcast -a " + Intent.ACTION_AIRPLANE_MODE_CHANGED +
+						" --ez state " + (enabled ? "true" : "false");
 				// Hopefully it's not too bad if the broadcast is not sent in this case. Because part will have
 				// been done by this point (setting set), and it's a hassle to check for both operations.
-				UtilsShell.executeShellCmd(commands, true);
+				return UtilsShell.executeShellCmd(broadcast_string, false, true).error_code;
 			}
-
-			// The operation finished, so it was successful. If the broadcast was sent or not is secondary and not
-			// really important for the user, I think.
-			return UtilsAndroid.NO_ERRORS;
 		}
 
-		// Forget the idea below. The function requires at least one of 4 permissions, all of which are only granted to
-		// system-signed apps, or one of them to "setup" apps (no idea what that is).
-		//final ConnectivityManager connectivityManager = (ConnectivityManager) context.
-		//		getSystemService(Context.CONNECTIVITY_SERVICE);
-		//connectivityManager.setAirplaneMode(enabled);
-
-		final List<String> commands = new ArrayList<>(3);
-		commands.add("su");
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			commands.add("settings put system " + Settings.System.AIRPLANE_MODE_ON + " " + (enabled ? "1" : "0"));
-		} else {
-			commands.add("settings put global " + Settings.Global.AIRPLANE_MODE_ON + " " + (enabled ? "1" : "0"));
-		}
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-
-		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		return UtilsAndroid.PERM_DENIED;
 	}
 
 	/**
 	 * <p>Toggles the Mobile Data connection state.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
-	 * required for the operation</p>
-	 * <p>- {@link #ALREADY_ENABLED} --> for the returning value: if the airplane mode was Mobile Data connection
-	 * enabled</p>
-	 * <p>- {@link #ALREADY_DISABLED} --> for the returning value: if the airplane mode was Mobile Data connection
-	 * disabled</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
+	 * <p>- {@link UtilsAndroid#ALREADY_ENABLED} --> for the returning value: if the airplane mode was Mobile Data
+	 * connection enabled</p>
+	 * <p>- {@link UtilsAndroid#ALREADY_DISABLED} --> for the returning value: if the airplane mode was Mobile Data
+	 * connection disabled</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to enable, false to disable
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or a SH shell exit code
 	 */
+	@SuppressLint("NewApi")
 	public static int setMobileDataEnabled(final boolean enabled) {
 		final Context context = UtilsGeneral.getContext();
 		final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 		final ConnectivityManager connectivityManager = (ConnectivityManager) context.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		boolean mobile_data_active;
+		final boolean mobile_data_active;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			try {
-				mobile_data_active = telephonyManager.isDataEnabled();
-			} catch (final Exception ignored) {
-				mobile_data_active = false;
-			}
+			mobile_data_active = telephonyManager.isDataEnabled();
 		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
 			// Deprecated as of Lollipop 5.0
-			mobile_data_active = connectivityManager.getMobileDataEnabled();
+			final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "getMobileDataEnabled");
+			assert null != method; // Will never happen.
+			Boolean method_ret = null;
+			try {
+				method_ret = (Boolean) method.invoke(connectivityManager, enabled);
+			} catch (final IllegalAccessException | InvocationTargetException ignored) {
+			}
+			// Won't be null
+			assert null != method_ret;
+			mobile_data_active = method_ret;
 		} else { // L <= SDK_INT < O
 			// Deprecated as of Oreo 8.0
 			mobile_data_active = telephonyManager.getDataEnabled();
 		}
 
 		if (enabled && mobile_data_active) {
-			return ALREADY_ENABLED;
+			return UtilsAndroid.ALREADY_ENABLED;
 		} else if (!enabled && !mobile_data_active) {
-			return ALREADY_DISABLED;
+			return UtilsAndroid.ALREADY_DISABLED;
 		}
 
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
-			// With the magical permission, we can use SDK methods.
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
+			// With the magical permission we can use SDK methods.
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
-				// Ignore the warning. The function exists since Lollipop (check the AOSP source), not since Oreo.
-				try {
-					telephonyManager.setDataEnabled(enabled);
+				// Ignore the API warning. The function exists since Lollipop on @hide.
+				telephonyManager.setDataEnabled(enabled);
 
-					return UtilsAndroid.NO_ERRORS;
-				} catch (final Exception ignored) {
-				}
+				return UtilsShell.NO_ERR;
 			} else {
 				// Deprecated as of Lollipop 5.0.
+				final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "setMobileDataEnabled", boolean.class);
+				assert null != method; // Will never happen
 				try {
-					final Method setMobileDataEnabled = ConnectivityManager.class.
-							getDeclaredMethod("setMobileDataEnabled", boolean.class);
-					setMobileDataEnabled.setAccessible(true);
-					setMobileDataEnabled.invoke(connectivityManager, enabled);
+					method.invoke(connectivityManager, enabled);
 
-					return UtilsAndroid.NO_ERRORS;
-				} catch (final NoSuchMethodException ignored) {
+					return UtilsShell.NO_ERR;
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
@@ -325,12 +282,8 @@ public final class UtilsAndroidConnectivity {
 		}
 
 		// Without the magical permission or in case the newest function stops being available, plan B: shell commands.
-		final List<String> commands = new ArrayList<>(3);
-		commands.add("su");
-		commands.add("svc data " + (enabled ? "enable" : "disable"));
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
+		final String command = "svc data " + (enabled ? "enable" : "disable");
 
-		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}
 }

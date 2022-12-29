@@ -7,12 +7,6 @@ assignees: DADi590
 
 ---
 
-<!--
-[Issue; Type: 1; Version: 1.0;]
-
-Do NOT delete/change anything inside < ! - - and - - >!!!
--->
-
 **Describe the bug** <!--[Title;]-->
 A clear and concise description of what the bug is.
 

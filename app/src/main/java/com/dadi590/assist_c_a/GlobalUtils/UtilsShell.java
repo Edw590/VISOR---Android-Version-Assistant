@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,8 +24,8 @@ package com.dadi590.assist_c_a.GlobalUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,6 +36,12 @@ import java.util.List;
  */
 public final class UtilsShell {
 
+	/** No permissions for the completion of the shell operations (might mean no root access in case root was requested
+	 * to access something which can only be accessed with root permissions). */
+	public static final int PERM_DENIED = 13;
+	/** No error in the shell operations. */
+	public static final int NO_ERR = 0;
+
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
@@ -43,25 +49,34 @@ public final class UtilsShell {
 	}
 
 	/**
+	 * <p>Same as in {@link #executeShellCmd(List, boolean, boolean)}, but that allows to send a string instead of a
+	 * list.</p>
+	 *
+	 * @param command the command(s - separated by new lines then) to execute
+	 * @param retrieve_streams same as in {@link #executeShellCmd(List, boolean, boolean)}
+	 * @param attempt_su same as in {@link #executeShellCmd(List, boolean, boolean)}
+	 *
+	 * @return same as in {@link #executeShellCmd(List, boolean, boolean)}
+	 */
+	@NonNull
+	public static CmdOutputObj executeShellCmd(@NonNull final String command, final boolean retrieve_streams,
+											   final boolean attempt_su) {
+		final List<String> commands = new ArrayList<>(1);
+		commands.add(command);
+
+		return executeShellCmd(commands, retrieve_streams, attempt_su);
+	}
+
+	/**
 	 * <p>Executes any given command and returns the outputs.</p>
+	 * <br>
+	 * <p>Attention: a call to this function is not "instantaneous". It takes a bit. Don't call this a lot of times.
+	 * It will make the app slow and waste battery.</p>
 	 * <br>
 	 * <p><u><strong>SECURITY WARNING:</strong></u></p>
 	 * <p>Do NOT use this to execute commands saved in some file or whatever. Execute ONLY constants or generated
 	 * strings on the code <em>still from constants</em> - NEVER generate from something that can be gotten outside
 	 * constants. NEVER something that can be saved on the device storage.</p>
-	 * <br>
-	 * <p><u>ATTENTION:</u></p>
-	 * <p>This function will return the output and error streams of the FIRST command on the list ONLY. In case that 1st
-	 * command creates a new shell, like the "su" command does, the output will still be that of the 1st command -
-	 * though, that 1st command has a sub-shell in which all is printed, so the output of the first command of the
-	 * original shell is the output written to the sub-shell created by that 1st command. If other commands are inserted
-	 * after exiting from the sub-shell, those are subsequent commands in the original shell and their output will not
-	 * be printed.</p>
-	 * <p>To print regardless of this, there is a special parameter, with a consequence - it will call /system/bin/sh as
-	 * a sub-shell. With root access on the device, someone could remove that binary, or it could be removed in updates
-	 * to AOSP or something (or could not - who knows) - and the command will fail. So... <u>USE ONLY IF
-	 * <strong>REALLY</strong> NECESSARY!!!</u> - use one-line commands, for example ("this && that" instead of using 2
-	 * separate inputs for the commands).</p>
 	 * <br>
 	 * <p>Considerations to have:</p>
 	 * <p>- Don't put a new line at the end of each command since the function will automatically do that. In case for
@@ -70,47 +85,49 @@ public final class UtilsShell {
 	 * <p>- An empty command will not be recognized as a new line - it will be ignored. To enter a new line, simply
 	 * write yourself "\n" on the command string.</p>
 	 * <p>- The return values are byte arrays. To get their printable form, use
-	 * {@link UtilsGeneral#bytesToPrintableChars(byte[], boolean)}.</p>
+	 * {@link UtilsDataConv#bytesToPrintable(byte[], boolean)}.</p>
 	 *
 	 * @param commands_list list of commands to execute, each in a new index
-	 * @param print_only_1st_cmd true to print the output of only the output of the 1st command, false to print the
-	 *                           output of all commands (read above for more about this)
+	 * @param retrieve_streams true to ignore the output and error streams and jump over the code that retrieves
+	 *                              them, making this method finish much faster, false to retrieve both streams
+	 * @param attempt_su true to, in case the app has root permissions, call su before the given commands, false
+	 *                   otherwise (useful to execute commands with or without root allowed without wanting the error
+	 *                   from calling su to appear on the output stream)
 	 *
-	 * @return an instance of {@link CmdOutputObj}, and if any error occurs, the streams will be null
+	 * @return an instance of {@link CmdOutputObj}, and if any I/O error or OutOfMemoryError error occurs (no command
+	 * errors trigger an exception) OR {@code retrieve_streams} is set to true, the streams will both be null
 	 */
 	@NonNull
 	public static CmdOutputObj executeShellCmd(@NonNull final List<String> commands_list,
-											   final boolean print_only_1st_cmd) {
-		final List<byte[]> ret_streams = new ArrayList<>(2);
-		ret_streams.add(null);
-		ret_streams.add(null);
-		@Nullable Integer exit_code = null;
+											   final boolean retrieve_streams, final boolean attempt_su) {
+		int exit_code = -1; // Won't happen unless the thread is interrupted, and I'm not sure what happens after that.
+		final byte[][] ret_streams = {null, null};
 
-		main_try: try {
-			final Process process;
-			if (print_only_1st_cmd) {
-				// If it's not to print all the commands, just use the first command to start the process (don't forget
-				// it will will print only the output from that command).
-				process = Runtime.getRuntime().exec(commands_list.get(0), null, null);
-			} else {
-				// Here is created a sub-shell to be able to print the output of the all the commands. The function will
-				// still only print the output of the first command - which is this one below, and this one will have
-				// all commands inside it printed, and the result is the output of the first ever command --> the shell
-				// initialization command.
-				process = Runtime.getRuntime().exec(File.separator + "system" + File.separator + "bin" +
-						File.separator + "sh", null, null);
-			}
+		Process process = null;
+		try {
+			// Here is created a sub-shell to be able to print the output of the all the commands. The function will
+			// still only print the output of the first command - which is this one below, and this one will have
+			// all commands inside it printed, and the result is the output of the first ever command --> the shell
+			// initialization command.
+			// The error code is also transmitted from shell to shell, so the main shell error code is the same as the
+			// error code that outputs from this created shell or any other subsequently created shells.
+			process = Runtime.getRuntime().exec("/system/bin/sh", null, null);
 
 			try (final DataOutputStream dataOutputStream = new DataOutputStream(process.getOutputStream())) {
 
-				for (int i = print_only_1st_cmd ? 1 : 0, size = commands_list.size(); i < size; ++i) {
-					// From index 1 because the 1st command was already executed
+				if (attempt_su && UtilsRoot.isRootAvailable()) {
+					dataOutputStream.writeBytes("su\n");
+					dataOutputStream.flush();
+				}
+
+				final int commands_list_size = commands_list.size();
+				for (int i = 0; i < commands_list_size; ++i) {
 					final String command = commands_list.get(i);
 					if (!command.isEmpty()) {
 						dataOutputStream.writeBytes(command);
 
 						// In case a new line wasn't in the end of the command, one must be inserted (below).
-						if ((int) command.charAt(command.length() - 1) != (int) '\n') {
+						if ((int) '\n' != (int) command.charAt(command.length() - 1)) {
 							// This above checks if the last *char* is a \n. The way it is written in is for mega
 							// optimization, advised by Android Studio (Java ME).
 							dataOutputStream.write((int) '\n');
@@ -118,83 +135,80 @@ public final class UtilsShell {
 						dataOutputStream.flush();
 					}
 				}
-			} catch (final IOException ignored) {
-				// This is here to leave the try statement in a way that doesn't required throwing an exception.
-				// If there was an error inserting all the commands, exit immediately with error.
-				break main_try;
+			}
+
+			// If it's to ignore the output streams (output and error streams), return now with null on both streams.
+			if (!retrieve_streams) {
+				exit_code = process.waitFor();
+
+				return new CmdOutputObj(exit_code, null, null);
 			}
 
 			final InputStream[] streams = {process.getInputStream(), process.getErrorStream()};
 
-			int number_bytes_read;
-			final ArrayList<Byte> storage_array = new ArrayList<>(64);
-			//final int buffer_length = 1; // Don't put too high. Try and see the Inspection error ("Large array
-			// allocation with no OutOfMemoryError check") - also if you change this, look below. I have buffer[0]
-			// because right now it's only one element per buffer (so no null bytes are appended and invalidate a file,
-			// that's being read, for example)
-			// EDIT: in any case, append to a byte array must be byte by byte, so yeah.
-			int stream_counter = 0;
-			for (final InputStream stream : streams) {
+			final ByteArrayOutputStream storage_array = new ByteArrayOutputStream(64);
+			// WARNING: THIS IS INCREASING THE SIZE OF THE ARRAY TO THE SIZE OF THE FILE!!!!
+			// An OutOfMemoryError catch was put in place for this, and I've also set largeHeap to true on the Manifest.
+			final int streams_length = streams.length;
+			for (int i = 0; i < streams_length; i++) {
+				//final int buffer_length = 1; // Don't put too high. Try and see the Inspection error ("Large array
+				// allocation with no OutOfMemoryError check") - also if you change this, look below. I have buffer[1]
+				// because right now it's only one element per buffer (so no null bytes are appended and invalidate a
+				// file, that's being read, for example - already happened).
 				final byte[] buffer = new byte[1];
-
-				try {
-					while (true) {
-						number_bytes_read = stream.read(buffer);
-
-						storage_array.add(buffer[0]);
-
-						if (number_bytes_read < 1) {
-							// Everything was read (less than the buffer was filled)
-							break;
-						}
+				while (true) {
+					if (streams[i].read(buffer) < 1) {
+						// Everything was read (0 bytes were retrieved)
+						break;
 					}
-				} catch (final IOException ignored) {
-					// This catches the exception on the read() function - happened when "su" was requested and the
-					// stream was closed when read() was called.
-				}
-				// Way of converting to bytes, since ArrayList won't let me convert to a primitive type
-				final int storage_array_size = storage_array.size();
-				final byte[] ret_array = new byte[storage_array_size];
-				for (int j = 0; j < storage_array_size; ++j) {
-					ret_array[j] = storage_array.get(j);
-				}
-				ret_streams.set(stream_counter, ret_array);
-				storage_array.clear();
 
-				++stream_counter;
+					// Possible OutOfMemoryError here
+					storage_array.write((int) buffer[0]);
+				}
+				// Possible OutOfMemoryError here
+				ret_streams[i] = storage_array.toByteArray();
 			}
 
 			exit_code = process.waitFor();
-		} catch (final IOException | SecurityException ignored) {
+		} catch (final IOException | OutOfMemoryError ignored) {
+			if (null != process) {
+				try {
+					exit_code = process.waitFor();
+				} catch (final InterruptedException ignored1) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			ret_streams[0] = null;
+			ret_streams[1] = null;
 		} catch (final InterruptedException ignored) {
 			Thread.currentThread().interrupt();
 		}
 
-		return new CmdOutputObj(exit_code, ret_streams.get(0), ret_streams.get(1));
+		return new CmdOutputObj(exit_code, ret_streams[0], ret_streams[1]);
 	}
 	/**
-	 * <p>Class to use for the returning value of {@link #executeShellCmd(List, boolean)}.</p>
-	 * <p>Always check if the error_code is null. If it is, the streams will be of size 0.</p>
+	 * <p>Class to use for the returning value of {@link #executeShellCmd(List, boolean, boolean)}.</p>
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
 	public static class CmdOutputObj {
-		public final Integer error_code;
+		public final int error_code;
+		// Don't add @Nullable or @NonNull on the streams. Let the developer decide which is the case.
 		public final byte[] output_stream;
 		public final byte[] error_stream;
 
 		/**
 		 * <p>Main class constructor.</p>
 		 *
-		 * @param error_code the exit code returned by {@link Process#waitFor()}; or null in case an exception was
-		 *                   thrown processing the commands and the execution was aborted at some point
+		 * @param error_code the SH shell exit code (usable constants are available in this class, like {@link #NO_ERR}
+		 * or {@link #PERM_DENIED}, which always match the SH shell codes)
 		 * @param output_stream the output stream of the terminal
 		 * @param error_stream the error stream of the terminal
 		 */
-		public CmdOutputObj(@Nullable final Integer error_code, @NonNull final byte[] output_stream,
-							@NonNull final byte[] error_stream) {
+		public CmdOutputObj(final int error_code, @Nullable final byte[] output_stream,
+							@Nullable final byte[] error_stream) {
 			this.error_code = error_code;
-			this.output_stream = output_stream.clone();
-			this.error_stream = error_stream.clone();
+			this.output_stream = output_stream;
+			this.error_stream = error_stream;
 		}
 	}
 }

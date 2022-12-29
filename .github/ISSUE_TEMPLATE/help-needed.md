@@ -7,12 +7,6 @@ assignees: DADi590
 
 ---
 
-<!--
-[Issue; Type: 3; Version: 1.0;]
-
-Do NOT delete/change anything inside < ! - - and - - >!!!
--->
-
 **What do you need help with?** <!--[Title;]-->
 
 

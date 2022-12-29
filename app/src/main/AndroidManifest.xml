@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2021 DADi590
+  ~ Copyright 2022 DADi590
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -24,16 +24,17 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	package="com.dadi590.assist_c_a"
 	android:targetSandboxVersion="2"
-	android:installLocation="internalOnly"
-	android:sharedUserLabel="@string/app_name_ACA"
-	coreApp="true">
-	<!-- Regardless of being here or not, if the app is a system app (with or without updates), it will start in Safe
-	 Mode. If it's not a system app, it won't. But leave it on true anyways. Could work somewhere. -->
-	<!-- sharedUserId has been deprecated on API 29, but on older Android versions I don't know if it's required for
-	 anything system-related (="android.uid.system") and then it's hours researching why something is not working. So
-	 I'll leave it here. Though, other methods to get the app working as system app will also be used, like setting
-	 'persistent' to true if needed. EDIT: removed at least on non-release APKs (too much hassle like with
-	 'persistent'). -->
+	android:installLocation="internalOnly">
+	<!-- Regardless of coreApp="true" being here or not, if the app is a system app (with or without updates), it will
+	 start in Safe Mode, it appears. If it's not a system app, it won't. But leave it on true anyways. Could work
+	 somewhere. EDIT: removed, until the app is properly tested without any other normally available apps present.
+	 EDIT 2: DON'T USE coreApps!!!! "// Only run "core" apps if we're encrypting the device." - if the "core" in quotes
+	 meant coreApps, then there's no way to test the app on that case, nor it is useful anyway (no interaction - and
+	 this is an assistant. And still, nothing for it to do in the background. No storage either. No Internet. No
+	 nothing). -->
+
+	<!-- The permissions here are at the lowest rank possible. That way, for example system|development permissions can
+	 be known to be granted with "pm grant" with root commands, not just if the app is a system app. -->
 
 	<!-- Normal+ permissions -->
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -68,23 +69,42 @@
 
 	<!-- AppOps+ permissions (those that have a specific settings screen for the user to grant them) -->
 	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-	<uses-permission android:name="android.permission.WRITE_SETTINGS" /> <!-- Or Pre-installed, not just AppOps. -->
+	<uses-permission android:name="android.permission.WRITE_SETTINGS"
+		tools:ignore="ProtectedPermissions" /> <!-- Or Pre-installed, not just AppOps. -->
+
+	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
+	<!-- Development permissions (must be explicitly granted with "pm grant/revoke" through ADB) -->
+	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+		tools:ignore="ProtectedPermissions" />
+	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 
 	<!-- Privileged apps'+ permissions (only by having the app installed in /system/priv-app, or below KitKat, in
 	/system/app) -->
 	<!-- For some of these permissions to work, hidden/internal APIs must be used to compile the app -->
-	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
-	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT" />
-	<uses-permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT" />
-	<uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
-	<uses-permission android:name="android.permission.LOCK_DEVICE" />
-	<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
-	<uses-permission android:name="android.permission.SHUTDOWN" />
-	<uses-permission android:name="android.permission.REBOOT" />
-	<uses-permission android:name="android.permission.POWER_SAVER" />
-	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-	<uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
-	<uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"/>
+	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.LOCK_DEVICE"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.MODIFY_PHONE_STATE"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.SHUTDOWN"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.REBOOT"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.POWER_SAVER"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.STATUS_BAR"
+		tools:ignore="ProtectedPermissions" />
 
 	<!-- There can only be one Package Installer and Package Verifier in the system -> Play Store is both, so forget it,
 	 don't try get the app as one of those, because the system won't boot (there's already Play Store on it). Either
@@ -192,6 +212,11 @@
 		android:directBootAware="true"
 		android:usesNonSdkApi="true"
 		android:requestLegacyExternalStorage="true"
+		android:largeHeap="true"
+		android:hardwareAccelerated="true"
+		android:killAfterRestore="true"
+		android:restoreAnyVersion="true"
+		android:supportsRtl="true"
 
 		android:cantSaveState="false"
 		android:allowClearUserData="true"
@@ -200,8 +225,8 @@
 		android:allowClearUserDataOnFailedRestore="false"
 		android:allowAudioPlaybackCapture="false"
 		android:allowBackup="false"
-		android:fullBackupContent="false"
-		android:fullBackupOnly="false"
+		android:fullBackupContent="true"
+		android:fullBackupOnly="true"
 		android:hasFragileUserData="true"
 		android:useEmbeddedDex="true"
 		android:vmSafeMode="true"
@@ -212,11 +237,13 @@
 		<!-- ^^^^ The attributes above but below the blank line are for maximum app security, hopefully -->
 		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
 		 without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
-		<!-- extractNativeLibs=false doesn't work if it's a system app!!! In that case, the libraries must still be
-		 extracted... todo See if there's some way to load from the APK directly using obscure methods. -->
+		<!-- extractNativeLibs=false doesn't work below API 23. todo See if there's some way to load from the APK
+		 directly using obscure methods... Or extract manually and reload after extracting and keep checking its SHA. -->
 		<!-- MANAGE_VOICE_KEYPHRASES set as the Application permission is required to be eligible to be an Assistant.
 		 Since it may be required again (or any other), always put a permission attribute on each component to override
 		 the main one - if an override is required. -->
+		<!-- testOnly is to override the debug mode, which sets it to true, and then the app can only be installed
+		 through ADB with the -t option, to include installing Test apps -->
 
 		<!-- Below, everything I can has exported=false, so nothing outside this app can reach those components.
 		 Do NOT rely on custom permissions to ensure that only the app can reach components. That may not be always
@@ -251,7 +278,8 @@
 			android:excludeFromRecents="true"
 			android:showWhenLocked="true"
 			android:resizeableActivity="false"
-			tools:ignore="NonResizeableActivity" />
+			tools:ignore="NonResizeableActivity"
+			android:process=":Protected_Lock_Screen" />
 			<!-- Keep turnScreenOn false. On BV9500 (tested with the app as a system app, at least), it was making the
 			 screen being always On, even after I would press the Power button -> I'd like to be able to turn off the
 			 screen... -->
@@ -270,7 +298,7 @@
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true"
-			android:process=":Protected_Lock_Screen"/>
+			android:process=":Protected_Lock_Screen" />
 		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition"
 			android:permission=""
 			android:exported="false"
@@ -295,7 +323,7 @@
 				<action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
 			</intent-filter>
 		</receiver>
-		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.BootRecv"
+		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.AppStartRecv"
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"
@@ -307,7 +335,7 @@
 
 				<!-- 1000 priority as that's system-level used priority. So this will get stuff first and nothing can
 				 stop the broadcast before this gets it (as long as it's installed as a system app, that is - else, the
-				 system will ignore and set it to 0). -->
+				 system will ignore the priority and will set it to 0). -->
 
 				<!-- ALWAYS REGISTER ACTIONS INSTEAD OF DECLARING THEM TO AVOID ISSUES WITH REGISTER-ONLY ACTIONS -->
 				<!-- Also, all actions need to be sent with the Main Service started and not with it stopped, so why
@@ -316,7 +344,8 @@
 				<!-- All of these are for the system to send ANYthing to start the Main Service in case it crashed or
 				something. See "List of all the Intent-Filters that I found.txt" for the list of these broadcasts. -->
 				<!-- Also, don't forget various of these are sent only to registered broadcast receivers! But still,
-				some are not like that, like boot, volume and phone unlock stuff, so cool. -->
+				some are not like that, like boot, volume and phone unlock stuff, so cool (I'll not filter that manually
+				- too much work). -->
 				<action android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
 				<action android:name="android.accounts.action.ACCOUNT_REMOVED" />
 				<action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />

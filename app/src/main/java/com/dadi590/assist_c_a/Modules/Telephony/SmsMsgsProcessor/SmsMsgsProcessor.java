@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,8 +33,10 @@ import android.telephony.SmsMessage;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
@@ -43,25 +47,37 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 /**
  * <p>Processes all SMS messages sent by and to the phone.</p>
  */
-public final class SmsMsgsProcessor implements IModule {
+public final class SmsMsgsProcessor implements IModuleInst {
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	@Override
-	public boolean isModuleFullyWorking() {
+	public boolean isFullyWorking() {
 		// Always fully-working. The module is currently a "static module" (it's not instantiated).
 		return true;
 	}
 	@Override
-	public void destroyModule() {
+	public void destroy() {
 		// Nothing to destroy. The module is currently a "static module" (it's not instantiated).
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		final String[][] min_required_permissions = {{
+				Manifest.permission.RECEIVE_SMS,
+		}};
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
+				&& UtilsCheckHardwareFeatures.isTelephonySupported(false);
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
 	 * <p>Main class constructor.</p>>
 	 */
+	@SuppressLint("InlinedApi")
 	public SmsMsgsProcessor() {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -88,7 +104,7 @@ public final class SmsMsgsProcessor implements IModule {
 			//System.out.println(message);
 			System.out.println("&&&&&&&&&&&&&&&&&");
 
-			// Update the values on the ValuesStorage
+			// Update the Values Storage
 			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_time, Long.toString(System.currentTimeMillis()));
 			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_number, sender);
 
@@ -105,6 +121,7 @@ public final class SmsMsgsProcessor implements IModule {
 
 	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
+		@SuppressLint("NewApi")
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 			if (intent == null || intent.getAction() == null) {
 				return;
@@ -118,7 +135,7 @@ public final class SmsMsgsProcessor implements IModule {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
 				case (Telephony.Sms.Intents.SMS_RECEIVED_ACTION): {
-					// Ignore the warning below. The constants exists on API 15, so exists >= API 15.
+					// Ignore the warning below. The Telephony class was in @hide before being released to the public.
 					final SmsMessage[] sms_messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
 
 					processSmsMsgs(sms_messages);

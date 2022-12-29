@@ -1,45 +1,41 @@
-/* ====================================================================
- * Copyright (c) 2014 Alpha Cephei Inc.  All rights reserved.
+/*
+ * Copyright 2022 DADi590
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY ALPHA CEPHEI INC. ``AS IS'' AND
- * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CARNEGIE MELLON UNIVERSITY
- * NOR ITS EMPLOYEES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 // Note: this file was modified by me, DADi590, in 2022.
 
 package edu.cmu.pocketsphinx1;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 
 import java.io.File;
@@ -69,6 +65,7 @@ public class SpeechRecognizer {
     private final int sampleRate;
     private final static float BUFFER_SIZE_SECONDS = 0.4f;
     private int bufferSize;
+    @Nullable
     private final AudioRecord recorder;
 
     private final int audio_source;
@@ -95,16 +92,21 @@ public class SpeechRecognizer {
         }
 
         decoder = new Decoder(config);
-        sampleRate = (int)decoder.getConfig().getFloat("-samprate");
+        sampleRate = (int) decoder.getConfig().getFloat("-samprate");
         bufferSize = Math.round(sampleRate * BUFFER_SIZE_SECONDS);
-        recorder = new AudioRecord(audio_source, sampleRate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize * 2);
+        if (ContextCompat.checkSelfPermission(UtilsGeneral.getContext(), Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED) {
+            recorder = new AudioRecord(audio_source, sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT, bufferSize * 2);
+        } else {
+            recorder = null;
+        }
 
-        if (recorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
+        if (null != recorder && recorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
             recorder.release();
             throw new IOException(
-                    "Failed to initialize recorder. Microphone might be already in use.");
+                    "Failed to initialize recorder. Microphone might be already in use or no RECORD_AUDIO permission granted.");
         }
     }
 
@@ -135,7 +137,7 @@ public class SpeechRecognizer {
         if (null != recognizerThread)
             return false;
 
-        Log.i(TAG, String.format("Start recognition \"%s\"", searchName));
+        //Log.ii(TAG, String.format("Start recognition \"%s\"", searchName));
         decoder.setSearch(searchName);
         recognizerThread = new RecognizerThread();
         recognizerThread.start();
@@ -154,7 +156,7 @@ public class SpeechRecognizer {
         if (null != recognizerThread)
             return false;
 
-        Log.i(TAG, String.format("Start recognition \"%s\"", searchName));
+        //Log.ii(TAG, String.format("Start recognition \"%s\"", searchName));
         decoder.setSearch(searchName);
         recognizerThread = new RecognizerThread(timeout);
         recognizerThread.start();
@@ -168,7 +170,7 @@ public class SpeechRecognizer {
         try {
             recognizerThread.interrupt();
             recognizerThread.join();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException ignored) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
         }
@@ -186,7 +188,7 @@ public class SpeechRecognizer {
     public boolean stop() {
         boolean result = stopRecognizerThread();
         if (result) {
-            Log.i(TAG, "Stop recognition");
+            //Log.ii(TAG, "Stop recognition");
             final Hypothesis hypothesis = decoder.hyp();
             mainHandler.post(new ResultEvent(hypothesis, true));
         }
@@ -202,7 +204,7 @@ public class SpeechRecognizer {
     public boolean cancel() {
         boolean result = stopRecognizerThread();
         if (result) {
-            Log.i(TAG, "Cancel recognition");
+            //Log.ii(TAG, "Cancel recognition");
         }
 
         return result;
@@ -247,7 +249,7 @@ public class SpeechRecognizer {
      *            JSGF file
      */
     public void addGrammarSearch(String name, File file) {
-        Log.i(TAG, String.format("Load JSGF %s", file));
+        //Log.ii(TAG, String.format("Load JSGF %s", file));
         decoder.setJsgfFile(name, file.getPath());
     }
 
@@ -272,7 +274,7 @@ public class SpeechRecognizer {
      *            N-gram model file
      */
     public void addNgramSearch(String name, File file) {
-        Log.i(TAG, String.format("Load N-gram model %s", file));
+        //Log.ii(TAG, String.format("Load N-gram model %s", file));
         decoder.setLmFile(name, file.getPath());
     }
 
@@ -347,7 +349,7 @@ public class SpeechRecognizer {
                 return;
             }
 
-            Log.d(TAG, "Starting decoding");
+            //Log.id(TAG, "Starting decoding");
 
             decoder.startUtt();
             short[] buffer = new short[bufferSize];
@@ -371,7 +373,7 @@ public class SpeechRecognizer {
                     // for (int i = 0; i < nread; i++) {
                     //     max = Math.max(max, Math.abs(buffer[i]));
                     // }
-                    // Log.e("!!!!!!!!", "Level: " + max);
+                    // //Log.ie("!!!!!!!!", "Level: " + max);
 
                     if (decoder.getInSpeech() != inSpeech) {
                         inSpeech = decoder.getInSpeech();

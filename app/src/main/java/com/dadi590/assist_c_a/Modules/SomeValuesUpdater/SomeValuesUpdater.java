@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,19 +21,19 @@
 
 package com.dadi590.assist_c_a.Modules.SomeValuesUpdater;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 
 /**
  * <p>The module that periodically updates some values which no other module updates by an event.</p>
  * <p>Examples: time and weather (can't be updated by an event - there isn't one).</p>
  */
-public class SomeValuesUpdater implements IModule {
+public class SomeValuesUpdater implements IModuleInst {
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -41,11 +41,18 @@ public class SomeValuesUpdater implements IModule {
 		return infinity_thread.isAlive();
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		infinity_thread.interrupt();
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		return true;
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 

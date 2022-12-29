@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -46,66 +46,49 @@ public final class UtilsRoot {
      * @param warn_root_available true to warn if root access is available, false to only warn when there's no access
      */
     public static void checkWarnRootAccess(final boolean warn_root_available) {
-        switch (rootCommandsAvailability()) {
-            case (ROOT_AVAILABLE): {
-                if (warn_root_available) {
-                    final String speak = "Root access available on the device.";
-                    UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-                }
-
-                break;
+        if (isRootAvailable()) {
+            if (warn_root_available) {
+                final String speak = "Root access available on the device.";
+                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
             }
-            case (ROOT_DENIED): {
-                final String speak = "WARNING! Root access was denied on this device! Some features may not " +
-                        "be available!";
-                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
-
-                break;
-            }
-            case (ROOT_UNAVAILABLE): {
-                final String speak = "Attention! The device is not rooted! Some features may not be available!";
-                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
-
-                break;
-            }
+        } else {
+            final String speak = "Attention! Root access was denied or is not available on this device! Some " +
+                    "features may not be available!";
+            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
         }
     }
 
-    public static final int ROOT_AVAILABLE = 0;
-    public static final int ROOT_DENIED = 1;
-    public static final int ROOT_UNAVAILABLE = 2;
     /**
-     * Checks if the device can run root commands.
-     * <br>
-     * <p><u>---CONSTANTS---</u></p>
-     * <p>- {@link #ROOT_AVAILABLE} --> for the returning value: if root access is available</p>
-     * <p>- {@link #ROOT_DENIED} --> for the returning value: if the user denied root access</p>
-     * <p>- {@link #ROOT_UNAVAILABLE} --> for the returning value: if the device is not rooted</p>
-     * <p><u>---CONSTANTS---</u></p>
+     * <p>Checks if the device can run root commands.</p>
      *
-     * @return one of the constants
+     * @return true if yes, false otherwise
      */
-    public static int rootCommandsAvailability() {
+    public static boolean isRootAvailable() {
         // The original implementation was gotten from
         // http://muzikant-android.blogspot.com/2011/02/how-to-get-root-access-and-execute.html, was then adapted to the
-        // app and finally changed to call the executeShellCmd function.
+        // app and finally changed to call the executeShellCmd() function.
         // So the way it checks root is supposed to be the same (hopefully it's the same and I didn't mess up). Only the
         // shell part is now removed because it is on the mentioned function.
+        // EDIT: it's not longer going according to the mentioned webpage. Now it just checks yes or no, not yes, no
+        // because denied, or no because not rooted.
 
-        final List<String> commands = new ArrayList<>(3);
+        final List<String> commands = new ArrayList<>(2);
         commands.add("su");
         commands.add("id");
-        commands.add("exit");
-        final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-        if (cmdOutputObj.error_code == null) {
-            System.out.println("ROOT_UNAVAILABLE");
-            return ROOT_UNAVAILABLE;
-        } else if (UtilsGeneral.bytesToPrintableChars(cmdOutputObj.output_stream, false).contains("uid=0")) {
-            System.out.println("ROOT_AVAILABLE");
-            return ROOT_AVAILABLE;
-        } else {
-            System.out.println("ROOT_DENIED");
-            return ROOT_DENIED;
-        }
+
+        // Root denied, could be error 13 of permission denied, for example - happens with Magisk. With SuperSU,
+        // error code 1 is returned. Which means, don't check for specific error codes except the file not found
+        // one (127), which for sure indicates there is no su binary available - how could it return [didn't get to
+        // finish... It could return 127 for no permission... Nothing stops it from not returning 127.]
+        // EDIT: I don't think there is a reliable way to check if root is available or not on the device (I don't
+        // mean denied - I mean, device not rooted at all) without checking the default binary locations. I don't
+        // know if that's reliable either, and so far no need to know if the user decided not to give root
+        // permissions while being able to, so whatever.
+
+        // All that is needed to know if there is root access is to know if the User ID is 0, which means root. If it's
+        // not root, then permission to access it was either denied or the su binary is non-existent (device not
+        // rooted).
+        return UtilsDataConv.bytesToPrintable(
+                UtilsShell.executeShellCmd(commands, true, false).output_stream, false).contains("uid=0");
     }
 }

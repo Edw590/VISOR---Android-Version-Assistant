@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -52,9 +52,10 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 			devicePolicyManager.setUninstallBlocked(mAdminName, UtilsGeneral.getContext().getPackageName(), true);
 		}*/
 
-		UtilsServices.startMainService();
+		// Not used to have this here if the app is to force the authorization from time to time.
+		//UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, null);
 
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, null);
+		UtilsServices.startMainService();
 	}
 
 	@NonNull
@@ -63,16 +64,11 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 												 @android.annotation.NonNull final Intent intent) {
 		super.onDisableRequested(context, intent);
 
-		UtilsServices.startMainService();
-
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
 		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.PRIORITY_HIGH, null);
-		// Why PRIORITY_CRITICAL? Because onDisabled() also has it, so they have the same priority. And onDisabled()
-		// skips this speech in case it's being spoken, so it's all good.
-		// EDIT: it's on HIGH now. Why CRITICAL... Critical thing is when it's disabled. If the user is just
-		// checking something, they don't need to have the phone screaming. If CRITICAL is to be set again, don't
-		// forget of skipping this speech because onDisabled() has top priority since the app might shut down.
+
+		UtilsServices.startMainService();
 
 		return CONSTS.RET_STR_DISABLE_REQUESTED;
 	}
@@ -80,12 +76,11 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	@Override
 	public final void onDisabled(@android.annotation.NonNull final Context context,
 								 @android.annotation.NonNull final Intent intent) {
-		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED.)
-
-		UtilsServices.startMainService();
+		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED)
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
+		// todo This is not bypassing DND and vibration mode......!!!!!!!!!!!!!!!!!!!!
 		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLED, Speech2.PRIORITY_CRITICAL, null);
 		// Why PRIORITY_CRITICAL? Refer to CONSTS.SPEAK_DISABLED.
 		// todo HE'LL SPEAK AND LEAVE THE PHONE WITH THE DO NOT DISTURB AND THE MAX VOLUME IF IT'S STOPPED IN
@@ -95,6 +90,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 		// This below is in case the administrator mode was enabled, but was disabled right after. The assistant
 		// would still say the administrator mode is enabled after saying it was disabled --> wtf. This fixes that.
 		UtilsSpeech2BC.removeSpeechByStr(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, true);
-		// todo This is not removing the speech, I think.....
+
+		UtilsServices.startMainService();
 	}
 }

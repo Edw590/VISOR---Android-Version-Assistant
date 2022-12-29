@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,7 +35,7 @@ final class CONSTS_BC_SpeechRecog {
 	}
 
 	/**
-	 * <p>Explanation: sets required variables inside {@link SpeechRecognitionCtrl}.</p>
+	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to start the Google recognition.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
 	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
 	 * <p>Extras: none.</p>
@@ -43,7 +43,7 @@ final class CONSTS_BC_SpeechRecog {
 	static final String ACTION_START_GOOGLE = "SpeechRecognition_ACTION_START_GOOGLE";
 
 	/**
-	 * <p>Explanation: sets required variables inside {@link SpeechRecognitionCtrl}.</p>
+	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to start the PocketSphinx recognition.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
 	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
 	 * <p>Extras: none.</p>
@@ -51,12 +51,20 @@ final class CONSTS_BC_SpeechRecog {
 	static final String ACTION_START_POCKET_SPHINX = "SpeechRecognition_ACTION_START_POCKET_SPHINX";
 
 	/**
-	 * <p>Explanation: sets required variables inside {@link SpeechRecognitionCtrl}.</p>
+	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to stop and keep stopped all speech recognizers.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
 	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_STOP_RECOGNITION = "SpeechRecognition_ACTION_STOP_RECOGNITION";
+
+	/**
+	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to terminate all speech recognizers.</p>
+	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
+	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
+	 * <p>Extras: none.</p>
+	 */
+	static final String ACTION_TERMINATE_RECOGNIZERS = "SpeechRecognition_ACTION_TERMINATE_RECOGNIZERS";
 
 	/**
 	 * <p>Explanation: informs that Google's speech recognition has began.</p>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,7 +28,10 @@ package com.dadi590.assist_c_a.ValuesStorage;
  */
 public final class CONSTS_ValueStorage {
 
+	// To add a new value here, also add it in the ValuesStorage class.
+
 	// Power
+	public static final String battery_present = "battery_present";
 	public static final String battery_percentage = "battery_percentage";
 	public static final String power_connected = "power_connected";
 

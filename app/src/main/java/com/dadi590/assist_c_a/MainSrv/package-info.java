@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Everything directly related to the Main Service.</p>
+ * <p>Everything directly related to the Main Service and the Modules Manager.</p>
  */
 package com.dadi590.assist_c_a.MainSrv;

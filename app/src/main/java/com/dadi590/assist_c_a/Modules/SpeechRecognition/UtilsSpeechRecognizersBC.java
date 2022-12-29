@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,7 +24,6 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognition;
 import android.content.Intent;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.ModulesList;
 
 /**
  * <p>Functions to call to send information to {@link SpeechRecognitionCtrl}, by using broadcasts.</p>
@@ -42,40 +41,41 @@ public final class UtilsSpeechRecognizersBC {
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_GOOGLE} and executes
-	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately, if the controller is running.</p>
+	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately.</p>
 	 */
 	public static void startGoogleRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
-			UtilsSpeechRecognizers.startGoogleRecognition();
-		}
 	}
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_POCKET_SPHINX} and executes
-	 * {@link UtilsSpeechRecognizers#startPocketSphinxRecognition()} immediately, if the controller is running.</p>
+	 * {@link UtilsSpeechRecognizers#startPocketSphinxRecognition()} immediately.</p>
 	 */
 	public static void startPocketSphinxRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
-			UtilsSpeechRecognizers.startPocketSphinxRecognition();
-		}
 	}
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION} and executes
-	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately, if the controller is running.</p>
+	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
 	 */
 	public static void stopRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
-		if (ModulesList.isModuleRunning(ModulesList.getModuleIndex(SpeechRecognitionCtrl.class))) {
-			UtilsSpeechRecognizers.terminateSpeechRecognizers();
-		}
+	}
+
+	/**
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_TERMINATE_RECOGNIZERS} and executes
+	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
+	 */
+	public static void terminateSpeechRecognizers() {
+		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS);
+
+		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
 }

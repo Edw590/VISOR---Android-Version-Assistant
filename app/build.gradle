@@ -23,20 +23,11 @@ plugins {
 	id 'com.android.application'
 }
 
-final JavaVersion APP_JAVA_VERSION = JavaVersion.VERSION_1_8
-if (JavaVersion.current() != APP_JAVA_VERSION) {
-	// Remove this when Gradle on Android has the --release parameter available... It doesn't on 2021-09-01.
-	throw new GradleException("ERROR: This project requires JDK " + APP_JAVA_VERSION + ", but it's being compiled " +
-			"with JDK " + JavaVersion.current() + ". Please use the Oracle JDK 1.8.0_202.")
-	// Do NOT attempt to compile with a different JDK version than the set above until this happens and the release
-	// parameter is set on this file. More about the why: https://stackoverflow.com/questions/43102787
-}
-
 android {
+	namespace 'com.dadi590.assist_c_a'
+
 	signingConfigs {
-		release {
-			// When compiling the project, it uses the release mode, not the debug one, so this is used to automatically
-			// sign the APK when compiling and installing the APK on the phone with the Run button.
+		signingConfig {
 			final def propsFile = rootProject.file('PERSONAL_FILES_EOG\\signing_assist_c_a.SECRET')
 			final def props = new Properties()
 
@@ -64,6 +55,15 @@ android {
 		- Lollipop 5.1, API 22 (phone) [more rare] --> until [still on it]
 		- Oreo 8.1, API 27 (phone) [main] --> until [still on it]
 
+	THIS ALSO MEANS THE APP'S FEATURES ARE ---ONLY--- BEING MADE FOR THE LATEST OF THE ANDROID VERSIONS ABOVE!!!!!
+	The app is only being made to work on the above versions, not caring of newer versions. It may include code for
+	newer versions, but it's optional - it only has to work on the above versions.
+	The app is also always being compiled with the newest hidden/internal SDKs available, so it won't let pass errors
+	of non-existent APIs for example, but again, optional - could be compiled with the SDK for the newest version above.
+
+	--> todo THIS MEANS... to update the app to a newer device, ALL code should be checked. AND read the release notes
+	     from the new version to know ALL that changed.
+
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,9 +73,21 @@ android {
 	// Android Studio will warn if a change happened in the hidden/internal SDK (something deleted or changed, like
 	// method signature), and then you can take care of it immediately: reflection to the old way, direct SDK usage for
 	// the new way, so that Android Studio warns of changes (it won't if reflection is always used - but if will if
-	// direct usage is used).
+	// direct usage is used). I've done this already since API 15, so all is guaranteed to work.
+	// When writing new code, go to AOSP code and check on previous versions if the constants and functions used exist
+	// on them all, and if not, act about it to make it work.
+	// Example of why not jump between versions when updating compileSdkVersion: on KitKat there's a FLAG_PRIVILEGED
+	// constant somewhere (and is a hidden constant). In Lollipop that was changed. In Marshmallow, it was changed again
+	// and the Lollipop constant disappeared - if you jump from KitKat to Marshmallow, Android Studio won't warn about
+	// the Marshmallow constant not being compatible with Lollipop. So always increment.
+
+	// Aside from the above, BEFORE INCREMENTING, READ ALL THAT CHANGED BETWEEN THE 2 VERSIONS!!!!
+	// An example on Android 12 is start foreground services from background seems to be forbidden - restart the service
+	// every time the app is killed or crashes?.
+	// Read here: https://developer.android.com/about/versions
+
+	// I'm only testing on API 27 at most. I'm compiling with 29 because the internal/hidden APIs on 26 or 27 don't work
 	compileSdkVersion 29
-	buildToolsVersion "30.0.3"
 
 	defaultConfig {
 		applicationId "com.dadi590.assist_c_a"
@@ -86,34 +98,43 @@ android {
 		versionCode 1
 		versionName "for development" // "version for development" will appear in Settings xD (at least in English...)
 
-		signingConfig signingConfigs.release
-	}
-
-	compileOptions {
-		sourceCompatibility APP_JAVA_VERSION
-		targetCompatibility APP_JAVA_VERSION
+		multiDexEnabled true // Enable only if really necessary - slower builds, sometimes:
+		// https://developer.android.com/studio/build/multidex#dev-build
+		signingConfig signingConfigs.signingConfig
 	}
 
 	buildTypes {
 		debug {
-			minifyEnabled true
-			shrinkResources true
-			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-			signingConfig signingConfigs.release
+			minifyEnabled false
+			shrinkResources false
+			proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+			signingConfig signingConfigs.signingConfig
 		}
 		release {
 			minifyEnabled true
 			shrinkResources true
-			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-			signingConfig signingConfigs.release
+			proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+			signingConfig signingConfigs.signingConfig
 		}
 	}
 
 	lintOptions {
 		checkDependencies true
+		abortOnError true
+		checkAllWarnings true
+		checkGeneratedSources true
+		checkReleaseBuilds true
+		explainIssues true
+		//warningsAsErrors true
 	}
 
 	packagingOptions {
+		jniLibs {
+			useLegacyPackaging = false
+		}
+		dex {
+			useLegacyPackaging = false
+		}
 		resources.excludes.add("META-INF/*")
 	}
 	sourceSets {
@@ -127,29 +148,29 @@ dependencies {
 	/////////////////////
 	// Maven //
 
-	// General
-	implementation "androidx.appcompat:appcompat:1.3.1" // 1.4.0 --> compileSdkVersion needed = 31
+	// Android
+	implementation "androidx.appcompat:appcompat:1.3.1"
 	implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 	implementation "androidx.multidex:multidex:2.0.1"
-	implementation "androidx.preference:preference:1.1.1" // 1.2.0 --> compileSdkVersion needed = 31
-
-	// Navigation
-	implementation "androidx.navigation:navigation-fragment:2.3.5" // 2.4.2 --> compileSdkVersion needed = 31
-	implementation "androidx.navigation:navigation-ui:2.3.5" // 2.4.2 --> compileSdkVersion needed = 31
+	implementation "androidx.preference:preference:1.1.1"
+	implementation "androidx.navigation:navigation-fragment:2.3.5"
+	implementation "androidx.navigation:navigation-ui:2.3.5"
+	implementation "androidx.multidex:multidex:2.0.1"
 
 	// External
 	implementation "org.gavaghan:geodesy:1.1.3"
 	implementation "com.madgag.spongycastle:core:1.58.0.0"
+	implementation "commons-io:commons-io:2.4"
 
 	/////////////////////
 	// Local files
 
+	// Platforms Unifier Module
+	implementation files("libs/assist_platforms_unifier.aar")
+
 	// External
 	implementation files("libs/jutf7-1.0.0.jar")
 	implementation files("libs/pocketsphinx-android-5prealpha-release.aar")
-
-	// Platforms Unifier Module
-	implementation files("libs/assist_platforms_unifier.aar")
 }
 
 ant.importBuild 'assets.xml'

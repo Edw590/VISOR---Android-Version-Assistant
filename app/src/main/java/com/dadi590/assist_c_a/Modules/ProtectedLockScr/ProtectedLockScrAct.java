@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -42,6 +42,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 import com.dadi590.assist_c_a.R;
@@ -93,7 +94,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	Thread collapse_infinity;
 
 	boolean locked = true;
-	boolean system_overlay = false; // No system overlay, then plan B: collapse the status bar.
+	boolean system_error_overlay = false; // No system overlay, then plan B: collapse the status bar.
 	boolean has_focus = true;
 	boolean runnable_running = false;
 
@@ -123,21 +124,28 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		// And start the service to be sure this never stops - don't check so it's faster to start it.
 		// Keep it starting in foreground, so if there is any error on the Main Service, this one still runs.
-		UtilsServices.startService(ProtectedLockScrSrv.class, null, true);
+		UtilsServices.startService(ProtectedLockScrSrv.class, null, true, false);
 
 		findViewById(R.id.btn_unlock).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				locked = false;
+
 				UtilsServices.stopService(ProtectedLockScrSrv.class);
 
-				if (view != null) {
-					final WindowManager windowManager = ((WindowManager) getApplicationContext()
-							.getSystemService(Context.WINDOW_SERVICE));
-					windowManager.removeView(view); // Remove the status bar overlay in case it has been created
+				try {
+					Thread.sleep(500);
+				} catch (final InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+
+					return;
 				}
 
-				finish();
+				// I had here the destruction of the status bar view and a call to finish(), but the activity was always
+				// restarting for some reason (on miTab Advance and BV9500), so now I'm just killing the PLS PID, but
+				// only after 500ms of calling stopService() (could take a bit for the system to process the call) so
+				// that Android doesn't restart the PLS service.
+				UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 			}
 		});
 	}
@@ -197,7 +205,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 					// It seems the fastest human conscious reaction time is 0.15s (150ms) and unconscious is 0.08s
 					// (80ms). So almost 1/4 of that should be fine, hopefully.
 					// Also beware not to put 0 or too low values, or that will get the app slower. 10ms I'd say is the
-					// limit, at least on BV9500. 20ms should be fine. To be above "fine", 25ms. Should be good.
+					// limit, at least on BV9500. 20ms should be fine. Just to be above "fine", 25ms. Should be good.
 					Thread.sleep(25L);
 				} catch (final InterruptedException ignored) {
 					Thread.currentThread().interrupt();
@@ -221,7 +229,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 			has_focus = false;
 			UtilsProtectedLockScr.lockAndShowPLS(intentPLS); // This is enough, it seems. No service, no loops.
 			// Only this. At least as long as the app is a Device Administrator. Wouldn't even need the system overlay.
-			if (!system_overlay && !UtilsApp.isDeviceAdmin()) { // If it's a Device Admin, lockNow() will suffice.
+			if (!system_error_overlay && !UtilsApp.isDeviceAdmin()) { // If it's a Device Admin, lockNow() will suffice.
 				// collapsePanels() only exists from API 17 onwards. Before that, it was collapse(). On API 22 and
 				// below, SYSTEM_ALERT_WINDOW is granted normally. So we can always draw the view to block the status
 				// bar on API 22 and below --> which includes the non-existent collapse() method.
@@ -271,54 +279,51 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		@Override
 		public final boolean onInterceptTouchEvent(@Nullable final MotionEvent ev) {
-			//Log.v("customViewGroup", "**********Intercepted");
+			////Log.iv("customViewGroup", "**********Intercepted");
 			return true;
 		}
 	}
 
 	/**
-	 * <p>Enables full screen on the app. The status bar is kept and it is prepared to be able for the touch events to
-	 * be stolen and redirected to do nothing by the custom ViewGroup class.</p>
+	 * <p>Enables full screen on the app. The status bar is kept and (if below API 26) it is prepared to be able for the
+	 * touch events to be stolen and redirected to do nothing by the custom ViewGroup class.</p>
 	 */
-	public final void enterFullScreen() {
-		// Prepare a new window
-		final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+	private void enterFullScreen() {
+		// From API 26 and above, TYPE_SYSTEM_ERROR (and others) can only be used if the app has the
+		// INTERNAL_SYSTEM_WINDOW permission, which is a signature permission... (forget it), and if the app doesn't
+		// hold that permission, it will behave like TYPE_APPLICATION_OVERLAY.
+		getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+				| WindowManager.LayoutParams.FLAG_FULLSCREEN //- the status bar needs to be showing (battery, for example)
+				// It won't stop people from pulling the status bar on API 23 onwards anyways.
+				//| WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON - let the phone rest...
+				// EDIT: but will make it take longer to push and try to touch on some button
+				| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+				| WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+
 		// SYSTEM_ALERT_WINDOW is not available from API 23 onwards automatically. Before that, everything is alright.
 		// On 23 and above, only if the app is allowed to draw overlays (OR comes from the Play Store, in which case,
 		// the permission will be granted automatically - some times, not always, it's confusing, might have to do with
 		// who is the creator of the app, like Facebook...).
-		// From API 26 and above, TYPE_SYSTEM_ERROR (and others) can only be used if the app is a system app.
-		final int window_type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			final Context context = UtilsGeneral.getContext();
 			if (Settings.canDrawOverlays(context)) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 					if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_SYSTEM_APP)) {
-						layoutParams.type = window_type;
-						system_overlay = true;
+						system_error_overlay = true;
 					}
 				} else {
-					layoutParams.type = window_type;
-					system_overlay = true;
+					system_error_overlay = true;
 				}
 			}
 		} else {
-			layoutParams.type = window_type;
-			system_overlay = true;
+			system_error_overlay = true;
 		}
 
-		// Update current window using the window type selected above
-		getWindow().setType(layoutParams.type);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-				//| WindowManager.LayoutParams.FLAG_FULLSCREEN - the status bar needs to be showing (battery, for example)
-				// It won't stop people from pulling the status bar on API 23 onwards anyways.
-				//| WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON - let the phone rest after whatever seconds or minutes...
-				| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-				| WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
-
-		if (system_overlay) {
-			// Keep preparing a new window if the type is SYSTEM_ERROR. If it's not, the view will do nothing, so don't
-			// create it.
+		if (system_error_overlay) {
+			// Keep preparing a new window if the type is SYSTEM_ERROR. If it's not, the view will do nothing to the
+			// status bar, so don't create it.
+			final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 			layoutParams.gravity = Gravity.TOP;
 			layoutParams.flags =
 					WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |

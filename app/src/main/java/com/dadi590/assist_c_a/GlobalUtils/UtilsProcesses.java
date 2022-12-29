@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -57,11 +57,14 @@ public final class UtilsProcesses {
 
     /**
      * <p>Terminates a PID.</p>
+     * <p>If -1 is provided, nothing is done.</p>
      *
      * @param pid PID to terminate
      */
     public static void terminatePID(final int pid) {
-        android.os.Process.killProcess(pid);
+        if (-1 != pid) {
+            android.os.Process.killProcess(pid);
+        }
     }
 
     /**

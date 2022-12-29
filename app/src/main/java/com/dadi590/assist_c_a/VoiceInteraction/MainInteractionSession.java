@@ -1,17 +1,22 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright 2022 DADi590
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package com.dadi590.assist_c_a.VoiceInteraction;
@@ -21,7 +26,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionSession;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,7 +34,7 @@ import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.R;
 
-@RequiresApi(api = Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.L)
 public class MainInteractionSession extends VoiceInteractionSession implements View.OnClickListener {
 	static final String TAG = "MainInteractionSession";
 
@@ -134,8 +138,8 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 
 	@Override
 	public void onRequestConfirmation(ConfirmationRequest request) {
-		//Log.i(TAG, "onConfirm: prompt=" + prompt + " extras=" + extras);
-		Log.i(TAG, "onConfirm: request=" + request);
+		////Log.ii(TAG, "onConfirm: prompt=" + prompt + " extras=" + extras);
+		//Log.ii(TAG, "onConfirm: request=" + request);
 		//mText.setText(prompt);
 		mText.setText(request.toString());
 		mStartButton.setText("Confirm");
@@ -146,8 +150,8 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 
 	@Override
 	public void onRequestCompleteVoice(CompleteVoiceRequest request) {
-		//Log.i(TAG, "onCompleteVoice: message=" + message + " extras=" + extras);
-		Log.i(TAG, "onCompleteVoice: request=" + request);
+		////Log.ii(TAG, "onCompleteVoice: message=" + message + " extras=" + extras);
+		//Log.ii(TAG, "onCompleteVoice: request=" + request);
 		//mText.setText(message);
 		mText.setText(request.toString());
 		mPendingRequest = request;
@@ -157,8 +161,8 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 
 	@Override
 	public void onRequestAbortVoice(AbortVoiceRequest request) {
-		//Log.i(TAG, "onAbortVoice: message=" + message + " extras=" + extras);
-		Log.i(TAG, "onAbortVoice: request=" + request);
+		////Log.ii(TAG, "onAbortVoice: message=" + message + " extras=" + extras);
+		//Log.ii(TAG, "onAbortVoice: request=" + request);
 		//mText.setText(message);
 		mText.setText(request.toString());
 		mPendingRequest = request;
@@ -168,8 +172,8 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 
 	@Override
 	public void onRequestCommand(CommandRequest request) {
-		//Log.i(TAG, "onCommand: command=" + command + " extras=" + extras);
-		Log.i(TAG, "onRequestCommand: request=" + request);
+		////Log.ii(TAG, "onCommand: command=" + command + " extras=" + extras);
+		//Log.ii(TAG, "onRequestCommand: request=" + request);
 		//mText.setText("Command: " + command);
 		mStartButton.setText("Finish Command");
 		mPendingRequest = request;
@@ -179,7 +183,7 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 
 	@Override
 	public void onCancelRequest(Request request) {
-		Log.i(TAG, "onCancel");
+		//Log.ii(TAG, "onCancel");
 		request.cancel();
 	}
 }

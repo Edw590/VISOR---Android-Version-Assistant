@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -68,7 +68,7 @@ public final class UtilsMainSrv {
 	public static int startLongPwrBtnDetection() {
 
 		// DOESN'T WORK AS OF ANDROID 9/Pie!!!!!!!!!!!!!!!! (SDK 28)
-		// Find another solution - on hold until I get an Android Pie device or something that demands it.
+		// Find another solution - or hold until you get an Android Pie device or something that demands it.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			return UNSUPPORTED_OS_VERSION;
 		}
@@ -78,17 +78,15 @@ public final class UtilsMainSrv {
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
-					Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
-					if (null == is_recording_audio) {
-						is_recording_audio = false;
-					}
-					if (is_recording_audio) {
-						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
-						UtilsAudioRecorderBC.recordAudio(false, -1);
-						UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
-					} else {
+
+					final Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(
+							CONSTS_ValueStorage.is_recording_audio_internally);
+					if (null == is_recording_audio || !is_recording_audio) {
 						// If it's not recording audio, start the commands recognizer.
 						UtilsSpeechRecognizersBC.startGoogleRecognition();
+					} else {
+						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
+						UtilsAudioRecorderBC.recordAudio(false, -1, true);
 					}
 				}/* else if ("homekey".equals(reason)) {
 					// Here the recognizers are stopped because the user might be wanting to start Google's recognition

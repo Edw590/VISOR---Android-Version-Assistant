@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -88,26 +88,26 @@ public final class UtilsApp {
 	}
 
 	/**
-	 * Deletes the app cache.
+	 * Deletes the app private cache folder.
 	 */
 	public static void deleteAppCache() {
-		UtilsFilesDirs.deletePath(UtilsGeneral.getContext().getCacheDir());
+		UtilsFilesDirs.removePath(UtilsGeneral.getContext().getCacheDir(), true);
 	}
 
 	/**
 	 * <p>Checks if an app is installed on the device or not.</p>
 	 *
-	 * @param packageName The name of the package of the app to be checked
+	 * @param package_name The name of the package of the app to be checked
 	 *
 	 * @return true if the app is installed, false otherwise
 	 */
-	public static boolean isAnAppInstalled(@NonNull final String packageName) {
+	public static boolean isAppInstalled(@NonNull final String package_name) {
 		final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
 		try {
-			packageManager.getPackageInfo(packageName, 0);
+			packageManager.getPackageInfo(package_name, 0);
 
 			return true;
-		} catch (final PackageManager.NameNotFoundException e) {
+		} catch (final PackageManager.NameNotFoundException ignored) {
 			return false;
 		}
 	}

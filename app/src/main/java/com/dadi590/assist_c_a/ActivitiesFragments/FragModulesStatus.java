@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -37,7 +37,6 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.R;
 
@@ -79,11 +78,10 @@ public class FragModulesStatus extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		for (int i = 0; i < ModulesList.modules_list_length; ++i) { // Add a switch for each module.
+		for (int module_index = 0; module_index < ModulesList.sub_and_modules_list_length; ++module_index) { // Add a Switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
-			switchCompat.setId(i); // Set the ID to be the index of the module in the list
-			switchCompat.setText((CharSequence) ModulesList.getModuleValue(i, ModulesList.MODULE_NAME)); // Name the switch the module name.
-			//switchCompat.setEnabled(true);
+			switchCompat.setId(module_index); // Set the ID to be the index of the module in the list
+			switchCompat.setText((CharSequence) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME));
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
 			switchCompat.setTypeface(null, Typeface.BOLD);
@@ -91,10 +89,9 @@ public class FragModulesStatus extends Fragment {
 			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
 			switchCompat.setTextIsSelectable(true);
 			switchCompat.setBackgroundColor(Color.WHITE);
-			switchCompat.setChecked(false);
 
-			if (!(boolean) ModulesList.getModuleValue(i, ModulesList.MODULE_SUPPORTED)) {
-				switchCompat.setEnabled(false);
+			final boolean is_module = (boolean) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_IS_MODULE);
+			if (is_module && !(boolean) ModulesList.getElementValue(module_index, ModulesList.MODULE_SUPPORTED)) {
 				switchCompat.setTextColor(Color.parseColor(color_primary));
 				switchCompat.setBackgroundColor(Color.GRAY);
 			}
@@ -102,12 +99,19 @@ public class FragModulesStatus extends Fragment {
 			// In case something was done wrong in the Modules Manager, the modules may start even if they're not
 			// supported, as just happened. This way I can still see there's something wrong (gray background with
 			// green letters is not supposed to happen).
-			final boolean module_running = ModulesList.isModuleRunning(i);
-			switchCompat.setChecked(module_running);
-			if (module_running) {
+			final boolean element_running = ModulesList.isElementRunning(module_index);
+			switchCompat.setChecked(element_running);
+			if (element_running) {
 				// If the module is fully working, color the text green (Accent Color), else with orange (holo_orange_dark).
-				switchCompat.setTextColor(ModulesList.isModuleFullyWorking(i) ? Color.parseColor(color_accent) :
-						Color.parseColor("#FFFF8800"));
+				// If it's not a module, then always green (always "supported" - its main module is the checked one).
+				final int color;
+				if (is_module) {
+					color = ModulesList.isModuleFullyWorking(module_index) ? Color.parseColor(color_accent)
+							: Color.parseColor("#FFFF8800");
+				} else {
+					color = Color.parseColor(color_accent);
+				}
+				switchCompat.setTextColor(color);
 			} else {
 				// If it's not running, color it red (Primary Color).
 				switchCompat.setTextColor(Color.parseColor(color_primary));
@@ -125,10 +129,10 @@ public class FragModulesStatus extends Fragment {
 		public void run() {
 			while (true) { // Keep checking the modules' status.
 				System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-				for (int i = 0; i < ModulesList.modules_list_length; ++i) {
-					final SwitchCompat switchCompat = current_view.findViewById(i);
+				for (int module_index = 0; module_index < ModulesList.sub_and_modules_list_length; ++module_index) {
+					final SwitchCompat switchCompat = current_view.findViewById(module_index);
 
-					final boolean module_running = ModulesList.isModuleRunning(i);
+					final boolean module_running = ModulesList.isElementRunning(module_index);
 					switchCompat.setChecked(module_running); // --> "Animators may only be run on Looper threads"
 					if (module_running) {
 						// If the module is running, color the text green (Accent Color).

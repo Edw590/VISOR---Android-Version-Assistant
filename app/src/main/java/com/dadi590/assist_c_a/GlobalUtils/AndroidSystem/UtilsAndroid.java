@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,12 +21,6 @@
 
 package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;
 
-import androidx.annotation.Nullable;
-
-import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
-
-import java.util.List;
-
 /**
  * <p>General utilities for this Android system utilities class.</p>
  */
@@ -38,33 +32,19 @@ public final class UtilsAndroid {
 	private UtilsAndroid() {
 	}
 
-	public static final int NO_ERRORS = -50;
-	public static final int ERROR = -51;
-	public static final int NO_ROOT = -52;
-	/**
-	 * <p>Checks the error code returned by {@link UtilsShell#executeShellCmd(List, boolean)} and decides what it means
-	 * (no root available, an error, or no errors).</p>
-	 * <br>
-	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #NO_ERRORS} --> for the returning value: no errors in the operation completed successfully</p>
-	 * <p>- {@link #ERROR} --> for the returning value: an error occurred and the operation did not succeed</p>
-	 * <p>- {@link #NO_ROOT} --> for the returning value: root user rights are not available but are required for the
-	 * operation</p>
-	 * <p><u>---CONSTANTS---</u></p>
-	 *
-	 * @param error_code the value of {@link UtilsShell.CmdOutputObj#error_code}
-	 *
-	 * @return one of the constants
-	 */
-	static int checkCmdOutputObjErrCode(@Nullable final Integer error_code) {
-		// These checks were made based on the way the root commands availability is done.
-		if (error_code == null || error_code == 13) {
-			// Error 13 is "Permission denied" in UNIX
-			return NO_ROOT;
-		} else if (error_code != 0) {
-			return ERROR;
-		} else {
-			return NO_ERRORS;
-		}
-	}
+	/** Generic error. */
+	public static final int GEN_ERR = 987670;
+	public static final int NO_ERR = 987671;
+	public static final int PERM_DENIED = 987672;
+
+	public static final int NO_BLUETOOTH_ADAPTER = -987673;
+
+	public static final int ALREADY_ENABLED = -987674;
+	public static final int ALREADY_DISABLED = -987675;
+
+	public static final int MODE_NORMAL = -987676;
+	public static final int MODE_SAFE = -987677;
+	public static final int MODE_RECOVERY = -987678;
+	public static final int MODE_BOOTLOADER = -987679;
+	public static final int MODE_FAST = -987680;
 }

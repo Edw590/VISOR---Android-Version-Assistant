@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.widget.LockPatternUtils;
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -75,7 +76,7 @@ public final class UtilsProtectedLockScr {
 			// This way below seems to work perfectly to start an activity instantly after pressing Home button.
 			// Though, it doesn't work as of API 27, according with testing from a StackOverflow user and behaves exactly
 			// like startActivity() in this matter.
-			PendingIntent.getActivity(UtilsGeneral.getContext(), 0, intent, 0).send();
+			PendingIntent.getActivity(UtilsGeneral.getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT).send();
 		} catch (final Throwable ignored) { // This is very important, so Throwable.
 			// In case it didn't work for some reason, use the supposed normal way of starting an activity.
 			UtilsGeneral.getContext().startActivity(intent);
@@ -96,7 +97,8 @@ public final class UtilsProtectedLockScr {
 		intentPLS.addFlags(
 				Intent.FLAG_ACTIVITY_CLEAR_TOP |
 				Intent.FLAG_ACTIVITY_SINGLE_TOP |
-				Intent.FLAG_ACTIVITY_NEW_TASK
+				Intent.FLAG_ACTIVITY_NEW_TASK |
+				Intent.FLAG_ACTIVITY_NO_ANIMATION
 		);
 
 		return intentPLS;
@@ -119,16 +121,17 @@ public final class UtilsProtectedLockScr {
 				a forçagem de permissões MEGA rápida --> tal como a função de iniciar o serviço, tenta metê-la ao máximo.*/
 
 		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsGeneral.getContext());
-		try {
-			final Method method = LockPatternUtils.class.getDeclaredMethod("isLockScreenDisabled");
+		final Method method = UtilsReflection.getMethod(LockPatternUtils.class, "isLockScreenDisabled");
+		if (null != method) {
+			try {
 
-			return !Boolean.parseBoolean(String.valueOf(method.invoke(lockPatternUtils)));
-		} catch (final InvocationTargetException ignored) {
-		} catch (final NoSuchMethodException ignored) {
-		} catch (final IllegalAccessException ignored) {
+				return !Boolean.parseBoolean(String.valueOf(method.invoke(lockPatternUtils)));
+			} catch (final InvocationTargetException ignored) {
+			} catch (final IllegalAccessException ignored) {
+			}
 		}
 
-		// Won't happen - the function exists on said API levels
+		// Won't happen, at least so soon. It exists from 22 to [something]?
 		return false;
 	}
 }

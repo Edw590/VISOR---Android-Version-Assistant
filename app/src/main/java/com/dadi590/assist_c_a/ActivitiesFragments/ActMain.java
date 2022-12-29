@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -32,7 +32,7 @@ import androidx.navigation.NavHost;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,8 +50,9 @@ public class ActMain extends AppCompatActivity {
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
-		final int perms_left = UtilsServices.startMainService()[1];
-		UtilsPermissions.warnPermissions(perms_left, false);
+		UtilsServices.startMainService();
+		UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
+		UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
 
 
 

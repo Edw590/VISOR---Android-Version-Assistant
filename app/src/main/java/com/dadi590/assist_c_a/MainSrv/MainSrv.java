@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,6 @@
 
 package com.dadi590.assist_c_a.MainSrv;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -32,6 +31,7 @@ import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.dadi590.assist_c_a.ActivitiesFragments.ActMain;
 import com.dadi590.assist_c_a.BroadcastRecvs.MainRegRecv;
@@ -40,8 +40,8 @@ import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsRoot;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -80,7 +80,7 @@ public class MainSrv extends Service {
 				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND,
 				"Main notification",
 				"",
-				NotificationManager.IMPORTANCE_UNSPECIFIED,
+				NotificationCompat.PRIORITY_MIN, // Ignore the warning. The API level is checked later.
 				// If I'm not forgetting anything (writing this much time after I put the code here), this (only) gets
 				// the notification in the bottom of the other ones with MIN importance. If it's MIN, the notification
 				// will be on the top of the list when it starts. With UNSPECIFIED, it gets to the bottom.
@@ -91,17 +91,6 @@ public class MainSrv extends Service {
 		startForeground(GL_CONSTS.NOTIF_ID_MAIN_SRV_FOREGROUND, UtilsNotifications.getNotification(notificationInfo).
 				setOngoing(true).
 				build());
-
-		// All the rest moved to the onStartCommand(). Read why there. The notification is here so it doesn't get
-		// created again.
-	}
-
-	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-		// Do this below every time the service is started/resumed/whatever
-
-		// Keep all here. In case the system kills all threads because of low memory and the service is called again
-		// with onStartCommand() (or by any other reason), it will try to restart the modules.
 
 		// Register the receiver before the speech module is started
 		try {
@@ -119,49 +108,33 @@ public class MainSrv extends Service {
 		// the assistant.
 		// EDIT: the Speech2 module has now notifications integrated into it, so it's still the thing to start before
 		// everything else.
-		final int speech_mod_index = ModulesList.getModuleIndex(Speech2.class);
-		if (ModulesList.deviceSupportsModule(speech_mod_index)) {
-			ModulesList.startModule(speech_mod_index);
-		}
-		// todo ^^^^ Cool right? Except if audio is not available --> get on with the notifications...
-
-		return START_STICKY;
+		ModulesList.startModule(ModulesList.getElementIndex(Speech2.class));
 	}
 
 	final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-			final int mods_manager_index = ModulesList.getModuleIndex(ModulesManager.class);
+			final int mods_manager_index = ModulesList.getElementIndex(ModulesManager.class);
 
-			final int mods_manager_type1 = (int) ModulesList.getModuleValue(mods_manager_index, ModulesList.MODULE_TYPE1);
-			if (ModulesList.TYPE1_SERVICE != mods_manager_type1 && ModulesList.TYPE1_INSTANCE != mods_manager_type1) {
-				// Can't happen --> throw error immediately so it can be fixed right after starting the app with a wrong
-				// value.
-				throw new Error("IT'S NOT POSSIBLE TO CHECK AND RESTART THE MODULES MANAGER IN CASE IT STOPS WORKING!!!");
-			}
-
-			// Keep checking if the Modules Manager is working and in case it's not, restart it.
 			while (true) {
-				boolean module_restarted = false;
-				if (ModulesList.TYPE1_SERVICE == mods_manager_type1) {
-					if (!ModulesList.isModuleRunning(mods_manager_index)) {
-						ModulesList.restartModule(mods_manager_index);
-						module_restarted = true;
-					}
-				} else {
-					if (!ModulesList.isModuleFullyWorking(mods_manager_index)) {
-						ModulesList.restartModule(mods_manager_index);
-						module_restarted = true;
-					}
-				}
-				if (module_restarted) {
+				// Force the permissions every some seconds.
+				UtilsPermsAuths.checkRequestPerms(null, true);
+				UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_FORCE);
+
+				// Keep checking if the Modules Manager is working and in case it's not, restart it.
+				if (!ModulesList.isModuleFullyWorking(mods_manager_index)) {
+					ModulesList.restartModule(mods_manager_index);
 					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
 					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 
 				try {
-					Thread.sleep(10_000L);
+					Thread.sleep(5_000L);
 				} catch (final InterruptedException ignored) {
+
+					// todo Hopefully this won't happen. Not sure what to do here.
+					// Can't kill the PID for the system to restart the app - might corrupt ongoing stuff.
+
 					Thread.currentThread().interrupt();
 
 					return;
@@ -188,7 +161,11 @@ public class MainSrv extends Service {
 				// right away after being ready.
 				MainRegRecv.registerReceivers();
 
-				//UtilsGeneral.checkWarnRootAccess(false); Not supposed to be needed root access. Only system permissions.
+				// Start the Modules Manager.
+				ModulesList.startModule(ModulesList.getElementIndex(ModulesManager.class));
+				infinity_thread.start();
+
+				UtilsRoot.checkWarnRootAccess(false);
 
 				switch (UtilsApp.appInstallationType()) {
 					case (UtilsApp.PRIVILEGED_WITHOUT_UPDATES): {
@@ -200,6 +177,8 @@ public class MainSrv extends Service {
 						//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
 						//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
 						//   memory? (always from memory, preferably)
+						//   Maybe try to extract to the cache partition or folder or something? Not as safe, but more
+						//   probable of being possible.
 
 						break;
 					}
@@ -218,7 +197,7 @@ public class MainSrv extends Service {
 					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
 
-				/*if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
+				/* todo if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
 					switch (Copiar_bibliotecas.copiar_biblioteca_PocketSphinx(getApplicationContext())) {
 						case (ARQUITETURA_NAO_DISPONIVEL): {
 							// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
@@ -238,10 +217,6 @@ public class MainSrv extends Service {
 						}
 					}
 				}*/
-
-				// Start the Modules Manager.
-				ModulesList.startModule(ModulesList.getModuleIndex(ModulesManager.class));
-				infinity_thread.start();
 
 				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in
 				//  a loop or whatever. Or with some event that the app could broadcast when it detects granted or
@@ -278,9 +253,6 @@ public class MainSrv extends Service {
 				final String speak = "Ready, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
-				final int perms_left = UtilsServices.startMainService()[1];
-				UtilsPermissions.warnPermissions(perms_left, false);
-
 				try {
 					UtilsGeneral.getContext().unregisterReceiver(this);
 				} catch (final IllegalArgumentException ignored) {
@@ -288,6 +260,13 @@ public class MainSrv extends Service {
 			}
 		}
 	};
+
+	@Override
+	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+		// Do this below every time the service is started/resumed/whatever
+
+		return START_STICKY;
+	}
 
 	@Override
 	@Nullable

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,15 +22,10 @@
 package com.dadi590.assist_c_a.ActivitiesFragments;
 
 import android.Manifest;
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,18 +35,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.VoiceEnrollment.TestEnrollmentActivity;
 
 import java.util.Locale;
 
@@ -100,11 +93,6 @@ public class FragDevelopment extends Fragment {
 				Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
 
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-					intent = new Intent(getActivity(), TestEnrollmentActivity.class);
-					startActivity(intent);
-				}
-
 				//System.out.println("HHHHHHHHHHHHHHHHHH");
 				//System.out.println(ValuesStorage.getValue(CONSTS_ValueStorage.last_phone_call_time));
 				//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
@@ -135,8 +123,8 @@ public class FragDevelopment extends Fragment {
 
 				final byte[] gotten_message = UtilsCryptoEnDecrypt.decryptBytes(password1, password2, file_contents, associated_authed_data);
 				System.out.println(Arrays.toString(gotten_message));
-				System.out.println(UtilsGeneral.bytesToPrintableChars(gotten_message, true));
-				System.out.println(UtilsGeneral.bytesToPrintableChars(gotten_message, false));*/
+				System.out.println(UtilsDataConv.bytesToPrintableChars(gotten_message, true));
+				System.out.println(UtilsDataConv.bytesToPrintableChars(gotten_message, false));*/
 
 				//System.out.println(UtilsShell.getAccessRights("", true));
 				//System.out.println(UtilsShell.getAccessRights("/oe", true));
@@ -159,15 +147,15 @@ public class FragDevelopment extends Fragment {
 				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_ORDINARY_SYSTEM_APP));
 				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP));
 				System.out.println("-----");
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.PACKAGE_VERIFICATION_AGENT));
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS));
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL));
-				System.out.println(UtilsPermissions.checkSelfPermission("android.permission.USER_INSTALLER_V2"));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.PACKAGE_VERIFICATION_AGENT));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL));
+				System.out.println(UtilsPermsAuths.checkSelfPermission("android.permission.USER_INSTALLER_V2"));
 				System.out.println("-----");
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT));
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL));
-				System.out.println(UtilsPermissions.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL));
+				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD));
 				System.out.println("------------------------");
 
 				// BUTTON FOR TESTING
@@ -178,84 +166,13 @@ public class FragDevelopment extends Fragment {
 		requireView().findViewById(R.id.btn_perms).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
-				final Context context = UtilsGeneral.getContext();
-				int missing_authorizations = 0;
+				// Request all missing permissions
+				final int perms_left = UtilsPermsAuths.checkRequestPerms(getActivity(), true);
+				UtilsPermsAuths.warnPermissions(perms_left, true);
 
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-					final String speak = "No manual permission authorizations needed below Android Marshmallow.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-				} else {
-					// Request all missing permissions
-					final int perms_left = UtilsPermissions.wrapperRequestPerms(getActivity(), true)[1];
-					UtilsPermissions.warnPermissions(perms_left, true);
-
-					// Check if the notification policy access has been granted for the app and if not, open the settings
-					// screen for the user to grant it.
-					final NotificationManager mNotificationManager = (NotificationManager) context.
-							getSystemService(Context.NOTIFICATION_SERVICE);
-					if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
-						++missing_authorizations;
-						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						startActivity(intent);
-					}
-
-					// Check if the app can draw system overlays and open the settings screen if not
-					if (!Settings.canDrawOverlays(context)) {
-						++missing_authorizations;
-						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-								Uri.parse("package:" + context.getPackageName()));
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						startActivity(intent);
-					}
-
-					// Check if the app can bypass battery optimizations and request it if not
-					final PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-					if (!powerManager.isIgnoringBatteryOptimizations(context.getPackageName())) {
-						++missing_authorizations;
-						final Intent intent = new Intent();
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-						intent.setData(Uri.parse("package:" + context.getPackageName()));
-						context.startActivity(intent);
-					}
-
-					// Check if the app has the WRITE_SETTINGS permission (in AppOp mode) and request it if not
-					if (!Settings.System.canWrite(context)) {
-						++missing_authorizations;
-						final Intent intent = new Intent();
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-						intent.setData(Uri.parse("package:" + context.getPackageName()));
-						context.startActivity(intent);
-					}
-				}
-
-				//Mete-o a verificar estas coisas na inicialização da app também... Mas só verificar, não pedir.
-
-				if (!UtilsApp.isDeviceAdmin()) {
-					++missing_authorizations;
-					final Intent intent = new Intent();
-					intent.setComponent(new ComponentName("com.android.settings",
-							"com.android.settings.DeviceAdminSettings"));
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
-				}
-
-				final String speak;
-				if (missing_authorizations == 0) {
-					speak = "No authorizations left to grant.";
-				} else {
-					speak = "Warning - Not all authorizations have been granted to the application! Number of " +
-							"authorizations left to grant: " + missing_authorizations + ".";
-				}
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-				// todo YOU MUST RESTART THE APP AFTER THIS!!!!! IT MUST KNOW IT HAS ALL THESE PERMISSIONS AND STUFF!!!
-
-				// todo Also, you must put a warning saying to keep clicking on Back until nothing else appears aside
-				//  from the desktop because of, for example, the battery optimization confirmation, which only appears
-				//  after the app is closed by clicking on Back (others do this too).
+				// Request all missing authorizations
+				final int auths_left = UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_REQUEST);
+				UtilsPermsAuths.warnAuthorizations(auths_left, true);
 			}
 		});
 		requireView().findViewById(R.id.btn_device_admin).setOnClickListener(new View.OnClickListener() {
@@ -273,30 +190,21 @@ public class FragDevelopment extends Fragment {
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, null);
 			}
 		});
-		requireView().findViewById(R.id.btn_speak_high).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
-				// Leave PRIORITY_HIGH there because CRITICAL will get the volume in the maximum, and this is probably
-				// just to test if the priority implementation is working.
-			}
-		});
 		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
 				final String inserted_text = txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
 				if ("stop".equals(inserted_text)) {
-					UtilsAudioRecorderBC.recordAudio(false, -1);
-					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+					UtilsAudioRecorderBC.recordAudio(false, -1, true);
 				} else {
 					UtilsCmdsExecutorBC.processTask(inserted_text, false, false);
 				}
-
-				/*final Intent broadcast_intent = new Intent(BroadcastReceivers_com_registo.ENVIAR_TAREFA);
-				broadcast_intent.putExtra("extras_frase_str", txt_to_send.getText().toString());
-				broadcast_intent.putExtra("extras_resultados_parciais", false);
-				sendBroadcast(broadcast_intent, GL_CONSTS.ASSIST_C_A_RECV_PERM);*/
+			}
+		});
+		requireView().findViewById(R.id.btn_force_stop).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(final View v) {
+				UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 			}
 		});
 		requireView().findViewById(R.id.btn_skip_speech).setOnClickListener(new View.OnClickListener() {

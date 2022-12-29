@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,7 +22,6 @@
 package com.dadi590.assist_c_a.Modules.ProtectedLockScr;
 
 import android.app.KeyguardManager;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,6 +35,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
@@ -48,11 +49,23 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
  * <p>And, since this is also always running, does other checks too to be 100% sure the user can't leave the
  * Protected Lock Screen.</p>
  */
-public class ProtectedLockScrSrv extends Service {
+public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 
 	final Intent intentPLS = UtilsProtectedLockScr.getPLSIntent();
 
 	boolean locked = true;
+
+	///////////////////////////////////////////////////////////////
+	// IModuleSrv stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		return true;
+	}
+	// IModuleSrv stuff
+	///////////////////////////////////////////////////////////////
 
 	@Override
 	public final void onCreate() {
@@ -64,7 +77,7 @@ public class ProtectedLockScrSrv extends Service {
 				GL_CONSTS.CH_ID_PLS_SRV_FOREGROUND,
 				"Protected Lock Screen notification",
 				"",
-				NotificationManager.IMPORTANCE_MAX,
+				NotificationCompat.PRIORITY_MAX,
 				GL_CONSTS.ASSISTANT_NAME + "'s Protected Lock Screen running",
 				"",
 				null
@@ -165,22 +178,12 @@ public class ProtectedLockScrSrv extends Service {
 		// The Main Service keeps starting this service every some time to be sure it never stops - and doesn't check
 		// if it's already running or not. Read the rest on Main Service's onStartCommand().
 
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	@Override
 	@Nullable
 	public final IBinder onBind(@Nullable final Intent intent) {
 		return null;
-	}
-
-	@Override
-	public final void onDestroy() {
-		super.onDestroy();
-		locked = false;
-		try {
-			UtilsGeneral.getContext().unregisterReceiver(localBroadcastReceiver);
-		} catch (final IllegalArgumentException ignored) {
-		}
 	}
 }

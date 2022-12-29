@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,6 @@
 
 package com.dadi590.assist_c_a.VoiceEnrollment;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -31,16 +30,20 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.voice.AlwaysOnHotwordDetector;
-import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
+
+import java.util.UUID;
 
 /**
  * Utility class for the enrollment operations like enroll;re-enroll & un-enroll.
  */
-@RequiresApi(api = Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.L)
 public class EnrollmentUtil {
 	private static final String TAG = "TestEnrollmentUtil";
 
@@ -104,7 +107,7 @@ public class EnrollmentUtil {
 		try {
 			status = mModelManagementService.updateKeyphraseSoundModel(soundModel);
 		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in updateKeyphraseSoundModel", e);
+			//Log.ie(TAG, "RemoteException in updateKeyphraseSoundModel", e);
 		}
 		return status == SoundTrigger.STATUS_OK;
 	}
@@ -123,7 +126,7 @@ public class EnrollmentUtil {
 	@Nullable
 	public KeyphraseSoundModel getSoundModel(int keyphraseId, String bcp47Locale) {
 		if (keyphraseId <= 0) {
-			Log.e(TAG, "Keyphrase must have a valid ID");
+			//Log.ie(TAG, "Keyphrase must have a valid ID");
 			return null;
 		}
 
@@ -131,11 +134,11 @@ public class EnrollmentUtil {
 		try {
 			model = mModelManagementService.getKeyphraseSoundModel(keyphraseId, bcp47Locale);
 		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in updateKeyphraseSoundModel");
+			//Log.ie(TAG, "RemoteException in updateKeyphraseSoundModel");
 		}
 
 		if (model == null) {
-			Log.w(TAG, "No models present for the gien keyphrase ID");
+			//Log.iw(TAG, "No models present for the gien keyphrase ID");
 			return null;
 		} else {
 			return model;
@@ -151,7 +154,7 @@ public class EnrollmentUtil {
 	@Nullable
 	public boolean deleteSoundModel(int keyphraseId, String bcp47Locale) {
 		if (keyphraseId <= 0) {
-			Log.e(TAG, "Keyphrase must have a valid ID");
+			//Log.ie(TAG, "Keyphrase must have a valid ID");
 			return false;
 		}
 
@@ -159,49 +162,162 @@ public class EnrollmentUtil {
 		try {
 			status = mModelManagementService.deleteKeyphraseSoundModel(keyphraseId, bcp47Locale);
 		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in updateKeyphraseSoundModel");
+			//Log.ie(TAG, "RemoteException in updateKeyphraseSoundModel");
 		}
 		return status == SoundTrigger.STATUS_OK;
 	}
 
 	private boolean verifyKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
 		if (soundModel == null) {
-			Log.e(TAG, "KeyphraseSoundModel must be non-null");
+			//Log.ie(TAG, "KeyphraseSoundModel must be non-null");
 			return false;
 		}
-		if (soundModel.uuid == null) {
-			Log.e(TAG, "KeyphraseSoundModel must have a UUID");
+		if (getUuid(soundModel) == null) {
+			//Log.ie(TAG, "KeyphraseSoundModel must have a UUID");
 			return false;
 		}
-		if (soundModel.data == null) {
-			Log.e(TAG, "KeyphraseSoundModel must have data");
+		if (getData(soundModel) == null) {
+			//Log.ie(TAG, "KeyphraseSoundModel must have data");
 			return false;
 		}
-		if (soundModel.keyphrases == null || soundModel.keyphrases.length != 1) {
-			Log.e(TAG, "Keyphrase must be exactly 1");
+		Keyphrase[] keyphrases = getKeyphrases(soundModel);
+		if (keyphrases == null || keyphrases.length != 1) {
+			//Log.ie(TAG, "Keyphrase must be exactly 1");
 			return false;
 		}
-		Keyphrase keyphrase = soundModel.keyphrases[0];
-		if (keyphrase.id <= 0) {
-			Log.e(TAG, "Keyphrase must have a valid ID");
+		Keyphrase keyphrase = keyphrases[0];
+		if (getId(keyphrase) <= 0) {
+			//Log.ie(TAG, "Keyphrase must have a valid ID");
 			return false;
 		}
-		if (keyphrase.recognitionModes < 0) {
-			Log.e(TAG, "Recognition modes must be valid");
+		if (getRecognitionModes(keyphrase) < 0) {
+			//Log.ie(TAG, "Recognition modes must be valid");
 			return false;
 		}
-		if (keyphrase.locale == null) {
-			Log.e(TAG, "Locale must not be null");
+		if (getLocale(keyphrase) == null) {
+			//Log.ie(TAG, "Locale must not be null");
 			return false;
 		}
-		if (keyphrase.text == null) {
-			Log.e(TAG, "Text must not be null");
+		if (getText(keyphrase) == null) {
+			//Log.ie(TAG, "Text must not be null");
 			return false;
 		}
-		if (keyphrase.users == null || keyphrase.users.length == 0) {
-			Log.e(TAG, "Keyphrase must have valid user(s)");
+		int[] users = getUsers(keyphrase);
+		if (users == null || users.length == 0) {
+			//Log.ie(TAG, "Keyphrase must have valid user(s)");
 			return false;
 		}
 		return true;
+	}
+
+	// Below, methods to return the required values before and after API 30 (before they were public attributes, now
+	// they are all private and have getters).
+
+	@Nullable
+	static UUID getUuid(@NonNull final KeyphraseSoundModel soundModel) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return soundModel.getUuid();
+			return soundModel.uuid;
+		} else {
+			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "uuid");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static UUID getVendorUuid(@NonNull final KeyphraseSoundModel soundModel) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return soundModel.getVendorUuid();
+			return soundModel.vendorUuid;
+		} else {
+			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "vendorUuid");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static byte[] getData(@NonNull final KeyphraseSoundModel soundModel) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return soundModel.getData();
+			return soundModel.data;
+		} else {
+			final byte[] value = (byte[]) UtilsReflection.getFieldValue(soundModel, "data");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static Keyphrase[] getKeyphrases(@NonNull final KeyphraseSoundModel soundModel) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return soundModel.getKeyphrases();
+			return soundModel.keyphrases;
+		} else {
+			final Keyphrase[] value = (Keyphrase[]) UtilsReflection.getFieldValue(soundModel, "keyphrases");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	static int getId(@NonNull final Keyphrase keyphrase) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return keyphrase.getId();
+			return keyphrase.id;
+		} else {
+			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "id");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	static int getRecognitionModes(@NonNull final Keyphrase keyphrase) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return keyphrase.getRecognitionModes();
+			return keyphrase.recognitionModes;
+		} else {
+			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "recognitionModes");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static String getLocale(@NonNull final Keyphrase keyphrase) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return keyphrase.getLocale();
+			// It was returning a Locale too, aside from the commented line (when I switched from API 32 back to 29)
+			return keyphrase.locale;
+		} else {
+			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "locale");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static String getText(@NonNull final Keyphrase keyphrase) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return keyphrase.getText();
+			return keyphrase.text;
+		} else {
+			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "text");
+			assert null != value; // Will never be null
+
+			return value;
+		}
+	}
+	@Nullable
+	static int[] getUsers(@NonNull final Keyphrase keyphrase) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			//return keyphrase.getUsers();
+			return keyphrase.users;
+		} else {
+			final int[] value = (int[]) UtilsReflection.getFieldValue(keyphrase, "users");
+			assert null != value; // Will never be null
+
+			return value;
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -40,22 +40,23 @@ public final class ValuesStorage {
 			// Note: the "Updating" means the value is currently being updated in some class, as opposite to no class at
 			// all being updating the value (and is therefore waiting to be used).
 			// Power
+			{CONSTS_ValueStorage.battery_present, "Power - Battery Present", TYPE_BOOLEAN, null}, // Updating
 			{CONSTS_ValueStorage.battery_percentage, "Power - Battery Percentage", TYPE_INTEGER, null}, // Updating
 			{CONSTS_ValueStorage.power_connected, "Power - Power Connected", TYPE_BOOLEAN, null}, // Updating
 			// Telephony - Phone calls
-			{CONSTS_ValueStorage.last_phone_call_time, "Telephony - Last call when (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS_ValueStorage.last_phone_call_time, "Telephony - Last call when (ms)", TYPE_LONG, null}, // Updating
 			{CONSTS_ValueStorage.curr_phone_call_number, "Telephony - Number of current call", TYPE_STRING, null}, // Updating
 			// Telephony - SMS
-			{CONSTS_ValueStorage.last_sms_msg_time, "Telephony - Last SMS msg when (milliseconds)", TYPE_LONG, null}, // Updating
+			{CONSTS_ValueStorage.last_sms_msg_time, "Telephony - Last SMS msg when (ms)", TYPE_LONG, null}, // Updating
 			{CONSTS_ValueStorage.last_sms_msg_number, "Telephony - Number of last SMS msg sender", TYPE_STRING, null}, // Updating
 			// Weather
 			{CONSTS_ValueStorage.loc_temp_for_the_day_c, "Location temperature for the day (C)", TYPE_DOUBLE, null},
 			{CONSTS_ValueStorage.loc_temp_for_the_day_f, "Location temperature for the day (F)", TYPE_DOUBLE, null},
 			{CONSTS_ValueStorage.loc_weather_for_the_day, "Location weather for the day", TYPE_STRING, null},
 			// AudioRecorder
-			{CONSTS_ValueStorage.is_recording_audio_internally, "Recording audio internally", TYPE_BOOLEAN, "false"}, // Updating
+			{CONSTS_ValueStorage.is_recording_audio_internally, "Recording audio internally", TYPE_BOOLEAN, null}, // Updating
 			// Flashlight
-			{CONSTS_ValueStorage.main_flashlight_enabled, "Main flashlight enabled (Android 6 and up only)", TYPE_BOOLEAN, null}, // Updating
+			{CONSTS_ValueStorage.main_flashlight_enabled, "Main flashlight enabled (Android 6+)", TYPE_BOOLEAN, null}, // Updating
 			// Speech Recognizers
 			{CONSTS_ValueStorage.google_recog_available, "Google speech recognition available", TYPE_BOOLEAN, null}, // Updating
 			{CONSTS_ValueStorage.pocketsphinx_recog_available, "PocketSphinx speech recognition available", TYPE_BOOLEAN, null}, // Updating
@@ -78,6 +79,8 @@ public final class ValuesStorage {
 		for (int i = 0, length = values_list.length; i < length; ++i) {
 			if (values_list[i][0].equals(key)) {
 				values_list[i][3] = new_value;
+
+				break;
 			}
 		}
 	}
@@ -120,7 +123,7 @@ public final class ValuesStorage {
 			}
 		}
 
-		return "Never happening - just don't be stupid and put everything right.";
+		return "Never happening - just don't be dumb and put everything right.";
 	}
 
 	/**

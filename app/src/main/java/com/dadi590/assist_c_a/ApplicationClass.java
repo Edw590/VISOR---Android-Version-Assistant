@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,8 +26,10 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.multidex.MultiDex;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 
 /**
@@ -61,10 +63,13 @@ public final class ApplicationClass extends Application {
 	@Nullable public static Context applicationContext = null;
 
 	@Override
-	public final void onCreate() {
+	public void onCreate() {
 		super.onCreate();
 
 		// To do exactly when the app's main process starts
+
+		// Apply SecureRandom fixes for devices running Android 4.3 or below
+		PRNGFixes.apply();
 
 		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
 		// which returns null sometimes.
@@ -82,6 +87,16 @@ public final class ApplicationClass extends Application {
 		UtilsApp.deleteAppCache();
 
 		UtilsServices.startMainService();
+
+		if (!UtilsApp.isDeviceAdmin()) {
+			UtilsPermsAuths.forceDeviceAdmin();
+		}
+	}
+
+	@Override
+	protected void attachBaseContext(final Context base) {
+		super.attachBaseContext(base);
+		MultiDex.install(this);
 	}
 
 	/**

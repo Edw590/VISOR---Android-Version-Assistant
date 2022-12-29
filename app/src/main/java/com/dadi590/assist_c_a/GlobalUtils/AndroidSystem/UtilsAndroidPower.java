@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,15 +27,14 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IPowerManager;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 
 import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermissions;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsRoot;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,11 +54,12 @@ public final class UtilsAndroidPower {
 	private UtilsAndroidPower() {
 	}
 
-	// Don't broadcast the shutdown and reboot. The broadcasts will freeze the app (at least on BV9500 with Android 8.1).
-	// If you do, put them after the shutdown and reboot function calls. Maybe that way they don't freeze (if those
-	// functions wouldn't freeze themselves, that is).
-
 	// todo Make the shutdown and reboot functions return with shell commands... --> EXECUTE ON ANOTHER THREAD!!!!!
+
+	// todo "CRITICAL APP ERROR" on the tablet on shutdown and with privileged system app permissions
+	// Didn't get to see the reason.
+
+	// todo Toggling the power saver mode freezes the app.... --> another thread
 
 	/**
 	 * <p>Shut down the device.</p>
@@ -69,20 +69,16 @@ public final class UtilsAndroidPower {
 	 * function will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
-	 * required for the operation</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or a SH shell exit code
 	 */
 	public static int shutDownDevice() {
 		// The REBOOT permission is the one required here, not SHUTDOWN (tested and got an error saying it).
 		// No idea what's the use of SHUTDOWN. But I'll keep it in the Manifest in case it's needed to broadcast the
 		// ACTION_SHUTDOWN or something.
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT) &&
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT) &&
 				Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			// [I believe the function below behaves as written on Intent.ACTION_REQUEST_SHUTDOWN.]
 			// Also, shutdown() only exists from API 17 onwards. Hopefully the root way works.
@@ -93,33 +89,30 @@ public final class UtilsAndroidPower {
 				try {
 					powerManager.shutdown(false, PowerManager.SHUTDOWN_USER_REQUESTED, false);
 
-					return UtilsAndroid.NO_ERRORS;
+					return UtilsShell.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			} else {
 				final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(ServiceManager.
 						getService(Context.POWER_SERVICE));
 
+				final Method method = UtilsReflection.getMethod(IPowerManager.class, "shutdown", boolean.class,
+						boolean.class);
+				assert null != method; // Will never happen.
 				try {
-					final Method method = IPowerManager.class.getDeclaredMethod("shutdown", boolean.class,
-							boolean.class);
-					method.setAccessible(true);
-
 					final Boolean ret_method = (Boolean) method.invoke(iPowerManager, false, false);
 					assert ret_method != null; // Which will never be... (but the warning is gone now)
 
 					if (ret_method) {
-						return UtilsAndroid.NO_ERRORS;
+						return UtilsShell.NO_ERR;
 					}
-				} catch (final NoSuchMethodException ignored) {
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
 			}
 		}
 
-		final List<String> commands = new ArrayList<>(6);
-		commands.add("su");
+		final List<String> commands = new ArrayList<>(4);
 		// This one below is for older devices (covers more anyway, in case the others below don't work on them).
 		commands.add("am start -a " + Intent.ACTION_REQUEST_SHUTDOWN + " --ez KEY_CONFIRM false --ez " +
 				"USER_REQUESTED_SHUTDOWN --activity-clear-task");
@@ -133,63 +126,74 @@ public final class UtilsAndroidPower {
 		// command, but I can't use it, so yeah.
 		commands.add("svc power shutdown");
 		commands.add("am broadcast -a " + Intent.ACTION_SHUTDOWN);
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
 
 		// As said in the function doc, the above command does not return if it's successful. So, if it gets here,
 		// it's because there's no root access on the device and it did return (with some error in this case).
-		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		return UtilsShell.executeShellCmd(commands, true, true).error_code;
 	}
 
-	public static final int MODE_NORMAL = 0;
-	public static final int MODE_SAFE = 1;
-	public static final int MODE_RECOVERY = 2;
-	//public static final int MODE_FAST = 3;
-	public static final int ERR_UNSUPPORTED_MODE = 0;
+	//public static final int MODE_FASTBOOT = -987679; todo
 	/**
 	 * <p>Reboot the device.</p>
 	 * <p>Note: the app needs either to be granted the {@link Manifest.permission#REBOOT} permission or to have root
 	 * user permissions.</p>
+	 * <p><strong>ATTENTION:</strong> there is not guarantee from me that each of these work in all devices. I don't
+	 * know what works in which API levels. As I don't know, I've put all available in all levels. The user will learn
+	 * when they request the mode and see it not working (or working). That also means....</p>
+	 * <p><strong>WARNING: DO NOT TRUST THIS FUNCTION TO REBOOT TO THE REQUESTED MODE!!!</strong> Useful to read this
+	 * if the function call is essential to security or something very important. <strong>Only trust it to reboot to the
+	 * recovery mode and nothing else.</strong></p>
 	 * <p>Attention: in case the reboot is issued with a shell command (mentioned permission not granted), this function
 	 * will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are
-	 * required for the operation</p>
-	 * <p>- {@link #ERR_UNSUPPORTED_MODE} --> for the returning value: if the chosen mode is unsupported on the device.</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
 	 * <br>
-	 * <p>- {@link #MODE_NORMAL} --> for {@code mode}: reboot device normally</p>
-	 * <p>- {@link #MODE_SAFE} --> for {@code mode}: reboot device into Safe Mode</p>
-	 * <p>- {@link #MODE_RECOVERY} --> for {@code mode}: reboot device into the Recovery</p>
+	 * <p>- {@link UtilsAndroid#MODE_NORMAL} --> for {@code mode}: reboot device normally</p>
+	 * <p>- {@link UtilsAndroid#MODE_SAFE} --> for {@code mode}: reboot device into Safe Mode</p>
+	 * <p>- {@link UtilsAndroid#MODE_RECOVERY} --> for {@code mode}: reboot device into the Recovery</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param mode one of the constants
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or a SH shell exit code
 	 */
 	public static int rebootDevice(final int mode) {
 		final String reason;
-		if (MODE_RECOVERY == mode) {
-			// "recovery" exists at minimum since API 15. This constant doesn't, but what matters is the string,
-			// which is always the same, so it's fully supported, even if the constant didn't exist at the beginning.
-			reason = PowerManager.REBOOT_RECOVERY;
-		} else if (MODE_SAFE == mode) {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-				reason = PowerManager.REBOOT_SAFE_MODE;
-			} else {
-				return ERR_UNSUPPORTED_MODE;
+		switch (mode) {
+			case (UtilsAndroid.MODE_RECOVERY): {
+				// "recovery" exists at minimum since API 15. This constant doesn't, but what matters is the string,
+				// which is always the same, so it's fully supported, even if the constant didn't exist at the beginning.
+				reason = PowerManager.REBOOT_RECOVERY;
+
+				break;
 			}
-		} else {
-			// This constant below only exists from Nougat onwards. Before that, it will be an unrecognized constant by
-			// the kernel, probably, and will just restart normally, I suppose. So let it be here, to simplify things,
-			// and don't check the version to put an empty string (equivalent of a normal reboot).
-			reason = PowerManager.REBOOT_REQUESTED_BY_DEVICE_OWNER;
+			case (UtilsAndroid.MODE_SAFE): {
+				reason = PowerManager.REBOOT_SAFE_MODE;
+
+				break;
+			}
+			case (UtilsAndroid.MODE_BOOTLOADER): {
+				reason = "bootloader";
+
+				break;
+			}
+			case (UtilsAndroid.MODE_FAST): {
+				reason = PowerManager.REBOOT_USERSPACE;
+
+				break;
+			}
+			default: {
+				// This constant below only exists from Nougat onwards. Before that, it will be an unrecognized constant by
+				// the kernel, probably, and will just restart normally, I suppose. So let it be here, to simplify things,
+				// and don't check the version to put an empty string (equivalent of a normal reboot).
+				reason = PowerManager.REBOOT_REQUESTED_BY_DEVICE_OWNER;
+
+				break;
+			}
 		}
 
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.REBOOT)) {
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT)) {
 			final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(ServiceManager.
 					getService(Context.POWER_SERVICE));
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -198,21 +202,19 @@ public final class UtilsAndroidPower {
 				try {
 					iPowerManager.reboot(false, reason, false);
 
-					return UtilsAndroid.NO_ERRORS;
+					return UtilsShell.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			} else {
+				final Method method = UtilsReflection.getMethod(IPowerManager.class, "reboot", String.class);
+				assert null != method; // Will never happen.
 				try {
-					final Method method = IPowerManager.class.getDeclaredMethod("reboot", String.class);
-					method.setAccessible(true);
-
 					final Boolean ret_method = (Boolean) method.invoke(iPowerManager, reason);
 					assert ret_method != null; // Which will never be... (but the warning is gone now)
 
 					if (ret_method) {
-						return UtilsAndroid.NO_ERRORS;
+						return UtilsShell.NO_ERR;
 					}
-				} catch (final NoSuchMethodException ignored) {
 				} catch (final IllegalAccessException ignored) {
 				} catch (final InvocationTargetException ignored) {
 				}
@@ -227,58 +229,45 @@ public final class UtilsAndroidPower {
 		}
 
 		// Note: the reboot will be done gracefully, unlike with the reboot binary.
-		final String reboot_command = "svc power reboot";
-		final List<String> commands = new ArrayList<>(4);
-		commands.add("su");
-		commands.add(reboot_command + " " + reason);
+		final List<String> commands = new ArrayList<>(2);
+		commands.add("svc power reboot " + reason);
 		commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
 
 		// As with the shutdown, execution will only get here if there was some error - but it can get here.
-		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		return UtilsShell.executeShellCmd(commands, true, true).error_code;
 	}
 
 	/**
 	 * <p>Toggles Android's Battery Saver mode from Android 5.0 onwards (below that it doesn't exist).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERRORS} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#ERROR} --> for the returning value: if an error occurred and the operation did not succeed</p>
-	 * <p>- {@link UtilsAndroid#NO_ROOT} --> for the returning value: if root user rights are not available but are required for the
-	 * operation</p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to enable, false to disable
 	 *
-	 * @return one of the constants
+	 * @return a SH shell exit code
 	 */
-	@RequiresApi(api = Build.VERSION_CODES.L)
+	@RequiresApi(Build.VERSION_CODES.L)
 	public static int setBatterySaverModeEnabled(final boolean enabled) {
 		final boolean operation_finished;
-		if (UtilsPermissions.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
 			operation_finished = Settings.Global.putString(UtilsGeneral.getContext().getContentResolver(),
 					Settings.Global.LOW_POWER_MODE, enabled ? "1" : "0");
 
 			if (operation_finished) {
-				return UtilsAndroid.NO_ERRORS;
-			} // Else, try with the root commands below.
+				final List<String> commands = new ArrayList<>(2);
+				commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED + " --ez mode " +
+						(enabled ? "true" : "false") + " --receiver-registered-only");
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL +
+							" --ez mode " + (enabled ? "true" : "false"));
+				}
+
+				return UtilsShell.executeShellCmd(commands, true, true).error_code;
+			}
 		}
 
-		final List<String> commands = new ArrayList<>(5);
-		commands.add("su");
-		commands.add("settings put global " + Settings.Global.LOW_POWER_MODE + " " + (enabled ? "1" : "0"));
-		// todo This broadcast below is supposed to be only for registered receivers, at least on Nougat (see on other
-		//  API levels --> then get this one to do that and not for everyone as it is now, I guess.
-		commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED + " --ez mode " +
-				(enabled ? "true" : "false"));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL + " --ez mode " +
-					(enabled ? "true" : "false"));
-		}
-		commands.add("exit");
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-
-		return UtilsAndroid.checkCmdOutputObjErrCode(cmdOutputObj.error_code);
+		return UtilsAndroid.PERM_DENIED;
 	}
 }

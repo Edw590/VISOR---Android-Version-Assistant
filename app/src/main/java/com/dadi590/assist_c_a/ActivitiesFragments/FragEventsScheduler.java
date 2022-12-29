@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -75,7 +75,7 @@ public class FragEventsScheduler extends Fragment {
 		final String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
 
-		for (int i = 0; i < ModulesList.modules_list_length; ++i) { // Add a switch for each module.
+		for (int i = 0; i < ModulesList.sub_and_modules_list_length; ++i) { // Add a switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
@@ -83,8 +83,8 @@ public class FragEventsScheduler extends Fragment {
 			switchCompat.setTextSize(20.0F);
 			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
 
-			switchCompat.setText((CharSequence) ModulesList.getModuleValue(i, ModulesList.MODULE_NAME)); // Name the switch the module name.
-			final boolean module_running = ModulesList.isModuleRunning(i);
+			switchCompat.setText((CharSequence) ModulesList.getElementValue(i, ModulesList.ELEMENT_NAME)); // Name the switch the module name.
+			final boolean module_running = ModulesList.isElementRunning(i);
 			switchCompat.setChecked(module_running);
 			if (module_running) {
 				// If the module is running, color the text green (Accent Color).

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -46,7 +46,6 @@ public class FragValuesStorageViewer extends Fragment {
 	View current_view = null;
 
 	final String[][] values_list = ValuesStorage.getValuesArrays();
-	final int values_list_length = values_list.length;
 
 	@Nullable
 	@Override

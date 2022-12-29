@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,7 +31,13 @@ import java.lang.reflect.Method;
 /**
  * <p>Classes to instantiate to use with utility methods.</p>
  */
-public class ObjectClasses {
+public final class ObjectClasses {
+
+	/**
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private ObjectClasses() {
+	}
 
 	/**
 	 * <p>Class to instantiate to give notification information to
@@ -43,7 +49,7 @@ public class ObjectClasses {
 		@NonNull final String ch_id;
 		@Nullable final String ch_name;
 		@Nullable final String ch_description;
-		@NonNull final Integer ch_importance;
+		@NonNull final Integer ch_priotiy;
 		@NonNull final String notif_title;
 		@NonNull final String notif_content;
 		@Nullable final PendingIntent notif_content_intent;
@@ -58,20 +64,20 @@ public class ObjectClasses {
 		 * @param ch_id the ID of the channel the notification is in
 		 * @param ch_name the name of the channel the notification is in
 		 * @param ch_description the description of the channel the notification is in
-		 * @param ch_importance the importance of the channel the notification is in (don't worry about the old
-		 * PRIORITYs, as that's automatically addressed based on the IMPORTANCE)
+		 * @param ch_priotiy the priority of the channel the notification is in (don't worry about the new IMPORTANCEs,
+		 * as that's automatically addressed based on the PRIORITY)
 		 * @param notif_title the title of the notification
 		 * @param notif_content the content of the notification
 		 * @param notif_content_intent the pending intent to use for when the user clicks on the notification
 		 */
 		public NotificationInfo(@NonNull final String ch_id, @Nullable final String ch_name,
-								@Nullable final String ch_description, @NonNull final Integer ch_importance,
+								@Nullable final String ch_description, @NonNull final Integer ch_priotiy,
 								@NonNull final String notif_title,
 								@NonNull final String notif_content, @Nullable final PendingIntent notif_content_intent) {
 			this.ch_id = ch_id;
 			this.ch_name = ch_name;
 			this.ch_description = ch_description;
-			this.ch_importance = ch_importance;
+			this.ch_priotiy = ch_priotiy;
 			this.notif_title = notif_title;
 			this.notif_content = notif_content;
 			this.notif_content_intent = notif_content_intent;

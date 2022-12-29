@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		if (stop_now) {
 			System.out.println("2GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG2");
 			stopSelf();
-			UtilsSpeechRecognizers.terminateSpeechRecognizers();
+			UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
 
 			return START_NOT_STICKY;
 		}
@@ -139,7 +140,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 
 		stopRecognizer();
 		stopSelf();
-		UtilsSpeechRecognizers.terminateSpeechRecognizers();
+		UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
 	}
 
 	/**
@@ -158,7 +159,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
 			stopRecognizer();
 			stopSelf();
-			UtilsSpeechRecognizers.startGoogleRecognition();
+			UtilsSpeechRecognizersBC.startGoogleRecognition();
 		}
 	}
 
@@ -176,7 +177,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 			System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
 			stopRecognizer();
 			stopSelf();
-			UtilsSpeechRecognizers.startGoogleRecognition();
+			UtilsSpeechRecognizersBC.startGoogleRecognition();
 		}
 	}
 
@@ -221,10 +222,14 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		// of different kind and switch between them
 
 		recognizer = SpeechRecognizerSetup.defaultSetup()
-				.setAcousticModel(new File(assetsDir, "en-us-ptm"))
+				// 250 MB seems a good value. Below than that, take 55 MB out might be too much. Also go for the
+				// original model (the smallest of the 3) if the device reports it's running on low memory.
+				.setAcousticModel(new File(assetsDir, UtilsGeneral.isDeviceLowOnMemory() ? "en-us-ptm" :
+						UtilsGeneral.getAvailableRAM() > 250L ? "en-us-5.2" : "en-us-ptm-5.2"))
 				.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-				.setKeywordThreshold(1.0f) // Goes from 1e-45f to 1. Adjust for false positives. The greater, the
-				// less false positives - though, more probability to fail to a true match.
+				.setSampleRate(16000) // As per the used files (not the "8k" option, so they're the default 16 kHz)
+				.setKeywordThreshold(1.0f) // Goes from 1e-45f to 1 (manual testing). Adjust for false positives. The
+				// greater, the less false positives - though, more probability to fail to a true match.
 				// If the Google Hotword recognizer could be put to work... Maybe it would be better (the normal
 				// recognition is very good).
 				// But this seems to be enough for now, I guess. 0.25f seems to be enough.
@@ -245,7 +250,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 		// restart it.
 		stopRecognizer();
 		stopSelf();
-		UtilsSpeechRecognizers.terminateSpeechRecognizers();
+		UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
 	}
 
 	@Override

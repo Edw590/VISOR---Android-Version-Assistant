@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,17 +25,22 @@ import android.app.Activity;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+
 import com.dadi590.assist_c_a.R;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.UUID;
 
+@RequiresApi(Build.VERSION_CODES.L)
 public class TestEnrollmentActivity extends Activity {
 	private static final String TAG = "TestEnrollmentActivity";
 	private static final boolean DBG = true;
@@ -51,7 +56,7 @@ public class TestEnrollmentActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (DBG) Log.d(TAG, "onCreate");
+		if (DBG) //Log.id(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.aohd_main);
 		mEnrollmentUtil = new EnrollmentUtil();
@@ -63,8 +68,26 @@ public class TestEnrollmentActivity extends Activity {
 	 * Performs a fresh enrollment.
 	 */
 	public void onEnrollButtonClicked(View v) {
-		Keyphrase kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES, BCP47_LOCALE, TEXT,
-				new int[] { UserManager.get(this).getUserHandle() /* current user */});
+		Keyphrase kp;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES, BCP47_LOCALE/*Locale.forLanguageTag(BCP47_LOCALE)*/, TEXT,
+					new int[] { UserManager.get(this).getUserHandle() /* current user */});
+		} else {
+			try {
+				final Constructor<Keyphrase> constructor = Keyphrase.class.
+						getConstructor(int.class, int.class, String.class, String.class, int[].class);
+				constructor.setAccessible(true);
+				kp = constructor.newInstance(KEYPHRASE_ID, RECOGNITION_MODES, BCP47_LOCALE, TEXT,
+								new int[] { UserManager.get(this).getUserHandle() /* current user */});
+			} catch (final NoSuchMethodException ignored) {
+			} catch (final IllegalAccessException ignored) {
+			} catch (final InvocationTargetException ignored) {
+			} catch (final InstantiationException ignored) {
+			}
+
+			// Won't happen.
+			return;
+		}
 		UUID modelUuid = UUID.randomUUID();
 		// Generate a fake model to push.
 		byte[] data = new byte[1024];
@@ -93,7 +116,7 @@ public class TestEnrollmentActivity extends Activity {
 		}
 		boolean status = mEnrollmentUtil.deleteSoundModel(KEYPHRASE_ID, BCP47_LOCALE);
 		if (status) {
-			Toast.makeText(this, "Successfully un-enrolled, model UUID=" + soundModel.uuid,
+			Toast.makeText(this, "Successfully un-enrolled, model UUID=" + EnrollmentUtil.getUuid(soundModel),
 					Toast.LENGTH_SHORT)
 					.show();
 		} else {
@@ -114,11 +137,11 @@ public class TestEnrollmentActivity extends Activity {
 		// Generate a fake model to push.
 		byte[] data = new byte[2048];
 		mRandom.nextBytes(data);
-		KeyphraseSoundModel updated = new KeyphraseSoundModel(soundModel.uuid,
-				soundModel.vendorUuid, data, soundModel.keyphrases);
+		KeyphraseSoundModel updated = new KeyphraseSoundModel(EnrollmentUtil.getUuid(soundModel),
+				EnrollmentUtil.getVendorUuid(soundModel), data, EnrollmentUtil.getKeyphrases(soundModel));
 		boolean status = mEnrollmentUtil.addOrUpdateSoundModel(updated);
 		if (status) {
-			Toast.makeText(this, "Successfully re-enrolled, model UUID=" + updated.uuid,
+			Toast.makeText(this, "Successfully re-enrolled, model UUID=" + EnrollmentUtil.getUuid(updated),
 					Toast.LENGTH_SHORT)
 					.show();
 		} else {

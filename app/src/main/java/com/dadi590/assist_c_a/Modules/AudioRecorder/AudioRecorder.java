@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.Modules.AudioRecorder;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,9 +30,11 @@ import android.media.MediaRecorder;
 
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -47,7 +50,7 @@ import java.util.List;
 /**
  * <p>The audio recorder module of the assistant.</p>
  */
-public class AudioRecorder implements IModule {
+public class AudioRecorder implements IModuleInst {
 
 	@Nullable private MediaRecorder recorder = null;
 
@@ -56,10 +59,10 @@ public class AudioRecorder implements IModule {
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -67,14 +70,26 @@ public class AudioRecorder implements IModule {
 		return true;
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		final String[][] min_required_permissions = {{
+				Manifest.permission.RECORD_AUDIO,
+				Manifest.permission.WRITE_EXTERNAL_STORAGE,
+		}};
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
+				&& UtilsCheckHardwareFeatures.isMicrophoneSupported();
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -98,8 +113,10 @@ public class AudioRecorder implements IModule {
 	 * @param start true to start recording, false to stop recording
 	 * @param audio_source same as in {@link #startRecording(int)}, or as a standard, -1 if {@code start} is false (this
 	 * parameter will be ignored if it's to stop recording).
+	 * @param restart_pocketsphinx in case the recorder was working and was stopped, true to restart pocketsphinx, false
+	 *                             not to restart pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
-	final void recordAudio(final boolean start, final int audio_source) {
+	final void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
 		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
 		if (null == is_recording) {
 			is_recording = false;
@@ -136,6 +153,10 @@ public class AudioRecorder implements IModule {
 				final String speak = "Stopped, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 				runnables.remove(0);
+
+				if (restart_pocketsphinx) {
+					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+				}
 			} else {
 				final String speak = "Already stopped, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
@@ -226,7 +247,7 @@ public class AudioRecorder implements IModule {
             }*/
 		}
 
-		// Update the values on the ValuesStorage
+		// Update the Values Storage
 		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(true));
 
 		return NO_ERRORS;
@@ -245,7 +266,7 @@ public class AudioRecorder implements IModule {
 			recorder = null;
 		}
 
-		// Update the values on the ValuesStorage
+		// Update the Values Storage
 		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(false));
 	}
 
@@ -266,7 +287,9 @@ public class AudioRecorder implements IModule {
 				case CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO: {
 					final boolean start = intent.getBooleanExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_1, false);
 					final int audio_source = intent.getIntExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_2, -1);
-					recordAudio(start, audio_source);
+					final boolean restart_pocketsphinx = intent.getBooleanExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_3,
+							true);
+					recordAudio(start, audio_source, restart_pocketsphinx);
 
 					break;
 				}

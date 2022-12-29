@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,11 +41,13 @@ public final class UtilsAudioRecorderBC {
 	 *
 	 * @param start read the action's documentation
 	 * @param audio_source read the action's documentation
+	 * @param restart_pocketsphinx read the action's documentation
 	 */
-	public static void recordAudio(final boolean start, final int audio_source) {
+	public static void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO);
 		broadcast_intent.putExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_1, start);
 		broadcast_intent.putExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_2, audio_source);
+		broadcast_intent.putExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_3, restart_pocketsphinx);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

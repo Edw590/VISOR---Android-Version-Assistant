@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,8 +22,6 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import com.dadi590.assist_c_a.R;
-
-import java.io.File;
 
 /**
  * <p>Global constants across the project.</p>
@@ -68,7 +66,7 @@ public final class GL_CONSTS {
 	public static final String CH_ID_SPEECHES = "Speech2:Speeches";
 
 	// Media
-	public static final String MEDIA_FOLDER_REL_PATH = ASSISTANT_NAME + File.separator;
+	public static final String MEDIA_FOLDER_REL_PATH = ASSISTANT_NAME_WO_DOTS + "/";
 
 	// TTS
 	public static final String PREFERRED_TTS_ENGINE = "ivona.tts";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -48,10 +48,9 @@ public final class UtilsNetwork {
 	public static double getAveragePingRTT(@NonNull final String ip) {
 		final int packets_num = 50; // 50 packets, each with 0.5 seconds delay, so 25 seconds of waiting time
 		// 248 + 8 header = 256 bytes each packet
-		final List<String> commands = new ArrayList<>(1);
-		commands.add("ping -c " + packets_num + " -i 0.5 -n -s 248 -t 1 -v " + ip);
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(commands, true);
-		final String[] output_lines = UtilsGeneral.bytesToPrintableChars(cmdOutputObj.output_stream, false).split("\n");
+		final String command = "ping -c " + packets_num + " -i 0.5 -n -s 248 -t 1 -v " + ip;
+		final String[] output_lines = UtilsDataConv.
+				bytesToPrintable(UtilsShell.executeShellCmd(command, true, false).output_stream, false).split("\n");
 
 		// Here it gets the time values (excluding the duplicated ones)
 		final List<Double> time_values = new ArrayList<>(packets_num);
@@ -70,7 +69,7 @@ public final class UtilsNetwork {
 		// the supposed value (between 16 and 20). If I put 4, it will come down to 14 (wrong). If it's less, even
 		// worse will get. More than that, could catch the 129, which I don't see appearing in the first 5 elements on
 		// some tests.
-		final int first_n_elements = 5;
+		final int first_n_elements = 5; // Never set to 0, or the division in the end will be divide by 0.
 		double sum = 0.0;
 		double sum_squares = 0.0;
 		for (int i = 0; i < first_n_elements; ++i) {
@@ -94,10 +93,8 @@ public final class UtilsNetwork {
 			// outlier check.
 			sum = 0.0;
 			sum_squares = 0.0;
-			summed_elements = 0;
 			for (int i = 0; i < first_n_elements; ++i) {
 				final double value = time_values.get(i);
-				++summed_elements;
 				sum += value;
 				sum_squares += value * value;
 			}

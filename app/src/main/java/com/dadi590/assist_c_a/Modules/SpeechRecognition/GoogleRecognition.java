@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -101,7 +101,7 @@ public class GoogleRecognition extends Service {
 		if (stop_now) {
 			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
 			stopSelf();
-			UtilsSpeechRecognizers.terminateSpeechRecognizers();
+			UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
 
 			return START_NOT_STICKY;
 		}

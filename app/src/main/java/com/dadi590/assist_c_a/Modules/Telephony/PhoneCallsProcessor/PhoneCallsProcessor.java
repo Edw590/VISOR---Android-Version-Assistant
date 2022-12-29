@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,8 +35,10 @@ import android.telephony.TelephonyManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
@@ -49,7 +53,7 @@ import java.util.Objects;
 /**
  * <p>Processes all phone calls made/received on the phone.</p>
  */
-public class PhoneCallsProcessor implements IModule {
+public class PhoneCallsProcessor implements IModuleInst {
 
 	// 50 call events from the point the phone receives a call to when it ends the last call. More than than that, wow,
 	// I guess. Amazingly busy person? In that case, the array will reallocate itself with the double of the size. Won't
@@ -65,10 +69,10 @@ public class PhoneCallsProcessor implements IModule {
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
 
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -76,14 +80,28 @@ public class PhoneCallsProcessor implements IModule {
 		return true;
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+
+	public static boolean isSupported() {
+		@SuppressLint("InlinedApi")
+		final String[][] min_required_permissions = {{
+				Manifest.permission.READ_CALL_LOG,
+				Manifest.permission.READ_PHONE_STATE,
+		}};
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
+				&& UtilsCheckHardwareFeatures.isTelephonySupported(true);
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -106,8 +124,12 @@ public class PhoneCallsProcessor implements IModule {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-			intentFilter.addAction(CONSTS_PhCallsProc.ACTION_PRECISE_CALL_STATE_CHANGED);
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)) {
+				intentFilter.addAction(CONSTS_PhCallsProc.ACTION_PRECISE_CALL_STATE_CHANGED);
+				intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+			} else {
+				intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+			}
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
@@ -124,24 +146,10 @@ public class PhoneCallsProcessor implements IModule {
 	 * @param precise_call_state true if it's a {@link PreciseCallState}, false if it's a {@link TelephonyManager} call
 	 *                              state
 	 */
-	final void processCall(final int call_state, @Nullable final String phone_number,
-								  final boolean precise_call_state) {
+	final void processCall(final int call_state, @Nullable final String phone_number, final boolean precise_call_state) {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println(phone_number);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
-
-		// Update the values on the ValuesStorage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.last_phone_call_time, Long.toString(System.currentTimeMillis()));
-		boolean active_number = false;
-		for (final ArrayList<String> call : calls_state) {
-			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
-				ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, call.get(0));
-				active_number = true;
-			}
-		}
-		if (!active_number) {
-			ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, "");
-		}
 
 		if (precise_call_state) {
 			// todo There's no PRECISE_CALL_STATE_LOST... Implement that somehow
@@ -157,6 +165,25 @@ public class PhoneCallsProcessor implements IModule {
 			for (final NumAndPhase sub_ret : ret) {
 				whatToDo(sub_ret);
 			}
+		}
+
+		// todo This only works when Precise Call States are not being used.... Don't forget that.
+
+		// Update the Values Storage
+		ValuesStorage.updateValue(CONSTS_ValueStorage.last_phone_call_time, Long.toString(System.currentTimeMillis()));
+
+		boolean active_number = false;
+		for (final ArrayList<String> call : calls_state) {
+			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
+				// Update the Values Storage
+				ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, call.get(0));
+
+				active_number = true;
+			}
+		}
+		if (!active_number) {
+			// Update the Values Storage
+			ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, "");
 		}
 	}
 
@@ -527,7 +554,6 @@ public class PhoneCallsProcessor implements IModule {
 				calls_state.clear();
 				// 0 or it will put 0s in the array - it must not.
 				return final_return.toArray(new NumAndPhase[0]);
-				//break;
 			}
 		}
 
@@ -566,16 +592,25 @@ public class PhoneCallsProcessor implements IModule {
 						if (call_state != null) {
 							processCall(call_state, phone_number, false);
 						}
-						// Not sure what to do with the possible NPE of map_EXTRA_STATE_CALL_STATE. Shouldn't happen, I
-						// guess, unless the call states are updated to include a new one or something.
 					}
 
 					break;
 				}
 				case (CONSTS_PhCallsProc.ACTION_PRECISE_CALL_STATE_CHANGED): {
+					final int ringing_call_state = intent.getIntExtra(CONSTS_PhCallsProc.EXTRA_RINGING_CALL_STATE,
+							PreciseCallState.PRECISE_CALL_STATE_NOT_VALID);
+					final int foreground_call_state = intent.getIntExtra(CONSTS_PhCallsProc.EXTRA_FOREGROUND_CALL_STATE,
+							PreciseCallState.PRECISE_CALL_STATE_NOT_VALID);
+					final int background_call_state = intent.getIntExtra(CONSTS_PhCallsProc.EXTRA_BACKGROUND_CALL_STATE,
+							PreciseCallState.PRECISE_CALL_STATE_NOT_VALID);
 					// todo See here for more: https://stackoverflow.com/questions/32821952/how-to-use-precisecallstate
 					//MainSrv.getPhoneCallProcessor().phoneNumRecv(context, map_EXTRA_STATE_CALL_STATE.get(state), phoneNumber,
 					//		true);
+
+					System.out.println("----- ACTION_PRECISE_CALL_STATE_CHANGED -----");
+					System.out.println("ringing_call_state - " + ringing_call_state);
+					System.out.println("foreground_call_state - " + foreground_call_state);
+					System.out.println("background_call_state - " + background_call_state);
 
 					// intent.getIntExtra(TelephonyManager.EXTRA_FOREGROUND_CALL_STATE, -2) --> why EXTRA_FOREGROUND_CALL_STATE?
 					// Why not the BACKGROUND one, or the other one, which I don't remember?

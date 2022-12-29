@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 DADi590
+ * Copyright 2022 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,10 +41,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.dadi590.assist_c_a.GlobalInterfaces.IModule;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.ModulesList;
@@ -57,12 +58,14 @@ import java.util.Set;
 
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
- * speeches - this module also manages notifications in case speech is not available.</p>
- * <br>
- * <p>This fixes a bug described on a note in the end of {@link Speech#speak(String, int, boolean, Runnable)} and,
- * hopefully, any other bugs related to how {@link TextToSpeech} is implemented in the various devices.</p>
+ * speeches instead of on {@link TextToSpeech}'s internal queue.</p>
+ * <p>Notifications are also managed here for a case where speech and/or audio output is not available (no hardware
+ * support, no TTS engine, or no sound).</p>
+ * <p>This module fixes a bug described on a note in the end of {@link Speech#speak(String, int, boolean, Runnable)}
+ * and, hopefully, any other bugs related to how {@link TextToSpeech} is implemented in the various devices, because
+ * this should now be device/{@link TextToSpeech} implementation independent.</p>
  */
-public class Speech2 implements IModule {
+public class Speech2 implements IModuleInst {
 
 	/*
 	Main note of how this module works!!!
@@ -90,7 +93,7 @@ public class Speech2 implements IModule {
 	// it won't notice it's not speaking. So get it to notice it. Check if the callbacks are called, and if not, put
 	// some timer checking that whenever there is a speech taking place (else it would be wasting battery).
 	// Also, after getting the voices back on their folder, this still doesn't work and I had to restart the app (not
-	// even changing the voices and the engine for it to restart the speech worked - I really had to restart the app.
+	// even changing the voices and the engine for it to restart the speech worked - I really had to restart the app).
 
 	boolean tts_working = false;
 	boolean audio_output_supported = false;
@@ -99,7 +102,6 @@ public class Speech2 implements IModule {
 	private NotificationCompat.Builder speeches_notif_builder = null;
 	// Leave the lists below static! This way, if the module is restarted, the lists are kept intact.
 	static final ArrayList<String> speech_notif_speeches = new ArrayList<>(10);
-	private static final ArrayList<String> speeches = new ArrayList<>(500);
 
 	TextToSpeech tts = null;
 	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
@@ -129,11 +131,13 @@ public class Speech2 implements IModule {
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
+	private final int speech_mod_index = ModulesList.getElementIndex(getClass());
+
 	///////////////////////////////////////////////////////////////
-	// IModule stuff
+	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isModuleFullyWorking() {
+	public final boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -145,7 +149,7 @@ public class Speech2 implements IModule {
 		return true;
 	}
 	@Override
-	public final void destroyModule() {
+	public final void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -155,7 +159,16 @@ public class Speech2 implements IModule {
 		}
 		is_module_destroyed = true;
 	}
-	// IModule stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		// The module checks internally if there is audio output available or not and if there isn't, it uses
+		// notifications instead.
+		return true;
+	}
+	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
 	/**
@@ -166,10 +179,11 @@ public class Speech2 implements IModule {
 		// Notification
 
 		final PendingIntent pendingIntent = PendingIntent.getBroadcast(UtilsGeneral.getContext(), 0,
-				new Intent(ACTION_CLEAR_NOTIF_MSGS), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+				new Intent(ACTION_CLEAR_NOTIF_MSGS), PendingIntent.FLAG_CANCEL_CURRENT |
+						(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
 				GL_CONSTS.CH_ID_SPEECHES, "Not spoken text", "Text skipped in speech for whatever reason, like no " +
-				"device sound)", NotificationManager.IMPORTANCE_MAX, GL_CONSTS.ASSISTANT_NAME + " notifications", "",
+				"device sound)", NotificationCompat.PRIORITY_MAX, GL_CONSTS.ASSISTANT_NAME + " notifications", "",
 				pendingIntent);
 		speeches_notif_builder = UtilsNotifications.getNotification(notificationInfo).
 				setVisibility(NotificationCompat.VISIBILITY_PRIVATE).
@@ -179,7 +193,7 @@ public class Speech2 implements IModule {
 		///////////////////////////////////
 		// TTS
 
-		audio_output_supported = ModulesList.deviceSupportsModType(ModulesList.TYPE2_AUDIO_OUTPUT);
+		audio_output_supported = UtilsCheckHardwareFeatures.isAudioOutputSupported();
 
 		// Even if audio is not supported, prepare everything anyway. Some device that can output audio can be connected
 		// and then audio output is available - this module should be ready for that already, and this way it is.
@@ -232,12 +246,16 @@ public class Speech2 implements IModule {
 								builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
 							}
 							builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-							builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+								builder.setUsage(AudioAttributes.USAGE_ASSISTANT);
+							} else {
+								builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
+							}
 							//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
 							// track plays it uses the System (Ringer) volume as the master volume control. Not the media
 							// volume as I would expect." (this is about setting that flag - changes the audio stream).
-							// That's to be changed depending on the speech priority only and the enforcing of the audio is
-							// done manually though DND, volume, and the stream. So don't set this flag.
+							// That's to be changed depending on the speech priority only and the enforcing of the audio
+							// is done manually though DND, volume, and the stream. So don't set this flag.
 							audioAttributes = builder.build();
 							//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
 							// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
@@ -482,7 +500,7 @@ public class Speech2 implements IModule {
 		if (!audio_output_supported) {
 			// If there's no audio output, check again to see if anything that can output audio was connected between
 			// the last and current speech.
-			audio_output_supported = ModulesList.deviceSupportsModType(ModulesList.TYPE2_AUDIO_OUTPUT);
+			audio_output_supported = UtilsCheckHardwareFeatures.isAudioOutputSupported();
 
 			if (!audio_output_supported) {
 				// If there's really no audio output support, just put a notification and that's it.
@@ -626,10 +644,7 @@ public class Speech2 implements IModule {
 
 		// todo Get this in a thread of itself. Gets the BV9500 slow (!!!) with the Google TTS (Ivona TTS is fine).
 
-		boolean reload_tts = false;
-		if (!tts.getCurrentEngine().equals(tts.getDefaultEngine())) {
-			reload_tts = true;
-		}
+		boolean reload_tts = !tts.getCurrentEngine().equals(tts.getDefaultEngine());
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final Voice voice = tts.getVoice();
 			if (null == voice || !voice.equals(tts.getDefaultVoice())) {
