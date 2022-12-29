@@ -22,7 +22,6 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.app.Activity;
-import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -210,11 +209,7 @@ public final class UtilsPermsAuths {
 		final String package_name = context.getPackageName();
 		int missing_authorizations = 0;
 
-		// todo Remove this when you make a way to request VISOR to stop requesting specific permissions
-		what_to_do = what_to_do == ALSO_FORCE ? ALSO_REQUEST : CHECK_ONLY;
-
-		//E também ias meter estas coisas num processo separado do terminal, sempre a correr, senão a app
-		//do superuser vai estar sempre a dizer que acesso root foi concedido. Não é fixe.
+		// todo Remove the comments when you make a way to request VISOR to stop requesting specific permissions
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
@@ -223,10 +218,10 @@ public final class UtilsPermsAuths {
 					getSystemService(Context.NOTIFICATION_SERVICE);
 			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (ALSO_FORCE == what_to_do) {
-					final String command = "cmd notification allow_dnd " + package_name;
+					/*final String command = "cmd notification allow_dnd " + package_name;
 					UtilsShell.executeShellCmd(command, false, true);
 
-					missing_authorizations += mNotificationManager.isNotificationPolicyAccessGranted() ? 0 : 1;
+					missing_authorizations += mNotificationManager.isNotificationPolicyAccessGranted() ? 0 : 1;*/
 				} else {
 					++missing_authorizations;
 
@@ -241,11 +236,11 @@ public final class UtilsPermsAuths {
 			// Check if the app can draw system overlays and open the settings screen if not
 			if (!Settings.canDrawOverlays(context)) {
 				if (ALSO_FORCE == what_to_do) {
-					final String command = "appops set " + package_name + " " + AppOpsManager.OP_SYSTEM_ALERT_WINDOW +
+					/*final String command = "appops set " + package_name + " " + AppOpsManager.OP_SYSTEM_ALERT_WINDOW +
 							" allow";
 					UtilsShell.executeShellCmd(command, false, true);
 
-					missing_authorizations += Settings.canDrawOverlays(context) ? 0 : 1;
+					missing_authorizations += Settings.canDrawOverlays(context) ? 0 : 1;*/
 				} else {
 					++missing_authorizations;
 
@@ -262,10 +257,10 @@ public final class UtilsPermsAuths {
 			final PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 			if (!powerManager.isIgnoringBatteryOptimizations(package_name)) {
 				if (ALSO_FORCE == what_to_do) {
-					final String command = "dumpsys deviceidle whitelist +" + package_name;
+					/*final String command = "dumpsys deviceidle whitelist +" + package_name;
 					UtilsShell.executeShellCmd(command, false, true);
 
-					missing_authorizations += powerManager.isIgnoringBatteryOptimizations(package_name) ? 0 : 1;
+					missing_authorizations += powerManager.isIgnoringBatteryOptimizations(package_name) ? 0 : 1;*/
 				} else {
 					++missing_authorizations;
 
@@ -282,11 +277,11 @@ public final class UtilsPermsAuths {
 			// Check if the app has the WRITE_SETTINGS permission and request it if not
 			if (!Settings.System.canWrite(context)) {
 				if (ALSO_FORCE == what_to_do) {
-					final String command = "appops set " + package_name + " " + AppOpsManager.OP_WRITE_SETTINGS +
+					/*final String command = "appops set " + package_name + " " + AppOpsManager.OP_WRITE_SETTINGS +
 							" allow";
 					UtilsShell.executeShellCmd(command, false, true);
 
-					missing_authorizations += Settings.System.canWrite(context) ? 0 : 1;
+					missing_authorizations += Settings.System.canWrite(context) ? 0 : 1;*/
 				} else {
 					++missing_authorizations;
 
@@ -303,10 +298,9 @@ public final class UtilsPermsAuths {
 
 		if (!UtilsApp.isDeviceAdmin()) {
 			if (ALSO_FORCE == what_to_do) {
+				/*forceDeviceAdmin();
 
-				forceDeviceAdmin();
-
-				missing_authorizations += UtilsApp.isDeviceAdmin() ? 0 : 1;
+				missing_authorizations += UtilsApp.isDeviceAdmin() ? 0 : 1;*/
 			} else {
 				++missing_authorizations;
 
