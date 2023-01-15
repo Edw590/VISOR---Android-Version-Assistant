@@ -39,7 +39,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
-import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -194,11 +193,7 @@ public class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String inserted_text = txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
-				if ("stop".equals(inserted_text)) {
-					UtilsAudioRecorderBC.recordAudio(false, -1, true);
-				} else {
-					UtilsCmdsExecutorBC.processTask(inserted_text, false, false);
-				}
+				UtilsCmdsExecutorBC.processTask(inserted_text, false, false);
 			}
 		});
 		requireView().findViewById(R.id.btn_force_stop).setOnClickListener(new View.OnClickListener() {

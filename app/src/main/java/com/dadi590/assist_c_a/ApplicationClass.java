@@ -31,6 +31,9 @@ import androidx.multidex.MultiDex;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList;
+
+import ACD.ACD;
 
 /**
  * <p>The Application class of the app, which I'm extending to start the Main Service while android:persistent flag is
@@ -85,6 +88,9 @@ public final class ApplicationClass extends Application {
 
 		// Clear the app cache as soon as the app starts not to take unnecessary space
 		UtilsApp.deleteAppCache();
+
+		// Prepare the Advanced Commands Detection module commands array
+		ACD.prepareCmdsArray(CmdsList.prepareCommandsString());
 
 		UtilsServices.startMainService();
 

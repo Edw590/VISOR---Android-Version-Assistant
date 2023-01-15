@@ -113,8 +113,8 @@ public class AudioRecorder implements IModuleInst {
 	 * @param start true to start recording, false to stop recording
 	 * @param audio_source same as in {@link #startRecording(int)}, or as a standard, -1 if {@code start} is false (this
 	 * parameter will be ignored if it's to stop recording).
-	 * @param restart_pocketsphinx in case the recorder was working and was stopped, true to restart pocketsphinx, false
-	 *                             not to restart pocketsphinx it. Outside that situation this parameter is ignored.
+	 * @param restart_pocketsphinx in case it's to stop the recorder, true to restart pocketsphinx, false not to restart
+	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	final void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
 		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);

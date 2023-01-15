@@ -166,7 +166,7 @@ dependencies {
 	// Local files
 
 	// Platforms Unifier Module
-	implementation files("libs/assist_platforms_unifier.aar")
+	implementation files("libs/AdvancedCommandsDetection.aar")
 
 	// External
 	implementation files("libs/jutf7-1.0.0.jar")

@@ -151,19 +151,25 @@ public final class UtilsShell {
 			// An OutOfMemoryError catch was put in place for this, and I've also set largeHeap to true on the Manifest.
 			final int streams_length = streams.length;
 			for (int i = 0; i < streams_length; i++) {
-				//final int buffer_length = 1; // Don't put too high. Try and see the Inspection error ("Large array
-				// allocation with no OutOfMemoryError check") - also if you change this, look below. I have buffer[1]
-				// because right now it's only one element per buffer (so no null bytes are appended and invalidate a
-				// file, that's being read, for example - already happened).
-				final byte[] buffer = new byte[1];
+				// Don't put too high. Try and see the Inspection error ("Large array allocation with no
+				// OutOfMemoryError check"). Also it seems that the JIT compiler will put arrays with <= 64 elements on
+				// the stack instead of the heap with > 64 elements. Hopefully even without JIT compilation (vmSafeMode)
+				// this optimization is still used.
+				final int buffer_length = 64;
+				final byte[] buffer = new byte[buffer_length];
 				while (true) {
-					if (streams[i].read(buffer) < 1) {
+					final int n_bytes = streams[i].read(buffer);
+					if (n_bytes < buffer_length) {
+						if (-1 != n_bytes) { // The last read of buffer_length bytes finished the stream
+							// Possible OutOfMemoryError here
+							storage_array.write(buffer, 0, n_bytes);
+						}
 						// Everything was read (0 bytes were retrieved)
 						break;
 					}
 
 					// Possible OutOfMemoryError here
-					storage_array.write((int) buffer[0]);
+					storage_array.write(buffer, 0, n_bytes);
 				}
 				// Possible OutOfMemoryError here
 				ret_streams[i] = storage_array.toByteArray();
