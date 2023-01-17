@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 DADi590
+ * Copyright 2023 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -59,7 +59,7 @@ public final class ModulesList {
 
 
 	// todo The 'disable_mod' parameter is not being used at all yet
-	//  Can all modules be disabled...? can_be_disabled?
+	//  Can all modules be disabled...? (PLS, Speech...?) can_be_disabled?
 
 	// There are only 2 TYPE1s of modules: INSTANCE, which means it is a simple instantiation of its class on some
 	// thread, or SERVICE_SEP, which means it's a service ---in a separate process---, which also means there are no
@@ -76,8 +76,9 @@ public final class ModulesList {
 	/** It's a service running on an separate process. */
 	public static final int TYPE1_SERVICE_SEP = 2;
 	/** If it's of {@link #TYPE1_SERVICE_SEP} but it's to be only checked if it's working, like with the Protected
-	 * Lock Screen - it's not supposed to be always running... xD. */
+	 * Lock Screen - it's not supposed to be always running... xD - it must be able of restarting itself then. */
 	public static final int TYPE1_SERVICE_SEP_CHK_ONLY = -TYPE1_SERVICE_SEP;
+	public static final int TYPE1_LIBRARY = -3;
 
 	// To disable a module, just comment its line here and be sure you disable its usages everywhere else or pray the
 	// app won't crash because of negative index from getModuleIndex() in case it's used for the disabled module.
@@ -94,6 +95,12 @@ public final class ModulesList {
 			new ModuleObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE),
 			new ModuleObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE),
 			new ModuleObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE),
+
+			// todo Make a new class for libraries? And get them to return on a standard function the supported
+			//  architectures. Then check if the file is present or at least if the library has been loaded by catching
+			//  a Throwable.
+			//new SubmoduleObj(ACD.ACD.class, "Advanced Commands Detection", TYPE1_LIBRARY),
+
 			new ModuleObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE),
 			new SubmoduleObj(CONSTS_SpeechRecog.POCKETSPHINX_RECOG_CLASS, "- Hotword recognizer", TYPE1_SERVICE_SEP),
 			new SubmoduleObj(CONSTS_SpeechRecog.GOOGLE_RECOG_CLASS, "- Commands recognizer", TYPE1_SERVICE_SEP),
@@ -280,6 +287,9 @@ public final class ModulesList {
 			}
 			case (TYPE1_INSTANCE): {
 				return null != getElementValue(module_index, MODULE_INSTANCE);
+			}
+			case (TYPE1_LIBRARY): {
+
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 DADi590
+ * Copyright 2023 DADi590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,7 +31,7 @@ interface IModule {
 	 * <p>Checks if the module is supported by whatever is required for it to work, be it another app available on the
 	 * device, the device hardware, or permissions.</p>
 	 *
-	 * @return true if hardware-supported, false otherwise
+	 * @return true if currently supported on the device, false otherwise
 	 */
 	int wrongIsSupported();
 }
