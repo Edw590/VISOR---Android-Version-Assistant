@@ -23,7 +23,7 @@ This project is a part of a bigger project, consisting of the following:
 - [Final notes and contributing](#final-notes-and-contributing)
 
 ## Pictures
-<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300">
+<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
 
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
@@ -45,14 +45,10 @@ The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I li
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
-## Supported commands
-Please come to the [Advanced Commands Detection repository](https://github.com/DADi590/Advanced-Commands-Detection), enter the CommandsDetection folder, and check out the CmdsInfoP1 file. No need to know about programming. Just check the commands that are listed there (each one starts with "CMD_" - use Ctrl+F if you'd like). Above each, there's an explanation of what they do.
-
-If it's to toggle the wifi, for example, say "turn the wifi on", or "turn off the wifi". If it's to toggle media, say "stop the music", or "next song". If it's to ask for the battery percentage, say "what's the battery percentage".
-
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
-- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording... To get it to record the microphone audio, use the appropiate command from Platforms Unifier's Command Recognition submodule. To stop, long press the power button, or write "stop" on the text to send box.
+- **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because is in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
+- **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording...
 - **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (always keep it from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
 - **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website. If you'd like to see it working, give the app Device Administration privileges and then remove them. The supposed only way to get back to the device (without restarting - didn't take care of that yet) is to click Unlock.
 - **Speech module** --> Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. Some important notes here:
@@ -66,8 +62,8 @@ Hopefully I don't forget to keep adding the modules here. Here's a list of the m
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 - **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
-- **Commands Executor** --> Executes commands given to it - after having the speech been given to the Commands Detection submodule of the Platforms Unifier (link for it on the Notice) for this last to return the list of detected commands, this list is given to this module, which then executes each one in the given order.
-- **Camera Manager** --> Manages the camera usage. It's supposeed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
+- **Commands Executor** --> Executes commands given to it - after the speech/written sentence having been sent to the commands detection module, a list is returned with the detected commands, and this Commands Executor module executes each one in the detected order.
+- **Camera Manager** --> Manages the camera usage. It's supposed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
 
 Note: not all the modules are here. Some are just for internal management or other minor things (like Modules Manager, which makes sure all the other modules are working perfectly - this is not really a "feature", so I didn't include it above).
 
@@ -84,10 +80,11 @@ After that, currently just click on the permissions button and accept everything
 - I have may also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
 
 Now a small explanation of the app structure:
-- All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder.
+- All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder. All modules must also be registered in the ModulesList.java file.
 - All utility methods are inside classes started with "Utils". All main utilities are on GlobalUtils. Other utilities may be one specific packages of modules or other folders (depending if the utilities are for global app usage or only for that specific package).
 - The main broadcast receivers are on BroadcastRecvs package. I say "main" because other broadcast receivers may be anywhere else on the app code. For example inside classes, like on Speech2 or on MainSrv.
-- The HiddenMethods would be used if I had not discovered about a static way of getting Context. I'm keeping it in case it's needed again.
+- All modules must implement the IModule classes, which provide "universal" methods to check if a module is working properly or not so that Module Manager can reset it if needed.
+- The VoiceEnrollment and VoiceInteraction folders are just experiments of mine to get Google's hotword recognizer to work (which would make it possible to use Google's speech recognition instead of the current PocketSphinx speech recognition, which is worse than Google's, and that's why when VISOR is called, it may not hear it, as opposite to if it were Google's recognition detecting the hotword).
 
 ## About
 ### - Roadmap
