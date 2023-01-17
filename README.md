@@ -10,6 +10,7 @@ This project is a part of a bigger project, consisting of the following:
 - [Pictures](#pictures)
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
+- [Supported commands](#supported-commands)
 - [Current modules (features)](#current-modules-features)
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
@@ -43,6 +44,11 @@ I should also note that I'm making this app to "think" it's a God. That's why yo
 The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards). Though, I'm only testing the app on Lollipop 5.1, on Oreo 8.1 (my 2 phones), and on Lollipop 4.4.2 (my tablet). Other Android versions only with the emulator, and more rarely.
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
+
+## Supported commands
+Please come to the [Advanced Commands Detection repository](https://github.com/DADi590/Advanced-Commands-Detection), enter the CommandsDetection folder, and check out the CmdsInfoP1 file. No need to know about programming. Just check the commands that are listed there (each one starts with "CMD_" - use Ctrl+F if you'd like). Above each, there's an explanation of what they do.
+
+If it's to toggle the wifi, for example, say "turn the wifi on", or "turn off the wifi". If it's to toggle media, say "stop the music", or "next song". If it's to ask for the battery percentage, say "what's the battery percentage".
 
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
