@@ -30,6 +30,7 @@
 	<string name="fragMain_title_ACA">Home</string>
 	<string name="fragModulesStatus_title_ACA">Modules status</string>
 	<string name="fragValuesStorageViewer_title_ACA">Global values</string>
+	<string name="fragCmdsList_title_ACA">Available commands</string>
 	<string name="fragEventsScheduler_title_ACA">Events Scheduler</string>
 
 

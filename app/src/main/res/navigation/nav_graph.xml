@@ -45,6 +45,11 @@
 		android:label="@string/fragValuesStorageViewer_title_ACA"
 		tools:layout="@layout/frag_values_storage_viewer" />
 	<fragment
+		android:id="@+id/frag_cmds_list"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragCmdsList"
+		android:label="@string/fragCmdsList_title_ACA"
+		tools:layout="@layout/frag_cmds_list" />
+	<fragment
 		android:id="@+id/frag_events_scheduler"
 		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragEventsScheduler"
 		android:label="@string/fragEventsScheduler_title_ACA"

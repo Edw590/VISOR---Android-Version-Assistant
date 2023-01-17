@@ -142,10 +142,11 @@ public class CmdsExecutor implements IModuleInst {
 
 		some_cmd_detected = false;
 
-		final String detected_cmds_str = ACD.main(sentence_str);
+		final String detected_cmds_str = ACD.main(sentence_str, false, true);
 		final String[] detected_cmds = detected_cmds_str.split(ACD.CMDS_SEPARATOR);
 
 		System.out.println("*****************************");
+		System.out.println(sentence_str);
 		System.out.println(Arrays.toString(detected_cmds));
 		System.out.println("*****************************");
 
@@ -449,8 +450,15 @@ public class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					// Don't say anything if it's successful - he will already say "Shutdown detected".
+					// EDIT: sometimes he doesn't say that. Now it says something anyway.
 
 					switch (UtilsAndroidPower.shutDownDevice()) {
+						case (UtilsAndroid.NO_ERR): {
+							final String speak = "Shutting down the device...";
+							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+							break;
+						}
 						case (UtilsAndroid.PERM_DENIED): {
 							final String speak = "No permission to shut down the device.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -475,19 +483,30 @@ public class CmdsExecutor implements IModuleInst {
 						if (only_returning) continue;
 
 						// Don't say anything if it's successful - he will already say "Shutdown detected".
+						// EDIT: sometimes he doesn't say that. Now it says something anyway.
 
 						final int reboot_mode;
 						if (command.contains(CmdsList.CmdRetIds.RET_14_NORMAL)) {
 							reboot_mode = UtilsAndroid.MODE_NORMAL;
 						} else if (command.contains(CmdsList.CmdRetIds.RET_14_SAFE_MODE)) {
 							reboot_mode = UtilsAndroid.MODE_SAFE;
-						} else {
+						} else if (command.contains(CmdsList.CmdRetIds.RET_14_RECOVERY)) {
 							reboot_mode = UtilsAndroid.MODE_RECOVERY;
+						} else if (command.contains(CmdsList.CmdRetIds.RET_14_BOOTLOADER)) {
+							reboot_mode = UtilsAndroid.MODE_BOOTLOADER;
+						} else if (command.contains(CmdsList.CmdRetIds.RET_14_FAST)) {
+							reboot_mode = UtilsAndroid.MODE_FAST;
+						} else {
+							continue;
 						}
 
-						// todo New reboot modes available. Update the APU and add them here.
-
 						switch (UtilsAndroidPower.rebootDevice(reboot_mode)) {
+							case (UtilsAndroid.NO_ERR): {
+								final String speak = "Rebooting the device...";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+								break;
+							}
 							case (UtilsAndroid.PERM_DENIED): {
 								final String speak = "No permission to reboot the device.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -576,9 +595,11 @@ public class CmdsExecutor implements IModuleInst {
 						stop_audio = true;
 					} else if (command.contains(CmdsList.CmdRetIds.RET_20_VIDEO)) {
 						stop_video = true;
-					} else {
+					} else if (command.contains(CmdsList.CmdRetIds.RET_20_ANY)) {
 						stop_audio = true;
 						stop_video = true;
+					} else {
+						continue;
 					}
 
 					if (stop_audio) {
