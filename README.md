@@ -45,11 +45,6 @@ The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I li
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
-## Supported commands
-Please come to the [Advanced Commands Detection repository](https://github.com/DADi590/Advanced-Commands-Detection), enter the CommandsDetection folder, and check out the CmdsInfoP1 file. No need to know about programming. Just check the commands that are listed there (each one starts with "CMD_" - use Ctrl+F if you'd like). Above each, there's an explanation of what they do.
-
-If it's to toggle the wifi, for example, say "turn the wifi on", or "turn off the wifi". If it's to toggle media, say "stop the music", or "next song". If it's to ask for the battery percentage, say "what's the battery percentage".
-
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
 - **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because is in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
