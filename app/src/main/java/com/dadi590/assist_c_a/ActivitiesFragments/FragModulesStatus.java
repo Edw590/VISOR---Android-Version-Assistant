@@ -79,9 +79,12 @@ public class FragModulesStatus extends Fragment {
 				resources.getDisplayMetrics());
 
 		for (int module_index = 0; module_index < ModulesList.sub_and_modules_list_length; ++module_index) { // Add a Switch for each module.
+			final int elem_type2 = (int) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_TYPE2);
+			final CharSequence elem_name = (CharSequence) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
+
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
 			switchCompat.setId(module_index); // Set the ID to be the index of the module in the list
-			switchCompat.setText((CharSequence) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME));
+			switchCompat.setText(ModulesList.TYPE2_MODULE == elem_type2 ? elem_name : "- " + elem_name);
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);
 			switchCompat.setTypeface(null, Typeface.BOLD);
@@ -90,8 +93,7 @@ public class FragModulesStatus extends Fragment {
 			switchCompat.setTextIsSelectable(true);
 			switchCompat.setBackgroundColor(Color.WHITE);
 
-			final boolean is_module = (boolean) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_IS_MODULE);
-			if (is_module && !(boolean) ModulesList.getElementValue(module_index, ModulesList.MODULE_SUPPORTED)) {
+			if (!(boolean) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_SUPPORTED)) {
 				switchCompat.setTextColor(Color.parseColor(color_primary));
 				switchCompat.setBackgroundColor(Color.GRAY);
 			}
@@ -105,7 +107,7 @@ public class FragModulesStatus extends Fragment {
 				// If the module is fully working, color the text green (Accent Color), else with orange (holo_orange_dark).
 				// If it's not a module, then always green (always "supported" - its main module is the checked one).
 				final int color;
-				if (is_module) {
+				if (ModulesList.TYPE2_MODULE == elem_type2) {
 					color = ModulesList.isModuleFullyWorking(module_index) ? Color.parseColor(color_accent)
 							: Color.parseColor("#FFFF8800");
 				} else {

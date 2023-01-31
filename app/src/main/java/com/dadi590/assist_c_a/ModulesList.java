@@ -39,6 +39,7 @@ import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS_SpeechRecog;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.Telephony.TelephonyManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,10 +68,12 @@ public final class ModulesList {
 	// service if one can have a simple instance with which we can communicate directly and easily through IModule?
 	//
 	// Also, positive values are for modules to check and restart if they're not working properly or at all always, and
-	// negative values are for modules to check only, like the Protected Lock Screen - these negative values MUST be
-	// symmetrical of their counterparts (if it's a TYPE1_SERVICE_SEP but not to be restarted, then -TYPE1_SERVICE_SEP).
+	// negative values are for modules to only check things and do nothing about them, like the Protected Lock Screen -
+	// these negative values MUST be symmetrical of their counterparts (if it's a TYPE1_SERVICE_SEP but not to be
+	// restarted (though, still behave like it's a service module), then -TYPE1_SERVICE_SEP, for example).
 	//
-	// NO 0 VALUES HERE!!!! (Reason just above)
+	// NO 0 VALUES HERE!!!! (Reason just above - nothing is symmetrical of 0)
+	//
 	/** It's a module that runs on a simple instance of its class on the Main Service process. */
 	public static final int TYPE1_INSTANCE = 1;
 	/** It's a service running on an separate process. */
@@ -78,7 +81,12 @@ public final class ModulesList {
 	/** If it's of {@link #TYPE1_SERVICE_SEP} but it's to be only checked if it's working, like with the Protected
 	 * Lock Screen - it's not supposed to be always running... xD - it must be able of restarting itself then. */
 	public static final int TYPE1_SERVICE_SEP_CHK_ONLY = -TYPE1_SERVICE_SEP;
+	/** Same as {@link #TYPE1_SERVICE_SEP_CHK_ONLY} but for instance type - only check if it's working or not. */
+	public static final int TYPE1_INSTANCE_CHK_ONLY = -TYPE1_INSTANCE;
 	public static final int TYPE1_LIBRARY = -3;
+
+	public static final int TYPE2_MODULE = 0;
+	public static final int TYPE2_SUBMODULE = 1;
 
 	// To disable a module, just comment its line here and be sure you disable its usages everywhere else or pray the
 	// app won't crash because of negative index from getModuleIndex() in case it's used for the disabled module.
@@ -87,11 +95,12 @@ public final class ModulesList {
 	private static final ElementObj[] sub_and_modules_list = {
 			new ModuleObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE),
 			//new ModuleObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE),
-			new ModuleObj(Speech2.class, "Speech", TYPE1_INSTANCE), // (TYPE2_NOT_SPECIAL because internally it checks if there's audio/TTS support or not to use TTS or notifications)
+			new ModuleObj(Speech2.class, "Speech", TYPE1_INSTANCE),
 			//new ModuleObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE),
 			new ModuleObj(BatteryProcessor.class, "Battery Processor", TYPE1_INSTANCE),
-			new ModuleObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE),
-			new ModuleObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE),
+			new ModuleObj(TelephonyManager.class, "Telephony Manager", TYPE1_INSTANCE),
+			new SubmoduleObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE_CHK_ONLY),
+			new SubmoduleObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE_CHK_ONLY),
 			new ModuleObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE),
 			new ModuleObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE),
 			new ModuleObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE),
@@ -102,8 +111,8 @@ public final class ModulesList {
 			//new SubmoduleObj(ACD.ACD.class, "Advanced Commands Detection", TYPE1_LIBRARY),
 
 			new ModuleObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE),
-			new SubmoduleObj(CONSTS_SpeechRecog.POCKETSPHINX_RECOG_CLASS, "- Hotword recognizer", TYPE1_SERVICE_SEP),
-			new SubmoduleObj(CONSTS_SpeechRecog.GOOGLE_RECOG_CLASS, "- Commands recognizer", TYPE1_SERVICE_SEP),
+			new SubmoduleObj(CONSTS_SpeechRecog.POCKETSPHINX_RECOG_CLASS, "Hotword recognizer", TYPE1_SERVICE_SEP),
+			new SubmoduleObj(CONSTS_SpeechRecog.GOOGLE_RECOG_CLASS, "Commands recognizer", TYPE1_SERVICE_SEP),
 			new ModuleObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY),
 	};
 	public static final int sub_and_modules_list_length = sub_and_modules_list.length;
@@ -114,7 +123,9 @@ public final class ModulesList {
 		@NonNull final Class<?> elem_class;
 		final int elem_type1;
 		@NonNull final String elem_name;
-		final boolean elem_is_module;
+		final int elem_type2;
+		boolean elem_supported = false;
+		@Nullable Object sub_mod_instance = null;
 
 		/**
 		 * <p>Main class constructor.</p>
@@ -122,14 +133,14 @@ public final class ModulesList {
 		 * @param elem_class the class of the submodule
 		 * @param elem_name the name of the submodule to present to users
 		 * @param elem_type1 the type 1 of the submodule ({@code TYPE1_}-started constants)
-		 * @param elem_is_module true if the element is a module, false otherwise (it's a submodule then)
+		 * @param elem_type2 the type 2 of the submodule ({@code TYPE2_}-started constants)
 		 */
 		ElementObj(@NonNull final Class<?> elem_class, @NonNull final String elem_name, final int elem_type1,
-				   final boolean elem_is_module) {
+				   final int elem_type2) {
 			this.elem_class = elem_class;
 			this.elem_name = elem_name;
 			this.elem_type1 = elem_type1;
-			this.elem_is_module = elem_is_module;
+			this.elem_type2 = elem_type2;
 		}
 	}
 	/**
@@ -137,22 +148,19 @@ public final class ModulesList {
 	 * <p>Check the constructor for more information.</p>
 	 */
 	private static class ModuleObj extends ElementObj {
-		@Nullable Object mod_instance = null;
 		boolean disable_mod = false;
-		boolean mod_supported = false;
 
 		/**
 		 * <p>Main class constructor.</p>
-		 * <p>It also sets the {@link #mod_supported} variable by checking directly if the module is supported or not,
-		 * and if it's a submodule, the variable is automatically set to true.</p>
-		 *  @param elem_class the class of the module
+		 *
+		 * @param elem_class the class of the module
 		 * @param elem_name the name of the module to present to users
 		 * @param elem_type1 the type 1 of the module ({@code TYPE1_}-started constants)
 		 */
 		ModuleObj(@NonNull final Class<?> elem_class, @NonNull final String elem_name, final int elem_type1) {
-			super(elem_class, elem_name, elem_type1, true);
+			super(elem_class, elem_name, elem_type1, TYPE2_MODULE);
 
-			mod_supported = isModuleSupported(elem_class);
+			super.elem_supported = isSubModuleSupported(elem_class);
 		}
 	}
 	/**
@@ -162,14 +170,15 @@ public final class ModulesList {
 	private static class SubmoduleObj extends ElementObj {
 		/**
 		 * <p>Main class constructor.</p>
-		 * <p>Wrapper for the main class of {@link ElementObj} that automatically sets the element as a submodule.</p>
 		 *
 		 * @param elem_class the class of the module
 		 * @param elem_name the name of the module to present to users
 		 * @param elem_type1 the type 1 of the module ({@code TYPE1_}-started constants)
 		 */
 		SubmoduleObj(@NonNull final Class<?> elem_class, @NonNull final String elem_name, final int elem_type1) {
-			super(elem_class, elem_name, elem_type1, false);
+			super(elem_class, elem_name, elem_type1, TYPE2_SUBMODULE);
+
+			super.elem_supported = isSubModuleSupported(elem_class);
 		}
 	}
 
@@ -182,9 +191,9 @@ public final class ModulesList {
 	public static final int ELEMENT_CLASS = 0;
 	public static final int ELEMENT_NAME = 1;
 	public static final int ELEMENT_TYPE1 = 2;
-	public static final int ELEMENT_IS_MODULE = 3;
+	public static final int ELEMENT_TYPE2 = 3;
 	public static final int MODULE_INSTANCE = 4;
-	public static final int MODULE_SUPPORTED = 5;
+	public static final int ELEMENT_SUPPORTED = 5;
 	public static final int MODULE_DISABLE = 6;
 	/**
 	 * <p>Get the value on the {@link #sub_and_modules_list} associated with the given key, for a specific element.</p>
@@ -201,9 +210,9 @@ public final class ModulesList {
 	 * <p>- {@link #ELEMENT_CLASS} --> for {@code key}: the class of the element.</p>
 	 * <p>- {@link #ELEMENT_NAME} --> for {@code key}: the element name to show to the user</p>
 	 * <p>- {@link #ELEMENT_TYPE1} --> for {@code key}: the TYPE1_-started constant of the element</p>
-	 * <p>- {@link #ELEMENT_IS_MODULE} --> for {@code key}: if the element is a module (or else, a submodule)</p>
+	 * <p>- {@link #ELEMENT_TYPE2} --> for {@code key}: the TYPE2_-started constant of the element</p>
 	 * <p>- {@link #MODULE_INSTANCE} --> for {@code key}: the instance of the module if it's of {@link #TYPE1_INSTANCE}</p>
-	 * <p>- {@link #MODULE_SUPPORTED} --> for {@code key}: if the module is supported on the device or not, including
+	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: if the module is supported on the device or not, including
 	 *      hardware support and permissions</p>
 	 * <p>- {@link #MODULE_DISABLE} --> for {@code key}: if the module has been disabled by the user or not</p>
 	 * <p><u>---CONSTANTS---</u></p>
@@ -225,14 +234,14 @@ public final class ModulesList {
 			case ELEMENT_TYPE1: {
 				return sub_and_modules_list[module_index].elem_type1;
 			}
-			case ELEMENT_IS_MODULE: {
-				return sub_and_modules_list[module_index].elem_is_module;
+			case ELEMENT_TYPE2: {
+				return sub_and_modules_list[module_index].elem_type2;
 			}
 			case MODULE_INSTANCE: {
-				return ((ModuleObj) sub_and_modules_list[module_index]).mod_instance;
+				return sub_and_modules_list[module_index].sub_mod_instance;
 			}
-			case MODULE_SUPPORTED: {
-				return ((ModuleObj) sub_and_modules_list[module_index]).mod_supported;
+			case ELEMENT_SUPPORTED: {
+				return sub_and_modules_list[module_index].elem_supported;
 			}
 			case MODULE_DISABLE: {
 				return ((ModuleObj) sub_and_modules_list[module_index]).disable_mod;
@@ -249,7 +258,7 @@ public final class ModulesList {
 	 * <p>Set the value on the {@link #sub_and_modules_list} associated with the given key, for a specific module.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #MODULE_SUPPORTED} --> for {@code key}: same as in {@link #getElementValue(int, int)}</p>
+	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: same as in {@link #getElementValue(int, int)}</p>
 	 * <p>- {@link #MODULE_DISABLE} --> for {@code key}: same as in {@link #getElementValue(int, int)}</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
@@ -259,8 +268,8 @@ public final class ModulesList {
 	 */
 	public static void setModuleValue(final int module_index, final int key, @NonNull final Object value) {
 		switch (key) {
-			case MODULE_SUPPORTED: {
-				((ModuleObj) sub_and_modules_list[module_index]).mod_supported = (boolean) value;
+			case ELEMENT_SUPPORTED: {
+				((ElementObj) sub_and_modules_list[module_index]).elem_supported = (boolean) value;
 
 				break;
 			}
@@ -311,7 +320,7 @@ public final class ModulesList {
 			return isElementRunning(module_index);
 		}
 
-		// module will never been null because that's what's checked inside isElementRunning().
+		// The module instance will never been null because that's what's checked inside isElementRunning().
 		return isElementRunning(module_index) && Objects.requireNonNull(getIModuleInstance(module_index))
 				.isFullyWorking();
 	}
@@ -345,11 +354,11 @@ public final class ModulesList {
 	 * @param module_index the index of the module to start
 	 */
 	public static void startModule(final int module_index) {
-		if (!isModuleSupported(module_index)) {
+		final Class<?> module_class = (Class<?>) getElementValue(module_index, ELEMENT_CLASS);
+		if (!isSubModuleSupported(module_class)) {
 			return;
 		}
 
-		final Class<?> module_class = (Class<?>) getElementValue(module_index, ELEMENT_CLASS);
 		switch (Math.abs((int) getElementValue(module_index, ELEMENT_TYPE1))) {
 			case (ModulesList.TYPE1_SERVICE_SEP): {
 				// startService() already checks if the service is running or not.
@@ -359,14 +368,21 @@ public final class ModulesList {
 			}
 			case (ModulesList.TYPE1_INSTANCE): {
 				if (!ModulesList.isElementRunning(module_index)) {
+					System.out.println(module_class);
 					try {
-						((ModuleObj) sub_and_modules_list[module_index]).mod_instance =module_class.getConstructor()
+						sub_and_modules_list[module_index].sub_mod_instance = module_class.getConstructor()
 								.newInstance();
-					} catch (final NoSuchMethodException ignored) {
-					} catch (final IllegalAccessException ignored) {
-					} catch (final InstantiationException ignored) {
-					} catch (final InvocationTargetException ignored) {
+					} catch (final NoSuchMethodException e) {
+						e.printStackTrace();
+					} catch (final IllegalAccessException e) {
+						e.printStackTrace();
+					} catch (final InstantiationException e) {
+						e.printStackTrace();
+					} catch (final InvocationTargetException e) {
+						e.printStackTrace();
 					}
+					// Keep the printStackTraces here. Useful to know if something is wrong here with modifications to
+					// the way how the class works.
 				}
 
 				break;
@@ -399,7 +415,7 @@ public final class ModulesList {
 			case (ModulesList.TYPE1_INSTANCE): {
 				if (ModulesList.isElementRunning(module_index)) {
 					((IModuleInst) getElementValue(module_index, MODULE_INSTANCE)).destroy();
-					((ModuleObj) sub_and_modules_list[module_index]).mod_instance = null;
+					sub_and_modules_list[module_index].sub_mod_instance = null;
 				}
 
 				break;
@@ -427,34 +443,21 @@ public final class ModulesList {
 	 */
 	@Nullable
 	private static IModuleInst getIModuleInstance(final int module_index) {
-		if (TYPE1_INSTANCE != (int) getElementValue(module_index, ELEMENT_TYPE1)) {
+		if (TYPE1_INSTANCE != Math.abs((int) getElementValue(module_index, ELEMENT_TYPE1))) {
 			return null;
 		}
 		return (IModuleInst) getElementValue(module_index, MODULE_INSTANCE);
 	}
 
 	/**
-	 * <p>Same as {@link #isModuleSupported(Class)}.</p>
-	 * <p>ONLY FOR USE IN THE {@link ModulesManager}!!!! This takes a bit to check. Use {@link #MODULE_SUPPORTED} for
-	 * all other requests.</p>
-	 *
-	 * @param module_index the index of the module to check
-	 *
-	 * @return same as in {@link #isModuleSupported(Class)}
-	 */
-	public static boolean isModuleSupported(final int module_index) {
-		return isModuleSupported((Class<?>) getElementValue(module_index, ELEMENT_CLASS));
-	}
-
-	/**
-	 * <p>Checks if the device running the app supports the module.</p>
+	 * <p>Checks if the device running the app supports the (sub)module.</p>
 	 * <p>This method signature is useful for {@link ModuleObj}'s constructor, which can't go on the list look for what
 	 * is being created at the moment.</p>
 	 *
 	 * @param module_class the class of the module
 	 * @return true if the module is supported by the device, false otherwise
 	 */
-	static boolean isModuleSupported(@NonNull final Class<?> module_class) {
+	public static boolean isSubModuleSupported(@NonNull final Class<?> module_class) {
 		// Had to use reflection. It's to behave like IModule, but with a static method that changes for every
 		// module and that can be called through the class, so that it doesn't matter if the module is a separate
 		// process services. Can't use an interface, use reflection and make sure all modules implement the method on

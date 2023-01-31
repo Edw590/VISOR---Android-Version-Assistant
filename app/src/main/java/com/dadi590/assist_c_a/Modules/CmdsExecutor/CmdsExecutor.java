@@ -48,13 +48,18 @@ import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
+import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.Modules.Telephony.TelephonyManager;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import ACD.ACD;
 
@@ -62,10 +67,13 @@ import ACD.ACD;
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
  */
 public class CmdsExecutor implements IModuleInst {
+
 	// This variable can't be local. It must memorize the last value, so they must always remain in memory.
 	// Also, because of that, the instance of this class must also remain in memory, as it's done in the ModulesList.
 	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
 	private static boolean some_cmd_detected = false;
+
+	final List<Runnable> runnables = new ArrayList<>(1);
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -84,6 +92,7 @@ public class CmdsExecutor implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+
 		is_module_destroyed = true;
 	}
 	@Override
@@ -132,7 +141,7 @@ public class CmdsExecutor implements IModuleInst {
 	 */
 	final int processTask(@NonNull final String sentence_str, final boolean partial_results,
 						  final boolean only_returning) {
-		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.APU_LIB_NAME)) {
+		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
 					"detected.";
 			UtilsCmdsExecutor.speak(speak, false, null);
@@ -174,7 +183,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					UtilsCameraManagerBC.useCamera(command.contains(CmdsList.CmdRetIds.RET_ON) ?
+					UtilsCameraManagerBC.useCamera(command.endsWith(CmdsList.CmdRetIds.RET_ON) ?
 							CameraManagement.USAGE_FLASHLIGHT_ON : CameraManagement.USAGE_FLASHLIGHT_OFF);
 
 					break;
@@ -201,7 +210,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					switch (UtilsAndroidConnectivity.setWifiEnabled(command.contains(CmdsList.CmdRetIds.RET_ON))) {
+					switch (UtilsAndroidConnectivity.setWifiEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsAndroid.NO_ERR): {
 							final String speak = "Wi-Fi toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -252,7 +261,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					switch (UtilsAndroidConnectivity.setMobileDataEnabled(command.contains(CmdsList.CmdRetIds.RET_ON))) {
+					switch (UtilsAndroidConnectivity.setMobileDataEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.NO_ERR): {
 							final String speak = "Mobile Data connection toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -279,7 +288,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					switch (UtilsAndroidConnectivity.setBluetoothEnabled(command.contains(CmdsList.CmdRetIds.RET_ON))) {
+					switch (UtilsAndroidConnectivity.setBluetoothEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsAndroid.NO_ERR): {
 							final String speak = "Bluetooth toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -375,7 +384,7 @@ public class CmdsExecutor implements IModuleInst {
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_SPEAKERS): {
-					UtilsAndroidTelephony.setCallSpeakerphoneEnabled(command.contains(CmdsList.CmdRetIds.RET_ON));
+					UtilsAndroidTelephony.setCallSpeakerphoneEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON));
 
 					final String speak = "Speakerphone toggled.";
 					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -386,7 +395,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(command.contains(CmdsList.CmdRetIds.RET_ON))) {
+					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.NO_ERR): {
 							final String speak = "Airplane Mode toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -476,9 +485,9 @@ public class CmdsExecutor implements IModuleInst {
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_REBOOT_DEVICE): {
-					if (command.contains(CmdsList.CmdRetIds.RET_14_NORMAL) ||
-							command.contains(CmdsList.CmdRetIds.RET_14_SAFE_MODE) ||
-							command.contains(CmdsList.CmdRetIds.RET_14_RECOVERY)) {
+					if (command.endsWith(CmdsList.CmdRetIds.RET_14_NORMAL) ||
+							command.endsWith(CmdsList.CmdRetIds.RET_14_SAFE_MODE) ||
+							command.endsWith(CmdsList.CmdRetIds.RET_14_RECOVERY)) {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
@@ -486,15 +495,15 @@ public class CmdsExecutor implements IModuleInst {
 						// EDIT: sometimes he doesn't say that. Now it says something anyway.
 
 						final int reboot_mode;
-						if (command.contains(CmdsList.CmdRetIds.RET_14_NORMAL)) {
+						if (command.endsWith(CmdsList.CmdRetIds.RET_14_NORMAL)) {
 							reboot_mode = UtilsAndroid.MODE_NORMAL;
-						} else if (command.contains(CmdsList.CmdRetIds.RET_14_SAFE_MODE)) {
+						} else if (command.endsWith(CmdsList.CmdRetIds.RET_14_SAFE_MODE)) {
 							reboot_mode = UtilsAndroid.MODE_SAFE;
-						} else if (command.contains(CmdsList.CmdRetIds.RET_14_RECOVERY)) {
+						} else if (command.endsWith(CmdsList.CmdRetIds.RET_14_RECOVERY)) {
 							reboot_mode = UtilsAndroid.MODE_RECOVERY;
-						} else if (command.contains(CmdsList.CmdRetIds.RET_14_BOOTLOADER)) {
+						} else if (command.endsWith(CmdsList.CmdRetIds.RET_14_BOOTLOADER)) {
 							reboot_mode = UtilsAndroid.MODE_BOOTLOADER;
-						} else if (command.contains(CmdsList.CmdRetIds.RET_14_FAST)) {
+						} else if (command.endsWith(CmdsList.CmdRetIds.RET_14_FAST)) {
 							reboot_mode = UtilsAndroid.MODE_FAST;
 						} else {
 							continue;
@@ -528,7 +537,7 @@ public class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					UtilsCameraManagerBC.useCamera(command.contains(CmdsList.CmdRetIds.RET_15_REAR) ?
+					UtilsCameraManagerBC.useCamera(command.endsWith(CmdsList.CmdRetIds.RET_15_REAR) ?
 							CameraManagement.USAGE_TAKE_REAR_PHOTO : CameraManagement.USAGE_TAKE_FRONTAL_PHOTO);
 
 					break;
@@ -538,7 +547,7 @@ public class CmdsExecutor implements IModuleInst {
 						case (CmdsList.CmdRetIds.RET_16_AUDIO): {
 							if (!only_returning) {
 								if (!(boolean) ModulesList.getElementValue(
-										ModulesList.getElementIndex(AudioRecorder.class), ModulesList.MODULE_SUPPORTED)) {
+										ModulesList.getElementIndex(AudioRecorder.class), ModulesList.ELEMENT_SUPPORTED)) {
 									final String speak = "Audio recording is not supported on this device through either " +
 											"hardware or application permissions limitations.";
 									UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -570,6 +579,9 @@ public class CmdsExecutor implements IModuleInst {
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_SAY_AGAIN): {
+					some_cmd_detected = true;
+					if (only_returning) continue;
+
 					UtilsSpeech2BC.sayAgain();
 
 					// todo Save speeches on an ArrayList or something to be possible to say the second-last thing or
@@ -580,7 +592,45 @@ public class CmdsExecutor implements IModuleInst {
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_MAKE_CALL): {
-					// todo
+					some_cmd_detected = true;
+					if (only_returning) continue;
+
+					final int contact_index = (int) ACD.getSubCmdIndex(command);
+					final String contact_name = TelephonyManager.ALL_CONTACTS[contact_index][0];
+					final String contact_number = TelephonyManager.ALL_CONTACTS[contact_index][1];
+
+					System.out.println("CALL NUMBER: " + contact_number);
+
+					final Runnable runnable = new Runnable() {
+						@Override
+						public void run() {
+							final boolean call_placed = UtilsAndroidTelephony.makePhoneCall(contact_number);
+
+							if (!call_placed) {
+								final String speak = "Insufficient privileges to call " + contact_number + " " +
+										"requested number. Instead, it was only dialed and requires your " +
+										"confirmation to proceed the call.";
+								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							}
+						}
+					};
+					final int hash_code = runnable.hashCode();
+
+					boolean already_in_array = false;
+					final int runnables_size = runnables.size();
+					for (int i = 0; i < runnables_size; ++i) {
+						if (hash_code == runnables.get(i).hashCode()) {
+							already_in_array = true;
+
+							break;
+						}
+					}
+					if (!already_in_array) {
+						runnables.add(runnable);
+					}
+
+					final String speak = "Calling " + contact_name + " now, sir.";
+					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, hash_code);
 
 					break;
 				}
@@ -591,11 +641,11 @@ public class CmdsExecutor implements IModuleInst {
 					boolean stop_audio = false;
 					boolean stop_video = false;
 
-					if (command.contains(CmdsList.CmdRetIds.RET_20_AUDIO)) {
+					if (command.endsWith(CmdsList.CmdRetIds.RET_20_AUDIO)) {
 						stop_audio = true;
-					} else if (command.contains(CmdsList.CmdRetIds.RET_20_VIDEO)) {
+					} else if (command.endsWith(CmdsList.CmdRetIds.RET_20_VIDEO)) {
 						stop_video = true;
-					} else if (command.contains(CmdsList.CmdRetIds.RET_20_ANY)) {
+					} else if (command.endsWith(CmdsList.CmdRetIds.RET_20_ANY)) {
 						stop_audio = true;
 						stop_video = true;
 					} else {
@@ -619,7 +669,7 @@ public class CmdsExecutor implements IModuleInst {
 						final String speak = "Battery Saver Mode not available below Android Lollipop.";
 						UtilsCmdsExecutor.speak(speak, true, null);
 					} else {
-						switch (UtilsAndroidPower.setBatterySaverModeEnabled(command.contains(CmdsList.CmdRetIds.RET_ON))) {
+						switch (UtilsAndroidPower.setBatterySaverModeEnabled(command.endsWith(CmdsList.CmdRetIds.RET_ON))) {
 							case (UtilsShell.NO_ERR): {
 								final String speak = "Battery Saver Mode toggled.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -789,6 +839,7 @@ public class CmdsExecutor implements IModuleInst {
 	final void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
+		intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
 		intentFilter.addAction(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
 
 		try {
@@ -818,6 +869,22 @@ public class CmdsExecutor implements IModuleInst {
 					final boolean only_returning = intent.getBooleanExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_3,
 							false);
 					processTask(sentence_str, partial_results, only_returning);
+
+					break;
+				}
+
+				case CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE: {
+					final int after_speak_code = intent.getIntExtra(
+							CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, -1);
+					for (final Runnable runnable : runnables) {
+						if (runnable.hashCode() == after_speak_code) {
+							runnable.run();
+
+							return;
+						}
+					}
+
+					break;
 				}
 			}
 

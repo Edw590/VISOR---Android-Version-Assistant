@@ -129,10 +129,10 @@ public class MainSrv extends Service {
 				}
 
 				try {
-					Thread.sleep(5_000L);
+					Thread.sleep(ModulesManager.CHECK_INTERVAL/2L);
 				} catch (final InterruptedException ignored) {
 
-					// todo Hopefully this won't happen. Not sure what to do here.
+					// todo Hopefully this won't happen. Not sure what to do here?
 					// Can't kill the PID for the system to restart the app - might corrupt ongoing stuff.
 
 					Thread.currentThread().interrupt();

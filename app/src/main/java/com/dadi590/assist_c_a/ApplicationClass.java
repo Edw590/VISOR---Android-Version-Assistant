@@ -31,7 +31,8 @@ import androidx.multidex.MultiDex;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
+import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 
 import ACD.ACD;
 
@@ -71,6 +72,14 @@ public final class ApplicationClass extends Application {
 
 		// To do exactly when the app's main process starts
 
+		// "Static assertions" here (app can't start if these aren't met)
+		{
+			if (ACD.MAX_SUB_CMDS != CmdsList.CmdRetIds.LOCAL_MAX_SUB_CMDS) {
+				throw new AssertionError("LOCAL_MAX_SUB_CMDS (value of " + CmdsList.CmdRetIds.LOCAL_MAX_SUB_CMDS +
+						") is different than " + ACD.MAX_SUB_CMDS);
+			}
+		}
+
 		// Apply SecureRandom fixes for devices running Android 4.3 or below
 		PRNGFixes.apply();
 
@@ -90,7 +99,7 @@ public final class ApplicationClass extends Application {
 		UtilsApp.deleteAppCache();
 
 		// Prepare the Advanced Commands Detection module commands array
-		ACD.prepareCmdsArray(CmdsList.prepareCommandsString());
+		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 
 		UtilsServices.startMainService();
 

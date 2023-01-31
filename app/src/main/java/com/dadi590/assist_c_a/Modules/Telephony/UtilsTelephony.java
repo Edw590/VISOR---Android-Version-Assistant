@@ -66,20 +66,14 @@ public final class UtilsTelephony {
 	 */
 	private static final Uri ICC_URI_API4PLUS = Uri.parse("content://icc/adn");
 
-	public static final int ALL_CONTACTS = 0;
-	public static final int CONTACTS_SIM = 1;
 	public static final String NO_MATCHES = "3234_NO_MATCHES";
 	public static final String MULTIPLE_MATCHES = "3234_MULTIPLE_MATCHES";
-	public static final String CONTENT_URI_ERROR = "3234_CONTENT_URI_ERROR";
 	/**
 	 * <p>Gets the name of a contact through its phone number.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #ALL_CONTACTS} --> for {@code location_search}: search everywhere for the contact</p>
-	 * <p>- {@link #CONTACTS_SIM} --> for {@code location_search}: search only on the SIM contacts for the contact</p>
 	 * <p>- {@link #NO_MATCHES} --> returned when no number was found for the given phone number</p>
 	 * <p>- {@link #MULTIPLE_MATCHES} --> returned when multiple contacts were found for the given phone number</p>
-	 * <p>- {@link #CONTENT_URI_ERROR} --> returned if a wrong value was used the parameter {@code location_search}</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param number the phone number of the contact
@@ -90,114 +84,30 @@ public final class UtilsTelephony {
 	@NonNull
 	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static String getNameFromNum(@NonNull final String number, final int location_search) {
-		final Uri uri_to_use;
-		switch (location_search) {
-			case (ALL_CONTACTS):
-				uri_to_use = ContactsContract.Contacts.CONTENT_URI;
-				// This seems to give the contacts of the entire phone: SIM card, phone storage and accounts like Google,
-				// Whatsapp...
-				break;
-			case (CONTACTS_SIM):
-				uri_to_use = ICC_URI_API4PLUS;
-				break;
-			default:
-				return CONTENT_URI_ERROR;
-		}
-
-		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-
-		int num_matches = 0;
+		final Collection<String> matches = new ArrayList<>(10); // 10 matches at most as a start, I guess?
 		String last_name_found = "";
-		try (final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null)) {
-			final Collection<String> matches = new ArrayList<>(10); // 10 matches at most, I guess?
 
-			// todo Put this in a thread!!! --> "Skipped 135 frames!"
+		for (final String[] contact : getAllContacts(location_search)) {
+			final String name = contact[0];
+			final String phoneNo = contact[1];
 
-			if (location_search == ALL_CONTACTS) {
-				if ((cursor != null ? cursor.getCount() : 0) > 0) {
-					while (cursor.moveToNext()) {
-						final int col1_idx = cursor.getColumnIndex(BaseColumns._ID);
-						final int col2_idx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-						if (col1_idx < 0 || col2_idx < 0) {
-							continue;
-						}
-						final String id = cursor.getString(col1_idx);
-						final String name = cursor.getString(col2_idx);
-						//System.out.println("Name: " + name);
-
-						final int col3_idx = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
-						if (col3_idx >= 0 && cursor.getInt(col3_idx) > 0) {
-							try (
-									final Cursor cursor1 = contentResolver.query(
-									ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-									null,
-									ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-									new String[]{id}, null)
-							) {
-								while (cursor1.moveToNext()) {
-									final int col4_idx = cursor1.getColumnIndex(
-											ContactsContract.CommonDataKinds.Phone.NUMBER);
-									if (col4_idx < 0) {
-										continue;
-									}
-									final String phoneNo = cursor1.getString(col4_idx);
-									//System.out.println("Number: " + phoneNo);
-
-									if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-									/*System.out.println("---Name: " + name);
-									System.out.println("---Number: " + phoneNo);*/
-										boolean already_found = false;
-										for (final String match : matches) {
-											if (match.equals(name)) {
-												already_found = true;
-												break;
-											}
-										}
-										if (!already_found) {
-											matches.add(name);
-											last_name_found = name;
-											++num_matches;
-										}
-									}
-								}
-							}
-						}
+			if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
+				/*System.out.println("---Name: " + name);
+				System.out.println("---Number: " + phoneNo);*/
+				boolean already_found = false;
+				for (final String match : matches) {
+					// This excludes repeated contacts (same name and number, or maybe same name but number with and
+					// without country extension) from being considered different contacts. Don't forget the contacts
+					// can come from *multiple* accounts, so the same contact may appear in various - this will filter
+					// the repeated ones out.
+					if (match.equals(name)) {
+						already_found = true;
+						break;
 					}
 				}
-			} else if (location_search == CONTACTS_SIM) {
-				// Leave it even being "always true" - until another location is added... Might prevent bugs.
-				while (cursor.moveToNext()) {
-					final int col1_idx = cursor.getColumnIndex("name");
-					if (col1_idx < 0) {
-						continue;
-					}
-					final String name = cursor.getString(col1_idx);
-					//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
-					final int col2_idx = cursor.getColumnIndex("number");
-					if (col2_idx < 0) {
-						continue;
-					}
-					final String phoneNo = cursor.getString(col2_idx);
-					/*System.out.println("Name: " + name);
-					System.out.println("Phone Number: " + phoneNo);*/
-
-					if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-						// Note: the compareStrictly() methods are only available with the hidden/internal classes showing
-						/*System.out.println("---Name: " + name);
-						System.out.println("---Number: " + phoneNo);*/
-						boolean already_found = false;
-						for (final String match : matches) {
-							if (match.equals(name)) {
-								already_found = true;
-								break;
-							}
-						}
-						if (!already_found) {
-							matches.add(name);
-							last_name_found = name;
-							++num_matches;
-						}
-					}
+				if (!already_found) {
+					matches.add(name);
+					last_name_found = name;
 				}
 			}
 		}
@@ -207,9 +117,11 @@ public final class UtilsTelephony {
         System.out.println(last_name_found);
         System.out.println("OOOOOOOOOOOOOOOOOOO");*/
 
+		final int num_matches = matches.size();
 		if (num_matches == 0) {
 			return NO_MATCHES;
 		} else if (num_matches == 1) {
+			// If only one match, the last name found is returned (the only one found).
 			return last_name_found;
 		} else {
 			return MULTIPLE_MATCHES;
@@ -225,8 +137,8 @@ public final class UtilsTelephony {
 	 */
 	public static boolean isPrivateNumber(@Nullable final String number) {
 		// Note: looked up how the ISPs normally represent private numbers and the final code I made was this.
-		// Has been detecting correctly - if the number is really private (go to Phone settings change that), this
-		// says it's a private number.
+		// Has been detecting correctly - if the number is really private (go to the Phone app settings and change it),
+		// this says it's a private number.
 		// Hasn't said a normal number is a private one, so all seems alright.
 
 		if (number != null && !number.isEmpty()) {
@@ -234,7 +146,7 @@ public final class UtilsTelephony {
 			// When PayPal sends a message, the "number" is "PayPal". In that case, converting to a long throws an error.
 			// In that case, it's because it's some name (not a private number then).
 			// If the conversion works, then check if the number is greater or equal to 0 ("Private numbers are sent to
-			// the phone as -1 or -2.", according with a StackOverflow user), and in that case, it's not a private number.
+			// the phone as -1 or -2.", according to a StackOverflow user), and in that case, it's not a private number.
 			try {
 				if (Long.parseLong(number) >= 0L) {
 					return false;
@@ -300,9 +212,10 @@ public final class UtilsTelephony {
 	 * of the call. On both indexes at the same time only might be one of the constants.
 	 */
 	@NonNull
+	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static String[] getLastCall() {
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-		try (final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null)) {
+		try (final Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null)) {
 			if (cursor == null) {
 				return new String[]{ERROR, ERROR};
 			}
@@ -325,9 +238,10 @@ public final class UtilsTelephony {
 	 *
 	 * @return one of the {@link CallLog.Calls#TYPE}s of call
 	 */
+	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static int getTypeLastCallByNum(@NonNull final String number) {
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
-		try (final Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, null, null, null, null)) {
+		try (final Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null)) {
 
 			if (cursor == null) {
 				return -2;
@@ -352,14 +266,113 @@ public final class UtilsTelephony {
 	 * @return true if it's an emergency number, false otherwise
 	 */
 	public static boolean isEmergencyNumber(@NonNull final String phone_number) {
-		final Context context = UtilsGeneral.getContext();
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.getContext().
+					getSystemService(Context.TELEPHONY_SERVICE);
 
-			return telephonyManager.isEmergencyNumber(phone_number);
+			return telephonyManager.isPotentialEmergencyNumber(phone_number);
 		} else {
-			return PhoneNumberUtils.isEmergencyNumber(phone_number);
+			return PhoneNumberUtils.isPotentialEmergencyNumber(phone_number);
 		}
+	}
+
+	public static final int ALL_CONTACTS = 0;
+	public static final int CONTACTS_SIM = 1;
+	/**
+	 * <p>Gets all contact names and phone number from the provided location.</p>
+	 * <br>
+	 * <p><u>---CONSTANTS---</u></p>
+	 * <p>- {@link #ALL_CONTACTS} --> for {@code location_search}: search everywhere for the contact</p>
+	 * <p>- {@link #CONTACTS_SIM} --> for {@code location_search}: search only on the SIM contacts for the contact</p>
+	 * <p><u>---CONSTANTS---</u></p>
+	 *
+	 * @param location_search the location to search the contacts on (one of the constants)
+	 *
+	 * @return a 2D array with the number in the 1st element of each 1D array and the phone number on the 2nd element
+	 */
+	@NonNull
+	@RequiresPermission(Manifest.permission.READ_CONTACTS)
+	public static String[][] getAllContacts(final int location_search) {
+		final ArrayList<String[]> contacts_found = new ArrayList<>(64);
+
+		final Uri uri_to_use;
+		switch (location_search) {
+			case (CONTACTS_SIM):
+				uri_to_use = ICC_URI_API4PLUS;
+
+				break;
+			default:
+				// This seems to give the contacts of the entire phone: SIM card, phone storage and accounts like Google,
+				// WhatsApp...
+				uri_to_use = ContactsContract.Contacts.CONTENT_URI;
+
+				break;
+		}
+
+		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
+
+		try (final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null)) {
+
+			// todo Put this in a thread!!! --> "Skipped 135 frames!"
+
+			if (location_search == ALL_CONTACTS) {
+				if ((cursor != null ? cursor.getCount() : 0) > 0) {
+					while (cursor.moveToNext()) {
+						final int col1_idx = cursor.getColumnIndex(BaseColumns._ID);
+						final int col2_idx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+						if (col1_idx < 0 || col2_idx < 0) {
+							continue;
+						}
+						final String id = cursor.getString(col1_idx);
+						final String name = cursor.getString(col2_idx);
+						//System.out.println("Name: " + name);
+
+						final int col3_idx = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
+						if (col3_idx >= 0 && cursor.getInt(col3_idx) > 0) {
+							try (
+									final Cursor cursor1 = contentResolver.query(
+											ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+											ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+											new String[]{id}, null)
+							) {
+								while (cursor1.moveToNext()) {
+									final int col4_idx = cursor1.getColumnIndex(
+											ContactsContract.CommonDataKinds.Phone.NUMBER);
+									if (col4_idx < 0) {
+										continue;
+									}
+									final String phoneNo = cursor1.getString(col4_idx);
+									//System.out.println("Number: " + phoneNo);
+
+									// Remove spaces so that the numbers don't get returned like "+351 123 456 789",
+									// which seems to be incompatible with isEmergencyNumber(), for example.
+									contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+								}
+							}
+						}
+					}
+				}
+			} else if (location_search == CONTACTS_SIM) {
+				while (cursor.moveToNext()) {
+					final int col1_idx = cursor.getColumnIndex("name");
+					if (col1_idx < 0) {
+						continue;
+					}
+					final String name = cursor.getString(col1_idx);
+					//listContactId.add(cursorSim.getString(cursorSim.getColumnIndex("_id")));
+					final int col2_idx = cursor.getColumnIndex("number");
+					if (col2_idx < 0) {
+						continue;
+					}
+					final String phoneNo = cursor.getString(col2_idx);
+					/*System.out.println("Name: " + name);
+					System.out.println("Phone Number: " + phoneNo);*/
+
+					contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+				}
+			}
+		}
+
+		return contacts_found.toArray(new String[0][]);
 	}
 }

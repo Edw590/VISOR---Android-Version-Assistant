@@ -219,6 +219,7 @@ public final class UtilsAndroidTelephony {
 			action = UtilsTelephony.isEmergencyNumber(phone_number) ? action_dial_emergency : Intent.ACTION_DIAL;
 			call_placed = false;
 		}
+
 		intent.setAction(action);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);

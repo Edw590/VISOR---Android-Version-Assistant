@@ -32,6 +32,8 @@ import android.speech.SpeechRecognizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
@@ -50,7 +52,20 @@ import java.util.Map;
  * <br>
  * <p>Only start this service if the Google app is available, else it won't work.</p>
  */
-public class GoogleRecognition extends Service {
+public class GoogleRecognition extends Service implements IModuleSrv {
+
+	///////////////////////////////////////////////////////////////
+	// IModuleSrv stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		// The Controller already checks if the Google app is installed, so no need to check here too.
+		return SpeechRecognitionCtrl.isSupported();
+	}
+	// IModuleSrv stuff
+	///////////////////////////////////////////////////////////////
 
 	@Nullable private SpeechRecognizer speechRecognizer = null;
 

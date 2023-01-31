@@ -118,15 +118,6 @@ android {
 		}
 	}
 
-	lintOptions {
-		checkDependencies true
-		abortOnError true
-		checkAllWarnings true
-		checkGeneratedSources true
-		checkReleaseBuilds true
-		explainIssues true
-		//warningsAsErrors true
-	}
 
 	packagingOptions {
 		jniLibs {
@@ -141,6 +132,14 @@ android {
 		main {
 			assets.srcDirs = ['src/main/assets']
 		}
+	}
+	lint {
+		abortOnError true
+		checkAllWarnings true
+		checkDependencies true
+		checkGeneratedSources true
+		checkReleaseBuilds true
+		explainIssues true
 	}
 }
 

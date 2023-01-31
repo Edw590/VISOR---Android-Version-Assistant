@@ -75,12 +75,12 @@ public final class UtilsGeneral {
 	 * @return true if it is available for use (APU library file on the device and on a correct folder), false otherwise
 	 */
 	public static boolean isAPUAvailable() {
-		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.APU_LIB_NAME)) {
+		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			return false;
 		}
 
 		return UtilsCryptoHashing.fileMatchesHash(UtilsNativeLibs.getPrimaryNativeLibsPath() + "/" +
-				UtilsNativeLibs.APU_LIB_NAME, hashes_APU_lib_files, UtilsCryptoHashing.IDX_SHA512);
+				UtilsNativeLibs.ACD_LIB_NAME, hashes_APU_lib_files, UtilsCryptoHashing.IDX_SHA512);
 	}
 
 	/**

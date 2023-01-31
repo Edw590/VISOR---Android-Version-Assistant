@@ -85,6 +85,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+
 		is_module_destroyed = true;
 	}
 	@Override

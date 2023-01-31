@@ -22,7 +22,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
-	package="com.dadi590.assist_c_a"
 	android:targetSandboxVersion="2"
 	android:installLocation="internalOnly">
 	<!-- Regardless of coreApp="true" being here or not, if the app is a system app (with or without updates), it will

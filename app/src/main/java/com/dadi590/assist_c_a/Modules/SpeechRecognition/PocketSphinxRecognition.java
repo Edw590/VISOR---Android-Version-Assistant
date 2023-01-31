@@ -29,6 +29,8 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
@@ -50,7 +52,20 @@ import edu.cmu.pocketsphinx1.SpeechRecognizerSetup;
  * <p>NOTE: the class is public but it's NOT to be used outside its package! It's only public for the service to be
  * instantiated (meaning if it would be put package-private now, no error would appear on the entire project).</p>
  */
-public class PocketSphinxRecognition extends Service implements RecognitionListener {
+public class PocketSphinxRecognition extends Service implements RecognitionListener, IModuleSrv {
+
+	///////////////////////////////////////////////////////////////
+	// IModuleSrv stuff
+	@Override
+	public final int wrongIsSupported() {return 0;}
+	/**.
+	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
+	public static boolean isSupported() {
+		// The Controller already checks if the Google app is installed, so no need to check here too.
+		return SpeechRecognitionCtrl.isSupported() && UtilsSpeechRecognizers.isPocketSphinxLibAvailable();
+	}
+	// IModuleSrv stuff
+	///////////////////////////////////////////////////////////////
 
 	@Nullable private SpeechRecognizer recognizer = null;
 

@@ -49,7 +49,7 @@ public final class UtilsNativeLibs {
 	}
 
 	public static final String POCKETSPHINX_LIB_NAME = "libpocketsphinx_jni.so";
-	public static final String APU_LIB_NAME = "libgojni.so";
+	public static final String ACD_LIB_NAME = "libgojni.so";
 	/**
 	 * <p>Checks if a native library file, bundled from the APK, is available on the native libraries directories of the
 	 * app.</p>
@@ -57,7 +57,7 @@ public final class UtilsNativeLibs {
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #POCKETSPHINX_LIB_NAME} --> for {@code lib_name}: name of the PocketSphinx library file</p>
-	 * <p>- {@link #APU_LIB_NAME} --> for {@code lib_name}: name of the APU library file</p>
+	 * <p>- {@link #ACD_LIB_NAME} --> for {@code lib_name}: name of the APU library file</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param lib_name one of the constants, or the name of the library file (eg. "library.so")

@@ -43,6 +43,7 @@ public class SomeValuesUpdater implements IModuleInst {
 	@Override
 	public final void destroy() {
 		infinity_thread.interrupt();
+
 		is_module_destroyed = true;
 	}
 	@Override

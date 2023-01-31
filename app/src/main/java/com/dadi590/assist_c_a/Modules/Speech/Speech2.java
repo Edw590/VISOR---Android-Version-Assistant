@@ -157,6 +157,7 @@ public class Speech2 implements IModuleInst {
 		if (null != tts) {
 			tts.stop();
 		}
+
 		is_module_destroyed = true;
 	}
 	@Override
