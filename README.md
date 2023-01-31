@@ -1,3 +1,4 @@
+
 # V.I.S.O.R. - A better Android assistant
 Secondary project name: Assist_C_A (Assistant Client Android)
 
@@ -6,11 +7,17 @@ This project is a part of a bigger project, consisting of the following:
 - [V.I.S.O.R. - A better Android assistant](https://github.com/DADi590/VISOR---A-better-Android-assistant)
 - [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
 
+## Download
+Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from https://github.com/DADi590/VISOR---A-better-Android-assistant/releases, clicking on Assets.
+
+They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. As they're pre-releases, I'm releasing them as debug type. Why not, anyway.
+
+## Pictures
+<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
+
 ## Table of Contents
-- [Pictures](#pictures)
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
-- [Supported commands](#supported-commands)
 - [Current modules (features)](#current-modules-features)
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
@@ -22,9 +29,6 @@ This project is a part of a bigger project, consisting of the following:
 - [Support](#support)
 - [Final notes and contributing](#final-notes-and-contributing)
 
-## Pictures
-<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
-
 ## Background
 Hi all. This Android version is a project I started in January 2020 when I broke my phone's screen and glass (so I could see and do exactly nothing with the screen and touch - only Vysor and TeamViewer helped/help, but only with a PC nearby) - the PC version started in 2017 a month after I learned what programming was, but it's too no-code to publish XD (I didn't know what a function was by then...). Anyways. As I wasn't gonna switch phone so quickly (bought a new one a year later), I decided to make an assistant for it that would do anything I'd need without the need for me to have a working screen and touch (basically an app for a blind person, I guess). Could only use the Power, Vol Up and Vol Down buttons.
 
@@ -33,13 +37,13 @@ I've now finally decided to make it public, after vastly improving its coding st
 "A better Android assistant" because it's supposed to help handling the phone, even if it has no screen (my original use for the app with an older phone of mine with a broken screen), or even in the future, with time, one of the ideas is to have it knowing exactly where the user is (**no sharing of anything, all local** - everything will be only local when I create the file to store them) to remind them of something they might need to do (leaving the house, good idea to bring the wallet and the keys, for example. Or going near a supermarket - "You wanted to buy food"). It's all open-source code, so... nothing bad in the background. Don't really trust? - check the code and compile yourself and use it (same app anyways).
 
 ## Explanation of the assistant
-Its command recognition submodule is not a simple recognition (have a look on the Advanced Commands Detection module mentioned in the Notice) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words in-between some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
+Its command recognition submodule is not a simple recognition (have a look on the Advanced Commands Detection module mentioned below in the Notice) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not AI - yet?). You can say any words in-between some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
 
 It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - doesn't seem a good idea... xD
 
 For now it's also an app that has everything hard-coded, so no options to customize in the UI. Feel free to change whatever you'd like and use it yourself, for example. If I decide to publish it on some store, an UI will be made for users to be able to choose as many things as I can make choosable - or with time, even if I don't publish it (for now I'd just like everything implemented and working).
 
-I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my atempts to force permissions to be granted (which I could not do yet). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it (it will probably cut features if I do it though).
+I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my code ready to force permissions to be granted (though, disabled until I have a way to make it optional). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it (it will probably cut features if I do it though).
 
 The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards). Though, I'm only testing the app on Lollipop 5.1, on Oreo 8.1 (my 2 phones), and on Lollipop 4.4.2 (my tablet). Other Android versions only with the emulator, and more rarely.
 
@@ -48,29 +52,30 @@ The app is also able to work with root access and system permissions. The prefer
 ## Current modules (features)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
 - **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because is in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
+- **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name - it's not very accurate unfortunately, but there's really nothing I can do about it), which then calls Google speech recognition to recognize normal speech (very very good accuracy, and in which you can say commands, like "turn on the wifi and the bluetooth and what time is it"). You can also call the commands recognizer directly by pressing and holding the Power key while the screen is on, on Android versions up to Pie (Android 9). Above that, the Power key detection doesn't work (Android security policies), and as I don't own a device with Android 10+, I haven't taken care of finding a replacement way.
 - **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording...
-- **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (always keep it from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
-- **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website. If you'd like to see it working, give the app Device Administration privileges and then remove them. The supposed only way to get back to the device (without restarting - didn't take care of that yet) is to click Unlock.
+- **Camera Manager** --> Manages the camera usage. It's supposed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
+- **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
+- Telephony:
+- - Note: all the modules here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related to that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
+- - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
+- - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 - **Speech module** --> Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. Some important notes here:
 - - About the Critical priority: it will take your phone out of Do Not Disturb mode, get it to full volume, and say what it has to say (currently only if you disable the Device Administration Mode).
 - - Another important thing is: the assistant will NOT speak if the phone's ringer mode is not the Normal one (which means, only if you have sound enabled for calls and messages). If it's on Vibrating or Do Not Disturb, it won't speak - unless again, Critical speech priority, which bypasses everything I found that could be bypassed to speak xD.
 - - Also another notes: if you have sound enabled and the assistant speaks...
 - - - It may raise your calls/messages volume to speak, and will stop other apps' audio. After it's done speaking, all will be back to normal, if anything was changed (volume, other apps' audio and Do Not Disturb) - unless it changed the volume to speak and while it was speaking, you changed it (in that case, the volume will not be touched again and will remain the one you chose).
 - - - Also, on High priority and above, all speeches will be spoken in both speakers and headphones. Below High, either headphones or speakers will be used, not both.
-- Telephony:
-- - Note: all the modules here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related to that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
-- - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
-- - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
-- **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name), which then calls Google speech recognition to recognize normal speech (in which you can say commands - like "turn on the wifi and the bluetooth and what time is it").
-- **Commands Executor** --> Executes commands given to it - after the speech/written sentence having been sent to the commands detection module, a list is returned with the detected commands, and this Commands Executor module executes each one in the detected order.
-- **Camera Manager** --> Manages the camera usage. It's supposed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
+- **Protected Lock Screen** --> [NOT READY] An alternate lock screen that is supposed to mimic ESET Mobile Security's lock screen on version 3.3 - it would lock users out of the normal one and let them do nothing until they inserted the correct code or, in case Internet connection was available, the device was removed from the protected mode in ESET's Anti-Theft website. If you'd like to see it working, give the app Device Administration privileges and then attept to remove them (you can remove, of course - you just need to dismiss the screen that will appear twice: first when you try to disable, and second when you actually disable). The supposed only way to get back to the device (without restarting - didn't take care of that yet) is to click Unlock.
 
-Note: not all the modules are here. Some are just for internal management or other minor things (like Modules Manager, which makes sure all the other modules are working perfectly - this is not really a "feature", so I didn't include it above).
+Note: not all the modules that appear on Modules Status are here. Some are just for internal management (like Modules Manager, which makes sure all the other modules are working perfectly - this is not really a "feature", so I didn't include it above) or any other minor things.
 
 ## Installation/Usage
 Install the app either as a perfectly normal app, or as a privileged system app (below KitKat 4.4, in /system/app; on 4.4 and above, in /system/priv-app/). Grant it root access, if you'd like, and also enable Device Administration for it, if you want. Privileged system app + root access + Device Administration will give you full functionality of the app.
 
 After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only recording audio is manual for now).
+
+To know what you can do, have a look on the Available commands view on the app and also ready the explanations about its modules/features.
 
 ## For developers
 ### - To compile the app
