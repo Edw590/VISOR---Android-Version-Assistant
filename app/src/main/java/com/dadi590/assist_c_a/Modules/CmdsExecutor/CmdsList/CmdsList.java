@@ -179,7 +179,7 @@ public class CmdsList {
 			"(Ask to repeat what was just said)",                                    // 17
 			"Call (a contact name)",                                                 // 18
 			"Turn on/off the power/battery saver mode",                              // 19
-			"Stop recording [audio/sound",                                           // 20
+			"Stop recording [audio/sound]",                                          // 20
 			"Stop media/song/music/video",                                           // 21
 			"Pause media/song/music/video",                                          // 22
 			"Play media/song/music/video",                                           // 23
