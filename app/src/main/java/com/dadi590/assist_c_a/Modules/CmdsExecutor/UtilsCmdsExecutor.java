@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 
 /**
  * <p>Executor module specific utilities.</p>
@@ -49,5 +50,64 @@ final class UtilsCmdsExecutor {
 	static void speak(@NonNull final String speak, final boolean bypass_no_sound,
 					  @Nullable final Integer after_speaking_code) {
 		UtilsSpeech2BC.speakExecutor(speak, Speech2.PRIORITY_USER_ACTION, bypass_no_sound, after_speaking_code);
+	}
+
+	/**
+	 * <p>Makes VISOR speak "Do you confirm to [action]?"</p>
+	 *
+	 * @param action the action mentioned above
+	 * @param cmdi_only_speak the {@code cmdi_only_speak}
+	 */
+	static void requestConfirmation(@NonNull final String action, final boolean cmdi_only_speak) {
+		final Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				UtilsSpeechRecognizersBC.startGoogleRecognition();
+
+				removeRunnableFromList(this.hashCode());
+			}
+		};
+		addRunnableToList(runnable);
+
+		final String speak = "Do you confirm to " + action + "?";
+		speak(speak, cmdi_only_speak, runnable.hashCode());
+
+	}
+
+	/**
+	 * <p>Adds a runnable to the Executor runnables list.</p>
+	 *
+	 * @param runnable the runnable
+	 */
+	static void addRunnableToList(@NonNull final Runnable runnable) {
+		final int hash_code = runnable.hashCode();
+		boolean already_in_array = false;
+		final int runnables_size = CmdsExecutor.runnables.size();
+		for (int i = 0; i < runnables_size; ++i) {
+			if (hash_code == CmdsExecutor.runnables.get(i).hashCode()) {
+				already_in_array = true;
+
+				break;
+			}
+		}
+		if (!already_in_array) {
+			CmdsExecutor.runnables.add(runnable);
+		}
+	}
+
+	/**
+	 * <p>Removes a runnable from the Executor runnables list.</p>
+	 *
+	 * @param hash_code the hash code of the runnable
+	 */
+	static void removeRunnableFromList(final int hash_code) {
+		final int runnables_size = CmdsExecutor.runnables.size();
+		for (int i = 0; i < runnables_size; ++i) {
+			if (hash_code == CmdsExecutor.runnables.get(i).hashCode()) {
+				CmdsExecutor.runnables.remove(i);
+
+				break;
+			}
+		}
 	}
 }

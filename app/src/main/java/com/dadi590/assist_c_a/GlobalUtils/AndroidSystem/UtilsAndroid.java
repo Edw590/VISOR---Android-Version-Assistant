@@ -47,4 +47,7 @@ public final class UtilsAndroid {
 	public static final int MODE_RECOVERY = -987678;
 	public static final int MODE_BOOTLOADER = -987679;
 	public static final int MODE_FAST = -987680;
+
+	public static final int NO_CALL_EMERGENCY = -987681;
+	public static final int NO_CALL_ANY = -987682;
 }

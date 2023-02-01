@@ -51,9 +51,9 @@ public final class UtilsCmdsList {
 			contacts_names_list.append(contact[0].toLowerCase(Locale.getDefault())).append("|");
 		}
 
-		CmdsList.MAKE_CALL_CMD[4] = contacts_names_list.substring(0, contacts_names_list.length()-1);
+		CmdsList.AutoCmds.CMD_CALL_CONTACT[4] = contacts_names_list.substring(0, contacts_names_list.length()-1);
 
-		ACD.addUpdateCmd(UtilsCmdsList.prepareCommandString(CmdsList.MAKE_CALL_CMD));
+		ACD.addUpdateCmd(UtilsCmdsList.prepareCommandString(CmdsList.AutoCmds.CMD_CALL_CONTACT));
 	}
 
 	/**

@@ -183,47 +183,50 @@ public final class UtilsAndroidTelephony {
 
 	/**
 	 * <p>Places a phone call.</p>
-	 * <p>If the app is a privileged system app, it is possible to call emergency numbers - do not attempt without being
-	 * such an app, or a security exception will be thrown and not handled.</p>
+	 * <br>
+	 * <p><u>---CONSTANTS---</u></p>
+	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
+	 * <p>- {@link UtilsAndroid#NO_CALL_ANY} --> for the returning value: no permission to call numbers</p>
+	 * <p>- {@link UtilsAndroid#NO_CALL_EMERGENCY} --> for the returning value: no permission to call emergency numbers</p>
+	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @param phone_number the phone number to call, with country prefix (for example, +351123456789 or +351112 for
-	 *                     Portugal)
+	 * @param phone_number the phone number to call
 	 *
-	 * @return true if the call was placed, false if it was just dialed because there are not enough permissions to
-	 * place the call (either because there's no permission to place calls, or there's no permission to place emergency
-	 * calls)
+	 * @return one of the constants
 	 */
-	public static boolean makePhoneCall(@NonNull final String phone_number) {
+	public static int makePhoneCall(@NonNull final String phone_number) {
 		final Context context = UtilsGeneral.getContext();
 
 		final Intent intent = new Intent("", Uri.fromParts("tel", phone_number, null));
 
-		// I think below Android 11, ACTION_DIAL can be used to dial emergency numbers (haven't tested it yet though).
-		final String action_dial_emergency = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ?
-				Intent.ACTION_DIAL_EMERGENCY : Intent.ACTION_DIAL;
+		// On 2023-02-01, Android Developers says ACTION_DIAL can be used for emergency numbers (so at least until
+		// Android 12 it's like this).
+		final String action_dial_emergency = Intent.ACTION_DIAL;
+		final boolean is_potentially_emergency_number = UtilsTelephony.isPotentialEmergencyNumber(phone_number);
 
 		final String action;
-		final boolean call_placed;
+		final int return_code;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PRIVILEGED)) {
+			// As written on the AOSP code for ACTION_CALL_PRIVILEGED:
+			// "Perform a call to any number (emergency or not) specified by the data."
 			action = Intent.ACTION_CALL_PRIVILEGED;
-			call_placed = true;
+			return_code = UtilsAndroid.NO_ERR;
 		} else if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
-			if (UtilsTelephony.isEmergencyNumber(phone_number)) {
+			if (is_potentially_emergency_number) {
 				action = action_dial_emergency;
-				call_placed = false;
+				return_code = UtilsAndroid.NO_CALL_EMERGENCY;
 			} else {
 				action = Intent.ACTION_CALL;
-				call_placed = true;
+				return_code = UtilsAndroid.NO_ERR;
 			}
 		} else {
-			action = UtilsTelephony.isEmergencyNumber(phone_number) ? action_dial_emergency : Intent.ACTION_DIAL;
-			call_placed = false;
+			action = is_potentially_emergency_number ? action_dial_emergency : Intent.ACTION_DIAL;
+			return_code = UtilsAndroid.NO_CALL_ANY;
 		}
-
 		intent.setAction(action);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(intent);
 
-		return call_placed;
+		return return_code;
 	}
 }

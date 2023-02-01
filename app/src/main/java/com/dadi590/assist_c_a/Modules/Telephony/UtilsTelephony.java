@@ -260,12 +260,33 @@ public final class UtilsTelephony {
 
 	/**
 	 * <p>Checks if a phone number is an emergency number.</p>
+	 * <p>See more on {@link TelephonyManager#isEmergencyNumber(String)}.</p>
 	 *
 	 * @param phone_number the phone number to check
 	 *
 	 * @return true if it's an emergency number, false otherwise
 	 */
 	public static boolean isEmergencyNumber(@NonNull final String phone_number) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.getContext().
+					getSystemService(Context.TELEPHONY_SERVICE);
+
+			return telephonyManager.isEmergencyNumber(phone_number);
+		} else {
+			return PhoneNumberUtils.isEmergencyNumber(phone_number);
+		}
+	}
+
+	/**
+	 * <p>Checks if a phone number is a potential an emergency number (what the Phone app uses to decide to let other
+	 * apps call or just dial numbers).</p>
+	 * <p>See more on {@link TelephonyManager#isPotentialEmergencyNumber(String)}.</p>
+	 *
+	 * @param phone_number the phone number to check
+	 *
+	 * @return true if it's an emergency number, false otherwise
+	 */
+	public static boolean isPotentialEmergencyNumber(@NonNull final String phone_number) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.getContext().
 					getSystemService(Context.TELEPHONY_SERVICE);
