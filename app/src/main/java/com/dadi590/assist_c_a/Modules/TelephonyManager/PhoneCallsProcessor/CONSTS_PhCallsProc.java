@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
 
 /**
  * <p>Constants directly related to the Phone Calls Processor module.</p>

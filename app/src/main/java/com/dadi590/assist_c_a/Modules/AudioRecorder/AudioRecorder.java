@@ -27,6 +27,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaRecorder;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -58,6 +61,10 @@ public class AudioRecorder implements IModuleInst {
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -67,7 +74,7 @@ public class AudioRecorder implements IModuleInst {
 			return false;
 		}
 
-		return true;
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {
@@ -75,6 +82,7 @@ public class AudioRecorder implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -97,13 +105,18 @@ public class AudioRecorder implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public AudioRecorder() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
 			intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
 			intentFilter.addAction(CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}

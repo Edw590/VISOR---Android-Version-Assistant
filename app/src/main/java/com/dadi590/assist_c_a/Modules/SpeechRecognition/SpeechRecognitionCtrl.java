@@ -26,6 +26,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -56,6 +59,10 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 	private static final long default_wait_time = 5_000L;
 	long wait_time = default_wait_time;
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -65,7 +72,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 			return false;
 		}
 
-		return infinity_thread.isAlive();
+		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public final void destroy() {
@@ -74,6 +81,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -101,6 +109,10 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public SpeechRecognitionCtrl() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
@@ -111,7 +123,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 

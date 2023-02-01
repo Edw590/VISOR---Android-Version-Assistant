@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -27,6 +27,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.provider.CallLog;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
@@ -41,7 +44,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.UtilsTelephony;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
@@ -68,6 +71,10 @@ public class PhoneCallsProcessor implements IModuleInst {
 	 */
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -77,7 +84,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 			return false;
 		}
 
-		return true;
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {
@@ -85,6 +92,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -109,6 +117,10 @@ public class PhoneCallsProcessor implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public PhoneCallsProcessor() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		mapCallLogToCALL_PHASE = new LinkedHashMap<>(2);
 		mapCallLogToCALL_PHASE.put(CallLog.Calls.INCOMING_TYPE, CALL_PHASE_ANSWERED);
 		mapCallLogToCALL_PHASE.put(CallLog.Calls.MISSED_TYPE, CALL_PHASE_LOST);
@@ -132,7 +144,8 @@ public class PhoneCallsProcessor implements IModuleInst {
 				intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 			}
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}

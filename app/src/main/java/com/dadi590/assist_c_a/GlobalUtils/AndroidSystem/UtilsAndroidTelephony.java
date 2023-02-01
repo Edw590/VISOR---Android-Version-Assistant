@@ -37,7 +37,7 @@ import com.android.internal.telephony.ITelephony;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
-import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.UtilsTelephony;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

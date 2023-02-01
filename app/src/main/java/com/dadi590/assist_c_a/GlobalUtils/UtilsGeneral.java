@@ -35,6 +35,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.os.Build;
+import android.os.HandlerThread;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.KeyEvent;
@@ -299,5 +300,30 @@ public final class UtilsGeneral {
 		((ActivityManager) getContext(). getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(memoryInfo);
 
 		return memoryInfo.lowMemory;
+	}
+
+	/**
+	 * <p>Checks if a Thread state is {@link Thread.State#RUNNABLE}.</p>
+	 *
+	 * @param thread the thread
+	 *
+	 * @return true if working, false if stopped
+	 */
+	public static boolean isThreadWorking(@NonNull final Thread thread) {
+		final Thread.State thread_state = thread.getState();
+		return !((Thread.State.NEW == thread_state) || (Thread.State.TERMINATED == thread_state));
+	}
+
+	/**
+	 * <p>Quit a {@link HandlerThread} safely if on API level 18+, or forcibly if below.</p>
+	 *
+	 * @param handlerThread the handler thread to quit from
+	 */
+	public static void quitHandlerThread(@NonNull final HandlerThread handlerThread) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+			handlerThread.quitSafely();
+		} else {
+			handlerThread.quit();
+		}
 	}
 }

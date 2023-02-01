@@ -37,9 +37,9 @@ import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS_SpeechRecog;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
-import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
-import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
-import com.dadi590.assist_c_a.Modules.Telephony.TelephonyManager;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.TelephonyManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

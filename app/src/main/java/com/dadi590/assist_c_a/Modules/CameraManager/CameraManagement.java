@@ -31,6 +31,7 @@ import android.hardware.Camera;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.AndroidException;
 
@@ -64,6 +65,10 @@ public class CameraManagement implements IModuleInst {
 	boolean flashlight_was_on_before_pic = false;
 	boolean first_pic_of_two = false;
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -81,6 +86,7 @@ public class CameraManagement implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -98,6 +104,10 @@ public class CameraManagement implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public CameraManagement() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
@@ -111,7 +121,8 @@ public class CameraManagement implements IModuleInst {
 			intentFilter.addAction(CONSTS_BC_CameraManag.ACTION_ERR_WRITING_PIC_TO_FILE);
 			intentFilter.addAction(CONSTS_BC_CameraManag.ACTION_ERR_UNSUPPORTED_FLASH_MODE);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 

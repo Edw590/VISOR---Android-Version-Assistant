@@ -99,8 +99,9 @@ public final class UtilsSpeechRecognizers {
 		}
 
 		try {
-			// Wait just a bit before checking if the microphone is available or not (has proven useful on BV9500).
-			Thread.sleep(500);
+			// Wait just a bit before checking if the microphone is available or not (has proven useful on BV9500,
+			// especially after stopping recording).
+			Thread.sleep(650L);
 		} catch (final InterruptedException ignored) {
 			Thread.currentThread().interrupt();
 		}

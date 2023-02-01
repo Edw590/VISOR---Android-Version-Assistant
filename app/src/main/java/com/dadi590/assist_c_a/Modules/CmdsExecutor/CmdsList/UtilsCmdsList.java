@@ -23,7 +23,7 @@ package com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.UtilsTelephony;
 
 import java.util.Locale;
 

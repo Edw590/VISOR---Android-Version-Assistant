@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -27,6 +27,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 
@@ -39,7 +42,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.Telephony.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.UtilsTelephony;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
@@ -47,18 +50,32 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 /**
  * <p>Processes all SMS messages sent by and to the phone.</p>
  */
-public final class SmsMsgsProcessor implements IModuleInst {
+public class SmsMsgsProcessor implements IModuleInst {
+
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
+	private boolean is_module_destroyed = false;
 	@Override
 	public boolean isFullyWorking() {
-		// Always fully-working. The module is currently a "static module" (it's not instantiated).
-		return true;
+		if (is_module_destroyed) {
+			return false;
+		}
+
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public void destroy() {
-		// Nothing to destroy. The module is currently a "static module" (it's not instantiated).
+		try {
+			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
+
+		is_module_destroyed = true;
 	}
 	@Override
 	public final int wrongIsSupported() {return 0;}
@@ -79,13 +96,18 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	 */
 	@SuppressLint("InlinedApi")
 	public SmsMsgsProcessor() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			// Ignore the warning below. The constants exists on API 15, so exists >= API 15.
+			// Ignore the warning below. The constant exists on API 15, so exists at least on >= API 15.
 			intentFilter.addAction(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}
@@ -108,14 +130,13 @@ public final class SmsMsgsProcessor implements IModuleInst {
 			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_time, Long.toString(System.currentTimeMillis()));
 			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_number, sender);
 
+			final String speak;
 			if (UtilsTelephony.isPrivateNumber(sender)) {
-				final String speak = "Sir, attention! New message from a private number!";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+				speak = "Sir, attention! New message from a private number!";
 			} else {
-				final String number_name = UtilsTelephony.getWhatToSayAboutNumber(sender);
-				final String speak = "Sir, new message from " + number_name + ".";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+				speak = "Sir, new message from " + UtilsTelephony.getWhatToSayAboutNumber(sender) + ".";
 			}
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
 		}
 	}
 

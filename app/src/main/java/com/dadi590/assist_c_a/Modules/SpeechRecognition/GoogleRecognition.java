@@ -126,7 +126,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
 		// service won't stop because it's frozen - the thread will take care of that and kill the service.
-		if (!frozen_methods_checker.isAlive()) {
+		if (UtilsGeneral.isThreadWorking(frozen_methods_checker)) {
 			// This check here is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
 			frozen_methods_checker.start();
 		}

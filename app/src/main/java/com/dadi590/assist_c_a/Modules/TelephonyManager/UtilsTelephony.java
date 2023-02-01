@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony;
+package com.dadi590.assist_c_a.Modules.TelephonyManager;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -301,6 +301,7 @@ public final class UtilsTelephony {
 	public static final int CONTACTS_SIM = 1;
 	/**
 	 * <p>Gets all contact names and phone number from the provided location.</p>
+	 * <p>NOTE: this is a possibly slow method. Call from a thread other than the main one if possible.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #ALL_CONTACTS} --> for {@code location_search}: search everywhere for the contact</p>
@@ -333,8 +334,6 @@ public final class UtilsTelephony {
 		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
 
 		try (final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null)) {
-
-			// todo Put this in a thread!!! --> "Skipped 135 frames!"
 
 			if (location_search == ALL_CONTACTS) {
 				if ((cursor != null ? cursor.getCount() : 0) > 0) {

@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.Modules.ModulesManager;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.ModulesList;
@@ -45,7 +46,7 @@ public class ModulesManager implements IModuleInst {
 			return false;
 		}
 
-		return infinity_thread.isAlive();
+		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public final void destroy() {

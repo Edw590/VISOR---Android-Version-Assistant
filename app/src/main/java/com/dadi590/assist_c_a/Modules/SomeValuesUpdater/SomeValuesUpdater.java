@@ -22,6 +22,7 @@
 package com.dadi590.assist_c_a.Modules.SomeValuesUpdater;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 /**
  * <p>The module that periodically updates some values which no other module updates by an event.</p>
@@ -38,7 +39,7 @@ public class SomeValuesUpdater implements IModuleInst {
 			return false;
 		}
 
-		return infinity_thread.isAlive();
+		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public final void destroy() {

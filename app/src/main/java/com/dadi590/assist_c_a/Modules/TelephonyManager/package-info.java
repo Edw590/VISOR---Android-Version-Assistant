@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Modules related to the Phone Telephony.</p>
+ * <p>Modules related to the phone Telephony.</p>
  */
-package com.dadi590.assist_c_a.Modules.Telephony;
+package com.dadi590.assist_c_a.Modules.TelephonyManager;

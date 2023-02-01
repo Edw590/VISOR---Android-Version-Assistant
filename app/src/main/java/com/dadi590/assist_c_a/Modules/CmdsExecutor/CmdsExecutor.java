@@ -30,6 +30,9 @@ import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -52,7 +55,7 @@ import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
-import com.dadi590.assist_c_a.Modules.Telephony.TelephonyManager;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.TelephonyManager;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
@@ -73,7 +76,7 @@ public class CmdsExecutor implements IModuleInst {
 	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
 	private static boolean some_cmd_detected = false;
 
-	static final List<Runnable> runnables = new ArrayList<>(1);
+	static final List<Runnable> after_speak_runnables = new ArrayList<>(10);
 
 	private static final String NO_CMD = "";
 	private class Command {
@@ -99,6 +102,10 @@ public class CmdsExecutor implements IModuleInst {
 	}
 	private Command previous_cmd = new Command();
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -116,6 +123,7 @@ public class CmdsExecutor implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -133,6 +141,10 @@ public class CmdsExecutor implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public CmdsExecutor() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		// Static variable. If the module is restarted, this must be reset.
 		some_cmd_detected = false;
 
@@ -938,7 +950,7 @@ public class CmdsExecutor implements IModuleInst {
 		intentFilter.addAction(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
 
 		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}
@@ -971,7 +983,7 @@ public class CmdsExecutor implements IModuleInst {
 				case CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE: {
 					final int after_speak_code = intent.getIntExtra(
 							CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, -1);
-					for (final Runnable runnable : runnables) {
+					for (final Runnable runnable : after_speak_runnables) {
 						if (runnable.hashCode() == after_speak_code) {
 							runnable.run();
 

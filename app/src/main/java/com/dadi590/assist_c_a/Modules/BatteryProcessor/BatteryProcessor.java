@@ -27,6 +27,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -54,6 +57,10 @@ public class BatteryProcessor implements IModuleInst {
 	boolean actions_power_mode_broadcast = false;
 	boolean better_battery_present = false;
 
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -71,6 +78,7 @@ public class BatteryProcessor implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
 		is_module_destroyed = true;
 	}
@@ -88,6 +96,10 @@ public class BatteryProcessor implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public BatteryProcessor() {
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
+
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
@@ -95,7 +107,7 @@ public class BatteryProcessor implements IModuleInst {
 			intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 			intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}

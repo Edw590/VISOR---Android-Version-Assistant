@@ -82,16 +82,16 @@ final class UtilsCmdsExecutor {
 	static void addRunnableToList(@NonNull final Runnable runnable) {
 		final int hash_code = runnable.hashCode();
 		boolean already_in_array = false;
-		final int runnables_size = CmdsExecutor.runnables.size();
+		final int runnables_size = CmdsExecutor.after_speak_runnables.size();
 		for (int i = 0; i < runnables_size; ++i) {
-			if (hash_code == CmdsExecutor.runnables.get(i).hashCode()) {
+			if (hash_code == CmdsExecutor.after_speak_runnables.get(i).hashCode()) {
 				already_in_array = true;
 
 				break;
 			}
 		}
 		if (!already_in_array) {
-			CmdsExecutor.runnables.add(runnable);
+			CmdsExecutor.after_speak_runnables.add(runnable);
 		}
 	}
 
@@ -101,10 +101,10 @@ final class UtilsCmdsExecutor {
 	 * @param hash_code the hash code of the runnable
 	 */
 	static void removeRunnableFromList(final int hash_code) {
-		final int runnables_size = CmdsExecutor.runnables.size();
+		final int runnables_size = CmdsExecutor.after_speak_runnables.size();
 		for (int i = 0; i < runnables_size; ++i) {
-			if (hash_code == CmdsExecutor.runnables.get(i).hashCode()) {
-				CmdsExecutor.runnables.remove(i);
+			if (hash_code == CmdsExecutor.after_speak_runnables.get(i).hashCode()) {
+				CmdsExecutor.after_speak_runnables.remove(i);
 
 				break;
 			}

@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.Telephony;
+package com.dadi590.assist_c_a.Modules.TelephonyManager;
 
 import android.Manifest;
 
@@ -27,11 +27,14 @@ import androidx.annotation.NonNull;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
-import com.dadi590.assist_c_a.Modules.Telephony.PhoneCallsProcessor.PhoneCallsProcessor;
-import com.dadi590.assist_c_a.Modules.Telephony.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.dadi590.assist_c_a.ModulesList;
 
 /**
@@ -52,7 +55,7 @@ public class TelephonyManager implements IModuleInst {
 			return false;
 		}
 
-		return infinity_thread.isAlive();
+		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public final void destroy() {
@@ -83,6 +86,8 @@ public class TelephonyManager implements IModuleInst {
 	final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
+			boolean module_startup = true;
+
 			final int[] modules_indexes = {
 					ModulesList.getElementIndex(PhoneCallsProcessor.class),
 					ModulesList.getElementIndex(SmsMsgsProcessor.class),
@@ -99,6 +104,12 @@ public class TelephonyManager implements IModuleInst {
 
 					if (ModulesList.isSubModuleSupported(modules_classes[i]) && !ModulesList.isModuleFullyWorking(module_index)) {
 						ModulesList.restartModule(module_index);
+
+						if (!module_startup) {
+							final String speak = "Attention - Module restarted: " +
+									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						}
 					}
 				}
 
@@ -113,6 +124,8 @@ public class TelephonyManager implements IModuleInst {
 					System.out.println("~~~~~~~~~~~~~~~~~~");
 					System.out.println(ALL_CONTACTS.length);
 				}
+
+				module_startup = false;
 
 				try {
 					Thread.sleep(ModulesManager.CHECK_INTERVAL);

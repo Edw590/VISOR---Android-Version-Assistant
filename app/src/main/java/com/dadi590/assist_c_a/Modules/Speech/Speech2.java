@@ -33,6 +33,9 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -48,7 +51,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
-import com.dadi590.assist_c_a.ModulesList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,7 +88,7 @@ public class Speech2 implements IModuleInst {
 
 	So, this works in one line of flow. Infinite speeches are called, and they're all stacked. Once a speech finishes
 	being spoken, it calls the second one on the line. So take things in only on one line of flow (I tried that it is a
-	synchronous class on the speech processing part to be easy to think on).
+	synchronous class on the speech processing part to be easier to think on).
 	*/
 
 	// todo With the Ivona TTS, configure it to work normally, then take the voices out of the folder and try to speak -
@@ -131,7 +133,9 @@ public class Speech2 implements IModuleInst {
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
-	private final int speech_mod_index = ModulesList.getElementIndex(getClass());
+	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private Handler main_handler = null;
+	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -146,7 +150,9 @@ public class Speech2 implements IModuleInst {
 		// It must NEVER be restarted, because it's the only way of communication by the assistant, and also because
 		// this module manages notifications as well, for when the speech is not available (so there's always
 		// communication, and it's this module that takes care of it).
-		return true;
+		// EDIT: and there will be no restarts --> as long as the module is correctly programmed. But it must be on a
+		// thread... Can't be all in the same thread! Especially all this stuff to process the speeches.
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {
@@ -154,6 +160,8 @@ public class Speech2 implements IModuleInst {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
+		UtilsGeneral.quitHandlerThread(main_handlerThread);
+
 		if (null != tts) {
 			tts.stop();
 		}
@@ -184,7 +192,7 @@ public class Speech2 implements IModuleInst {
 						(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
 				GL_CONSTS.CH_ID_SPEECHES, "Not spoken text", "Text skipped in speech for whatever reason, like no " +
-				"device sound)", NotificationCompat.PRIORITY_MAX, GL_CONSTS.ASSISTANT_NAME + " notifications", "",
+				"device sound", NotificationCompat.PRIORITY_MAX, GL_CONSTS.ASSISTANT_NAME + " notifications", "",
 				pendingIntent);
 		speeches_notif_builder = UtilsNotifications.getNotification(notificationInfo).
 				setVisibility(NotificationCompat.VISIBILITY_PRIVATE).
@@ -196,9 +204,14 @@ public class Speech2 implements IModuleInst {
 
 		audio_output_supported = UtilsCheckHardwareFeatures.isAudioOutputSupported();
 
-		// Even if audio is not supported, prepare everything anyway. Some device that can output audio can be connected
-		// and then audio output is available - this module should be ready for that already, and this way it is.
+		// Even if audio is not supported, prepare everything anyway. Some external device that can output audio
+		// (microphone or camera with microphone or whatever) can be connected and then audio output is available - this
+		// module should be ready for that already, and this way it is.
 		UtilsSpeech2.readyArrayLists(arrays_speech_objs);
+
+		main_handlerThread.start();
+		main_looper = main_handlerThread.getLooper();
+		main_handler = new Handler(main_looper);
 
 		// By the way, this must ALWAYS be called here. The entire module expects the tts object to never be null after
 		// the constructor is called.
@@ -1190,7 +1203,7 @@ public class Speech2 implements IModuleInst {
 		intentFilter.addAction(ACTION_CLEAR_NOTIF_MSGS);
 
 		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter);
+			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 
 			// Don't take this out of here. This way, this function can be called as many times as needed and it will
 			// only act if it's the first time - else, the exception will be thrown (the receiver is already registered)
@@ -1200,7 +1213,7 @@ public class Speech2 implements IModuleInst {
 		}
 	}
 
-	public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 			if (intent == null || intent.getAction() == null) {
