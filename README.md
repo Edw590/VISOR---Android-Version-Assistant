@@ -53,8 +53,11 @@ The app is also able to work with root access and system permissions. The prefer
 
 ## Possible commands list
 List of all commands and variations available (optional words are in "[...]" and generic descriptions are in "(...)").
+
 (Note: there is more than one way to say a command, with synonyms and random words in between ("switch on the phone's wifi", "what's the current time", "terminate the phone call", "call my friend number 2" (when the contact is just called "friend 2").)
+
 Note 2: all this is listed inside the app.
+
 ```
 --> Turn on/off flashlight/lantern
 --> (Ask for the time)
