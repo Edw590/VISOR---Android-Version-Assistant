@@ -1,4 +1,3 @@
-
 # V.I.S.O.R. - A better Android assistant
 Secondary project name: Assist_C_A (Assistant Client Android)
 
@@ -8,17 +7,20 @@ This project is a part of a bigger project, consisting of the following:
 - [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
 
 ## Download
-Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from https://github.com/DADi590/VISOR---A-better-Android-assistant/releases, clicking on Assets.
+Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from the [releases](https://github.com/DADi590/VISOR---A-better-Android-assistant/releases), clicking on Assets.
 
 They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. As they're pre-releases, I'm releasing them as debug type. Why not, anyway.
 
 ## Pictures
 <img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
 
+**NOTE: the commands list picture is outdated. Check below for a complete list.**
+
 ## Table of Contents
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
-- [Current modules (features)](#current-modules-features)
+- [Possible commands list](#possible-commands-list)
+- [Current features (modules and submodules)](#current-features-modules-and-submodules)
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
 - - [To compile the app](#--to-compile-the-app)
@@ -49,15 +51,51 @@ The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I li
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
-## Current modules (features)
+## Possible commands list
+List of all commands and variations available (optional words are in "[...]" and generic descriptions are in "(...)").
+
+(Note: there is more than one way to say a command, with synonyms and random words in between ("switch on the phone's wifi", "what's the current time", "terminate the phone call", "call my friend number 2" (when the contact is just called "friend 2").)
+
+Note 2: all this is listed inside the app.
+
+```
+--> Turn on/off flashlight/lantern
+--> (Ask for the time)
+--> (Ask for the date)
+--> Turn on/off Wi-Fi
+--> Turn on/off mobile data
+--> Turn on/off bluetooth
+--> Answer call
+--> End call
+--> Turn on/off speaker/speakers
+--> Turn on/off airplane mode
+--> (Ask for the battery percentage/status/level)
+--> Shut down the device/phone
+--> [Fast] reboot the device/phone [into recovery/safe mode/bootloader]
+--> Take a [frontal] picture/photo
+--> Record audio/sound
+--> (Ask to repeat what was just said)
+--> Call (a contact name)
+--> Turn on/off the power/battery saver mode
+--> Stop recording [audio/sound]
+--> Stop media/song/music/video
+--> Pause media/song/music/video
+--> Play media/song/music/video"
+--> Next media/song/music/video
+--> Previous media/song/music/video
+--> I do/confirm/approve/certify (confirm action when VISOR requests it)
+--> I don't/reject/disapprove (reject action instead)
+```
+
+## Current features (modules and submodules)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
-- **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because is in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
+- **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because it's in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, and understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
 - **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name - it's not very accurate unfortunately, but there's really nothing I can do about it), which then calls Google speech recognition to recognize normal speech (very very good accuracy, and in which you can say commands, like "turn on the wifi and the bluetooth and what time is it"). You can also call the commands recognizer directly by pressing and holding the Power key while the screen is on, on Android versions up to Pie (Android 9). Above that, the Power key detection doesn't work (Android security policies), and as I don't own a device with Android 10+, I haven't taken care of finding a replacement way.
 - **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named V.I.S.O.R.. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording...
 - **Camera Manager** --> Manages the camera usage. It's supposed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
 - **Battery Processor** --> Processes the device battery level and warns if it's outside of normal ranges. For now, 5% or below, extremelly low battery; 20% or below, low battery; above 80%, battery charged enough to the recommended Lithum-Ion batteries percentage (from 20% to 80%, and varying as little as possible); 100%, battery completely charged.
-- Telephony:
-- - Note: all the modules here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related to that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
+- **TelephonyManager** --> Manages the 2 submodules mentioned below, and keeps an internal list of all phone contacts updated to be used for command detection. The list is being updated every 10 seconds.
+- - Note: everything here that need to get the contact name of a phone number will do it like this. If the phone number is only numeric (like +351 123 456 789 in case of Portugal), it will get the name related to that number. If the "number" has letters on it, it will warn it's an alphanumeric number (like "PayPal"). If it's a private number, it will say it's a private number. If it found different names for the same phone number, it will warn it detected multiple matches on that number.
 - - **Phone Calls Processor** --> Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me).
 - - **SMS messages Processor** --> Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts).
 - **Speech module** --> Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. Some important notes here:
@@ -75,7 +113,7 @@ Install the app either as a perfectly normal app, or as a privileged system app 
 
 After that, currently just click on the permissions button and accept everything (or what you'd like to accept - though I'm not/will not steal anything, so you can accept everything, if you want), and that's it. The app will do everything automatically (there's not much to do manually with it yet - only recording audio is manual for now).
 
-To know what you can do, have a look on the Available commands view on the app and also ready the explanations about its modules/features.
+To know what you can do, have a look on the Available commands view on the app. To know what the app can do, have a look on the explanations about its features.
 
 ## For developers
 ### - To compile the app
