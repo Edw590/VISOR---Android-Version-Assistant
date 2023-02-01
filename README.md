@@ -7,7 +7,7 @@ This project is a part of a bigger project, consisting of the following:
 - [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
 
 ## Download
-Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from https://github.com/DADi590/VISOR---A-better-Android-assistant/releases, clicking on Assets.
+Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from the [releases](https://github.com/DADi590/VISOR---A-better-Android-assistant/releases), clicking on Assets.
 
 They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. As they're pre-releases, I'm releasing them as debug type. Why not, anyway.
 
