@@ -288,7 +288,7 @@
 		 "android:process" attribute that causes it to run in a separate process, that process will NOT be persistent. -->
 		<!-- On the services that say the type is for location, I just think location will be given more priority for
 		 anything that it's done with this. -->
-		<service android:name="com.dadi590.assist_c_a.MainSrv.MainSrv"
+		<service android:name="com.dadi590.assist_c_a.MainSrvc.MainSrvc"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true" />

@@ -27,7 +27,7 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.UtilsProtectedLockScr;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -55,7 +55,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 		// Not used to have this here if the app is to force the authorization from time to time.
 		//UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, null);
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 	}
 
 	@NonNull
@@ -68,7 +68,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.PRIORITY_HIGH, null);
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 
 		return CONSTS.RET_STR_DISABLE_REQUESTED;
 	}
@@ -91,6 +91,6 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 		// would still say the administrator mode is enabled after saying it was disabled --> wtf. This fixes that.
 		UtilsSpeech2BC.removeSpeechByStr(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, true);
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 	}
 }

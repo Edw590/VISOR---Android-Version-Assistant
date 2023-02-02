@@ -30,8 +30,6 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.MainSrv.MainSrv;
-
 /**
  * <p>Global {@link Service}s-related utilities.</p>
  */
@@ -105,26 +103,6 @@ public final class UtilsServices {
 		// Do NOT call this in high frequency. It's said on the docs that it takes various milliseconds to process this
 		// call.
 		context.startService(intent_to_use);
-	}
-
-	/**
-	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
-	 * <p>What it does:</p>
-	 * <p>- Checks if the app is signed by its supposed certificates, and if it's not, it will kill itself silently;</p>
-	 * <p>- Starts the Main Service.</p>
-	 */
-	public static void startMainService() {
-		if (UtilsCertificates.isThisAppCorrupt()) {
-			// This is just in case it's possible to patch the APK like it is with binary files without needing the
-			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
-			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.
-			// It's also in case something changes on the APK because of some corruption. The app won't start.
-			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
-
-			return;
-		}
-
-		UtilsServices.startService(MainSrv.class, null, true, false);
 	}
 
 	/**

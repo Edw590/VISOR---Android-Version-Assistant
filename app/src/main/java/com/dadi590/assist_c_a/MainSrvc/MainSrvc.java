@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.MainSrv;
+package com.dadi590.assist_c_a.MainSrvc;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -51,7 +51,7 @@ import com.dadi590.assist_c_a.ModulesList;
 /**
  * The main {@link Service} of the application - MainService.
  */
-public class MainSrv extends Service {
+public class MainSrvc extends Service {
 
 	//////////////////////////////////////
 	// Class variables
@@ -108,7 +108,7 @@ public class MainSrv extends Service {
 		// the assistant.
 		// EDIT: the Speech2 module has now notifications integrated into it, so it's still the thing to start before
 		// everything else.
-		ModulesList.startModule(ModulesList.getElementIndex(Speech2.class));
+		ModulesList.startElement(ModulesList.getElementIndex(Speech2.class));
 	}
 
 	final Thread infinity_thread = new Thread(new Runnable() {
@@ -122,8 +122,8 @@ public class MainSrv extends Service {
 				UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_FORCE);
 
 				// Keep checking if the Modules Manager is working and in case it's not, restart it.
-				if (!ModulesList.isModuleFullyWorking(mods_manager_index)) {
-					ModulesList.restartModule(mods_manager_index);
+				if (!ModulesList.isElementFullyWorking(mods_manager_index)) {
+					ModulesList.restartElement(mods_manager_index);
 					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
 					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 				}
@@ -162,7 +162,7 @@ public class MainSrv extends Service {
 				MainRegRecv.registerReceivers();
 
 				// Start the Modules Manager.
-				ModulesList.startModule(ModulesList.getElementIndex(ModulesManager.class));
+				ModulesList.startElement(ModulesList.getElementIndex(ModulesManager.class));
 				infinity_thread.start();
 
 				UtilsRoot.checkWarnRootAccess(false);
@@ -222,22 +222,22 @@ public class MainSrv extends Service {
 				//  a loop or whatever. Or with some event that the app could broadcast when it detects granted or
 				//  denied permissions (this could be useful...).
 				// Enable the power button long press detection.
-				switch (UtilsMainSrv.startLongPwrBtnDetection()) {
-					case UtilsMainSrv.UNSUPPORTED_OS_VERSION: {
+				switch (UtilsMainSrvc.startLongPwrBtnDetection()) {
+					case UtilsMainSrvc.UNSUPPORTED_OS_VERSION: {
 						final String speak = "The power button long press detection will not be available. Your " +
 								"Android version is not supported.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 						break;
 					}
-					case UtilsMainSrv.UNSUPPORTED_HARDWARE: {
+					case UtilsMainSrvc.UNSUPPORTED_HARDWARE: {
 						final String speak = "The power button long press detection will not be available. " +
 								"Your hardware does not seem to support the detection.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 						break;
 					}
-					case UtilsMainSrv.PERMISSION_DENIED: {
+					case UtilsMainSrvc.PERMISSION_DENIED: {
 						final String speak = "The power button long press detection will not be available. The " +
 								"permission to draw a system overlay was denied.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);

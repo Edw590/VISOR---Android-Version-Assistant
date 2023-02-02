@@ -41,7 +41,7 @@ import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 
 /**
  * <p>The Protected Lock Screen service, which is basically an insurance that the Protected Lock Screen activity is
@@ -87,7 +87,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 				setOngoing(true).
 				build());
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_USER_PRESENT);
@@ -107,7 +107,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 	private final BroadcastReceiver localBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			UtilsServices.startMainService();
+			UtilsMainSrvc.startMainService();
 
 			if (intent == null || intent.getAction() == null) {
 				return;
@@ -157,7 +157,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 			while (locked) {
 				UtilsProtectedLockScr.showPLS(intentPLS);
 
-				UtilsServices.startMainService();
+				UtilsMainSrvc.startMainService();
 
 				try {
 					Thread.sleep(1000L);

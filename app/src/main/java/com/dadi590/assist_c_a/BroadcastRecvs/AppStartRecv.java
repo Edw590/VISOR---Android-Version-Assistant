@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 
 /**
  * <p>The {@link BroadcastReceiver} to be used to start the app by detecting ANY system-wide broadcast.</p>
@@ -48,7 +48,7 @@ public class AppStartRecv extends BroadcastReceiver {
 			UtilsPermsAuths.forceDeviceAdmin();
 		}
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 
 		System.out.println("PPPPPPPPPPPPPPPPPP-BootRcv - " + (null != intent ? intent.getAction() : null));
 

@@ -45,6 +45,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -114,7 +115,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 
 		// Lock the device immediately.
 		UtilsDeviceAdmin.lockDevice();
@@ -156,14 +157,14 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 
 		// Do this below every time the activity is started/resumed/whatever
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 	}
 
 	@Override
 	protected final void onStop() {
 		super.onStop();
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 	}
 
 	// todo In Samsung A50, the activity takes too much time to get back to foreground and we can mess with the status

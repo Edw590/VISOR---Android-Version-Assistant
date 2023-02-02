@@ -33,7 +33,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 import com.dadi590.assist_c_a.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -50,7 +50,7 @@ public class ActMain extends AppCompatActivity {
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 		UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
 		UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
 
@@ -81,6 +81,6 @@ public class ActMain extends AppCompatActivity {
 
 		// Do this below every time the activity is started/resumed/whatever
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 	}
 }

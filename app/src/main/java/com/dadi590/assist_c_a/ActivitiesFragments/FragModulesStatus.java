@@ -78,7 +78,7 @@ public class FragModulesStatus extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		for (int module_index = 0; module_index < ModulesList.sub_and_modules_list_length; ++module_index) { // Add a Switch for each module.
+		for (int module_index = 0; module_index < ModulesList.elements_list_length; ++module_index) { // Add a Switch for each module.
 			final int elem_type2 = (int) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_TYPE2);
 			final CharSequence elem_name = (CharSequence) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
 
@@ -108,7 +108,7 @@ public class FragModulesStatus extends Fragment {
 				// If it's not a module, then always green (always "supported" - its main module is the checked one).
 				final int color;
 				if (ModulesList.TYPE2_MODULE == elem_type2) {
-					color = ModulesList.isModuleFullyWorking(module_index) ? Color.parseColor(color_accent)
+					color = ModulesList.isElementFullyWorking(module_index) ? Color.parseColor(color_accent)
 							: Color.parseColor("#FFFF8800");
 				} else {
 					color = Color.parseColor(color_accent);
@@ -131,7 +131,7 @@ public class FragModulesStatus extends Fragment {
 		public void run() {
 			while (true) { // Keep checking the modules' status.
 				System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-				for (int module_index = 0; module_index < ModulesList.sub_and_modules_list_length; ++module_index) {
+				for (int module_index = 0; module_index < ModulesList.elements_list_length; ++module_index) {
 					final SwitchCompat switchCompat = current_view.findViewById(module_index);
 
 					final boolean module_running = ModulesList.isElementRunning(module_index);

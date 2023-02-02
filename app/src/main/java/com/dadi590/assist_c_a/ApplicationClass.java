@@ -30,7 +30,7 @@ import androidx.multidex.MultiDex;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 
@@ -101,7 +101,7 @@ public final class ApplicationClass extends Application {
 		// Prepare the Advanced Commands Detection module commands array
 		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 
-		UtilsServices.startMainService();
+		UtilsMainSrvc.startMainService();
 
 		if (!UtilsApp.isDeviceAdmin()) {
 			UtilsPermsAuths.forceDeviceAdmin();

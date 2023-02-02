@@ -60,8 +60,8 @@ public class TelephonyManager implements IModuleInst {
 	@Override
 	public final void destroy() {
 		infinity_thread.interrupt();
-		ModulesList.stopModule(ModulesList.getElementIndex(PhoneCallsProcessor.class));
-		ModulesList.stopModule(ModulesList.getElementIndex(SmsMsgsProcessor.class));
+		ModulesList.stopElement(ModulesList.getElementIndex(PhoneCallsProcessor.class));
+		ModulesList.stopElement(ModulesList.getElementIndex(SmsMsgsProcessor.class));
 
 		is_module_destroyed = true;
 	}
@@ -102,8 +102,8 @@ public class TelephonyManager implements IModuleInst {
 				for (int i = 0; i < num_modules; ++i) {
 					final int module_index = modules_indexes[i];
 
-					if (ModulesList.isSubModuleSupported(modules_classes[i]) && !ModulesList.isModuleFullyWorking(module_index)) {
-						ModulesList.restartModule(module_index);
+					if (ModulesList.isElementSupported(modules_classes[i]) && !ModulesList.isElementFullyWorking(module_index)) {
+						ModulesList.restartElement(module_index);
 
 						if (!module_startup) {
 							final String speak = "Attention - Module restarted: " +

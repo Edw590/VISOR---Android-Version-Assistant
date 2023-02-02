@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.MainSrv;
+package com.dadi590.assist_c_a.MainSrvc;
 
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -29,7 +29,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsCertificates;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
@@ -39,12 +42,32 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 /**
  * <p>Main Service related utilities.</p>
  */
-public final class UtilsMainSrv {
+public final class UtilsMainSrvc {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private UtilsMainSrv() {
+	private UtilsMainSrvc() {
+	}
+
+	/**
+	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
+	 * <p>What it does:</p>
+	 * <p>- Checks if the app is signed by its supposed certificates, and if it's not, it will kill itself silently;</p>
+	 * <p>- Starts the Main Service.</p>
+	 */
+	public static void startMainService() {
+		if (UtilsCertificates.isThisAppCorrupt()) {
+			// This is just in case it's possible to patch the APK like it is with binary files without needing the
+			// source. So in this case, a new APK must be installed, and the current one can't be modified, or the
+			// signature will change. Though if it can be patched, maybe this can too be patched. Whatever.
+			// It's also in case something changes on the APK because of some corruption. The app won't start.
+			android.os.Process.killProcessQuiet(UtilsProcesses.getCurrentPID());
+
+			return;
+		}
+
+		UtilsServices.startService(MainSrvc.class, null, true, false);
 	}
 
 	public static final int DETECTION_ACTIVATED = 0;
