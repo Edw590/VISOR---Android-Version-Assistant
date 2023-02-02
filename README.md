@@ -119,7 +119,7 @@ To know what you can do, have a look on the Available commands view on the app. 
 ### - To compile the app
 - I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 - Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api and/or https://github.com/Reginer/aosp-android-jar.
-- Another thing needed to run the app without signing it with my certificate is to go to UtilsServices and comment the signature/app corruption check on startMainService().
+- Another thing needed to run the app without signing it with my certificate is to go to UtilsMainSrvc and comment the signature/app corruption check on startMainService().
 - I have may also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
 
 Now a small explanation of the app structure:
