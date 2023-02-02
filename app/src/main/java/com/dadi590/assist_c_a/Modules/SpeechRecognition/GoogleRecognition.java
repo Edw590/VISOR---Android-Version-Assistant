@@ -185,7 +185,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 
 
 			// Vibrate to indicate it's ready to listen.
-			UtilsGeneral.vibrateDeviceOnce(400L);
+			UtilsGeneral.vibrateDeviceOnce(300L);
 		}
 
 		@Override
