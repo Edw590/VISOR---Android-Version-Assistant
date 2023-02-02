@@ -929,7 +929,6 @@ public class CmdsExecutor implements IModuleInst {
 
 		if (some_cmd_detected) {
 			// Vibrate to indicate it did something.
-			// Twice because vibrate once only is when he's listening for commands.
 			UtilsGeneral.vibrateDeviceOnce(200L);
 
 			return SOMETHING_EXECUTED;

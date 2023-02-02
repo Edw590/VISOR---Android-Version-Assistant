@@ -193,7 +193,7 @@ public final class UtilsGeneral {
 	public static void vibrateDeviceOnce(final long duration) {
 		final Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+			vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.MAX_AMPLITUDE));
 		} else {
 			vibrator.vibrate(duration);
 		}

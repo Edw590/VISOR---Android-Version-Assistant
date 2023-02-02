@@ -106,12 +106,10 @@ public class GoogleRecognition extends Service implements IModuleSrv {
         This below is supposed to fix that - if there's not EXTRA_TIME_START on the intent with a time that is 1 second
         or less ago relative to the current time, the service will be stopped immediately.
         */
-		final boolean stop_now;
+		boolean stop_now = true;
 		if (intent != null && intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
 			// Must have been called 1 second ago at most - else it was the system restarting it or something.
 			stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
-		} else {
-			stop_now = true;
 		}
 		if (stop_now) {
 			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
@@ -125,9 +123,9 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 		UtilsApp.sendInternalBroadcast(intent1);
 
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
-		// service won't stop because it's frozen - the thread will take care of that and kill the service.
+		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
 		if (!UtilsGeneral.isThreadWorking(frozen_methods_checker)) {
-			// This check here is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
+			// This check here above is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
 			frozen_methods_checker.start();
 		}
 
@@ -187,7 +185,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 
 
 			// Vibrate to indicate it's ready to listen.
-			UtilsGeneral.vibrateDeviceOnce(100L);
+			UtilsGeneral.vibrateDeviceOnce(400L);
 		}
 
 		@Override
