@@ -21,12 +21,12 @@
 
 package com.dadi590.assist_c_a.Modules.CameraManager;
 
+import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
@@ -41,6 +41,7 @@ import androidx.annotation.RequiresApi;
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
@@ -78,7 +79,7 @@ public class CameraManagement implements IModuleInst {
 			return false;
 		}
 
-		return true;
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {
@@ -88,6 +89,15 @@ public class CameraManagement implements IModuleInst {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
+		if (camera_old != null) {
+			try {
+				camera_old.stopPreview();
+			} catch (final RuntimeException ignored) {
+			}
+			camera_old.release();
+		}
+		camera_old = null;
+
 		is_module_destroyed = true;
 	}
 	@Override
@@ -95,7 +105,12 @@ public class CameraManagement implements IModuleInst {
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
-		return UtilsCheckHardwareFeatures.isCameraSupported();
+		// If the flash is available, the module is already useful (no runtime permission is required to control the
+		// flash). If there's no flash, then there must at least exist a camera, and we must hold the CAMERA permission.
+		// If nothing of this, module not supported.
+		return UtilsCheckHardwareFeatures.isCameraFlashSupported() ||
+				(UtilsCheckHardwareFeatures.isCameraSupported() &&
+						UtilsPermsAuths.checkSelfPermission(Manifest.permission.CAMERA));
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -168,10 +183,9 @@ public class CameraManagement implements IModuleInst {
 	public static final int USAGE_RECORD_REAR_VIDEO = 4;
 	public static final int USAGE_RECORD_FRONTAL_VIDEO = 5;
 	public static final int NOTHING_DONE = 0;
-	public static final int NO_CAMERAS = 1;
-	public static final int CAMERA_DISABLED_ADMIN = 2;
-	public static final int NO_CAMERA_FLASH = 3;
-	public static final int CAMERA_IN_USAGE = 4;
+	public static final int CAMERA_DISABLED_ADMIN = 1;
+	public static final int NO_CAMERA_FLASH = 2;
+	public static final int CAMERA_IN_USAGE = 3;
 	/**
 	 * <p>Function to call to use any camera service, like the flashlight, taking photos or recording a video.</p>
 	 * <p>For example, in case the flashlight is turned on and a photo or a video recording is requested, the flashlight
@@ -187,7 +201,6 @@ public class CameraManagement implements IModuleInst {
 	 * <p>---------------</p>
 	 * <p>- {@link #NOTHING_DONE} --> for the returning value: in case nothing was done due to wrong parameters passed
 	 * to the function</p>
-	 * <p>- {@link #NO_CAMERAS} --> for the returning value: the device does not feature any camera</p>
 	 * <p>- {@link #CAMERA_DISABLED_ADMIN} --> for the returning value: the camera has been disabled by Device
 	 * Administrators</p>
 	 * <p>- {@link #NO_CAMERA_FLASH} --> for the returning value: the device does not feature camera flash</p>
@@ -206,87 +219,78 @@ public class CameraManagement implements IModuleInst {
 	 * @return one of the constants
 	 */
 	final int useCamera(final int usage) {
-		final Context context = UtilsGeneral.getContext();
-
-		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-			final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.
-					getSystemService(Context.DEVICE_POLICY_SERVICE);
-			if (devicePolicyManager.getCameraDisabled(null)) {
-				final String speak = "Error - Cameras disabled by a Device Administrator.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-				return CAMERA_DISABLED_ADMIN;
-			}
-
-			if (USAGE_FLASHLIGHT_ON == usage || USAGE_FLASHLIGHT_OFF == usage) {
-				if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-					final boolean turn_on_flashlight = FLASHLIGHT_SET_ON == usage;
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-						return flashlightNew(turn_on_flashlight);
-					} else {
-						// Below Marshmallow, one needs to use the old Camera API, even on Lollipop (so ignore the
-						// deprecation warning - it's because of being running on that its complaining, but that's the
-						// official way).
-						if (turn_on_flashlight) {
-							if (null == camera_old) {
-								// Request the back camera, as that's the one that has the flashlight on it.
-								camera_old = UtilsCameraManager.openCamera(true);
-								if (null == camera_old) {
-									final String speak = "Error - Camera already in use.";
-									UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-									return CAMERA_IN_USAGE;
-								}
-							}
-						}
-
-						return flashlightOld(turn_on_flashlight ? FUNCTION_SET_ON : FUNCTION_SET_OFF);
-					}
-				} else {
-					final String speak = "Error - No camera flash available.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-					return NO_CAMERA_FLASH;
-				}
-			}
-
-			switch (usage) {
-				case USAGE_TAKE_REAR_PHOTO:
-				case USAGE_TAKE_FRONTAL_PHOTO: {
-					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
-						if (null == takePictureOld && null == camera_old) {
-							first_pic_of_two = true;
-							takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_MODE_OFF_ON, 100);
-
-							System.out.println("################################");
-						} else {
-							final String speak = "Error - Camera already in use.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
-
-							return CAMERA_IN_USAGE;
-						}
-					}/* else {
-						// todo
-					}*/
-
-					break;
-				}
-				/*case USAGE_RECORD_REAR_VIDEO:
-				case USAGE_RECORD_FRONTAL_VIDEO: {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
-						// todo
-					} else {
-						// todo
-					}
-
-					break;
-				}*/
-			}
-		} else {
-			final String speak = "Error - No cameras in the device.";
+		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext().
+				getSystemService(Context.DEVICE_POLICY_SERVICE);
+		if (devicePolicyManager.getCameraDisabled(null)) {
+			final String speak = "Error - Cameras disabled by a Device Administrator.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
-			return NO_CAMERAS;
+			return CAMERA_DISABLED_ADMIN;
+		}
+
+		if (USAGE_FLASHLIGHT_ON == usage || USAGE_FLASHLIGHT_OFF == usage) {
+			if (UtilsCheckHardwareFeatures.isCameraFlashSupported()) {
+				final boolean turn_on_flashlight = FLASHLIGHT_SET_ON == usage;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+					return flashlightNew(turn_on_flashlight);
+				} else {
+					// Below Marshmallow, one needs to use the old Camera API, even on Lollipop (so ignore the
+					// deprecation warning - it's because of being running on that its complaining, but that's the
+					// official way).
+					if (turn_on_flashlight) {
+						if (null == camera_old) {
+							// Request the back camera, as that's the one that has the flashlight on it.
+							camera_old = UtilsCameraManager.openCamera(true);
+							if (null == camera_old) {
+								final String speak = "Error - Camera already in use.";
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+								return CAMERA_IN_USAGE;
+							}
+						}
+					}
+
+					return flashlightOld(turn_on_flashlight ? FUNCTION_SET_ON : FUNCTION_SET_OFF);
+				}
+			} else {
+				final String speak = "Error - No camera flash available.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+				return NO_CAMERA_FLASH;
+			}
+		}
+
+		switch (usage) {
+			case USAGE_TAKE_REAR_PHOTO:
+			case USAGE_TAKE_FRONTAL_PHOTO: {
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
+					if (null == takePictureOld && null == camera_old) {
+						first_pic_of_two = true;
+						takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_MODE_OFF_ON, 100);
+
+						System.out.println("################################");
+					} else {
+						final String speak = "Error - Camera already in use.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+
+						return CAMERA_IN_USAGE;
+					}
+				}/* else {
+					// todo
+				}*/
+
+				break;
+			}
+			/*case USAGE_RECORD_REAR_VIDEO:
+			case USAGE_RECORD_FRONTAL_VIDEO: {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+					// todo
+				} else {
+					// todo
+				}
+
+				break;
+			}*/
 		}
 
 		return NOTHING_DONE;

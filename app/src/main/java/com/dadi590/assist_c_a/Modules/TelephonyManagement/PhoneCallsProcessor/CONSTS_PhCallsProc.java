@@ -19,27 +19,23 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
-
-import androidx.annotation.Nullable;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor;
 
 /**
- * <p>A class to be used as a "multi-type array" for the returning value of
- * {@link PhoneCallsProcessor#getCallPhase(int, String)}.</p>
+ * <p>Constants directly related to the Phone Calls Processor module.</p>
  */
-class NumAndPhase {
+public final class CONSTS_PhCallsProc {
 
-	@Nullable final String phone_number;
-	final int call_phase;
+	// TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED - Android Studio doesn't find it, even though I see it there
+	// (???)
+	static final String ACTION_PRECISE_CALL_STATE_CHANGED = "android.intent.action.PRECISE_CALL_STATE";
+	static final String EXTRA_RINGING_CALL_STATE = "ringing_state";
+	static final String EXTRA_FOREGROUND_CALL_STATE = "foreground_state";
+	static final String EXTRA_BACKGROUND_CALL_STATE = "background_state";
 
 	/**
-	 * <p>Main class constructor.</p>
-	 *
-	 * @param phone_number the phone number directly from the intent extra (null or not --> directly)
-	 * @param call_phase one of the {@code CALL_PHASE_} constants in {@link PhoneCallsProcessor}
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	NumAndPhase(@Nullable final String phone_number, final int call_phase) {
-		this.phone_number = phone_number;
-		this.call_phase = call_phase;
+	private CONSTS_PhCallsProc() {
 	}
 }

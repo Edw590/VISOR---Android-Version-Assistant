@@ -22,4 +22,4 @@
 /**
  * <p>Everything directly related to the assistant's phone call processor.</p>
  */
-package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor;

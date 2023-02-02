@@ -70,7 +70,7 @@ public class BatteryProcessor implements IModuleInst {
 			return false;
 		}
 
-		return true;
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {

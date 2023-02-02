@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.TelephonyManager;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement;
 
 import android.Manifest;
 
@@ -33,15 +33,15 @@ import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor.PhoneCallsProcessor;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.dadi590.assist_c_a.ModulesList;
 
 /**
  * <p>The module that manages all telephony-related things, including the Phone Calls Processor and the SMS Messages
  * Processor submodules.</p>
  */
-public class TelephonyManager implements IModuleInst {
+public class TelephonyManagement implements IModuleInst {
 
 	@NonNull
 	public static String[][] ALL_CONTACTS = {};
@@ -79,7 +79,7 @@ public class TelephonyManager implements IModuleInst {
 	/**
 	 * <p>Main class constructor.</p>
 	 */
-	public TelephonyManager() {
+	public TelephonyManagement() {
 		infinity_thread.start();
 	}
 

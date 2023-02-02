@@ -19,7 +19,27 @@
  * under the License.
  */
 
+package com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor;
+
+import androidx.annotation.Nullable;
+
 /**
- * <p>Modules related to the phone Telephony.</p>
+ * <p>A class to be used as a "multi-type array" for the returning value of
+ * {@link PhoneCallsProcessor#getCallPhase(int, String)}.</p>
  */
-package com.dadi590.assist_c_a.Modules.TelephonyManager;
+class NumAndPhase {
+
+	@Nullable final String phone_number;
+	final int call_phase;
+
+	/**
+	 * <p>Main class constructor.</p>
+	 *
+	 * @param phone_number the phone number directly from the intent extra (null or not --> directly)
+	 * @param call_phase one of the {@code CALL_PHASE_} constants in {@link PhoneCallsProcessor}
+	 */
+	NumAndPhase(@Nullable final String phone_number, final int call_phase) {
+		this.phone_number = phone_number;
+		this.call_phase = call_phase;
+	}
+}

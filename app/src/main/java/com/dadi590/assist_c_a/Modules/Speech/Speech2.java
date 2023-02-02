@@ -164,6 +164,8 @@ public class Speech2 implements IModuleInst {
 
 		if (null != tts) {
 			tts.stop();
+			tts.shutdown();
+			tts = null;
 		}
 
 		is_module_destroyed = true;
@@ -227,11 +229,20 @@ public class Speech2 implements IModuleInst {
 	final void initializeTts(final boolean from_constructor) {
 		System.out.println("3333333333333333333333333");
 
+		if (!from_constructor) {
+			// If it's not from the constructor, it's not null and therefore the resources must be released before
+			// reinitializing the TTS.
+			tts.stop();
+			tts.shutdown();
+			tts = null;
+		}
+
 		tts = new TextToSpeech(UtilsGeneral.getContext(), new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(final int status) {
 				System.out.println("222222222222222222222222222222");
-				success_if: if (status == TextToSpeech.SUCCESS) {
+				success_if:
+				if (status == TextToSpeech.SUCCESS) {
 					System.out.println("1111111111111111111111111111111111");
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 

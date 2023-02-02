@@ -37,9 +37,9 @@ import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS_SpeechRecog;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor.PhoneCallsProcessor;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor.SmsMsgsProcessor;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.TelephonyManager;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -102,7 +102,7 @@ public final class ModulesList {
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, TYPE2_MODULE),
 			//new ElementObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(BatteryProcessor.class, "Battery Processor", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(TelephonyManager.class, "Telephony Manager", TYPE1_INSTANCE, TYPE2_MODULE),
+			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, TYPE2_MODULE),

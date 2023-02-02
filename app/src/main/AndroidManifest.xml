@@ -36,6 +36,7 @@
 	 be known to be granted with "pm grant" with root commands, not just if the app is a system app. -->
 
 	<!-- Normal+ permissions -->
+	<uses-permission android:name="android.permission.FLASHLIGHT" />
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
@@ -53,6 +54,7 @@
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous+ permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
+	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.RECEIVE_SMS" />
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

@@ -43,7 +43,6 @@ final class PERMS_CONSTS {
 			{Manifest.permission.INTERNET, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.ACCESS_NETWORK_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECEIVE_BOOT_COMPLETED, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.ACCESS_WIFI_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.CHANGE_WIFI_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.BLUETOOTH, String.valueOf(Build.VERSION_CODES.BASE)},
@@ -53,6 +52,7 @@ final class PERMS_CONSTS {
 	};*/
 	@SuppressLint("InlinedApi")
 	private static final String[][] danger_perms_list = {
+			//{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)}, todo Enable when taking pictures on Lollipop+ is implemented
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECORD_AUDIO, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(Build.VERSION_CODES.DONUT)},

@@ -55,7 +55,7 @@ import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.TelephonyManager;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
@@ -115,7 +115,7 @@ public class CmdsExecutor implements IModuleInst {
 			return false;
 		}
 
-		return true;
+		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public final void destroy() {
@@ -661,8 +661,8 @@ public class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					final int contact_index = (int) ACD.getSubCmdIndex(cmd_variant);
-					final String contact_name = TelephonyManager.ALL_CONTACTS[contact_index][0];
-					final String contact_number = TelephonyManager.ALL_CONTACTS[contact_index][1];
+					final String contact_name = TelephonyManagement.ALL_CONTACTS[contact_index][0];
+					final String contact_number = TelephonyManagement.ALL_CONTACTS[contact_index][1];
 
 					final Runnable do_after_confirm = new Runnable() {
 						@Override

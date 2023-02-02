@@ -84,6 +84,8 @@ public class AudioRecorder implements IModuleInst {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
+		stopRecording();
+
 		is_module_destroyed = true;
 	}
 	@Override

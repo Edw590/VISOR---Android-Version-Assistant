@@ -19,23 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
-
 /**
- * <p>Constants directly related to the Phone Calls Processor module.</p>
+ * <p>Modules related to the phone Telephony.</p>
  */
-public final class CONSTS_PhCallsProc {
-
-	// TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED - Android Studio doesn't find it, even though I see it there
-	// (???)
-	static final String ACTION_PRECISE_CALL_STATE_CHANGED = "android.intent.action.PRECISE_CALL_STATE";
-	static final String EXTRA_RINGING_CALL_STATE = "ringing_state";
-	static final String EXTRA_FOREGROUND_CALL_STATE = "foreground_state";
-	static final String EXTRA_BACKGROUND_CALL_STATE = "background_state";
-
-	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private CONSTS_PhCallsProc() {
-	}
-}
+package com.dadi590.assist_c_a.Modules.TelephonyManagement;

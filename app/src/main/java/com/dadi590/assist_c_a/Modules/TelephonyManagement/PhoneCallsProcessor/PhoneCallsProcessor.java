@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.TelephonyManager.PhoneCallsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -44,7 +44,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.TelephonyManager.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 

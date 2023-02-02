@@ -132,7 +132,6 @@ public final class UtilsAndroidPower {
 		return UtilsShell.executeShellCmd(commands, true, true).error_code;
 	}
 
-	//public static final int MODE_FASTBOOT = -987679; todo
 	/**
 	 * <p>Reboot the device.</p>
 	 * <p>Note: the app needs either to be granted the {@link Manifest.permission#REBOOT} permission or to have root
@@ -152,7 +151,7 @@ public final class UtilsAndroidPower {
 	 * <p>- {@link UtilsAndroid#MODE_NORMAL} --> for {@code mode}: reboot device normally</p>
 	 * <p>- {@link UtilsAndroid#MODE_SAFE} --> for {@code mode}: reboot device into Safe Mode</p>
 	 * <p>- {@link UtilsAndroid#MODE_RECOVERY} --> for {@code mode}: reboot device into the Recovery</p>
-	 * <p>- {@link UtilsAndroid#MODE_BOOTLOADER} --> for {@code mode}: reboot device into the Bootloader</p>
+	 * <p>- {@link UtilsAndroid#MODE_BOOTLOADER} --> for {@code mode}: reboot device into the Bootloader (Fastboot)</p>
 	 * <p>- {@link UtilsAndroid#MODE_FAST} --> for {@code mode}: fast reboot device (reboot the userspace)</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *

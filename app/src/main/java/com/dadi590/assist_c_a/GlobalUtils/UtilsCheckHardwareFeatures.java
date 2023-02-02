@@ -137,7 +137,7 @@ public final class UtilsCheckHardwareFeatures {
 		}
 	}
 
-	public static boolean isLocationSupported() {
+	public static boolean isLocationSupported_IMPLEMENT_THIS_THING_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA() {
 		// todo This needs GPS checking, mobile data too, WiFi, and Bluetooth (just one needs to be true)
 		return false; // Just for me to remember to come here when I find out the module is not working
 	}
@@ -156,6 +156,15 @@ public final class UtilsCheckHardwareFeatures {
 			return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
 					context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
 		}
+	}
+
+	/**
+	 * <p>Checks if the device has camera flash support.</p>
+	 *
+	 * @return true if camera flash is supported, false otherwise
+	 */
+	public static boolean isCameraFlashSupported() {
+		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 	}
 
 	/**

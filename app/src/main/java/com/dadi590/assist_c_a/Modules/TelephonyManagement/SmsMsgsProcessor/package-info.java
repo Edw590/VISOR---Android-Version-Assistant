@@ -22,4 +22,4 @@
 /**
  * <p>Everything directly related to the assistant's SMS processor.</p>
  */
-package com.dadi590.assist_c_a.Modules.TelephonyManager.SmsMsgsProcessor;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor;

@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.TelephonyManager;
+package com.dadi590.assist_c_a.Modules.TelephonyManagement;
 
 import android.Manifest;
 import android.content.ContentResolver;
