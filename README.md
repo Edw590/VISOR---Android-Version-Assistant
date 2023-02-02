@@ -11,6 +11,8 @@ Currently there are only pre-releases, but they're functional - I use the app on
 
 They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. As they're pre-releases, I'm releasing them as debug type. Why not, anyway.
 
+They're pre-releases because I don't have any settings yet. So everything is how I programmed it and can't be changed. When I have a settings page I might start releasing the versions as actual releases.
+
 ## Pictures
 <img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
 
