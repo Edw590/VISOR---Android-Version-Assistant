@@ -28,13 +28,13 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
  * <p>The module that periodically updates some values which no other module updates by an event.</p>
  * <p>Examples: time and weather (can't be updated by an event - there isn't one).</p>
  */
-public class SomeValuesUpdater implements IModuleInst {
+public final class SomeValuesUpdater implements IModuleInst {
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -42,13 +42,13 @@ public class SomeValuesUpdater implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		infinity_thread.interrupt();
 
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {

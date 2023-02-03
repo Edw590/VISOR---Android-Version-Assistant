@@ -49,7 +49,7 @@ import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
  * <p>And, since this is also always running, does other checks too to be 100% sure the user can't leave the
  * Protected Lock Screen.</p>
  */
-public class ProtectedLockScrSrv extends Service implements IModuleSrv {
+public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 
 	final Intent intentPLS = UtilsProtectedLockScr.getPLSIntent();
 
@@ -58,7 +58,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 	///////////////////////////////////////////////////////////////
 	// IModuleSrv stuff
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -68,7 +68,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 	///////////////////////////////////////////////////////////////
 
 	@Override
-	public final void onCreate() {
+	public void onCreate() {
 		super.onCreate();
 
 		// Do this only once, when the service is created and while it's not destroyed
@@ -171,7 +171,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 	});
 
 	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
 		// Do this below every time the service is started/resumed/whatever
 
 		// Do NOT put ANYTHING here!!!
@@ -183,7 +183,7 @@ public class ProtectedLockScrSrv extends Service implements IModuleSrv {
 
 	@Override
 	@Nullable
-	public final IBinder onBind(@Nullable final Intent intent) {
+	public IBinder onBind(@Nullable final Intent intent) {
 		return null;
 	}
 }

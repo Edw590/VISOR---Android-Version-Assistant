@@ -117,7 +117,11 @@ public final class UtilsPermsAuths {
 
 		final String [][][] list_to_use = PERMS_CONSTS.list_of_perms_lists;
 		final int list_to_use_len = list_to_use.length;
-		final boolean force_permissions = false;// todo (request && activity == null); - same reason on the auths function
+		final boolean force_permissions = (request && activity == null);
+		if (force_permissions) {
+			// todo Get this out of here when... --> same as on the auths function
+			return 0;
+		}
 		int num_not_granted_perms = 0;
 
 		int array_length = 0;

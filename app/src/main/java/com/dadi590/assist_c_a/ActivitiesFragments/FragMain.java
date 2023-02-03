@@ -37,18 +37,18 @@ import com.dadi590.assist_c_a.R;
  * Use the {@link FragMain#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragMain extends Fragment {
+public final class FragMain extends Fragment {
 
 	@Nullable
 	@Override
-	public final View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
+	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.frag_main, container, false);
 	}
 
 	@Override
-	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 	}
 }

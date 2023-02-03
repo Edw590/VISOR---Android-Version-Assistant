@@ -35,12 +35,12 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 /**
  * <p>The Device Administration Receiver, which handles all received administration actions.</p>
  */
-public class DeviceAdminRecv extends DeviceAdminReceiver {
+public final class DeviceAdminRecv extends DeviceAdminReceiver {
 
 	static final int PRIORITY_ADMIN_ENABLED = Speech2.PRIORITY_MEDIUM;
 
 	@Override
-	public final void onEnabled(@android.annotation.NonNull final Context context,
+	public void onEnabled(@android.annotation.NonNull final Context context,
 								@android.annotation.NonNull final Intent intent) {
 		super.onEnabled(context, intent);
 
@@ -60,7 +60,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 
 	@NonNull
 	@Override
-	public final CharSequence onDisableRequested(@android.annotation.NonNull final Context context,
+	public CharSequence onDisableRequested(@android.annotation.NonNull final Context context,
 												 @android.annotation.NonNull final Intent intent) {
 		super.onDisableRequested(context, intent);
 
@@ -74,7 +74,7 @@ public class DeviceAdminRecv extends DeviceAdminReceiver {
 	}
 
 	@Override
-	public final void onDisabled(@android.annotation.NonNull final Context context,
+	public void onDisabled(@android.annotation.NonNull final Context context,
 								 @android.annotation.NonNull final Intent intent) {
 		//super.onDisabled(context, intent); - the less things here the better (Why? Refer to CONSTS.SPEAK_DISABLED)
 

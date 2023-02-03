@@ -43,7 +43,7 @@ import com.dadi590.assist_c_a.R;
 /**
  * <p>Fragment that shows the status of each module of the assistant.</p>
  */
-public class FragModulesStatus extends Fragment {
+public final class FragModulesStatus extends Fragment {
 
 	View current_view = null;
 
@@ -52,13 +52,13 @@ public class FragModulesStatus extends Fragment {
 
 	@Nullable
 	@Override
-	public final View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
+	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 								   @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.frag_modules_status, container, false);
 	}
 
 	@Override
-	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		current_view = view;

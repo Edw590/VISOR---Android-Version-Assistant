@@ -46,6 +46,10 @@ public final class UtilsCmdsList {
 	 * @param all_contacts same as returned by {@link UtilsTelephony#getAllContacts(int)}
 	 */
 	public static void updateMakeCallCmdContacts(@NonNull final String[][] all_contacts) {
+		if (0 == all_contacts.length) {
+			return;
+		}
+		
 		final StringBuilder contacts_names_list = new StringBuilder(500*20); // To start, 500 contacts, 20 chars per each
 		for (final String[] contact : all_contacts) {
 			contacts_names_list.append(contact[0].toLowerCase(Locale.getDefault())).append("|");

@@ -52,7 +52,7 @@ import java.util.List;
 /**
  * <p>The module that manages the device camera, to take photos, record a video, or toggle the flashlight.</p>
  */
-public class CameraManagement implements IModuleInst {
+public final class CameraManagement implements IModuleInst {
 
 	@Nullable private Camera camera_old = null;
 	@Nullable TakePictureOld takePictureOld = null;
@@ -74,7 +74,7 @@ public class CameraManagement implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -82,7 +82,7 @@ public class CameraManagement implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -101,7 +101,7 @@ public class CameraManagement implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -218,7 +218,7 @@ public class CameraManagement implements IModuleInst {
 	 *
 	 * @return one of the constants
 	 */
-	final int useCamera(final int usage) {
+	int useCamera(final int usage) {
 		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext().
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
 		if (devicePolicyManager.getCameraDisabled(null)) {

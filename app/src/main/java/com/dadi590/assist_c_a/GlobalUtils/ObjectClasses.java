@@ -88,7 +88,7 @@ public final class ObjectClasses {
 	 * <p>Class to use as return value of {@link UtilsGeneral#getMethodClass(String)}.</p>
 	 * <p>Check the constructor for more information.</p>
 	 */
-	public static class GetMethodClassObj {
+	public static final class GetMethodClassObj {
 
 		@Nullable public final Method getMethod;
 		@Nullable public final Class<?> hidden_class;

@@ -54,7 +54,7 @@ import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
@@ -69,7 +69,7 @@ import ACD.ACD;
 /**
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
  */
-public class CmdsExecutor implements IModuleInst {
+public final class CmdsExecutor implements IModuleInst {
 
 	// This variable can't be local. It must memorize the last value, so they must always remain in memory.
 	// Also, because of that, the instance of this class must also remain in memory, as it's done in the ModulesList.
@@ -79,7 +79,7 @@ public class CmdsExecutor implements IModuleInst {
 	static final List<Runnable> after_speak_runnables = new ArrayList<>(10);
 
 	private static final String NO_CMD = "";
-	private class Command {
+	private final class Command {
 		@NonNull String command_str;
 		@NonNull String cmd_action;
 		@Nullable Runnable runnable;
@@ -110,7 +110,7 @@ public class CmdsExecutor implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -118,7 +118,7 @@ public class CmdsExecutor implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -128,7 +128,7 @@ public class CmdsExecutor implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -175,7 +175,7 @@ public class CmdsExecutor implements IModuleInst {
 	 *
 	 * @return one of the constants
 	 */
-	final int processTask(@NonNull final String sentence_str, final boolean partial_results,
+	int processTask(@NonNull final String sentence_str, final boolean partial_results,
 						  final boolean only_returning) {
 		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
@@ -942,7 +942,7 @@ public class CmdsExecutor implements IModuleInst {
 	/**
 	 * <p>Register the module's broadcast receiver.</p>
 	 */
-	final void registerReceiver() {
+	void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
 		intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);

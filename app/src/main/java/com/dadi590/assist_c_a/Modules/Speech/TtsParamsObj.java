@@ -29,7 +29,7 @@ import java.util.HashMap;
 /**
  * <p>An instantiated class to serve as a multi-type array for the {@link TextToSpeech} speak() methods.</p>
  */
-class TtsParamsObj {
+final class TtsParamsObj {
 
 	final Bundle bundle = new Bundle(2);
 	final HashMap<String, String> hashmap = new HashMap<>(3);

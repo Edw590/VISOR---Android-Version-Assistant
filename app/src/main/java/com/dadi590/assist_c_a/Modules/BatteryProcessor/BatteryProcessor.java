@@ -43,7 +43,7 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 /**
  * <p>Processes changes in the battery levels or on battery power mode.</p>
  */
-public class BatteryProcessor implements IModuleInst {
+public final class BatteryProcessor implements IModuleInst {
 
 	// Minimum and maximum recommended battery percentage values to increase its life
 	private static final int PERCENT_MIN = 20;
@@ -65,7 +65,7 @@ public class BatteryProcessor implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -73,7 +73,7 @@ public class BatteryProcessor implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -83,7 +83,7 @@ public class BatteryProcessor implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -117,7 +117,7 @@ public class BatteryProcessor implements IModuleInst {
 	 *
 	 * @param power_connected true if external power was connected, false otherwise
 	 */
-	final void processBatteryPwrChg(final boolean power_connected) {
+	void processBatteryPwrChg(final boolean power_connected) {
 		// Update the Values Storage
 		ValuesStorage.updateValue(CONSTS_ValueStorage.power_connected, Boolean.toString(power_connected));
 
@@ -150,7 +150,7 @@ public class BatteryProcessor implements IModuleInst {
 	 * @param battery_lvl_scale the value from {@link BatteryManager#EXTRA_SCALE}
 	 * @param battery_present the value from {@link BatteryManager#EXTRA_STATUS}
 	 */
-	final void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
+	void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
 									@Nullable final Boolean battery_present) {
 		// Don't if the EXTRA_STATUS is -1, in case it's wrong (can be - checked on miTab Advance).
 		if (battery_lvl == -1 || battery_lvl_scale == -1) {

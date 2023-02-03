@@ -27,7 +27,7 @@ import androidx.annotation.Nullable;
  * <p>A class to be used as a "multi-type array" for the returning value of
  * {@link PhoneCallsProcessor#getCallPhase(int, String)}.</p>
  */
-class NumAndPhase {
+final class NumAndPhase {
 
 	@Nullable final String phone_number;
 	final int call_phase;

@@ -41,10 +41,10 @@ import com.google.android.material.navigation.NavigationView;
 /**
  * <p>The app's main activity.</p>
  */
-public class ActMain extends AppCompatActivity {
+public final class ActMain extends AppCompatActivity {
 
 	@Override
-	protected final void onCreate(@Nullable final Bundle savedInstanceState) {
+	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 
@@ -76,7 +76,7 @@ public class ActMain extends AppCompatActivity {
 	}
 
 	@Override
-	public final void onStart() {
+	public void onStart() {
 		super.onStart();
 
 		// Do this below every time the activity is started/resumed/whatever

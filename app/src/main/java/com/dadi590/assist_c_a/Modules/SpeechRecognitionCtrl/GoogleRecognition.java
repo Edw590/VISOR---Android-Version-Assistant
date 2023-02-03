@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.SpeechRecognition;
+package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.app.Service;
 import android.content.Intent;
@@ -52,12 +52,12 @@ import java.util.Map;
  * <br>
  * <p>Only start this service if the Google app is available, else it won't work.</p>
  */
-public class GoogleRecognition extends Service implements IModuleSrv {
+public final class GoogleRecognition extends Service implements IModuleSrv {
 
 	///////////////////////////////////////////////////////////////
 	// IModuleSrv stuff
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -95,7 +95,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 	};
 
 	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
         /*
 		If the service was killed by its PID and the system restarted it, this might appear in the logs:
 
@@ -163,7 +163,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 	/**
 	 * <p>Stops and destroys the {@link SpeechRecognizer} instance if it's not stopped and destroyed already.</p>
 	 */
-	final void stopRecognizer() {
+	void stopRecognizer() {
 		if (speechRecognizer != null) {
 			speechRecognizer.stopListening();
 			speechRecognizer.cancel();
@@ -178,7 +178,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 	final class SpeechRecognitionListener implements RecognitionListener {
 
 		@Override
-		public final void onReadyForSpeech(final Bundle params) {
+		public void onReadyForSpeech(final Bundle params) {
 			System.out.println("QQQQQQQQQQQQQQQ");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_READY_FOR_SPEECH_STR;
@@ -189,7 +189,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 		}
 
 		@Override
-		public final void onBeginningOfSpeech() {
+		public void onBeginningOfSpeech() {
 			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_BEGINNING_OF_SPEECH_STR;
@@ -202,7 +202,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 		}
 
 		@Override
-		public final void onEndOfSpeech() {
+		public void onEndOfSpeech() {
 			System.out.println("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_END_OF_SPEECH_STR;
@@ -210,7 +210,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 		}
 
 		@Override
-		public final void onError(final int error) {
+		public void onError(final int error) {
             /*
              Copied from StackOverflow:
              // Sometime onError will get called after onResults so we keep a boolean to ignore error also
@@ -243,12 +243,12 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 		}
 
 		@Override
-		public final void onPartialResults(final Bundle partialResults) {
+		public void onPartialResults(final Bundle partialResults) {
 			// todo
 		}
 
 		@Override
-		public final void onResults(final Bundle results) {
+		public void onResults(final Bundle results) {
 			last_method_called = null;
 			last_method_called_when = 0L;
 
@@ -339,7 +339,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 	});
 
 	@Override
-	public final void onDestroy() {
+	public void onDestroy() {
 		super.onDestroy();
 
 		stopRecognizer();
@@ -350,7 +350,7 @@ public class GoogleRecognition extends Service implements IModuleSrv {
 
 	@Override
 	@Nullable
-	public final IBinder onBind(@Nullable final Intent intent) {
+	public IBinder onBind(@Nullable final Intent intent) {
 		return null;
 	}
 }

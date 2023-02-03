@@ -27,7 +27,7 @@ import android.media.AudioManager;
 /**
  * <p>Class to instantiate to keep the values of the volume and Do Not Disturb interruption filter.</p>
  */
-class VolumeDndObj {
+final class VolumeDndObj {
 
 	/**
 	 * <p>Default value for all the attributes of the object.</p>
@@ -69,7 +69,7 @@ class VolumeDndObj {
 	/**
 	 * <p>Sets all the attributes to their default values.</p>
 	 */
-	final void setDefaultValues() {
+	void setDefaultValues() {
 		audio_stream = DEFAULT_VALUE;
 		old_volume = DEFAULT_VALUE;
 		old_interruption_filter = DEFAULT_VALUE;

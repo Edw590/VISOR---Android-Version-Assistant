@@ -67,7 +67,7 @@ import java.util.Set;
  * and, hopefully, any other bugs related to how {@link TextToSpeech} is implemented in the various devices, because
  * this should now be device/{@link TextToSpeech} implementation independent.</p>
  */
-public class Speech2 implements IModuleInst {
+public final class Speech2 implements IModuleInst {
 
 	/*
 	Main note of how this module works!!!
@@ -141,7 +141,7 @@ public class Speech2 implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -155,7 +155,7 @@ public class Speech2 implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -171,7 +171,7 @@ public class Speech2 implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -226,7 +226,7 @@ public class Speech2 implements IModuleInst {
 	 * @param from_constructor true if the call to this function was made from the constructor, false otherwise - this
 	 *                         way the function can execute tasks that can only be done in the module initialization
 	 */
-	final void initializeTts(final boolean from_constructor) {
+	void initializeTts(final boolean from_constructor) {
 		System.out.println("3333333333333333333333333");
 
 		if (!from_constructor) {
@@ -311,7 +311,7 @@ public class Speech2 implements IModuleInst {
 	 *
 	 * @param audio_stream the audio stream of which the volume changed
 	 */
-	final void setUserChangedVolumeTrue(final int audio_stream) {
+	void setUserChangedVolumeTrue(final int audio_stream) {
 		// Detect user changes only after some time after the assistant changed the volume to speak, since the first
 		// volume change to be detected would be the assistant himself changing the volume - in case he changed the
 		// volume (otherwise the first and next changes will be user changes). This way we wait until the broadcasts for
@@ -393,7 +393,7 @@ public class Speech2 implements IModuleInst {
 	 *
 	 * @return true if yes, false otherwise
 	 */
-	final boolean isTtsAvailable() {
+	boolean isTtsAvailable() {
 		 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final Set<Voice> voices = tts.getVoices();
 			if (null == voices || voices.isEmpty() || null == tts.getVoice() || null == tts.getVoice().getLocale()) {
@@ -413,7 +413,7 @@ public class Speech2 implements IModuleInst {
 	 *
 	 * @return same as in {@link #ttsStop(boolean)}}
 	 */
-	final int skipCurrentSpeech() {
+	int skipCurrentSpeech() {
 		return ttsStop(true);
 	}
 
@@ -490,7 +490,7 @@ public class Speech2 implements IModuleInst {
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
 	 * being spoken immediately; one of the constants otherwise.
 	 */
-	final int speak(@NonNull final String txt_to_speak, final int speech_priority, final boolean bypass_no_sound,
+	int speak(@NonNull final String txt_to_speak, final int speech_priority, final boolean bypass_no_sound,
 					@Nullable final Integer after_speaking_code) {
 
 		return speakInternal(txt_to_speak, speech_priority, bypass_no_sound, null, after_speaking_code);
@@ -641,7 +641,7 @@ public class Speech2 implements IModuleInst {
 	 *
 	 * @return same as in {@link TextToSpeech}'s speak() methods
 	 */
-	final int sendTtsSpeak(@NonNull final String txt_to_speak, @NonNull final String utterance_id,
+	int sendTtsSpeak(@NonNull final String txt_to_speak, @NonNull final String utterance_id,
 						   final int audio_stream) {
 		if (!tts_working || !isTtsAvailable()) {
 			return TextToSpeech.ERROR;
@@ -666,19 +666,25 @@ public class Speech2 implements IModuleInst {
 	 * <p>Useful at minimum when the phone starts and third-party engines are not ready yet when the app starts.</p>
 	 */
 	private void checkReloadTts() {
-
-		// todo Get this in a thread of itself. Gets the BV9500 slow (!!!) with the Google TTS (Ivona TTS is fine).
-
-		boolean reload_tts = !tts.getCurrentEngine().equals(tts.getDefaultEngine());
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			final Voice voice = tts.getVoice();
-			if (null == voice || !voice.equals(tts.getDefaultVoice())) {
-				reload_tts = true;
-			}
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			final Locale language = tts.getLanguage();
-			if (null == language || !language.equals(tts.getDefaultLanguage())) {
-				reload_tts = true;
+		boolean reload_tts = false;
+		final String current_engine = tts.getCurrentEngine();
+		if (null == current_engine) {
+			reload_tts = true;
+		} else {
+			reload_tts = !current_engine.equals(tts.getDefaultEngine());
+		}
+		if (!reload_tts) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				final Voice voice = tts.getVoice();
+				if (null == voice || !voice.equals(tts.getDefaultVoice())) {
+					reload_tts = true;
+				}
+			} else {
+				final Locale language = tts.getLanguage();
+				if (null == language || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
+								!language.equals(tts.getDefaultLanguage()))) {
+					reload_tts = true;
+				}
 			}
 		}
 		if (reload_tts) {
@@ -807,7 +813,7 @@ public class Speech2 implements IModuleInst {
 	 * <p>- set a new Interruption Filter, in case it needs to be changed</p>
 	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
-	final void resetToSpeakChanges() {
+	void resetToSpeakChanges() {
 		setResetWillChangeVolume(false);
 
 		// Reset the volume
@@ -878,7 +884,7 @@ public class Speech2 implements IModuleInst {
 	 *
 	 * @param request true to request the audio focus, false to abandon the audio focus
 	 */
-	final void audioFocus(final boolean request) {
+	void audioFocus(final boolean request) {
 		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
 				.getSystemService(Context.AUDIO_SERVICE);
 		if (audioManager != null) {
@@ -953,7 +959,7 @@ public class Speech2 implements IModuleInst {
 	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case - unless there's a request to
 	 * bypass a no-sound setting, like Do Not Disturb or Vibrating mode, for example.</p>
 	 */
-	final void rightBeforeSpeaking() {
+	void rightBeforeSpeaking() {
 		boolean skip_speech = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
@@ -994,17 +1000,17 @@ public class Speech2 implements IModuleInst {
 	/**
 	 * <p>The {@link UtteranceProgressListener} to be used for the speech.</p>
 	 */
-	class TtsUtteranceProgressListener extends UtteranceProgressListener {
+	final class TtsUtteranceProgressListener extends UtteranceProgressListener {
 
 		@Override
-		public final void onStart(final String utteranceId) {
+		public void onStart(final String utteranceId) {
 			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
 			rightBeforeSpeaking();
 			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
 		}
 
 		@Override
-		public final void onDone(final String utteranceId) {
+		public void onDone(final String utteranceId) {
 			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 			System.out.println(arrays_speech_objs);
 			System.out.println(utteranceId);
@@ -1024,7 +1030,7 @@ public class Speech2 implements IModuleInst {
 
 		// Up to API 20
 		@Override
-		public final void onError(final String utteranceId) {
+		public void onError(final String utteranceId) {
 			System.out.println("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
 			System.out.println(arrays_speech_objs);
 			System.out.println(utteranceId);
@@ -1042,7 +1048,7 @@ public class Speech2 implements IModuleInst {
 
 		// As of API 21
 		@Override
-		public final void onError(final String utteranceId, final int errorCode) {
+		public void onError(final String utteranceId, final int errorCode) {
 			super.onError(utteranceId, errorCode);
 			System.out.println("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
 			System.out.println(errorCode);
@@ -1054,7 +1060,7 @@ public class Speech2 implements IModuleInst {
 
 		// As of API 23
 		@Override
-		public final void onStop(final String utteranceId, final boolean interrupted) {
+		public void onStop(final String utteranceId, final boolean interrupted) {
 			super.onStop(utteranceId, interrupted);
 
 			// Do nothing here. Why? Read the custom onStop() method's documentation which explains it.
@@ -1099,10 +1105,11 @@ public class Speech2 implements IModuleInst {
 	 *                    {@link #onStop(String, boolean)}), or an empty string to signal the function not to remove any
 	 *                    speech from the queues and only start the next one
 	 */
-	final void speechTreatment(@NonNull final String utteranceId) {
+	void speechTreatment(@NonNull final String utteranceId) {
 		// Main note: everything that calls this function empties current_speech_obj first.
 
-		// Reload the TTS instance in case the default voice and/or engine have changed.
+		// Reload the TTS instance in case the default voice and/or engine have changed (also if it was uninstalled or
+		// disabled or something else that would prevent VISOR from speaking).
 		// Do it only here because it's after every speech finishes, and not before it starts (delaying the start).
 		checkReloadTts();
 
@@ -1201,7 +1208,7 @@ public class Speech2 implements IModuleInst {
 	 * <p>Register the module's broadcast receiver AND broadcast {@link CONSTS_BC_Speech#ACTION_READY}.</p>
 	 * <p>Call how many times needed - the function only executes if it's the first time it's called.</p>
 	 */
-	final void registerRecvBcastReady() {
+	void registerRecvBcastReady() {
 		final IntentFilter intentFilter = new IntentFilter();
 
 		intentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);

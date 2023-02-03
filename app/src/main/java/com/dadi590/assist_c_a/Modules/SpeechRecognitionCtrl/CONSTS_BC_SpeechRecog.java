@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.SpeechRecognition;
+package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 /**
  * <p>Actions, extras, and classes to use to send a broadcast to this module.</p>

@@ -50,17 +50,17 @@ import java.util.Locale;
 /**
  * <p>The main fragment to be used for development purposes.</p>
  */
-public class FragDevelopment extends Fragment {
+public final class FragDevelopment extends Fragment {
 
 	@Nullable
 	@Override
-	public final View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
+	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.frag_development, container, false);
 	}
 
 	@Override
-	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		setButtonsClickListeners();

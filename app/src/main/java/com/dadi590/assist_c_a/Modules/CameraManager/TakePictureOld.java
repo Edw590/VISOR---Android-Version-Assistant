@@ -61,7 +61,7 @@ import java.util.List;
  * needs (for example by removing checks for API levels lower than 15), but also to improve its code. Also, parts of
  * this class (static methods) were put in a separate utility class: {@link UtilsCameraManager}.</p>
  */
-public class TakePictureOld implements SurfaceHolder.Callback {
+public final class TakePictureOld implements SurfaceHolder.Callback {
 
 
 
@@ -148,17 +148,17 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	/**
 	 * <p>Calls {@link #takeImage()}.</p>
 	 */
-	class TakeImage extends AsyncTask<Void, Void, Void> {
+	final class TakeImage extends AsyncTask<Void, Void, Void> {
 
 		@Override
-		protected final Void doInBackground(final Void... params) {
+		protected Void doInBackground(final Void... params) {
 			takeImage();
 
 			return null;
 		}
 
 		@Override
-		protected final void onPostExecute(final Void result) {
+		protected void onPostExecute(final Void result) {
 			// No need to implement.
 		}
 	}
@@ -166,7 +166,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	/**
 	 * <p>Takes a picture with the chosen settings.</p>
 	 */
-	final void takeImage() {
+	void takeImage() {
 		final Camera camera = UtilsCameraManager.openCamera(rear_picture_requested);
 		if (null == camera) {
 			final Intent broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_ERR_CANT_OPEN_CAM);
@@ -266,7 +266,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	};
 
 	@Override
-	public final void surfaceCreated(@NonNull final SurfaceHolder holder) {
+	public void surfaceCreated(@NonNull final SurfaceHolder holder) {
 		new TakeImage().execute();
 	}
 
@@ -276,7 +276,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	}
 
 	@Override
-	public final void surfaceDestroyed(@NonNull final SurfaceHolder holder) {
+	public void surfaceDestroyed(@NonNull final SurfaceHolder holder) {
 		// No need to implement.
 	}
 
@@ -313,7 +313,7 @@ public class TakePictureOld implements SurfaceHolder.Callback {
 	 * @return true if everything went fine and the camera is ready to be used, false if the chosen flash mode is not
 	 * supported by the camera and no parameter was set
 	 */
-	final boolean configureCamera(@NonNull final Camera camera, final boolean rear_camera) {
+	boolean configureCamera(@NonNull final Camera camera, final boolean rear_camera) {
 		final Camera.Parameters camera_parameters = camera.getParameters();
 
 		final String flash_mode_to_use;

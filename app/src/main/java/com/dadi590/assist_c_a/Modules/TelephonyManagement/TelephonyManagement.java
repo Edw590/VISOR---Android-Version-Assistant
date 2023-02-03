@@ -41,7 +41,7 @@ import com.dadi590.assist_c_a.ModulesList;
  * <p>The module that manages all telephony-related things, including the Phone Calls Processor and the SMS Messages
  * Processor submodules.</p>
  */
-public class TelephonyManagement implements IModuleInst {
+public final class TelephonyManagement implements IModuleInst {
 
 	@NonNull
 	public static String[][] ALL_CONTACTS = {};
@@ -50,7 +50,7 @@ public class TelephonyManagement implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -58,7 +58,7 @@ public class TelephonyManagement implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		infinity_thread.interrupt();
 		ModulesList.stopElement(ModulesList.getElementIndex(PhoneCallsProcessor.class));
 		ModulesList.stopElement(ModulesList.getElementIndex(SmsMsgsProcessor.class));
@@ -66,7 +66,7 @@ public class TelephonyManagement implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 

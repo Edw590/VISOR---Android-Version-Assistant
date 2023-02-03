@@ -196,7 +196,7 @@ public final class UtilsShell {
 	 * <p>Class to use for the returning value of {@link #executeShellCmd(List, boolean, boolean)}.</p>
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
-	public static class CmdOutputObj {
+	public static final class CmdOutputObj {
 		public final int error_code;
 		// Don't add @Nullable or @NonNull on the streams. Let the developer decide which is the case.
 		public final byte[] output_stream;

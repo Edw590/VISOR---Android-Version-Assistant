@@ -51,7 +51,7 @@ import com.dadi590.assist_c_a.R;
 /**
  * <p>The activity of the assistant's Protected Lock Screen (PLS for abbreviation).</p>
  */
-public class ProtectedLockScrAct extends AppCompatActivity {
+public final class ProtectedLockScrAct extends AppCompatActivity {
 
 	// For an explanation on how the Protected Lock Screen works, please go to the package-info.java file.
 
@@ -109,7 +109,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	// internal API directly without reflection.
 
 	@Override
-	protected final void onCreate(@Nullable final Bundle savedInstanceState) {
+	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_protected_lock_scr);
 
@@ -152,7 +152,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	}
 
 	@Override
-	protected final void onStart() {
+	protected void onStart() {
 		super.onStart();
 
 		// Do this below every time the activity is started/resumed/whatever
@@ -161,7 +161,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	}
 
 	@Override
-	protected final void onStop() {
+	protected void onStop() {
 		super.onStop();
 
 		UtilsMainSrvc.startMainService();
@@ -220,12 +220,12 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	};
 
 	@Override
-	public final void onBackPressed() {
+	public void onBackPressed() {
 		// Ignore (disable the back button then).
 	}
 
 	@Override
-	public final void onWindowFocusChanged(final boolean hasFocus) {
+	public void onWindowFocusChanged(final boolean hasFocus) {
 		if (!hasFocus && locked) {
 			has_focus = false;
 			UtilsProtectedLockScr.lockAndShowPLS(intentPLS); // This is enough, it seems. No service, no loops.
@@ -262,7 +262,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 	/**
 	 * <p>Custom ViewGroup to steal the motion events on the status bar.</p>
 	 */
-	public static class customViewGroup extends ViewGroup {
+	public static final class customViewGroup extends ViewGroup {
 
 		/**
 		 * <p>Main class's constructor.</p>
@@ -279,7 +279,7 @@ public class ProtectedLockScrAct extends AppCompatActivity {
 		}
 
 		@Override
-		public final boolean onInterceptTouchEvent(@Nullable final MotionEvent ev) {
+		public boolean onInterceptTouchEvent(@Nullable final MotionEvent ev) {
 			////Log.iv("customViewGroup", "**********Intercepted");
 			return true;
 		}

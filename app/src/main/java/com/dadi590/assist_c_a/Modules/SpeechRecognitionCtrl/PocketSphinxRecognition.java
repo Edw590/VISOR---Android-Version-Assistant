@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.SpeechRecognition;
+package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.app.Service;
 import android.content.Intent;
@@ -52,12 +52,12 @@ import edu.cmu.pocketsphinx1.SpeechRecognizerSetup;
  * <p>NOTE: the class is public but it's NOT to be used outside its package! It's only public for the service to be
  * instantiated (meaning if it would be put package-private now, no error would appear on the entire project).</p>
  */
-public class PocketSphinxRecognition extends Service implements RecognitionListener, IModuleSrv {
+public final class PocketSphinxRecognition extends Service implements RecognitionListener, IModuleSrv {
 
 	///////////////////////////////////////////////////////////////
 	// IModuleSrv stuff
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -74,7 +74,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	private static final String KEYPHRASE = GL_CONSTS.ASSISTANT_NAME_WO_DOTS.toLowerCase(Locale.ENGLISH); // "visor"
 
 	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
         /*
 		If the service was killed by its PID and the system restarted it, this might appear in the logs:
 
@@ -117,7 +117,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	/**
 	 * <p>The AsyncTask that will take care of the recognition.</p>
 	 */
-	private static class SetupTask_PocketSphinx extends AsyncTask<Void, Void, Exception> {
+	private static final class SetupTask_PocketSphinx extends AsyncTask<Void, Void, Exception> {
 		WeakReference<PocketSphinxRecognition> serviceReference;
 
 		/**
@@ -131,7 +131,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 
 		@Nullable
 		@Override
-		protected final Exception doInBackground(final Void... params) {
+		protected Exception doInBackground(final Void... params) {
 			try {
 				final Assets assets = new Assets(serviceReference.get());
 				final File assetDir = assets.syncAssets();
@@ -142,7 +142,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 			return null;
 		}
 		@Override
-		protected final void onPostExecute(final Exception e) {
+		protected void onPostExecute(final Exception e) {
 			if (e == null) {
 				serviceReference.get().switchSearch(KEYWORD_WAKEUP);
 			}
@@ -150,7 +150,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	}
 
 	@Override
-	public final void onDestroy() {
+	public void onDestroy() {
 		super.onDestroy();
 
 		stopRecognizer();
@@ -164,7 +164,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	 * for final result in onResult.
 	 */
 	@Override
-	public final void onPartialResult(@Nullable final Hypothesis hypothesis) {
+	public void onPartialResult(@Nullable final Hypothesis hypothesis) {
 		if (hypothesis == null) {
 			return;
 		}
@@ -182,7 +182,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	 * This callback is called when we stop the recognizer.
 	 */
 	@Override
-	public final void onResult(@Nullable final Hypothesis hypothesis) {
+	public void onResult(@Nullable final Hypothesis hypothesis) {
 		if (hypothesis == null) {
 			return;
 		}
@@ -205,7 +205,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	 * We stop recognizer here to get a final result.
 	 */
 	@Override
-	public final void onEndOfSpeech() {
+	public void onEndOfSpeech() {
 		if (recognizer != null) { // It has arrived null here once
 			final String search_name = recognizer.getSearchName();
 			if (null == search_name) {
@@ -258,7 +258,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	}
 
 	@Override
-	public final void onError(@Nullable final Exception e) {
+	public void onError(@Nullable final Exception e) {
 		// If something requires the microphone while this is recognizing, an error will be thrown. Let the Controller be
 		// the one to restart this every some seconds and not instantly to kill the battery for no reason (since the
 		// user is recording audio in some other app) - which means, kill the service, so the Controller knows it has to
@@ -269,14 +269,14 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 	}
 
 	@Override
-	public final void onTimeout() {
+	public void onTimeout() {
 		switchSearch(KEYWORD_WAKEUP);
 	}
 
 	/**
 	 * <p>Stops and destroys the {@link SpeechRecognizer} instance if it's not stopped and destroyed already.</p>
 	 */
-	final void stopRecognizer() {
+	void stopRecognizer() {
 		if (recognizer != null) {
 			recognizer.cancel();
 			recognizer.shutdown();
@@ -286,7 +286,7 @@ public class PocketSphinxRecognition extends Service implements RecognitionListe
 
 	@Override
 	@Nullable
-	public final IBinder onBind(@Nullable final Intent intent) {
+	public IBinder onBind(@Nullable final Intent intent) {
 		return null;
 	}
 }

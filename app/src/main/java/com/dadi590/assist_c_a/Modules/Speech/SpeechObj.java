@@ -32,7 +32,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
  * <p>Each speech is an instance of this class.</p>
  * <p>Check the constructor for more information.</p>
  */
-class SpeechObj {
+final class SpeechObj {
 
 	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
 	// SYSTEM_ENFORCED so we can't the change the volume: "Yeah, it will always play at max volume since this stream is
@@ -108,7 +108,7 @@ class SpeechObj {
 
 	@NonNull
 	@Override
-	public final String toString() {
+	public String toString() {
 		return "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + txt_to_speak + "\", "
 				+ after_speaking_code + ", " + audio_stream + ", " + bypass_no_sound + "]";
 	}

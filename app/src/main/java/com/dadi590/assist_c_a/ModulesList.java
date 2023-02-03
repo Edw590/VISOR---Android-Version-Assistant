@@ -35,8 +35,8 @@ import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.CONSTS_SpeechRecog;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.SpeechRecognitionCtrl;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.CONSTS_SpeechRecog;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
@@ -123,7 +123,7 @@ public final class ModulesList {
 	/**
 	 * <p>Class for the (sub)modules of the list.</p>
 	 */
-	private static class ElementsObj {
+	private static final class ElementsObj {
 		@NonNull final Class<?> elem_class;
 		final int elem_type1;
 		@NonNull final String elem_name;

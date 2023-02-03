@@ -39,11 +39,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
@@ -56,7 +56,7 @@ import java.util.Objects;
 /**
  * <p>Processes all phone calls made/received on the phone.</p>
  */
-public class PhoneCallsProcessor implements IModuleInst {
+public final class PhoneCallsProcessor implements IModuleInst {
 
 	// 50 call events from the point the phone receives a call to when it ends the last call. More than than that, wow,
 	// I guess. Amazingly busy person? In that case, the array will reallocate itself with the double of the size. Won't
@@ -79,7 +79,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -87,7 +87,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -97,7 +97,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 
@@ -107,8 +107,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 				Manifest.permission.READ_CALL_LOG,
 				Manifest.permission.READ_PHONE_STATE,
 		}};
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
-				&& UtilsCheckHardwareFeatures.isTelephonySupported(true);
+		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0];
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -160,7 +159,7 @@ public class PhoneCallsProcessor implements IModuleInst {
 	 * @param precise_call_state true if it's a {@link PreciseCallState}, false if it's a {@link TelephonyManager} call
 	 *                              state
 	 */
-	final void processCall(final int call_state, @Nullable final String phone_number, final boolean precise_call_state) {
+	void processCall(final int call_state, @Nullable final String phone_number, final boolean precise_call_state) {
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println(phone_number);
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%");

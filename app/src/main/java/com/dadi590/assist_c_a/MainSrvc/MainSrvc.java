@@ -51,7 +51,7 @@ import com.dadi590.assist_c_a.ModulesList;
 /**
  * The main {@link Service} of the application - MainService.
  */
-public class MainSrvc extends Service {
+public final class MainSrvc extends Service {
 
 	//////////////////////////////////////
 	// Class variables
@@ -62,7 +62,7 @@ public class MainSrvc extends Service {
 
 
 	@Override
-	public final void onCreate() {
+	public void onCreate() {
 		super.onCreate();
 
 		// Do this only once, when the service is created and while it's not destroyed
@@ -262,7 +262,7 @@ public class MainSrvc extends Service {
 	};
 
 	@Override
-	public final int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
 		// Do this below every time the service is started/resumed/whatever
 
 		return START_STICKY;
@@ -270,7 +270,7 @@ public class MainSrvc extends Service {
 
 	@Override
 	@Nullable
-	public final IBinder onBind(@Nullable final Intent intent) {
+	public IBinder onBind(@Nullable final Intent intent) {
 		return null;
 	}
 }

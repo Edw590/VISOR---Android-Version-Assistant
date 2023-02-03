@@ -37,11 +37,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
@@ -50,7 +50,7 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 /**
  * <p>Processes all SMS messages sent by and to the phone.</p>
  */
-public class SmsMsgsProcessor implements IModuleInst {
+public final class SmsMsgsProcessor implements IModuleInst {
 
 	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
 	private Handler main_handler = null;
@@ -60,7 +60,7 @@ public class SmsMsgsProcessor implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -68,7 +68,7 @@ public class SmsMsgsProcessor implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -78,15 +78,14 @@ public class SmsMsgsProcessor implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
 		final String[][] min_required_permissions = {{
 				Manifest.permission.RECEIVE_SMS,
 		}};
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
-				&& UtilsCheckHardwareFeatures.isTelephonySupported(false);
+		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0];
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////

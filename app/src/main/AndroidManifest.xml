@@ -223,7 +223,6 @@
 		android:allowClearUserData="true"
 		android:persistent="false"
 
-		android:allowClearUserDataOnFailedRestore="false"
 		android:allowAudioPlaybackCapture="false"
 		android:allowBackup="false"
 		android:fullBackupContent="true"
@@ -300,12 +299,12 @@
 			android:exported="false"
 			android:directBootAware="true"
 			android:process=":Protected_Lock_Screen" />
-		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.GoogleRecognition"
+		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.GoogleRecognition"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true"
 			android:process=":Google_Speech_Recognition" />
-		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognition.PocketSphinxRecognition"
+		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.PocketSphinxRecognition"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true"

@@ -36,10 +36,10 @@ import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
  * <p>Do NOT use to detect things in particular - only to start the app and nothing else. Explanation of the why on a
  * comment on the manifest.</p>
  */
-public class AppStartRecv extends BroadcastReceiver {
+public final class AppStartRecv extends BroadcastReceiver {
 
 	@Override
-	public final void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+	public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 		// Important to attempt to force Device Administration mode because the app might have been killed (or just
 		// restarted, but supposed it's killed) by the system for uninstallation and this will start it again and enable
 		// Device Administration again, which will stop it from uninstalling - if the user is slow enough to insert the

@@ -41,7 +41,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.Modules.SpeechRecognition.UtilsSpeechRecognizersBC;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
@@ -53,7 +53,7 @@ import java.util.List;
 /**
  * <p>The audio recorder module of the assistant.</p>
  */
-public class AudioRecorder implements IModuleInst {
+public final class AudioRecorder implements IModuleInst {
 
 	@Nullable private MediaRecorder recorder = null;
 
@@ -69,7 +69,7 @@ public class AudioRecorder implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -77,7 +77,7 @@ public class AudioRecorder implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
@@ -89,7 +89,7 @@ public class AudioRecorder implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
@@ -132,7 +132,7 @@ public class AudioRecorder implements IModuleInst {
 	 * @param restart_pocketsphinx in case it's to stop the recorder, true to restart pocketsphinx, false not to restart
 	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
-	final void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
+	void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
 		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
 		if (null == is_recording) {
 			is_recording = false;
@@ -202,7 +202,7 @@ public class AudioRecorder implements IModuleInst {
 	 * @param audioSource one of {@link MediaRecorder#setAudioSource(int)}'s parameters
 	 * @return one of the constants
 	 */
-	final int startRecording(final int audioSource) {
+	int startRecording(final int audioSource) {
 		// Do NOT change the encoder and format settings. I've put those because they are compatible with all devices
 		// that the app supports, and the sound is still very good.
 

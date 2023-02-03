@@ -38,17 +38,17 @@ import com.dadi590.assist_c_a.R;
 /**
  * <p>Fragment that shows the status of each module of the assistant.</p>
  */
-public class FragCmdsList extends Fragment {
+public final class FragCmdsList extends Fragment {
 
 	@Nullable
 	@Override
-	public final View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
+	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 								   @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.frag_cmds_list, container, false);
 	}
 
 	@Override
-	public final void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		final LinearLayout linearLayout = view.findViewById(R.id.frag_cmds_list_linear_layout);

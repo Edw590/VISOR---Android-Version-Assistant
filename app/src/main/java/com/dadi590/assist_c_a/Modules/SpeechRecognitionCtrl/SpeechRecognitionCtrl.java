@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.SpeechRecognition;
+package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -44,7 +44,7 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
  * <p>This is the module which controls the assistant's speech recognition.</p>
  * <p>It may control one or more speech recognizers, like PocketSphinx and/or Google Speech Recognition.</p>
  */
-public class SpeechRecognitionCtrl implements IModuleInst {
+public final class SpeechRecognitionCtrl implements IModuleInst {
 
 	static final Class<?> NO_RECOGNIZER = null;
 	static final Class<?> POCKETSPHINX_RECOGNIZER = PocketSphinxRecognition.class;
@@ -67,7 +67,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -75,7 +75,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		infinity_thread.interrupt();
 		try {
 			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
@@ -86,7 +86,7 @@ public class SpeechRecognitionCtrl implements IModuleInst {
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {

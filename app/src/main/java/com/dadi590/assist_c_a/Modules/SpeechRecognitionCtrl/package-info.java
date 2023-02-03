@@ -22,4 +22,4 @@
 /**
  * <p>Everything directly related to the assistant's Speech Recognition module.</p>
  */
-package com.dadi590.assist_c_a.Modules.SpeechRecognition;
+package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;

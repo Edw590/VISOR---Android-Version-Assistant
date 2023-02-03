@@ -89,7 +89,7 @@ public final class UtilsReflection {
 	 * like it would if the actual return value of the invoked method were null.</p>
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
-	public static class InvokeMethodObj {
+	public static final class InvokeMethodObj {
 		public final Object ret_var;
 		public final boolean success;
 

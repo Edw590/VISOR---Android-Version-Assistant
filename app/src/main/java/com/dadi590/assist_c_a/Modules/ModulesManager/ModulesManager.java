@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * <p>The module which ensures all the other modules are working properly.</p>
  */
-public class ModulesManager implements IModuleInst {
+public final class ModulesManager implements IModuleInst {
 
 	public static final long CHECK_INTERVAL = 10_000L;
 
@@ -41,7 +41,7 @@ public class ModulesManager implements IModuleInst {
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
 	@Override
-	public final boolean isFullyWorking() {
+	public boolean isFullyWorking() {
 		if (is_module_destroyed) {
 			return false;
 		}
@@ -49,13 +49,13 @@ public class ModulesManager implements IModuleInst {
 		return UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
-	public final void destroy() {
+	public void destroy() {
 		infinity_thread.interrupt();
 
 		is_module_destroyed = true;
 	}
 	@Override
-	public final int wrongIsSupported() {return 0;}
+	public int wrongIsSupported() {return 0;}
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
