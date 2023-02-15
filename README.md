@@ -20,14 +20,16 @@ They're pre-releases because I don't have any settings yet. So everything is how
 - Lollipop 5.0 on a OnePlus X (the phone with the broken screen that gave reason to the app)
 
 ## Pictures
-<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
+Note: these pictures may be outdated.
 
 **NOTE: the commands list picture is outdated. Check below for a complete list.**
+
+<img src="Pictures/Dev_Mode.png" width="300"><img src="Pictures/Modules_Status.png" width="300"><img src="Pictures/Global_values.png" width="300"><img src="Pictures/Available_commands.png" width="300">
 
 ## Table of Contents
 - [Background](#background)
 - [Explanation of the assistant](#explanation-of-the-assistant)
-- [Possible commands list](#possible-commands-list)
+- [Commands list](#commands-list)
 - [Current features (modules and submodules)](#current-features-modules-and-submodules)
 - [Installation/Usage](#installationusage)
 - [For developers](#for-developers)
@@ -59,7 +61,7 @@ The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I li
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
-## Possible commands list
+## Commands list
 List of all commands and variations available (optional words are in "[...]" and generic descriptions are in "(...)").
 
 (Note: there is more than one way to say a command, with synonyms and random words in between ("switch on the phone's wifi", "what's the current time", "terminate the phone call", "call my friend number 2" (when the contact is just called "friend 2").)
@@ -98,6 +100,7 @@ Note 2: all this is listed inside the app.
 ## Current features (modules and submodules)
 Hopefully I don't forget to keep adding the modules here. Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
 - **[Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)** --> Detects commands in a sentence of words (a link because it's in another repository). It's the module that understands the user communication (voice or text - as long as it uses words). It can detect no so simple sentences of multiple commands, and understands the meaning of "don't", "it", and "and". Example of a complex sentence it can successfully understand (without the punctuation - it must not be present): `"turn it on. turn on the wifi, and and the airplane mode, get it it on. no, don't turn it on. turn off airplane mode and also the wifi, please."` (ignores/warns about the meaningless "it", turns on the Wi-Fi, and turns off the airplane mode and the Wi-Fi).
+- **Device Locator** --> This module is responsible for locating the device as best and accurately as it can, both absolutely (like GPS coordinates or knowing the user is in their house because the Wi-Fi SSID and MAC is at reach) and/or relatively (the user's computer is near the mobile device, wherever that is). It uses any means necessary and available (both by hardware and app permissions). For example as of this writing, it's checking the current type of network (if any), getting the public IP address (if connected to the Internet), and detecting nearby Bluetooth devices and Wi-Fi Access Points (networks). Though, more will be added with time (GPS, BLE, and whatever more I find that can be used to locate the device).
 - **Speech Recognition** --> This is a module which contains 2 different speech recognizers: the Google one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name - it's not very accurate unfortunately, but there's really nothing I can do about it), which then calls Google speech recognition to recognize normal speech (very very good accuracy, and in which you can say commands, like "turn on the wifi and the bluetooth and what time is it"). You can also call the commands recognizer directly by pressing and holding the Power key while the screen is on, on Android versions up to Pie (Android 9). Above that, the Power key detection doesn't work (Android security policies), and as I don't own a device with Android 10+, I haven't taken care of finding a replacement way.
 - **Audio Recorder** --> Records audio from a given audio source (like phone calls, microphone...). The audio will be recorded in background and in a good quality, and will be saved to a folder in the external storage, named VISOR. No notifications, nothing. And in case of an error, "Error 1" or "Error 2" only will be said. Nothing related to being recording...
 - **Camera Manager** --> Manages the camera usage. It's supposed to be able to record videos (not yet), take pictures (only on Android KitKat and below for now), and toggle the flashlight (ready).
