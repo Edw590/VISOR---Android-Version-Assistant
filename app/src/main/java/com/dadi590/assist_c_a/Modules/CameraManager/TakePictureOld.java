@@ -122,8 +122,8 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 
 		flash_off_on = FLASH_MODE_OFF_ON.equals(chosen_flash_mode);
 
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().
-				getSystemService(Context.WINDOW_SERVICE);
+		final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+		assert null != windowManager; // Module supported
 
 		final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -376,8 +376,10 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 		camera_parameters.setJpegThumbnailQuality(chosen_quality_mode);
 		camera_parameters.setPictureFormat(ImageFormat.JPEG);
 
-		final int display_rotation = ((WindowManager) UtilsGeneral.getContext().getSystemService(Context.WINDOW_SERVICE)).
-				getDefaultDisplay().getRotation();
+		final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+		assert null != windowManager; // If the camera is available and this is how it's used, then this is also available
+
+		final int display_rotation = windowManager.getDefaultDisplay().getRotation();
 		final int[][] rotation_to_degrees = {{Surface.ROTATION_0, 0}, {Surface.ROTATION_90, 90},
 				{Surface.ROTATION_180, 180}, {Surface.ROTATION_270, 270}};
 		for (final int[] rotation_to_degree : rotation_to_degrees) {

@@ -52,7 +52,7 @@ public final class UtilsRoot {
                 UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
             }
         } else {
-            final String speak = "Attention! Root access was denied or is not available on this device! Some " +
+            final String speak = "Attention! Root access was denied or is not available in this device! Some " +
                     "features may not be available!";
             UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
         }

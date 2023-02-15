@@ -29,10 +29,11 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.AudioRecorder;
-import com.dadi590.assist_c_a.Modules.BatteryProcessor.BatteryProcessor;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
+import com.dadi590.assist_c_a.Modules.DeviceLocator.DeviceLocator;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
+import com.dadi590.assist_c_a.Modules.PowerProcessor.PowerProcessor;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.CONSTS_SpeechRecog;
@@ -95,19 +96,20 @@ public final class ModulesList {
 	// To disable an element, just comment its line here and be sure you disable its usages everywhere else or pray the
 	// app won't crash because of negative index from getModuleIndex() in case it's used for the disabled element.
 	/** List of all modules of the app, and also the wanted submodules to be shown on the Modules Status - check which
-	 * is what with {@link #ELEMENT_TYPE2}.*/
+	 * is what with {@link #ELEMENT_TYPE2}. They must also be in the order of module startup (the Modules Manager must
+	 * be the first one).*/
 	private static final ElementsObj[] elements_list = {
 			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			//new ElementObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, TYPE2_MODULE),
-			//new ElementObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(BatteryProcessor.class, "Battery Processor", TYPE1_INSTANCE, TYPE2_MODULE),
+			new ElementsObj(PowerProcessor.class, "Power Processor", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
+			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, TYPE2_MODULE),
+			new ElementsObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, TYPE2_MODULE),
 
 			// todo Make a new class for libraries? And get them to return on a standard function the supported
 			//  architectures. Then check if the file is present or at least if the library has been loaded by catching

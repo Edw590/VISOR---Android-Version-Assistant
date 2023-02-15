@@ -11,7 +11,7 @@ import com.dadi590.assist_c_a.R;
 /**
  * Stub activity to test out settings selection for voice interactor.
  */
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class SettingsActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {

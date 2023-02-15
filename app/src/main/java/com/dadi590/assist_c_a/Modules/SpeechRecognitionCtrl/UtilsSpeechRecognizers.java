@@ -34,7 +34,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
@@ -103,8 +102,11 @@ public final class UtilsSpeechRecognizers {
 			// especially after stopping recording).
 			Thread.sleep(650L);
 		} catch (final InterruptedException ignored) {
-			Thread.currentThread().interrupt();
+			return;
 		}
+
+		// No need to check if Google's recognition is supported or not because the Controller will only be activated if
+		// the recognition is available (checked on isSupported() every CHECK_TIME on the Manager).
 
 		if (UtilsGeneral.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
 			final Intent intent = new Intent(UtilsGeneral.getContext(), GoogleRecognition.class);
@@ -131,8 +133,11 @@ public final class UtilsSpeechRecognizers {
 			intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
 			UtilsServices.startService(PocketSphinxRecognition.class, intent, false, true);
 		} else {
-			final Boolean recog_available = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.pocketsphinx_recog_available);
-			if (null == recog_available || recog_available) { // Warn only once when it was there and stopped being.
+			// Set no-value to be equal to true value (so that VISOR warns anyway even before the value being there -
+			// would mean it's assuming the recognition was there, or just to warn the user at the app startup).
+			final boolean recog_available = ValuesStorage.getValueObj(ValuesStorage.Keys.pocketsphinx_recog_available).
+					getValue(true);
+			if (recog_available) { // Warn only once when it was there and stopped being.
 				final String speak = "Attention - Background speech recognition is not available. Either the microphone" +
 						"is being used already or PocketSphinx's correct library file was not found.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
@@ -140,8 +145,7 @@ public final class UtilsSpeechRecognizers {
 		}
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.pocketsphinx_recog_available,
-				String.valueOf(pocketsphinx_recog_available));
+		ValuesStorage.setValue(ValuesStorage.Keys.pocketsphinx_recog_available, pocketsphinx_recog_available);
 	}
 
 	/**

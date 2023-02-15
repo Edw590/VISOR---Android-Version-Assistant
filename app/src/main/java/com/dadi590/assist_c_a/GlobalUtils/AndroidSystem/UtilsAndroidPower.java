@@ -25,9 +25,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.PowerManager;
-import android.os.ServiceManager;
 import android.provider.Settings;
 
 import androidx.annotation.RequiresApi;
@@ -37,7 +37,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +69,7 @@ public final class UtilsAndroidPower {
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
+	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: power service module not available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @return one of the constants or a SH shell exit code
@@ -84,8 +84,11 @@ public final class UtilsAndroidPower {
 			// Also, shutdown() only exists from API 17 onwards. Hopefully the root way works.
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-				final PowerManager powerManager = (PowerManager) UtilsGeneral.getContext().
-						getSystemService(Context.POWER_SERVICE);
+				final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+				if (null == powerManager) {
+					return UtilsAndroid.NOT_AVAILABLE;
+				}
+
 				try {
 					powerManager.shutdown(false, PowerManager.SHUTDOWN_USER_REQUESTED, false);
 
@@ -93,21 +96,21 @@ public final class UtilsAndroidPower {
 				} catch (final Exception ignored) {
 				}
 			} else {
-				final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(ServiceManager.
-						getService(Context.POWER_SERVICE));
+				final IBinder iBinder = UtilsGeneral.getService(Context.POWER_SERVICE);
+				if (null == iBinder) {
+					return UtilsAndroid.NOT_AVAILABLE;
+				}
+
+				final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(iBinder);
 
 				final Method method = UtilsReflection.getMethod(IPowerManager.class, "shutdown", boolean.class,
 						boolean.class);
 				assert null != method; // Will never happen.
-				try {
-					final Boolean ret_method = (Boolean) method.invoke(iPowerManager, false, false);
-					assert ret_method != null; // Which will never be... (but the warning is gone now)
+				// The return won't be null either
+				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, false, false).ret_var;
 
-					if (ret_method) {
-						return UtilsShell.NO_ERR;
-					}
-				} catch (final IllegalAccessException ignored) {
-				} catch (final InvocationTargetException ignored) {
+				if (ret_method) {
+					return UtilsShell.NO_ERR;
 				}
 			}
 		}
@@ -147,6 +150,7 @@ public final class UtilsAndroidPower {
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
+	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: power service not available</p>
 	 * <br>
 	 * <p>- {@link UtilsAndroid#MODE_NORMAL} --> for {@code mode}: reboot device normally</p>
 	 * <p>- {@link UtilsAndroid#MODE_SAFE} --> for {@code mode}: reboot device into Safe Mode</p>
@@ -195,8 +199,12 @@ public final class UtilsAndroidPower {
 		}
 
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT)) {
-			final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(ServiceManager.
-					getService(Context.POWER_SERVICE));
+			final IBinder iBinder = UtilsGeneral.getService(Context.POWER_SERVICE);
+			if (null == iBinder) {
+				return UtilsAndroid.NOT_AVAILABLE;
+			}
+
+			final IPowerManager iPowerManager = IPowerManager.Stub.asInterface(iBinder);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 				// This below is the implementation of the PowerManager.reboot() function. But I need to set 'wait' to
 				// false, so here is a re-implementation.
@@ -209,15 +217,11 @@ public final class UtilsAndroidPower {
 			} else {
 				final Method method = UtilsReflection.getMethod(IPowerManager.class, "reboot", String.class);
 				assert null != method; // Will never happen.
-				try {
-					final Boolean ret_method = (Boolean) method.invoke(iPowerManager, reason);
-					assert ret_method != null; // Which will never be... (but the warning is gone now)
+				// The return won't be null either.
+				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, reason).ret_var;
 
-					if (ret_method) {
-						return UtilsShell.NO_ERR;
-					}
-				} catch (final IllegalAccessException ignored) {
-				} catch (final InvocationTargetException ignored) {
+				if (ret_method) {
+					return UtilsShell.NO_ERR;
 				}
 			}
 
@@ -249,7 +253,7 @@ public final class UtilsAndroidPower {
 	 *
 	 * @return a SH shell exit code
 	 */
-	@RequiresApi(Build.VERSION_CODES.L)
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 	public static int setBatterySaverModeEnabled(final boolean enabled) {
 		final boolean operation_finished;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {

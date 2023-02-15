@@ -19,7 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.UUID;
 
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class TestEnrollmentActivity extends Activity {
 	private static final String TAG = "TestEnrollmentActivity";
 	private static final boolean DBG = true;

@@ -125,8 +125,12 @@ public final class UtilsNotifications {
 		final NotificationChannel channel = new NotificationChannel(id, chName, importance);
 		channel.setDescription(description);
 
-		final NotificationManager notificationManager = UtilsGeneral.getContext()
-				.getSystemService(NotificationManager.class);
+		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.
+				getSystemService(Context.NOTIFICATION_SERVICE);
+		if (null == notificationManager) {
+			return;
+		}
+
 		try {
 			notificationManager.createNotificationChannel(channel);
 		} catch (final IllegalArgumentException ignored) {

@@ -268,8 +268,11 @@ public final class UtilsTelephony {
 	 */
 	public static boolean isEmergencyNumber(@NonNull final String phone_number) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.getContext().
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.
 					getSystemService(Context.TELEPHONY_SERVICE);
+			if (null == telephonyManager) {
+				return false;
+			}
 
 			return telephonyManager.isEmergencyNumber(phone_number);
 		} else {
@@ -288,8 +291,11 @@ public final class UtilsTelephony {
 	 */
 	public static boolean isPotentialEmergencyNumber(@NonNull final String phone_number) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.getContext().
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.
 					getSystemService(Context.TELEPHONY_SERVICE);
+			if (null == telephonyManager) {
+				return false;
+			}
 
 			return telephonyManager.isPotentialEmergencyNumber(phone_number);
 		} else {
@@ -300,7 +306,7 @@ public final class UtilsTelephony {
 	public static final int ALL_CONTACTS = 0;
 	public static final int CONTACTS_SIM = 1;
 	/**
-	 * <p>Gets all contact names and phone number from the provided location.</p>
+	 * <p>Gets all contacts' name and phone number from the provided location.</p>
 	 * <p>NOTE: this is a possibly slow method. Call from a thread other than the main one if possible.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
@@ -310,7 +316,8 @@ public final class UtilsTelephony {
 	 *
 	 * @param location_search the location to search the contacts on (one of the constants)
 	 *
-	 * @return a 2D array with the number in the 1st element of each 1D array and the phone number on the 2nd element
+	 * @return a 2D array with the number in the 1st element of each 1D array and the phone number on the 2nd element,
+	 * and no repeated contacts (checked by same name and number)
 	 */
 	@NonNull
 	@RequiresPermission(Manifest.permission.READ_CONTACTS)
@@ -364,9 +371,20 @@ public final class UtilsTelephony {
 									final String phoneNo = cursor1.getString(col4_idx);
 									//System.out.println("Number: " + phoneNo);
 
-									// Remove spaces so that the numbers don't get returned like "+351 123 456 789",
-									// which seems to be incompatible with isEmergencyNumber(), for example.
-									contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+									boolean not_in_list = true;
+									for (final String[] contact : contacts_found) {
+										if (name.equals(contact[0]) && phoneNo.equals(contact[1])) {
+											not_in_list = false;
+
+											break;
+										}
+									}
+									if (not_in_list) {
+										// Also remove spaces so that the numbers don't get returned like
+										// "+351 123 456 789", which seems to be incompatible with isEmergencyNumber(),
+										// for example.
+										contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+									}
 								}
 							}
 						}
@@ -388,7 +406,20 @@ public final class UtilsTelephony {
 					/*System.out.println("Name: " + name);
 					System.out.println("Phone Number: " + phoneNo);*/
 
-					contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+					boolean not_in_list = true;
+					for (final String[] contact : contacts_found) {
+						if (name.equals(contact[0]) && phoneNo.equals(contact[1])) {
+							not_in_list = false;
+
+							break;
+						}
+					}
+					if (not_in_list) {
+						// Also remove spaces so that the numbers don't get returned like
+						// "+351 123 456 789", which seems to be incompatible with isEmergencyNumber(),
+						// for example.
+						contacts_found.add(new String[]{name, phoneNo.replace(" ", "")});
+					}
 				}
 			}
 		}

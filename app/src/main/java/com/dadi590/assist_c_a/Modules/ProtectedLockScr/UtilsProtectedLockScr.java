@@ -131,7 +131,7 @@ public final class UtilsProtectedLockScr {
 			}
 		}
 
-		// Won't happen, at least so soon. It exists from 22 to [something]?
+		// Won't happen, at least so soon. It exists from 22 to [something?]
 		return false;
 	}
 }

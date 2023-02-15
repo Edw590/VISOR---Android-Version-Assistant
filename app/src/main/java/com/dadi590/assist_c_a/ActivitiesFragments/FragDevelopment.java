@@ -21,7 +21,6 @@
 
 package com.dadi590.assist_c_a.ActivitiesFragments;
 
-import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.dadi590.assist_c_a.GlobalUtils.PERMS_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
@@ -93,7 +93,7 @@ public final class FragDevelopment extends Fragment {
 				//startActivity(intent);
 
 				//System.out.println("HHHHHHHHHHHHHHHHHH");
-				//System.out.println(ValuesStorage.getValue(CONSTS_ValueStorage.last_phone_call_time));
+				//System.out.println(ValuesStorage.getValue(ValuesStorage.last_phone_call_time, 0L));
 				//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
@@ -141,20 +141,16 @@ public final class FragDevelopment extends Fragment {
 				//MainActTests.for_tests();
 
 				System.out.println("------------------------");
-				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_SYSTEM_APP));
-				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_UPDATED_SYSTEM_APP));
-				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_ORDINARY_SYSTEM_APP));
-				System.out.println(UtilsSysApp.mainFunction(null, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP));
+				System.out.println("IS_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_SYSTEM_APP));
+				System.out.println("IS_UPDATED_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_UPDATED_SYSTEM_APP));
+				System.out.println("IS_ORDINARY_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_ORDINARY_SYSTEM_APP));
+				System.out.println("IS_PRIVILEGED_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP));
 				System.out.println("-----");
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.PACKAGE_VERIFICATION_AGENT));
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS));
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL));
-				System.out.println(UtilsPermsAuths.checkSelfPermission("android.permission.USER_INSTALLER_V2"));
-				System.out.println("-----");
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE));
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT));
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL));
-				System.out.println(UtilsPermsAuths.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD));
+				for (final String[][] permissions : PERMS_CONSTS.list_of_perms_lists) {
+					for (final String[] permission : permissions) {
+						System.out.println(permission[0] + ": " + UtilsPermsAuths.checkSelfPermission(permission[0]));
+					}
+				}
 				System.out.println("------------------------");
 
 				// BUTTON FOR TESTING

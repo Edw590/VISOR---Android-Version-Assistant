@@ -23,9 +23,6 @@ package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
-import android.app.AppGlobals;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +33,8 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.os.Build;
 import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.ServiceManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.KeyEvent;
@@ -118,8 +117,11 @@ public final class UtilsGeneral {
 	 * @return true if an accessory with speakers is connected, false otherwise
 	 */
 	public static boolean areExtSpeakersOn() {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
-				.getSystemService(Context.AUDIO_SERVICE);
+		final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		if (null == audioManager) {
+			return false;
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			final AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
 
@@ -142,33 +144,16 @@ public final class UtilsGeneral {
 
 	/**
 	 * <p>Returns the Application Context.</p>
-	 * <p>Main note: probably not good idea to use on Content Provider classes. Only on Activities, Services and
-	 * Receivers. Read the doc of {@link ApplicationClass#applicationContext}.</p>
-	 * <br>
-	 * <p>It will use the way that doesn't get a null value from the 2 below, in this order. It's also not supposed to
-	 * return null ever, since I'm using 2 different ways, but it can. Though, I don't think it will. If it does, I'll
-	 * change @NonNull to @Nullable or something. Until then, assume it's never null (except on Content Providers, as
-	 * said above, which might be null). Ways:</p>
-	 * <p>- Returns {@link Context#getApplicationContext()} on {@link ActivityThread#currentApplication()}.</p>
-	 * <p>Warning from {@link AppGlobals#getInitialApplication()}, which calls the last mentioned method above:</p>
-	 * <p>"Return the first Application object made in the process.</p>
-	 * <p>NOTE: Only works on the main thread."</p>
-	 * <p>- Returns the Application Context, got at app boot on {@link ApplicationClass}.</p>
+	 * <p>Main note: do NOT use on Content Provider classes. Only on Activities, Services and Receivers. Read the doc of
+	 * {@link ApplicationClass#application_context}, which is the variable returned by this function.</p>
 	 *
 	 * @return same as in {@link Context#getApplicationContext()}
 	 */
 	@NonNull
 	public static Context getContext() {
-		Context context = null;
-		final Application application = ActivityThread.currentApplication();
-		if (null != application) { // Was null in various runs of the app on API 15
-			context = application.getApplicationContext();
-		}
-		if (null == context) {
-			System.out.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-			context = ApplicationClass.applicationContext;
-		}
-		return context;
+		// This shouldn't return null ever, if used from Activities, Service, and Receivers. If it ever does, change
+		// @NonNull to @Nullable or think of/find something else/other method.
+		return ApplicationClass.application_context;
 	}
 
 	/**
@@ -178,8 +163,11 @@ public final class UtilsGeneral {
 	 */
 	public static boolean isDeviceRunningOnLowMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getContext()
-				.getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if (null == activityManager) {
+			return false;
+		}
+
 		activityManager.getMemoryInfo(memoryInfo);
 
 		return memoryInfo.lowMemory;
@@ -191,7 +179,11 @@ public final class UtilsGeneral {
 	 * @param duration milliseconds to vibrate
 	 */
 	public static void vibrateDeviceOnce(final long duration) {
-		final Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+		final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		if (null == vibrator) {
+			return;
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.MAX_AMPLITUDE));
 		} else {
@@ -285,7 +277,12 @@ public final class UtilsGeneral {
 	 */
 	public static long getAvailableRAM() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		((ActivityManager) getContext(). getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(memoryInfo);
+		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if (null == activityManager) {
+			return Long.MAX_VALUE;
+		}
+
+		activityManager.getMemoryInfo(memoryInfo);
 
 		return memoryInfo.availMem / 1048576L;
 	}
@@ -297,7 +294,10 @@ public final class UtilsGeneral {
 	 */
 	public static boolean isDeviceLowOnMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		((ActivityManager) getContext(). getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(memoryInfo);
+		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if (null == activityManager) {
+			return false;
+		}
 
 		return memoryInfo.lowMemory;
 	}
@@ -315,15 +315,42 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Quit a {@link HandlerThread} safely if on API level 18+, or forcibly if below.</p>
+	 * <p>Interrupt and quit a {@link HandlerThread} safely if on API level 18+, or forcibly if below.</p>
 	 *
 	 * @param handlerThread the handler thread to quit from
 	 */
 	public static void quitHandlerThread(@NonNull final HandlerThread handlerThread) {
+		handlerThread.interrupt();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
 			handlerThread.quitSafely();
 		} else {
 			handlerThread.quit();
 		}
+	}
+
+	/**
+	 * <p>Same as {@code Application}{@link Context#getSystemService(String)}, but that includes @Nullable on it from AndroidX
+	 * to provide warnings.</p>
+	 *
+	 * @param name same as in {@link Context#getSystemService(String)}
+	 *
+	 * @return same as in {@link Context#getSystemService(String)}
+	 */
+	@Nullable
+	public static Object getSystemService(@NonNull final String name) {
+		return getContext().getSystemService(name);
+	}
+
+	/**
+	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @Nullable on it from AndroidX
+	 * to provide warnings.</p>
+	 *
+	 * @param name same as in {@link ServiceManager#getService(String)}
+	 *
+	 * @return same as in {@link ServiceManager#getService(String)}
+	 */
+	@Nullable
+	public static IBinder getService(@NonNull final String name) {
+		return ServiceManager.getService(name);
 	}
 }

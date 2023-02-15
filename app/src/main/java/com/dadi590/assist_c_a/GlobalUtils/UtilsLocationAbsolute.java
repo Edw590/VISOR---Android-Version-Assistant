@@ -209,8 +209,7 @@ public final class UtilsLocationAbsolute {
 		}
 
 		if (update_location) {
-			final LocationManager locationManager = (LocationManager) UtilsGeneral.getContext()
-					.getSystemService(Context.LOCATION_SERVICE);
+			final LocationManager locationManager = (LocationManager) UtilsGeneral.getSystemService(Context.LOCATION_SERVICE);
 
 			final boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			final boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -272,8 +271,7 @@ public final class UtilsLocationAbsolute {
 			locations.add(null);
 		}
 
-		final LocationManager locationManager = (LocationManager) UtilsGeneral.getContext()
-				.getSystemService(Context.LOCATION_SERVICE);
+		final LocationManager locationManager = (LocationManager) UtilsGeneral.getSystemService(Context.LOCATION_SERVICE);
 
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
 				&& UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {

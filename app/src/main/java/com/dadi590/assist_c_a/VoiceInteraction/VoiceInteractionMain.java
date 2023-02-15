@@ -10,7 +10,7 @@ import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.R;
 
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class VoiceInteractionMain extends Activity {
 
     @Override

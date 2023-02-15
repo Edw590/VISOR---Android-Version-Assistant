@@ -44,7 +44,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.List;
@@ -66,9 +66,10 @@ public final class CameraManagement implements IModuleInst {
 	boolean flashlight_was_on_before_pic = false;
 	boolean first_pic_of_two = false;
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -120,8 +121,7 @@ public final class CameraManagement implements IModuleInst {
 	 */
 	public CameraManagement() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -144,8 +144,9 @@ public final class CameraManagement implements IModuleInst {
 		// Set the main camera ID for the callback to work right away if the camera state is changed externally to the
 		// app.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			final CameraManager camera_new = (CameraManager) UtilsGeneral.getContext()
-					.getSystemService(Context.CAMERA_SERVICE);
+			final CameraManager camera_new = (CameraManager) UtilsGeneral.getSystemService(Context.CAMERA_SERVICE);
+			assert null != camera_new; // Module supported
+
 			try {
 				main_camera_id = camera_new.getCameraIdList()[0];
 			} catch (final AndroidException ignored) {
@@ -155,8 +156,8 @@ public final class CameraManagement implements IModuleInst {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
 			final Handler handler =  new Handler(Looper.getMainLooper());
 
-			final CameraManager mCameraManager = (CameraManager) UtilsGeneral.getContext().
-					getSystemService(Context.CAMERA_SERVICE);
+			final CameraManager mCameraManager = (CameraManager) UtilsGeneral.getSystemService(Context.CAMERA_SERVICE);
+			assert null != mCameraManager; // Module supported
 
 			torchCallback = new CameraManager.TorchCallback() {
 				@Override
@@ -165,7 +166,7 @@ public final class CameraManagement implements IModuleInst {
 
 					if (!main_camera_id.isEmpty() && main_camera_id.equals(cameraId)) {
 						// Update the Values Storage
-						ValuesStorage.updateValue(CONSTS_ValueStorage.main_flashlight_enabled, Boolean.toString(enabled));
+						ValuesStorage.setValue(ValuesStorage.Keys.main_flashlight_enabled, enabled);
 					}
 				}
 			};
@@ -219,9 +220,9 @@ public final class CameraManagement implements IModuleInst {
 	 * @return one of the constants
 	 */
 	int useCamera(final int usage) {
-		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext().
+		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
-		if (devicePolicyManager.getCameraDisabled(null)) {
+		if (null != devicePolicyManager && devicePolicyManager.getCameraDisabled(null)) {
 			final String speak = "Error - Cameras disabled by a Device Administrator.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
 
@@ -263,7 +264,7 @@ public final class CameraManagement implements IModuleInst {
 		switch (usage) {
 			case USAGE_TAKE_REAR_PHOTO:
 			case USAGE_TAKE_FRONTAL_PHOTO: {
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 					if (null == takePictureOld && null == camera_old) {
 						first_pic_of_two = true;
 						takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_MODE_OFF_ON, 100);
@@ -283,7 +284,7 @@ public final class CameraManagement implements IModuleInst {
 			}
 			/*case USAGE_RECORD_REAR_VIDEO:
 			case USAGE_RECORD_FRONTAL_VIDEO: {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 					// todo
 				} else {
 					// todo
@@ -405,7 +406,9 @@ public final class CameraManagement implements IModuleInst {
 	@RequiresApi(Build.VERSION_CODES.M) // Because of setTorchMode()
 	private int flashlightNew(final boolean set_enabled) {
 		// The API warnings here are wrong, I think - I believe the condition is correct. Either API >= 21 or 23.
-		final CameraManager camera_new = (CameraManager) UtilsGeneral.getContext().getSystemService(Context.CAMERA_SERVICE);
+		final CameraManager camera_new = (CameraManager) UtilsGeneral.getSystemService(Context.CAMERA_SERVICE);
+		assert null != camera_new; // Module supported
+
 		try {
 			main_camera_id = camera_new.getCameraIdList()[0];
 		} catch (final AndroidException ignored) {
@@ -416,15 +419,16 @@ public final class CameraManagement implements IModuleInst {
 			return ERROR_ACCESSING_CAMERA;
 		}
 
-		final Boolean flashlight_new_on = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.main_flashlight_enabled);
-		// No check with the state being null is done. This is for the assistant to try anyway even if it doesn't know
-		// the state.
+		final Boolean flashlight_new_on = ValuesStorage.getValueObj(ValuesStorage.Keys.main_flashlight_enabled).
+				getValue(false);
+		// Even if the state was unknown (value is null), set it as false so that VISOR will try anyway even if it
+		// doesn't know the state.
 		if (set_enabled) {
-			if (flashlight_new_on != null && flashlight_new_on) {
+			if (flashlight_new_on) {
 				return FLASHLIGHT_ALREADY_ON;
 			}
 		} else {
-			if (flashlight_new_on != null && !flashlight_new_on) {
+			if (!flashlight_new_on) {
 				return FLASHLIGHT_ALREADY_OFF;
 			}
 		}

@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 
@@ -43,7 +42,7 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 
@@ -52,9 +51,10 @@ import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
  */
 public final class SmsMsgsProcessor implements IModuleInst {
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -96,8 +96,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	@SuppressLint("InlinedApi")
 	public SmsMsgsProcessor() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -126,8 +125,8 @@ public final class SmsMsgsProcessor implements IModuleInst {
 			System.out.println("&&&&&&&&&&&&&&&&&");
 
 			// Update the Values Storage
-			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_time, Long.toString(System.currentTimeMillis()));
-			ValuesStorage.updateValue(CONSTS_ValueStorage.last_sms_msg_number, sender);
+			ValuesStorage.setValue(ValuesStorage.Keys.last_sms_msg_time, System.currentTimeMillis());
+			ValuesStorage.setValue(ValuesStorage.Keys.last_sms_msg_number, sender);
 
 			final String speak;
 			if (UtilsTelephony.isPrivateNumber(sender)) {

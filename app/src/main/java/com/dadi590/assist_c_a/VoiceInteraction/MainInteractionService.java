@@ -14,7 +14,7 @@ import androidx.annotation.RequiresApi;
 
 import java.util.Locale;
 
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class MainInteractionService extends VoiceInteractionService {
 	static final String TAG = "MainInteractionService";
 

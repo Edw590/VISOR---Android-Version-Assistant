@@ -31,12 +31,6 @@ import java.util.ArrayList;
 public final class CONSTS_BC_Speech {
 
 	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private CONSTS_BC_Speech() {
-	}
-
-	/**
 	 * <p>Explanation: warns when a speech that requested to broadcast a code after being finished, has finished.</p>
 	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
 	 * <p>To be received only by the class(es): any chosen class.</p>
@@ -112,4 +106,10 @@ public final class CONSTS_BC_Speech {
 	 * <p>Extras: none.</p>
 	 */
 	static final String ACTION_SAY_AGAIN = "Speech_ACTION_SAY_AGAIN";
+
+	/**
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private CONSTS_BC_Speech() {
+	}
 }

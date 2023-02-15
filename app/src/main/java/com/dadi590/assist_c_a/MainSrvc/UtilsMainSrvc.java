@@ -36,7 +36,6 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
@@ -102,14 +101,14 @@ public final class UtilsMainSrvc {
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
 
-					final Boolean is_recording_audio = (Boolean) ValuesStorage.getValue(
-							CONSTS_ValueStorage.is_recording_audio_internally);
-					if (null == is_recording_audio || !is_recording_audio) {
-						// If it's not recording audio, start the commands recognizer.
-						UtilsSpeechRecognizersBC.startGoogleRecognition();
-					} else {
+					final boolean is_recording_audio = ValuesStorage.
+							getValueObj(ValuesStorage.Keys.is_recording_audio_internally).getValue(false);
+					if (is_recording_audio) {
 						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 						UtilsAudioRecorderBC.recordAudio(false, -1, true);
+					} else {
+						// If it's not recording audio, start the commands recognizer.
+						UtilsSpeechRecognizersBC.startGoogleRecognition();
 					}
 				}/* else if ("homekey".equals(reason)) {
 					// Here the recognizers are stopped because the user might be wanting to start Google's recognition
@@ -123,7 +122,7 @@ public final class UtilsMainSrvc {
 		linearLayout.setFocusable(true);
 
 		final View view = LayoutInflater.from(UtilsGeneral.getContext()).inflate(R.layout.power_long_press_service_layout, linearLayout);
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.getContext().
+		final WindowManager windowManager = (WindowManager) UtilsGeneral.
 				getSystemService(android.content.Context.WINDOW_SERVICE);
 
 		if (windowManager == null) {

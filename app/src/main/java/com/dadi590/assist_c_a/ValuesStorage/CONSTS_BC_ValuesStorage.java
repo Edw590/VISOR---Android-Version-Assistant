@@ -19,34 +19,28 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;
+package com.dadi590.assist_c_a.ValuesStorage;
 
 /**
- * <p>General utilities for the Android system utilities classes.</p>
+ * <p>Actions and extras of broadcasts sent by the ValuesStorage class methods.</p>
+ * <br>
+ * <p>Check the doc on the action string to know what to do.</p>
  */
-public final class UtilsAndroid {
+public final class CONSTS_BC_ValuesStorage {
+
+	/**
+	 * <p>Explanation: warns when a value on the array was just updated.</p>
+	 * <p>Is broadcast by the class(es): {@link ValuesStorage}.</p>
+	 * <p>To be received only by the class(es): any chosen class.</p>
+	 * <p>Extras:</p>
+	 * <p>- {@link #EXTRA_VALUE_UPDATED_1} ({@link String}): {@link ValueObj#key}</p>
+	 */
+	public static final String ACTION_VALUE_UPDATED =  "ValuesStorage_ACTION_VALUE_UPDATED";
+	public static final String EXTRA_VALUE_UPDATED_1 = "ValuesStorage_EXTRA_VALUE_UPDATED_1";
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private UtilsAndroid() {
+	private CONSTS_BC_ValuesStorage() {
 	}
-
-	/** Generic error. */
-	public static final int GEN_ERR = 987670;
-	public static final int NO_ERR = 987671;
-	public static final int PERM_DENIED = 987672;
-	public static final int NOT_AVAILABLE = 987673;
-
-	public static final int ALREADY_ENABLED = -987674;
-	public static final int ALREADY_DISABLED = -987675;
-
-	public static final int MODE_NORMAL = -987676;
-	public static final int MODE_SAFE = -987677;
-	public static final int MODE_RECOVERY = -987678;
-	public static final int MODE_BOOTLOADER = -987679;
-	public static final int MODE_FAST = -987680;
-
-	public static final int NO_CALL_EMERGENCY = -987681;
-	public static final int NO_CALL_ANY = -987682;
 }

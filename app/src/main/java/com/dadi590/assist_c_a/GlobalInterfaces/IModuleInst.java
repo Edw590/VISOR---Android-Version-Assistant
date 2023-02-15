@@ -24,7 +24,7 @@ package com.dadi590.assist_c_a.GlobalInterfaces;
 import com.dadi590.assist_c_a.ModulesList;
 
 /**
- * <p>All {@link ModulesList#TYPE1_INSTANCE} modules must implement this interface.</p>
+ * <p>All |{@link ModulesList#TYPE1_INSTANCE}| (sub)modules must implement this interface.</p>
  */
 public interface IModuleInst extends IModule {
 

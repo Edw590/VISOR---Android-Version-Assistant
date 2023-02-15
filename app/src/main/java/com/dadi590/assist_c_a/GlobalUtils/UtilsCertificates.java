@@ -31,8 +31,6 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -108,11 +106,6 @@ public final class UtilsCertificates {
 	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map<?, ?>[] list_cert_hashes) {
 		final String[][] possible_hash_algos = UtilsCryptoHashing.getPossibleHashAlgorithms();
 		final int hash_algo_to_use = possible_hash_algos.length - 1; // Last one (safest)
-		try {
-			MessageDigest.getInstance(possible_hash_algos[hash_algo_to_use][0]);
-		} catch (final NoSuchAlgorithmException ignored) {
-			// Will never happen.
-		}
 
 		final Signature[] other_app_signatures = getAppSignatures(package_name);
 		if (other_app_signatures == null) {

@@ -78,8 +78,6 @@ public final class SomeValuesUpdater implements IModuleInst {
 				try {
 					Thread.sleep(10_000L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}

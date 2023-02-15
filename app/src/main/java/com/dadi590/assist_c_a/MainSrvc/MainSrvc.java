@@ -34,11 +34,9 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.dadi590.assist_c_a.ActivitiesFragments.ActMain;
-import com.dadi590.assist_c_a.BroadcastRecvs.MainRegRecv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsRoot;
@@ -98,7 +96,7 @@ public final class MainSrvc extends Service {
 
 			intentFilter.addAction(CONSTS_BC_Speech.ACTION_READY);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
 		} catch (final IllegalArgumentException ignored) {
 		}
 
@@ -135,8 +133,6 @@ public final class MainSrvc extends Service {
 					// todo Hopefully this won't happen. Not sure what to do here?
 					// Can't kill the PID for the system to restart the app - might corrupt ongoing stuff.
 
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}
@@ -157,10 +153,6 @@ public final class MainSrvc extends Service {
 			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
 			if (intent.getAction().equals(CONSTS_BC_Speech.ACTION_READY)) {
-				// Start the main broadcast receivers before everything else, so stuff can start sending broadcasts
-				// right away after being ready.
-				MainRegRecv.registerReceivers();
-
 				// Start the Modules Manager.
 				ModulesList.startElement(ModulesList.getElementIndex(ModulesManager.class));
 				infinity_thread.start();
@@ -254,7 +246,7 @@ public final class MainSrvc extends Service {
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
 
 				try {
-					UtilsGeneral.getContext().unregisterReceiver(this);
+					unregisterReceiver(this);
 				} catch (final IllegalArgumentException ignored) {
 				}
 			}

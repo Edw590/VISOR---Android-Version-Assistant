@@ -42,16 +42,20 @@ public final class UtilsProcesses {
      *
      * @param serviceClass the service class
      *
-     * @return the PID of the service of the given class
+     * @return the PID of the service of the given class or -1 if not found
      */
     public static int getRunningServicePID(@NonNull final Class<?> serviceClass) {
-        final ActivityManager manager = (ActivityManager) UtilsGeneral.getContext()
-                .getSystemService(Context.ACTIVITY_SERVICE);
+        final ActivityManager manager = (ActivityManager) UtilsGeneral.getSystemService(Context.ACTIVITY_SERVICE);
+        if (null == manager) {
+            return -1;
+        }
+
         for (final ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
                 return service.pid;
             }
         }
+
         return -1;
     }
 

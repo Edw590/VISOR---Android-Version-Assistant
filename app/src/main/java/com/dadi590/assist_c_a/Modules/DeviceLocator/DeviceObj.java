@@ -19,18 +19,17 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.GlobalInterfaces;
-
-import android.app.Service;
-
-import com.dadi590.assist_c_a.ModulesList;
+package com.dadi590.assist_c_a.Modules.DeviceLocator;
 
 /**
- * <p>All |{@link ModulesList#TYPE1_SERVICE_SEP}| (sub)modules must implement this interface.</p>
- * <p>Note: no module running on a process other than the Main Service process must implement this interface, so that
- * it's possible to call these methods directly on their instances. For example {@link Service}s running on
- * separate processes - in these cases no idea yet on how to implement the idea of the methods of this interface with
- * this ease --> todo.</p>
+ * <p>Class to instantiate to get and set information about the current device (using the app).</p>
  */
-public interface IModuleSrv extends IModule {
+public final class DeviceObj {
+
+	// Location
+	public static final int LOCATION_UNKNOWN = -1;
+	public static final int LOCATION_AT_HOME = 0;
+	public static final int LOCATION_LEAVING_HOME = 1;
+
+	public int location = LOCATION_UNKNOWN;
 }

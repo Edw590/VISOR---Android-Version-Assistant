@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Utility class for the enrollment operations like enroll;re-enroll & un-enroll.
  */
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class EnrollmentUtil {
 	private static final String TAG = "TestEnrollmentUtil";
 

@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.provider.CallLog;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PreciseCallState;
@@ -45,7 +44,7 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.ArrayList;
@@ -71,9 +70,10 @@ public final class PhoneCallsProcessor implements IModuleInst {
 	 */
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -117,8 +117,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 	 */
 	public PhoneCallsProcessor() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		mapCallLogToCALL_PHASE = new LinkedHashMap<>(2);
 		mapCallLogToCALL_PHASE.put(CallLog.Calls.INCOMING_TYPE, CALL_PHASE_ANSWERED);
@@ -183,20 +182,20 @@ public final class PhoneCallsProcessor implements IModuleInst {
 		// todo This only works when Precise Call States are not being used.... Don't forget that.
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.last_phone_call_time, Long.toString(System.currentTimeMillis()));
+		ValuesStorage.setValue(ValuesStorage.Keys.last_phone_call_time, System.currentTimeMillis());
 
 		boolean active_number = false;
 		for (final ArrayList<String> call : calls_state) {
 			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
 				// Update the Values Storage
-				ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, call.get(0));
+				ValuesStorage.setValue(ValuesStorage.Keys.curr_phone_call_number, call.get(0));
 
 				active_number = true;
 			}
 		}
 		if (!active_number) {
 			// Update the Values Storage
-			ValuesStorage.updateValue(CONSTS_ValueStorage.curr_phone_call_number, "");
+			ValuesStorage.setValue(ValuesStorage.Keys.curr_phone_call_number, "");
 		}
 	}
 

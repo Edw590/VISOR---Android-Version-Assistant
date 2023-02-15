@@ -29,7 +29,6 @@ import android.content.IntentFilter;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -42,7 +41,7 @@ import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.io.File;
@@ -61,9 +60,10 @@ public final class AudioRecorder implements IModuleInst {
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -108,8 +108,10 @@ public final class AudioRecorder implements IModuleInst {
 	 */
 	public AudioRecorder() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
+
+		// Update the Values Storage
+		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, false);
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -133,10 +135,8 @@ public final class AudioRecorder implements IModuleInst {
 	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
-		Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
-		if (null == is_recording) {
-			is_recording = false;
-		}
+		final Boolean is_recording = ValuesStorage.getValueObj(ValuesStorage.Keys.is_recording_audio_internally).
+				getValue(false);
 
 		if (start) {
 			if (is_recording) {
@@ -147,10 +147,8 @@ public final class AudioRecorder implements IModuleInst {
 					@Override
 					public void run() {
 						startRecording(audio_source);
-						Boolean is_recording = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.is_recording_audio_internally);
-						if (null == is_recording) {
-							is_recording = false;
-						}
+						final Boolean is_recording = ValuesStorage.
+								getValueObj(ValuesStorage.Keys.is_recording_audio_internally).getValue(false);
 						if (audio_source == MediaRecorder.AudioSource.MIC && !is_recording) {
 							// In case of an error and that the microphone is the audio source, start the background
 							// recognition again (if it's not the microphone, then the speech recognition didn't stop
@@ -264,7 +262,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(true));
+		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, true);
 
 		return NO_ERRORS;
 	}
@@ -283,7 +281,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.is_recording_audio_internally, Boolean.toString(false));
+		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, false);
 	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

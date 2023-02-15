@@ -146,14 +146,7 @@ public class SpeechRecognizer {
         if (null == recognizerThread)
             return false;
 
-        try {
-            recognizerThread.interrupt();
-            recognizerThread.join();
-        } catch (final InterruptedException ignored) {
-            // Restore the interrupted status.
-            Thread.currentThread().interrupt();
-        }
-
+        recognizerThread.interrupt();
         recognizerThread = null;
         return true;
     }
@@ -371,7 +364,10 @@ public class SpeechRecognizer {
                 }
             }
 
-            recorder.stop();
+            try {
+                recorder.stop();
+            } catch (final IllegalStateException ignored) {
+            }
             decoder.endUtt();
 
             // Remove all pending notifications.

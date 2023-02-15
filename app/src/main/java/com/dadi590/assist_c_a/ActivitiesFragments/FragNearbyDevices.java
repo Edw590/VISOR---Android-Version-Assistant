@@ -36,33 +36,30 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsTimeDate;
+import com.dadi590.assist_c_a.Modules.DeviceLocator.DeviceLocator;
+import com.dadi590.assist_c_a.Modules.DeviceLocator.ExtDeviceObj;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.ValueObj;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+
+import java.util.List;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
-public final class FragValuesStorageViewer extends Fragment {
+public final class FragNearbyDevices extends Fragment {
 
-	View current_view = null;
-
-	final ValueObj[] values_list = ValuesStorage.getValuesArrays();
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 								   @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.frag_values_storage_viewer, container, false);
+		return inflater.inflate(R.layout.frag_nearby_devices, container, false);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		current_view = view;
-
-		final LinearLayout linearLayout = current_view.findViewById(R.id.frag_values_storage_viewer_linear_layout);
+		final LinearLayout linearLayout = view.findViewById(R.id.frag_nearby_devices_linear_layout);
 
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -72,26 +69,30 @@ public final class FragValuesStorageViewer extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		int i = 0;
-		for (final ValueObj valueObj : values_list) { // Add a TextView for each value.
-			final TextView textView = new TextView(requireContext());
-			textView.setId(i); // Set the ID to be the index of the value in the list
-			textView.setLayoutParams(layoutParams);
-			textView.setPadding(padding_px, padding_px, padding_px, padding_px);
-			textView.setTextColor(Color.BLACK);
-			textView.setTextIsSelectable(true);
+		final TextView textView1 = new TextView(requireContext());
+		textView1.setLayoutParams(layoutParams);
+		textView1.setPadding(padding_px, padding_px, padding_px, padding_px);
+		textView1.setTextColor(Color.BLACK);
+		textView1.setTextIsSelectable(true);
+		textView1.setText("Type (0, Bluetooth; 1, Wi-Fi)\nAddress\nLast detection (ms)\nRounded distance (m)\nName\nGiven name\nIs linked/saved network");
+		linearLayout.addView(textView1);
 
-			final String text = "Name: " + valueObj.pretty_name + "\nType: " + valueObj.type +
-					"\nTime: " + getTimeDateStr(valueObj.getPrevTime()) + "\nPrev: " + valueObj.getPrevValue() +
-					"\nTime: " + getTimeDateStr(valueObj.getTime()) + "\nCurr: " + valueObj.getValue();
-			textView.setText(text);
+		final List<ExtDeviceObj>[] lists = new List[]{DeviceLocator.nearby_devices_bt, DeviceLocator.nearby_aps_wifi};
+		for (final List<ExtDeviceObj> list : lists) {
+			for (final ExtDeviceObj device : list) { // Add a TextView for each value.
+				final TextView textView = new TextView(requireContext());
+				textView.setLayoutParams(layoutParams);
+				textView.setPadding(padding_px, padding_px, padding_px, padding_px);
+				textView.setTextColor(Color.BLACK);
+				textView.setTextIsSelectable(true);
 
-			linearLayout.addView(textView);
-			++i;
+				final long last_detection = device.last_detection;
+				final String text = device.type + "\n" + device.address + "\n" + UtilsTimeDate.getTimeDateStr(last_detection) +
+						"\n" + device.distance + "\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
+				textView.setText(text);
+
+				linearLayout.addView(textView);
+			}
 		}
-	}
-
-	private static String getTimeDateStr(final long time) {
-		return ValueObj.DEFAULT_TIME == time ? "never" : UtilsTimeDate.getTimeDateStr(time);
 	}
 }

@@ -61,10 +61,10 @@ public final class ApplicationClass extends Application {
 	// is here now too to indicate it can actually be null (only with Content Providers, as said above - but it can).
 	/**
 	 * <p>The main application's context.</p>
-	 * <p>Do NOT use with Content Provider classes! This context may not be ready in those cases!</p>
+	 * <p>Do NOT use with Content Provider classes! This variable may not be ready in those cases and be null!</p>
 	 * <p>Use in Activities, Services and Receivers and everything else.</p>
 	 */
-	@Nullable public static Context applicationContext = null;
+	@Nullable public static Context application_context = null;
 
 	@Override
 	public void onCreate() {
@@ -84,8 +84,8 @@ public final class ApplicationClass extends Application {
 		PRNGFixes.apply();
 
 		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
-		// which returns null sometimes.
-		applicationContext = getApplicationContext();
+		// which returns null sometimes - and that only works if called from the main app thread (UI thread).
+		application_context = getApplicationContext();
 
 		// Setup handler for uncaught exceptions
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {

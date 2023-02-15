@@ -130,8 +130,6 @@ public final class TelephonyManagement implements IModuleInst {
 				try {
 					Thread.sleep(ModulesManager.CHECK_INTERVAL);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}

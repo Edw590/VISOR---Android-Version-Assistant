@@ -9,7 +9,7 @@ import androidx.annotation.RequiresApi;
 /**
  * Stub recognition service needed to be a complete voice interactor.
  */
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class MainRecognitionService extends RecognitionService {
 
     private static final String TAG = "MainRecognitionService";

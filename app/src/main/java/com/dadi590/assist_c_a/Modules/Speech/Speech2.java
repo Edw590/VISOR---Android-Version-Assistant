@@ -35,7 +35,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -51,6 +50,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
+import com.dadi590.assist_c_a.ModulesList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,7 +98,6 @@ public final class Speech2 implements IModuleInst {
 	// even changing the voices and the engine for it to restart the speech worked - I really had to restart the app).
 
 	boolean tts_working = false;
-	boolean audio_output_supported = false;
 
 	private static final String ACTION_CLEAR_NOTIF_MSGS = "Speech_ACTION_CLEAR_NOTIF_MSGS";
 	private NotificationCompat.Builder speeches_notif_builder = null;
@@ -133,9 +132,18 @@ public final class Speech2 implements IModuleInst {
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
+
+	// The module only runs if this returns non-null. This is just to suppress warnings along the class (even though a
+	// warning will appear on isSupported() because "it's never null" --> it's not when the module starts...
+	@NonNull static final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.
+			getSystemService(Context.NOTIFICATION_SERVICE);
+	// The audio support is checked internally. If there's no audio support, the speeches are notified and not attempted
+	// to be spoken.
+	@NonNull final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -176,8 +184,8 @@ public final class Speech2 implements IModuleInst {
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
 		// The module checks internally if there is audio output available or not and if there isn't, it uses
-		// notifications instead.
-		return true;
+		// notifications instead, so those must always be present (also in case of vibration mode).
+		return null != notificationManager;
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -204,16 +212,13 @@ public final class Speech2 implements IModuleInst {
 		///////////////////////////////////
 		// TTS
 
-		audio_output_supported = UtilsCheckHardwareFeatures.isAudioOutputSupported();
-
 		// Even if audio is not supported, prepare everything anyway. Some external device that can output audio
 		// (microphone or camera with microphone or whatever) can be connected and then audio output is available - this
 		// module should be ready for that already, and this way it is.
 		UtilsSpeech2.readyArrayLists(arrays_speech_objs);
 
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		// By the way, this must ALWAYS be called here. The entire module expects the tts object to never be null after
 		// the constructor is called.
@@ -383,8 +388,6 @@ public final class Speech2 implements IModuleInst {
 		}
 		speeches_notif_builder.setWhen(System.currentTimeMillis());
 
-		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext().
-				getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(GL_CONSTS.NOTIF_ID_SPEECHES, speeches_notif_builder.build());
 	}
 
@@ -522,21 +525,15 @@ public final class Speech2 implements IModuleInst {
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
-		if (!audio_output_supported) {
-			// If there's no audio output, check again to see if anything that can output audio was connected between
-			// the last and current speech.
-			audio_output_supported = UtilsCheckHardwareFeatures.isAudioOutputSupported();
+		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported()) {
+			// If there's really no audio output support, just put a notification and that's it.
 
-			if (!audio_output_supported) {
-				// If there's really no audio output support, just put a notification and that's it.
+			addSpeechToNotif(txt_to_speak);
 
-				addSpeechToNotif(txt_to_speak);
-
-				return TextToSpeech.SUCCESS;
-			}
-			// Else, if it's now supported, let it check by itself if the TTS is ready or not. If it's not, the next
-			// speech will use it after it's restarted.
+			return TextToSpeech.SUCCESS;
 		}
+		// Else, if it's now supported, let it check by itself if the TTS is ready or not. If it's not, the next
+		// speech will use it after it's restarted.
 
 		SpeechObj new_speech_obj = null;
 		String utterance_id_to_use;
@@ -662,7 +659,7 @@ public final class Speech2 implements IModuleInst {
 
 	/**
 	 * <p>This checks if the default voice and engine was changed and in that case, changes the assistant voice and
-	 * engine.</p>
+	 * engine to the new default.</p>
 	 * <p>Useful at minimum when the phone starts and third-party engines are not ready yet when the app starts.</p>
 	 */
 	private void checkReloadTts() {
@@ -729,15 +726,11 @@ public final class Speech2 implements IModuleInst {
 	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
 	private void setToSpeakChanges() {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
-				.getSystemService(Context.AUDIO_SERVICE);
 		if (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id)) {
 			audioFocus(true);
 
 			// Set Do Not Disturb to ALARMS (emergency speech)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
-						.getSystemService(Context.NOTIFICATION_SERVICE);
 				if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALARMS) {
 					volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
 					volumeDndObj.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALARMS;
@@ -762,8 +755,6 @@ public final class Speech2 implements IModuleInst {
 
 				// Set Do Not Disturb to ALL (normal speech)
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-					final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
-							.getSystemService(Context.NOTIFICATION_SERVICE);
 					if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALL) {
 						volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
 						volumeDndObj.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALL;
@@ -833,8 +824,6 @@ public final class Speech2 implements IModuleInst {
 				}
 			}
 			if (carry_on) {
-				final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
-						.getSystemService(Context.AUDIO_SERVICE);
 				if (audioManager.getStreamVolume(volumeDndObj.audio_stream) != volumeDndObj.old_volume) {
 					try {
 						audioManager.setStreamVolume(volumeDndObj.audio_stream, volumeDndObj.old_volume,
@@ -851,15 +840,12 @@ public final class Speech2 implements IModuleInst {
 
 		// Reset the ringer mode
 		if (VolumeDndObj.DEFAULT_VALUE != volumeDndObj.old_ringer_mode) {
-			((AudioManager) UtilsGeneral.getContext().getSystemService(Context.AUDIO_SERVICE)).
-					setRingerMode(volumeDndObj.old_ringer_mode);
+			audioManager.setRingerMode(volumeDndObj.old_ringer_mode);
 		}
 
 		// Reset Do Not Disturb
 		if (volumeDndObj.old_interruption_filter != VolumeDndObj.DEFAULT_VALUE) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getContext()
-						.getSystemService(Context.NOTIFICATION_SERVICE);
 				if (notificationManager.isNotificationPolicyAccessGranted()) {
 					// Only reset if the interruption mode was not changed while the assistant was speaking.
 					if (notificationManager.getCurrentInterruptionFilter() == volumeDndObj.new_interruption_filter) {
@@ -885,44 +871,40 @@ public final class Speech2 implements IModuleInst {
 	 * @param request true to request the audio focus, false to abandon the audio focus
 	 */
 	void audioFocus(final boolean request) {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getContext()
-				.getSystemService(Context.AUDIO_SERVICE);
-		if (audioManager != null) {
-			final int priority = UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id);
-			if (request) {
-				final int duration_hint;
-				if (priority == PRIORITY_CRITICAL) {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						// todo Test this here! The comment in the 2nd else statement below
-						duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
-					} else {
-						duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT;
-					}
+		final int priority = UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id);
+		if (request) {
+			final int duration_hint;
+			if (priority == PRIORITY_CRITICAL) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+					// todo Test this here! The comment in the 2nd else statement below
+					duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
 				} else {
 					duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT;
-					// Some weird behavior on Lollipop 5.1 prevents it from speaking with TRANSIENT if media is playing,
-					// so leave GAIN here only.
-					// On Oreo 8.1, without this, other apps won't continue playback --> fix this!!!
-				}
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					audioFocusRequest = new AudioFocusRequest.Builder(duration_hint)
-							.setAudioAttributes(audioAttributes)
-							.build();
-					audioManager.requestAudioFocus(audioFocusRequest);
-				} else {
-					audioManager.requestAudioFocus(onAudioFocusChangeListener, current_speech_obj.audio_stream,
-							duration_hint);
 				}
 			} else {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					if (audioFocusRequest != null) {
-						audioManager.abandonAudioFocusRequest(audioFocusRequest);
-						audioFocusRequest = null;
-					}
-				} else {
-					audioManager.abandonAudioFocus(onAudioFocusChangeListener);
+				duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT;
+				// Some weird behavior on Lollipop 5.1 prevents it from speaking with TRANSIENT if media is playing,
+				// so leave GAIN here only.
+				// On Oreo 8.1, without this, other apps won't continue playback --> fix this!!!
+			}
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				audioFocusRequest = new AudioFocusRequest.Builder(duration_hint)
+						.setAudioAttributes(audioAttributes)
+						.build();
+				audioManager.requestAudioFocus(audioFocusRequest);
+			} else {
+				audioManager.requestAudioFocus(onAudioFocusChangeListener, current_speech_obj.audio_stream,
+						duration_hint);
+			}
+		} else {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				if (audioFocusRequest != null) {
+					audioManager.abandonAudioFocusRequest(audioFocusRequest);
+					audioFocusRequest = null;
 				}
+			} else {
+				audioManager.abandonAudioFocus(onAudioFocusChangeListener);
 			}
 		}
 	}
@@ -964,8 +946,7 @@ public final class Speech2 implements IModuleInst {
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (AudioManager.RINGER_MODE_NORMAL != ((AudioManager) UtilsGeneral.getContext().getSystemService(
-				Context.AUDIO_SERVICE)).getRingerMode()) {
+		if (AudioManager.RINGER_MODE_NORMAL != audioManager.getRingerMode()) {
 			skip_speech = (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) ||
 					!current_speech_obj.bypass_no_sound);
 		}
@@ -1115,10 +1096,18 @@ public final class Speech2 implements IModuleInst {
 
 		// Why is this check here and not just the removal? Refer to the custom onStop().
 		if (!utteranceId.isEmpty()) {
+			System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+			System.out.println(utteranceId);
 			// Won't happen, except from the custom onStop() - or the speech wouldn't have taken place.
 			last_thing_said = Objects.requireNonNull(UtilsSpeech2.removeSpeechById(utteranceId, arrays_speech_objs))
 					.txt_to_speak;
 			// todo It's getting null here on API 15 and 19 at least.... (on Oreo it doesn't)
+			//  EDIT: not on 15 anymore... hmm...
+			//  Synchronize the class... ('synchronize' keyword)
+			//  It's null and the error is only on the .txt_to_speak usage. So inside the removeSpeechById all went
+			//  fine, which means the speech was really not on the lists anymore --> thread mess?
+			// After this, check it again on API 15 and 19. On 19 now the speech is not working well. These errors
+			// might be the reason. VISOR won't speak nor throw a notification. Not cool.
 		}
 
 		// From back to beginning since high priority has greater value than low priority and the first speeches to be
@@ -1168,7 +1157,7 @@ public final class Speech2 implements IModuleInst {
 					// Now carrying on what I was saying, (...)".
 					Thread.sleep(500L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
+					return;
 				}
 
 				return;

@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -37,7 +36,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
@@ -56,12 +55,13 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 	@Nullable Class<?> current_recognizer = NO_RECOGNIZER;
 
-	private static final long default_wait_time = 5_000L;
-	long wait_time = default_wait_time;
+	private static final long DEFAULT_WAIT_TIME = 5_000L;
+	long wait_time = DEFAULT_WAIT_TIME;
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -97,7 +97,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		final boolean google_recog_available = UtilsSpeechRecognizers.isGoogleAppEnabled();
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(google_recog_available));
+		ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, google_recog_available);
 
 		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0] &&
 				UtilsCheckHardwareFeatures.isMicrophoneSupported() && google_recog_available;
@@ -110,8 +110,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	 */
 	public SpeechRecognitionCtrl() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -142,28 +141,28 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 						final boolean is_running = UtilsServices.isServiceRunning(GoogleRecognition.class);
 
 						// Update the Values Storage
-						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(is_running));
+						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, is_running);
 
 						if (!is_running) {
 							current_recognizer = NO_RECOGNIZER;
-							wait_time = default_wait_time;
+							wait_time = DEFAULT_WAIT_TIME;
 						}
 					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
 						final boolean is_running = UtilsServices.isServiceRunning(PocketSphinxRecognition.class);
 
 						// Update the Values Storage
-						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(is_running));
+						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, is_running);
 
 						if (!is_running) {
 							current_recognizer = NO_RECOGNIZER;
-							wait_time = default_wait_time;
+							wait_time = DEFAULT_WAIT_TIME;
 						}
 					}
 
 					if (NO_RECOGNIZER == current_recognizer) {
 						// Update the Values Storage
-						ValuesStorage.updateValue(CONSTS_ValueStorage.pocketsphinx_recog_available, String.valueOf(false));
-						ValuesStorage.updateValue(CONSTS_ValueStorage.google_recog_available, String.valueOf(false));
+						ValuesStorage.setValue(ValuesStorage.Keys.pocketsphinx_recog_available, false);
+						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, false);
 
 						UtilsSpeechRecognizers.terminateSpeechRecognizers();
 						UtilsSpeechRecognizers.startPocketSphinxRecognition();
@@ -173,8 +172,6 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				try {
 					Thread.sleep(wait_time);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}
@@ -203,7 +200,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				}
 				case CONSTS_BC_SpeechRecog.ACTION_POCKETSPHINX_RECOG_STARTED: {
 					current_recognizer = POCKETSPHINX_RECOGNIZER;
-					wait_time = default_wait_time;
+					wait_time = DEFAULT_WAIT_TIME;
 
 					break;
 				}
@@ -214,7 +211,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					UtilsSpeechRecognizers.startGoogleRecognition();
 
 					stop_speech_recognition = false;
-					wait_time = default_wait_time;
+					wait_time = DEFAULT_WAIT_TIME;
 
 					break;
 				}
@@ -223,13 +220,13 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					UtilsSpeechRecognizers.startPocketSphinxRecognition();
 
 					stop_speech_recognition = false;
-					wait_time = default_wait_time;
+					wait_time = DEFAULT_WAIT_TIME;
 
 					break;
 				}
 				case CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION: {
 					stop_speech_recognition = true;
-					wait_time = default_wait_time;
+					wait_time = DEFAULT_WAIT_TIME;
 
 					UtilsSpeechRecognizers.terminateSpeechRecognizers();
 
@@ -237,7 +234,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				}
 				case CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS: {
 					//stop_speech_recognition = false; - this doesn't change with this call
-					wait_time = default_wait_time;
+					wait_time = DEFAULT_WAIT_TIME;
 
 					UtilsSpeechRecognizers.terminateSpeechRecognizers();
 

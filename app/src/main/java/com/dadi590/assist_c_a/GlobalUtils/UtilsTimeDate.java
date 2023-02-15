@@ -45,25 +45,52 @@ public final class UtilsTimeDate {
 	/**
 	 * <p>Gets the time in a string with the format of {@link #CURRENT_TIME_FORMAT}.</p>
 	 *
+	 * @param millis the milliseconds for the time or -1 to get the current time
+	 *
 	 * @return the formatted string
 	 */
 	@NonNull
-	public static String getTimeStr() {
+	public static String getTimeStr(final long millis) {
 		final SimpleDateFormat time = new SimpleDateFormat(CURRENT_TIME_FORMAT, Locale.getDefault());
 		time.setTimeZone(TimeZone.getDefault());
-		return time.format(new Date());
+
+		if (millis < 0L) {
+			return time.format(new Date());
+		} else {
+			return time.format(new Date(millis));
+		}
 	}
 
 	/**
 	 * <p>Gets the date in a string with the format of {@link #CURRENT_DATE_FORMAT}.</p>
 	 *
+	 * @param millis the milliseconds for the time or -1 to get the current time
+	 *
 	 * @return the formatted string
 	 */
 	@NonNull
-	public static String getDateStr() {
+	public static String getDateStr(final long millis) {
 		// Keep the timezone in English here so he can say the weekday in English.
 		final SimpleDateFormat date = new SimpleDateFormat(CURRENT_DATE_FORMAT, Locale.US);
 		date.setTimeZone(TimeZone.getDefault());
-		return date.format(new Date());
+
+		if (millis < 0L) {
+			return date.format(new Date());
+		} else {
+			return date.format(new Date(millis));
+		}
+	}
+
+	/**
+	 * <p>Gets the time and the date in a string with the format
+	 * "{@link #CURRENT_DATE_FORMAT} -- {@link #CURRENT_TIME_FORMAT}".</p>
+	 *
+	 * @param millis the milliseconds for the time and date or -1 to get the current time and date
+	 *
+	 * @return the formatted string
+	 */
+	@NonNull
+	public static String getTimeDateStr(final long millis) {
+		return UtilsTimeDate.getDateStr(millis) + " -- " + UtilsTimeDate.getTimeStr(millis);
 	}
 }

@@ -20,6 +20,6 @@
  */
 
 /**
- * <p>Everything directly related to the assistant's battery processor.</p>
+ * <p>Everything directly related to the assistant's power processor.</p>
  */
-package com.dadi590.assist_c_a.Modules.BatteryProcessor;
+package com.dadi590.assist_c_a.Modules.PowerProcessor;

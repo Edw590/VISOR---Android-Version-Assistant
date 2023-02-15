@@ -223,9 +223,9 @@ public final class UtilsPermsAuths {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
 			// screen for the user to grant it.
-			final NotificationManager mNotificationManager = (NotificationManager) context.
+			final NotificationManager mNotificationManager = (NotificationManager) UtilsGeneral.
 					getSystemService(Context.NOTIFICATION_SERVICE);
-			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
+			if (null != mNotificationManager && !mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "cmd notification allow_dnd " + package_name;
 					UtilsShell.executeShellCmd(command, false, true);
@@ -263,8 +263,8 @@ public final class UtilsPermsAuths {
 			}
 
 			// Check if the app can bypass battery optimizations and request it if not
-			final PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-			if (!powerManager.isIgnoringBatteryOptimizations(package_name)) {
+			final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+			if (null != powerManager && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "dumpsys deviceidle whitelist +" + package_name;
 					UtilsShell.executeShellCmd(command, false, true);
@@ -335,7 +335,7 @@ public final class UtilsPermsAuths {
 	public static void forceDeviceAdmin1() {
 		final String full_device_admin_recv_name = new ComponentName(UtilsGeneral.getContext(),
 				DeviceAdminRecv.class).flattenToString();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.L) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			// dpm is only available from Lollipop onwards
 			// Have the "su" command already here and in one string alone to be as fast as possible executing this -
 			// the user may be attempting to uninstall the app and this must enable Device Admin back right away.

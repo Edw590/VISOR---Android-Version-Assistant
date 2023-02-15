@@ -21,10 +21,25 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
-import androidx.annotation.NonNull;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import org.spongycastle.util.Arrays;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 
 /**
  * <p>Utilities related to network functions.</p>
@@ -38,81 +53,74 @@ public final class UtilsNetwork {
 	}
 
 	/**
-	 * <p>This function pings the specified IP address 50 times, eliminates outlier time values, and finally calculates
-	 * the average of the resulting values (the round-trip time, RTT).</p>
+	 * <p>Gets the IPv4 address of the current Wi-Fi connection's router.</p>
 	 *
-	 * @param ip the IP address to ping
-	 *
-	 * @return the average RTT
+	 * @return the IPv4 string, or an empty string if there is no Wi-Fi connection
 	 */
-	public static double getAveragePingRTT(@NonNull final String ip) {
-		final int packets_num = 50; // 50 packets, each with 0.5 seconds delay, so 25 seconds of waiting time
-		// 248 + 8 header = 256 bytes each packet
-		final String command = "ping -c " + packets_num + " -i 0.5 -n -s 248 -t 1 -v " + ip;
-		final String[] output_lines = UtilsDataConv.
-				bytesToPrintable(UtilsShell.executeShellCmd(command, true, false).output_stream, false).split("\n");
+	@Nullable
+	public static String getRouterIpv4() {
+		final byte[] myIPAddress = BigInteger.valueOf((long) getWifiManager().getDhcpInfo().gateway).toByteArray();
+		try {
+			return InetAddress.getByAddress(Arrays.reverse(myIPAddress)).getHostAddress();
+		} catch (final UnknownHostException ignored) {
+			// Won't happen, just supply an IPv4
+			return "";
+		}
+	}
 
-		// Here it gets the time values (excluding the duplicated ones)
-		final List<Double> time_values = new ArrayList<>(packets_num);
-		for (final String line : output_lines) {
-			if (!line.contains(" (DUP!)") && line.contains("time=") && line.contains(" ms")) {
-				time_values.add(Double.parseDouble(line.split("time=")[1].split(" ")[0]));
-			}
+	/**
+	 * <p>Get the device network's external IP address (Wi-Fi public IP, mobile data IP, etc.).</p>
+	 *
+	 * @return the IP or an empty string in case an error happened (like no connection)
+	 */
+	@NonNull
+	public static String getExternalIpAddress() {
+		final URL whatismyip_website;
+		try {
+			whatismyip_website = new URL("https://checkip.amazonaws.com");
+		} catch (final MalformedURLException ignored) {
+			// Won't happen.
+			return "";
 		}
 
-		final double accuracy_parameter = 2.0; // Accuracy parameter to use with UtilsMath.isOutlier().
+		try (final BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip_website.openStream(),
+				Charset.defaultCharset()))) {
 
-		// It will calculate the sum and sum of squares of the first 5 elements of the time_values list (5 seemed a good
-		// number), and then will check if any of those first 5 elements is an outlier inside that 5-elements list, and
-		// if any is an outlier, it will be removed from the time_values list.
-		// If the time values are [2, 20, 18, 16, 34, 129, 21, 23], the average of the first values will still be near
-		// the supposed value (between 16 and 20). If I put 4, it will come down to 14 (wrong). If it's less, even
-		// worse will get. More than that, could catch the 129, which I don't see appearing in the first 5 elements on
-		// some tests.
-		final int first_n_elements = 5; // Never set to 0, or the division in the end will be divide by 0.
-		double sum = 0.0;
-		double sum_squares = 0.0;
-		for (int i = 0; i < first_n_elements; ++i) {
-			final double value = time_values.get(i);
-			sum += value;
-			sum_squares += value * value;
+			return in.readLine();
+		} catch (final IOException ignored) {
+			return "";
 		}
-		boolean any_outlier = false;
-		for (int i = 0; i < first_n_elements; ++i) {
-			if (UtilsMath.isOutlier(time_values.get(i), sum, sum_squares, 5, accuracy_parameter)) {
-				any_outlier = true;
-				time_values.remove(i);
-				i--;
-			}
-		}
+	}
 
-		int summed_elements = first_n_elements;
-		if (any_outlier) {
-			// Reset the variables since now it will calculate again the new sum and sum of squares (in case there was an
-			// outlier and it was removed from the original list). This will be used as the starting parameters for the
-			// outlier check.
-			sum = 0.0;
-			sum_squares = 0.0;
-			for (int i = 0; i < first_n_elements; ++i) {
-				final double value = time_values.get(i);
-				sum += value;
-				sum_squares += value * value;
-			}
+	/**
+	 * <p>Gets a {@link WifiManager} instance.</p>
+	 * <p>The reason of this is because getContext() already gets the Application Context. This could be avoided by
+	 * renaming it to getApplicationContext() (Android Studio pays attention to the name), but that's a big name and I
+	 * wanted it to be smaller. So just use this function to suppress warnings.</p>
+	 *
+	 * @return the instance
+	 */
+	@Nullable
+	public static WifiManager getWifiManager() {
+		// The only warning will be here.
+		// EDIT: not anymore because I replaced all getSystemService() and getService() calls.
+		return (WifiManager) UtilsGeneral.getSystemService(Context.WIFI_SERVICE);
+	}
+
+	/**
+	 * <p>Get the current network type.</p>
+	 *
+	 * @return same as {@link NetworkInfo#getType()} or {@link ConnectivityManager#TYPE_NONE} if there's no network
+	 */
+	public static int getCurrentNetworkType() {
+		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsGeneral.
+				getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (null == connectivityManager) {
+			return ConnectivityManager.TYPE_NONE;
 		}
 
-		// With the remaining elements, the function will check if any of them is an outlier, comparing to the values
-		// got from the first 5 elements (those 5 decide the fate of the list xD).
-		for (int i = summed_elements; i < packets_num - summed_elements; ++i) {
-			final double value = time_values.get(i);
-			if (!UtilsMath.isOutlier(value, sum, sum_squares, summed_elements, accuracy_parameter)) {
-				++summed_elements;
-				sum += value;
-				sum_squares += value * value;
-			}
-		}
+		final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-		// The mean of the time values will be calculated using the first 5 elements (excluding any outliers) and the
-		// rest of the list (excluding any outliers).
-		return sum / (double) summed_elements;
+		return null == networkInfo ? ConnectivityManager.TYPE_NONE : networkInfo.getType();
 	}
 }

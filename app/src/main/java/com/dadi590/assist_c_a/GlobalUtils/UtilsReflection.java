@@ -25,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -53,14 +52,10 @@ public final class UtilsReflection {
 	public static Method getMethod(@NonNull final Class<?> cls, @NonNull final String method_name,
 								   @Nullable final Class<?>... parameter_types) {
 		try {
-			final Method method = cls.getDeclaredMethod(method_name, parameter_types);
-			method.setAccessible(true);
-
-			return method;
+			return cls.getDeclaredMethod(method_name, parameter_types);
 		} catch (final NoSuchMethodException ignored) {
+			return null;
 		}
-
-		return null;
 	}
 
 	/**
@@ -76,9 +71,22 @@ public final class UtilsReflection {
 	public static InvokeMethodObj invokeMethod(@NonNull final Method method, @Nullable final Object invoke_on,
 											   @Nullable final Object... parameters) {
 		try {
-			return new InvokeMethodObj(method.invoke(invoke_on, parameters), false);
-		} catch (final IllegalAccessException ignored) {
-		} catch (final InvocationTargetException ignored) {
+			final boolean is_accessible = method.isAccessible();
+			try {
+				method.setAccessible(true);
+			} catch (final SecurityException ignored) {
+				// Ignore the exception. If the method can't be accessed or not, is the same as if it executed
+				// correctly or not and then the null return will happen.
+			}
+			final InvokeMethodObj invokeMethodObj = new InvokeMethodObj(method.invoke(invoke_on, parameters), true);
+			try {
+				method.setAccessible(is_accessible);
+			} catch (final SecurityException ignored) {
+				// Ignore the exception. We already executed the method, that's all that matters.
+			}
+
+			return invokeMethodObj;
+		} catch (final Exception ignored) {
 		}
 
 		return new InvokeMethodObj(null, false);
@@ -90,15 +98,16 @@ public final class UtilsReflection {
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
 	public static final class InvokeMethodObj {
+		/** The returning value from the method. */
 		public final Object ret_var;
+		/** True in case the method invocation was successful, false otherwise, and therefore the return value should be
+		 * ignored. */
 		public final boolean success;
 
 		/**
-		 * <p>Main class constructor.</p>
-		 *
-		 * @param ret_var the returning value from the method
-		 * @param success true in case the method invocation was successful, false otherwise, and therefore the return
-		 * value should be ignored
+		 * .
+		 * @param ret_var {@link #ret_var}
+		 * @param success {@link #success}
 		 */
 		InvokeMethodObj(@Nullable final Object ret_var, final boolean success) {
 			this.ret_var = ret_var;

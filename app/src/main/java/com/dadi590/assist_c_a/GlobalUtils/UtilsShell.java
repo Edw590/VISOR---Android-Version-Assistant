@@ -159,11 +159,7 @@ public final class UtilsShell {
 				final byte[] buffer = new byte[buffer_length];
 				while (true) {
 					final int n_bytes = streams[i].read(buffer);
-					if (n_bytes < buffer_length) {
-						if (-1 != n_bytes) { // The last read of buffer_length bytes finished the stream
-							// Possible OutOfMemoryError here
-							storage_array.write(buffer, 0, n_bytes);
-						}
+					if (-1 == n_bytes) { // The last read of buffer_length bytes finished the stream
 						// Everything was read (0 bytes were retrieved)
 						break;
 					}
@@ -181,13 +177,13 @@ public final class UtilsShell {
 				try {
 					exit_code = process.waitFor();
 				} catch (final InterruptedException ignored1) {
-					Thread.currentThread().interrupt();
+					return new CmdOutputObj(exit_code, null, null);
 				}
 			}
 			ret_streams[0] = null;
 			ret_streams[1] = null;
 		} catch (final InterruptedException ignored) {
-			Thread.currentThread().interrupt();
+			return new CmdOutputObj(exit_code, null, null);
 		}
 
 		return new CmdOutputObj(exit_code, ret_streams[0], ret_streams[1]);

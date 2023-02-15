@@ -19,18 +19,21 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.GlobalInterfaces;
-
-import android.app.Service;
-
-import com.dadi590.assist_c_a.ModulesList;
+package com.dadi590.assist_c_a.Modules.PowerProcessor;
 
 /**
- * <p>All |{@link ModulesList#TYPE1_SERVICE_SEP}| (sub)modules must implement this interface.</p>
- * <p>Note: no module running on a process other than the Main Service process must implement this interface, so that
- * it's possible to call these methods directly on their instances. For example {@link Service}s running on
- * separate processes - in these cases no idea yet on how to implement the idea of the methods of this interface with
- * this ease --> todo.</p>
+ * <p>Constants related to the Power Processor module.</p>
  */
-public interface IModuleSrv extends IModule {
+public final class CONSTS {
+
+	// These 2 below appeared in a StackOverflow answer. Maybe it's the same explanation as the POWERON one. Keep it.
+	static final String ACTION_HTC_QCK_POFF = "com.htc.intent.action.QUICKBOOT_POWEROFF";
+	static final String ACTION_ANDR_QCK_POFF = "android.intent.action.QUICKBOOT_POWEROFF";
+
+
+	/**
+	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
+	 */
+	private CONSTS() {
+	}
 }

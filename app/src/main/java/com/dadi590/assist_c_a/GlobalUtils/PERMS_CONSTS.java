@@ -28,7 +28,7 @@ import android.os.Build;
 /**
  * <p>Constants for all assistant-required permissions.</p>
  */
-final class PERMS_CONSTS {
+public final class PERMS_CONSTS {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -84,5 +84,5 @@ final class PERMS_CONSTS {
 	// only the permissions from the list on index 0 here are counted as not granted and warned to the user. With all
 	// other indexes no permissions are counted (the user can't do anything about them - development permissions can be
 	// granted with root permissions allowed to the app, and that's it - without root, no way to grant the permissions).
-	static final String[][][] list_of_perms_lists = {danger_perms_list, dev_perms_list};
+	public static final String[][][] list_of_perms_lists = {danger_perms_list, dev_perms_list};
 }

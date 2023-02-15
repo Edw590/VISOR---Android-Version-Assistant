@@ -148,8 +148,6 @@ public final class FragModulesStatus extends Fragment {
 				try {
 					Thread.sleep(1_000L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}

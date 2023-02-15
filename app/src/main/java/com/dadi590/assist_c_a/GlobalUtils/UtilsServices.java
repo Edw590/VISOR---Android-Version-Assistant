@@ -119,8 +119,11 @@ public final class UtilsServices {
 		// Note: this method is called automatically before starting services, if it's chosen for it to - so don't put
 		// it using too much CPU time. Must be as fast as possible.
 
-		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getContext()
-				.getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getSystemService(Context.ACTIVITY_SERVICE);
+		if (null == activityManager) {
+			return false;
+		}
+
 		final String srv_class = service_class.getName();
 
 		for (final ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {

@@ -19,21 +19,10 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.BroadcastRecvs;
+package com.dadi590.assist_c_a.Modules.DeviceLocator;
 
 /**
- * <p>Constants related to the broadcast receivers.</p>
+ * <p>Device Locator related utilities.</p>
  */
-public final class CONSTS {
-
-	// These 2 below appeared in a StackOverflow answer. Maybe it's the same explanation as the POWERON one. Keep it.
-	static final String ACTION_HTC_QCK_POFF = "com.htc.intent.action.QUICKBOOT_POWEROFF";
-	static final String ACTION_ANDR_QCK_POFF = "android.intent.action.QUICKBOOT_POWEROFF";
-
-
-	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private CONSTS() {
-	}
+public final class UtilsDeviceLocator {
 }

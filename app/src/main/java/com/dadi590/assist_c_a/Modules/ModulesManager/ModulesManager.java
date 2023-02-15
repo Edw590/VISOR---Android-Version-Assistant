@@ -153,8 +153,6 @@ public final class ModulesManager implements IModuleInst {
 				try {
 					Thread.sleep(CHECK_INTERVAL);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}

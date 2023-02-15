@@ -330,8 +330,6 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 				try {
 					Thread.sleep(1_000L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}

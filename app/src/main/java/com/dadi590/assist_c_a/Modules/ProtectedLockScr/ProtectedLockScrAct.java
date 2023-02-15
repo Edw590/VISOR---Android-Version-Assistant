@@ -103,8 +103,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 	// API 29 - that's on public APIs only, not internal ones.
 	// Also the "WrongConstant" STATUS_BAR_SERVICE works, so can't be that wrong - ignore too.
 	@SuppressLint({"NewApi", "WrongConstant"})
-	final StatusBarManager statusBarManager = (StatusBarManager) UtilsGeneral.getContext()
-			.getSystemService(STATUS_BAR_SERVICE);
+	@Nullable final StatusBarManager statusBarManager = (StatusBarManager) UtilsGeneral.getSystemService(STATUS_BAR_SERVICE);
 	// At least compiling with API 29, the method on StatusBarManager is still collapsePanels(), so all cool using the
 	// internal API directly without reflection.
 
@@ -137,8 +136,6 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 				try {
 					Thread.sleep(500);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 
@@ -181,7 +178,9 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 			while (locked && !has_focus) {
 				// The onWindowFocusChanged is not fast enough to detect expansion of the status bar. So plan B...
 				// Always collapsing it, no matter what.
-				statusBarManager.collapsePanels();
+				if (null != statusBarManager) {
+					statusBarManager.collapsePanels();
+				}
 
 				if (count >= 4) { // >= just in case it goes above and passes this no idea why
 					// If after some time this is still running - imagine the user clicked many times on Home and PLS
@@ -209,8 +208,6 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 					// limit, at least on BV9500. 20ms should be fine. Just to be above "fine", 25ms. Should be good.
 					Thread.sleep(25L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 				++count;
@@ -240,7 +237,9 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 				// Collapse the status bar immediately (doesn't work well calling it here only, since it will only close
 				// it once and in the beginning. If the user hold the status bar open for some time, it won't close it.
 				// That's the reason for the "collapse_infinity" thread.
-				statusBarManager.collapsePanels();
+				if (null != statusBarManager) {
+					statusBarManager.collapsePanels();
+				}
 
 				if (!runnable_running) {
 					collapse_infinity = new Thread(new Runnable() {
@@ -344,10 +343,11 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 			layoutParams.height = (int) (50.0F * getResources().getDisplayMetrics().scaledDensity);
 			layoutParams.format = PixelFormat.TRANSPARENT;
 
-			final WindowManager windowManager = ((WindowManager) getApplicationContext()
-					.getSystemService(Context.WINDOW_SERVICE));
-			view = new customViewGroup(UtilsGeneral.getContext());
-			windowManager.addView(view, layoutParams);
+			final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+			if (null != windowManager) {
+				view = new customViewGroup(UtilsGeneral.getContext());
+				windowManager.addView(view, layoutParams);
+			}
 		}
 	}
 }

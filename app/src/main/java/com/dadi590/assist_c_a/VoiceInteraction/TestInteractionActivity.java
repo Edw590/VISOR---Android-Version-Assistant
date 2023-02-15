@@ -13,7 +13,7 @@ import androidx.annotation.RequiresApi;
 
 import com.dadi590.assist_c_a.R;
 
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class TestInteractionActivity extends Activity implements View.OnClickListener {
     static final String TAG = "TestInteractionActivity";
 

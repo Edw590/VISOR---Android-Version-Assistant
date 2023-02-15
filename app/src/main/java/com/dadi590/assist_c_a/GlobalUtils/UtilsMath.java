@@ -49,14 +49,14 @@ public final class UtilsMath {
 		final double mean = sum / (double) num_elements;
 		final double variance = sum_squares / (double) num_elements - mean*mean;
 		final double standard_deviation = Math.sqrt(variance);
-		System.out.println("------------------");
-		System.out.println("Element - " + element);
-		System.out.println("Mean - " + mean);
-		System.out.println("Standard Deviation - " + standard_deviation);
+		//System.out.println("------------------");
+		//System.out.println("Element - " + element);
+		//System.out.println("Mean - " + mean);
+		//System.out.println("Standard Deviation - " + standard_deviation);
 
 		final boolean is_outlier = !(element >= mean - accuracy_parameter * standard_deviation
 				&& element <= mean + accuracy_parameter * standard_deviation);
-		System.out.println("Outlier - " + is_outlier);
+		//System.out.println("Outlier - " + is_outlier);
 		return is_outlier;
 		// All values inside accuracy_parameter * standard_deviation, remain. All others leave the array.
 	}

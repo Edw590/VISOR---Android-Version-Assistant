@@ -7,7 +7,7 @@ import android.service.voice.VoiceInteractionSessionService;
 
 import androidx.annotation.RequiresApi;
 
-@RequiresApi(Build.VERSION_CODES.L)
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class MainInteractionSessionService extends VoiceInteractionSessionService {
     @Override
     public VoiceInteractionSession onNewSession(Bundle args) {

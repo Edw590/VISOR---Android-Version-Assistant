@@ -42,6 +42,10 @@
 			android:id="@+id/frag_cmds_list"
 			android:title="@string/fragCmdsList_title_ACA"
 			android:icon="@drawable/development" />
+		<item
+			android:id="@+id/frag_nearby_devices"
+			android:title="@string/fragNearbyDevices_title_ACA"
+			android:icon="@drawable/development" />
 	</group>
 
 </menu>

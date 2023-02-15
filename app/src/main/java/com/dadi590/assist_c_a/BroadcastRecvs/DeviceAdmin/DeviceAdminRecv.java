@@ -47,7 +47,7 @@ public final class DeviceAdminRecv extends DeviceAdminReceiver {
 		// todo Why doesn't this work...?
 		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final ComponentName mAdminName = new ComponentName(context, DeviceAdminRecv.class);
-			final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext()
+			final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral
 					.getSystemService(Context.DEVICE_POLICY_SERVICE);
 			devicePolicyManager.setUninstallBlocked(mAdminName, UtilsGeneral.getContext().getPackageName(), true);
 		}*/

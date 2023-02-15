@@ -41,11 +41,16 @@ public final class UtilsDeviceAdmin {
 	/**
 	 * <p>Locks the device immediately.</p>
 	 *
-	 * @return true if the device was locked, false if {@link DevicePolicyManager#lockNow()} thrown a SecurityException
+	 * @return true if the device was locked, false if {@link DevicePolicyManager#lockNow()} threw a SecurityException
+	 * or the {@link DevicePolicyManager} does not exist on the system
 	 */
 	public static boolean lockDevice() {
-		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.getContext()
-				.getSystemService(Context.DEVICE_POLICY_SERVICE);
+		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.
+				getSystemService(Context.DEVICE_POLICY_SERVICE);
+		if (null == devicePolicyManager) {
+			return false;
+		}
+
 		try {
 			devicePolicyManager.lockNow();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

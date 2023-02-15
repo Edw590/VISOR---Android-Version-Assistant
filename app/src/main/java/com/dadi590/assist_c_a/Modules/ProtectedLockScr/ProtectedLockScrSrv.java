@@ -92,7 +92,11 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_USER_PRESENT);
 		try {
-			UtilsGeneral.getContext().registerReceiver(localBroadcastReceiver, intentFilter);
+			// DON'T use the Application Context here. Leaks will happen because it won't be unregistered. Use the local
+			// context and when the service stops, it will get unregistered automatically. I'll unregister on the
+			// onDestroy() method, but we also can kill the PID, and then the method is not called (but maybe the
+			// receiver would still be unregistered. No idea. Better safe than sorry).
+			registerReceiver(localBroadcastReceiver, intentFilter);
 		} catch (final IllegalArgumentException ignored) {
 		}
 
@@ -121,8 +125,13 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 				} catch (final Throwable ignored) { // ANY error....
 					// This won't differentiate between None and Swipe though. But it's better than nothing, since the
 					// method for Lollipop and older doesn't seem to be working when I call it on Oreo 8.1 for some reason.
-					final KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-					device_is_secured = keyguardManager.isDeviceSecure();
+					final KeyguardManager keyguardManager = (KeyguardManager) UtilsGeneral.
+							getSystemService(Context.KEYGUARD_SERVICE);
+					if (null == keyguardManager) {
+						device_is_secured = false;
+					} else {
+						device_is_secured = keyguardManager.isDeviceSecure();
+					}
 				}
 			} else {
 				device_is_secured = UtilsProtectedLockScr.isLockScreenEnabled22Older();
@@ -162,13 +171,18 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 				try {
 					Thread.sleep(1000L);
 				} catch (final InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-
 					return;
 				}
 			}
 		}
 	});
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+
+		unregisterReceiver(localBroadcastReceiver);
+	}
 
 	@Override
 	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {

@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.dadi590.assist_c_a.Modules.BatteryProcessor;
+package com.dadi590.assist_c_a.Modules.PowerProcessor;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,21 +29,21 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.ValuesStorage.CONSTS_ValueStorage;
+import com.dadi590.assist_c_a.ModulesList;
 import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
- * <p>Processes changes in the battery levels or on battery power mode.</p>
+ * <p>Processes changes in the power levels, power mode, or shutdowns and reboots.</p>
  */
-public final class BatteryProcessor implements IModuleInst {
+public final class PowerProcessor implements IModuleInst {
 
 	// Minimum and maximum recommended battery percentage values to increase its life
 	private static final int PERCENT_MIN = 20;
@@ -57,9 +57,10 @@ public final class BatteryProcessor implements IModuleInst {
 	boolean actions_power_mode_broadcast = false;
 	boolean better_battery_present = false;
 
-	private HandlerThread main_handlerThread = new HandlerThread("HandlerThread");
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
 	private Handler main_handler = null;
-	private Looper main_looper = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -95,10 +96,9 @@ public final class BatteryProcessor implements IModuleInst {
 	/**
 	 * <p>Main class constructor.</p>
 	 */
-	public BatteryProcessor() {
+	public PowerProcessor() {
 		main_handlerThread.start();
-		main_looper = main_handlerThread.getLooper();
-		main_handler = new Handler(main_looper);
+		main_handler = new Handler(main_handlerThread.getLooper());
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -106,6 +106,12 @@ public final class BatteryProcessor implements IModuleInst {
 			intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
 			intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 			intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+
+			// Shutdown and reboot
+			intentFilter.addAction(Intent.ACTION_SHUTDOWN);
+			intentFilter.addAction(Intent.ACTION_REBOOT);
+			intentFilter.addAction(CONSTS.ACTION_HTC_QCK_POFF);
+			intentFilter.addAction(CONSTS.ACTION_ANDR_QCK_POFF);
 
 			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
@@ -119,7 +125,7 @@ public final class BatteryProcessor implements IModuleInst {
 	 */
 	void processBatteryPwrChg(final boolean power_connected) {
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.power_connected, Boolean.toString(power_connected));
+		ValuesStorage.setValue(ValuesStorage.Keys.power_connected, power_connected);
 
 		if ((last_detected_percent == -1) ||
 				// Only warn if the power state is new (can't warn every percentage increase... - only on power changes)
@@ -161,7 +167,7 @@ public final class BatteryProcessor implements IModuleInst {
 		final int battery_percentage = battery_lvl * 100 / battery_lvl_scale;
 
 		// Update the Values Storage
-		ValuesStorage.updateValue(CONSTS_ValueStorage.battery_percentage, Integer.toString(battery_percentage));
+		ValuesStorage.setValue(ValuesStorage.Keys.battery_percent, battery_percentage);
 
 		// If the EXTRA_PRESENT can be wrong, check if the battery level is different than 0 and 100, depending on the
 		// device version, as documented here: https://source.android.com/docs/core/power/batteryless.
@@ -174,10 +180,10 @@ public final class BatteryProcessor implements IModuleInst {
 		// battery_present - unless battery_present is null, and in that case, nothing at all is known.
 		if (better_battery_present) {
 			// Update the Values Storage
-			ValuesStorage.updateValue(CONSTS_ValueStorage.battery_present, Boolean.toString(true));
+			ValuesStorage.setValue(ValuesStorage.Keys.battery_present, true);
 		} else if (null != battery_present) {
 			// Update the Values Storage
-			ValuesStorage.updateValue(CONSTS_ValueStorage.battery_present, Boolean.toString(battery_present));
+			ValuesStorage.setValue(ValuesStorage.Keys.battery_present, battery_present);
 		}
 
 		// The ACTION_POWER_CONNECTED and _DISCONNECTED may not be broadcast on the device (happens on miTab Advance),
@@ -198,7 +204,7 @@ public final class BatteryProcessor implements IModuleInst {
 		// this here, a change in battery is enough. After that first change, go only with the ACTION_POWER_ broadcasts.
 		if (!actions_power_mode_broadcast) {
 			@Nullable final Boolean power_connected;
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 				// Compare the percentages
 				if (last_detected_percent == -1) {
 					// No way of knowing - don't update the value.
@@ -233,7 +239,7 @@ public final class BatteryProcessor implements IModuleInst {
 
 			if (null != power_connected) {
 				// Update the Values Storage
-				ValuesStorage.updateValue(CONSTS_ValueStorage.power_connected, Boolean.toString(power_connected));
+				ValuesStorage.setValue(ValuesStorage.Keys.power_connected, power_connected);
 				processBatteryPwrChg(power_connected);
 			}
 		}
@@ -248,7 +254,7 @@ public final class BatteryProcessor implements IModuleInst {
 		// functions will warn based on them only --> then compare the values and be done with it.
 		// Still, use the power_connected status, but only if it's different than null, just to be sure no weird devices
 		// increase the percentage by mistake without being charging. This would warn in that case - now it won't.
-		final Boolean power_connected = (Boolean) ValuesStorage.getValue(CONSTS_ValueStorage.power_connected);
+		final Boolean power_connected = ValuesStorage.getValueObj(ValuesStorage.Keys.power_connected).getValue();
 		if (null == power_connected || power_connected) {
 			// Don't do anything if by chance, another broadcast is sent without the battery level having changed.
 			if (battery_percentage > last_detected_percent) {
@@ -307,7 +313,7 @@ public final class BatteryProcessor implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-BatteryStatus - " + intent.getAction());
+			System.out.println("PPPPPPPPPPPPPPPPPP-PowerProcessor - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
@@ -337,6 +343,37 @@ public final class BatteryProcessor implements IModuleInst {
 				case (Intent.ACTION_POWER_DISCONNECTED): {
 					actions_power_mode_broadcast = true;
 					processBatteryPwrChg(false);
+
+					break;
+				}
+
+				/////////////////////////////////////
+				// Shutdown and reboot
+				case (CONSTS.ACTION_HTC_QCK_POFF):
+				case (CONSTS.ACTION_ANDR_QCK_POFF):
+				case (Intent.ACTION_SHUTDOWN): {
+					UtilsApp.prepareShutdown();
+
+					if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
+						final String speak = "Fast shut down detected.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					} else {
+						final String speak = "Shut down detected.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					}
+					// Note: must be very small speeches, since the phone will shut down fast.
+
+					break;
+				}
+				case (Intent.ACTION_REBOOT): {
+					UtilsApp.prepareShutdown();
+
+					// No idea if this is supposed detected at all (might be stopped before it gets here by the system
+					// as soon as it detects it or something).
+					final String speak = "Reboot detected.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					// Note: must be a very small speech, since the phone will shut down fast.
+
 
 					break;
 				}

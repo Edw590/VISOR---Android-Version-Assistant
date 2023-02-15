@@ -173,11 +173,16 @@ public final class UtilsApp {
 	/**
 	 * <p>Checks if the app is a Device Administrator.</p>
 	 *
-	 * @return true if it's a Device Administrator, false otherwise
+	 * @return true if it's a Device Administrator, false otherwise or if there is no Device Administration available on
+	 * the device
 	 */
 	public static boolean isDeviceAdmin() {
 		final Context context = UtilsGeneral.getContext();
-		final DevicePolicyManager mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+		final DevicePolicyManager mDPM = (DevicePolicyManager) UtilsGeneral.getSystemService(Context.DEVICE_POLICY_SERVICE);
+		if (null == mDPM) {
+			return false;
+		}
+
 		final ComponentName mAdminName = new ComponentName(context, DeviceAdminRecv.class);
 
 		return mDPM.isAdminActive(mAdminName);
