@@ -31,14 +31,12 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
-import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Locale;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -70,8 +68,6 @@ public final class PocketSphinxRecognition extends Service implements Recognitio
 	@Nullable private SpeechRecognizer recognizer = null;
 
 	private static final String KEYWORD_WAKEUP = "WAKEUP";
-
-	private static final String KEYPHRASE = GL_CONSTS.ASSISTANT_NAME_WO_DOTS.toLowerCase(Locale.ENGLISH); // "visor"
 
 	@Override
 	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
@@ -169,13 +165,14 @@ public final class PocketSphinxRecognition extends Service implements Recognitio
 			return;
 		}
 
-		final String text = hypothesis.getHypstr();
-		if (text.equals(KEYPHRASE)) {
-			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
-			stopRecognizer();
-			stopSelf();
-			UtilsSpeechRecognizersBC.startGoogleRecognition();
-		}
+		//final String text = hypothesis.getHypstr();
+		//if (text.equals(KEYPHRASE)) {
+		System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
+		System.out.println(hypothesis.getHypstr());
+		stopRecognizer();
+		stopSelf();
+		UtilsSpeechRecognizersBC.startGoogleRecognition();
+		//}
 	}
 
 	/**
@@ -187,13 +184,17 @@ public final class PocketSphinxRecognition extends Service implements Recognitio
 			return;
 		}
 
-		final String text = hypothesis.getHypstr();
-		if (text.equals(KEYPHRASE)) {
-			System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
-			stopRecognizer();
-			stopSelf();
-			UtilsSpeechRecognizersBC.startGoogleRecognition();
-		}
+		// No need to have this here checking. PocketSphinx only gets to the results functions if it detects the words
+		// it was told to detect - no like Google, which comes here after any detection. So no need to check, if it only
+		// gets here with the VISOR keywords.
+		//final String text = hypothesis.getHypstr();
+		//if (text.equals(KEYPHRASE)) {
+		System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
+		System.out.println(hypothesis.getHypstr());
+		stopRecognizer();
+		stopSelf();
+		UtilsSpeechRecognizersBC.startGoogleRecognition();
+		//}
 	}
 
 	@Override
@@ -226,9 +227,13 @@ public final class PocketSphinxRecognition extends Service implements Recognitio
 
 		// If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
 		if (searchName.equals(KEYWORD_WAKEUP)) {
-			recognizer.startListening(searchName);
+			if (!recognizer.startListening(searchName)) {
+				UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+			}
 		} else {
-			recognizer.startListening(searchName, 10000);
+			if (!recognizer.startListening(searchName, 10000)) {
+				UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+			}
 		}
 	}
 
@@ -254,7 +259,7 @@ public final class PocketSphinxRecognition extends Service implements Recognitio
 		recognizer.addListener(this);
 
 		// Create keyword-activation search.
-		recognizer.addKeyphraseSearch(KEYWORD_WAKEUP, KEYPHRASE);
+		recognizer.addKeywordSearch(KEYWORD_WAKEUP, new File(assetsDir, "visor_keywords.gram"));
 	}
 
 	@Override
