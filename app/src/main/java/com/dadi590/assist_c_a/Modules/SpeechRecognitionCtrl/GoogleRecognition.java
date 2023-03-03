@@ -102,10 +102,10 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 		{
 			// Don't forget the sleep time of the thread is 1 second, so the waiting time here must be a multiple of
 			// that (or not, but 1.5 seconds == 2 seconds in this case of 1 second sleep).
-			put(ON_START_COMMAND_STR, 5_000L);
-			put(ON_READY_FOR_SPEECH_STR, 5_000L);
-			put(ON_BEGINNING_OF_SPEECH_STR, 5_000L);
-			put(ON_END_OF_SPEECH_STR, 10_000L);
+			put(ON_START_COMMAND_STR, 3_000L);
+			put(ON_READY_FOR_SPEECH_STR, 3_000L);
+			put(ON_BEGINNING_OF_SPEECH_STR, 3_000L);
+			put(ON_END_OF_SPEECH_STR, 5_000L);
 		}
 	};
 

@@ -217,20 +217,37 @@ public final class PocketSphinxRecognition implements IModuleInst {
 		public void onPartialResult(@Nullable final Hypothesis hypothesis) {
 			// null == recognizer to be sure it doesn't use other results after supposedly shutting down. This is a
 			// replacement to terminating the PID, which might make the controller restart this recognition.
-			if (hypothesis == null || null == recognizer) {
+			// Also !is_listening to be sure it doesn't try to analyze more results after stopListening() is called.
+			if (!is_listening || hypothesis == null || null == recognizer) {
 				return;
+			}
+			final String[] hypothesis_list = hypothesis.getHypstr().split(" ");
+			if (!hypothesis_list[0].contains("isor")) {
+				// Substring "isor" must be in the 1st or 2nd hypothesis. Else, ignore the detection.
+				if (hypothesis_list.length > 1) {
+					if (!hypothesis_list[1].contains("isor")) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 
 			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
 			System.out.println(hypothesis.getHypstr());
+			stopListening(); // Stop listening or else this might try to start Google recognition various times (happened).
 			UtilsSpeechRecognizersBC.startGoogleRecognition();
 		}
 
 		/**
-		 * This callback is called when we stop the recognizer.
+		 * This callback is called when we stop() the recognizer.
 		 */
 		@Override
 		public void onResult(@Nullable final Hypothesis hypothesis) {
+			// Ignore the result here. Continuous speech is dealt with by onPartialResult(). This is called in the end
+			// of the speech for a final result - which doesn't happen, because... continuous. Would only be called if
+			// stop() was called on onPartialResult(), because else it will always be on partial results (it's
+			// continuously recognizing, not finishing ever - no timeout set either).
 			is_listening = false;
 			startListening();
 		}

@@ -90,7 +90,7 @@ public class SpeechRecognizer {
 	protected SpeechRecognizer(Config config, @NonNull final Handler main_handler) throws IOException {
 		mainHandler = main_handler;
 
-		if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) ||
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ||
 				!UtilsPermsAuths.checkSelfPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD)) {
 			audio_source = MediaRecorder.AudioSource.VOICE_RECOGNITION;
 		} else {
