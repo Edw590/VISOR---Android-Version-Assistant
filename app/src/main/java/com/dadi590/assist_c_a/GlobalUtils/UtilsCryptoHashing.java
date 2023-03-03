@@ -49,9 +49,8 @@ public final class UtilsCryptoHashing {
 	 * <p>- SHA-384 (3)</p>
 	 * <p>- SHA-512 (4)</p>
 	 */
-	private static final String[][] possible_hashing_algorithms = {
-			// ATTENTION - the implementation of UtilsCertificates#checkCertsPkg() depends on the format of this array.
-			// If it's to be changed, check that function too.
+	private static final String[][] POSSIBLE_HASHING_ALGORITHMS = {
+			// ATTENTION - keep the safest algorithm on the last position! Its usages are based on that.
 			// Format: 1st index: algorithm name; 2nd index: hexadecimal representation length
 			// (https://www.php.net/manual/en/function.hash.php)
 			{"MD5",     "32"},
@@ -60,6 +59,7 @@ public final class UtilsCryptoHashing {
 			{"SHA-384", "96"},
 			{"SHA-512", "128"},
 	};
+	public static final int IDX_MAX_ALGO = POSSIBLE_HASHING_ALGORITHMS.length - 1;
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -69,11 +69,11 @@ public final class UtilsCryptoHashing {
 
 	/**
 	 * .
-	 * @return the {@link #possible_hashing_algorithms} variable
+	 * @return a clone of the {@link #POSSIBLE_HASHING_ALGORITHMS} variable
 	 */
 	@NonNull
 	public static String[][] getPossibleHashAlgorithms() {
-		return possible_hashing_algorithms.clone();
+		return POSSIBLE_HASHING_ALGORITHMS.clone();
 	}
 
 	public static final int IDX_MD5 = 0;
@@ -83,9 +83,10 @@ public final class UtilsCryptoHashing {
 	public static final int IDX_SHA512 = 4;
 	/**
 	 * <p>Gets a byte array of the hash of the given byte array, calculated by one of the algorithms present in
-	 * {@link #possible_hashing_algorithms}.</p>
+	 * {@link #POSSIBLE_HASHING_ALGORITHMS}.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
+	 * <p>- {@link #IDX_MAX_ALGO} --> for {@code index}: index of the last (and safest) algorithm</p>
 	 * <p>- {@link #IDX_MD5} --> for {@code index}: index of the MD5 algorithm</p>
 	 * <p>- {@link #IDX_SHA1} --> for {@code index}: index of the SHA-1 algorithm</p>
 	 * <p>- {@link #IDX_SHA256} --> for {@code index}: index of the SHA-256 algorithm</p>
@@ -94,7 +95,7 @@ public final class UtilsCryptoHashing {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param byte_array the bytes to calculate the hash from
-	 * @param index the index of one of the String[] arrays inside {@link #possible_hashing_algorithms} --> one of the
+	 * @param index the index of one of the String[] arrays inside {@link #POSSIBLE_HASHING_ALGORITHMS} --> one of the
 	 * constants
 	 *
 	 * @return the hash string
@@ -103,7 +104,7 @@ public final class UtilsCryptoHashing {
 	public static byte[] getHashBytesOfBytes(@NonNull final byte[] byte_array, final int index) {
 		final MessageDigest messageDigest;
 		try {
-			messageDigest = MessageDigest.getInstance(possible_hashing_algorithms[index][0]);
+			messageDigest = MessageDigest.getInstance(POSSIBLE_HASHING_ALGORITHMS[index][0]);
 		} catch (final NoSuchAlgorithmException ignored) {
 			// Will never happen as long as the list of possible algorithms contains only algorithms that are available
 			// in all APIs supported by the app.
@@ -124,7 +125,7 @@ public final class UtilsCryptoHashing {
 	 */
 	@NonNull
 	public static String getHashStringOfBytes(@NonNull final byte[] byte_array, final int index) {
-		final String format_specifier = "%" + possible_hashing_algorithms[index][1] + "X";
+		final String format_specifier = "%" + POSSIBLE_HASHING_ALGORITHMS[index][1] + "X";
 		return String.format(Locale.getDefault(), format_specifier, new BigInteger(1,
 				getHashBytesOfBytes(byte_array, index)));
 	}

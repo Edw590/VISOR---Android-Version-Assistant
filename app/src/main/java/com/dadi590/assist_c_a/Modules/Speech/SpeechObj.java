@@ -68,25 +68,28 @@ final class SpeechObj {
 	@NonNull String txt_to_speak; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
 	final int audio_stream;
 	final boolean bypass_no_sound;
+	final boolean notify_no_sound;
 
 	/**
 	 * <p>Main class constructor.</p>
 	 *
 	 * @param utterance_id same as in {@link Speech2#speakInternal(String, int, boolean, String, Integer)}, but must not
-	 *                     be null
-	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * be null
+	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
 	 * @param current_speech_obj true if the instance is being created to reset the {@link Speech2#current_speech_obj} -
-	 *                           the audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value;
-	 *                           false otherwise
-	 * @param bypass_no_sound same as in {@link Speech2#speak(String, int, boolean, Integer)}
-	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, boolean, Integer)}
+	 * the audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value;
+	 * false otherwise
+	 * @param bypass_no_sound same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param notify_no_sound
+	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
 	 */
 	SpeechObj(@NonNull final String utterance_id, @NonNull final String txt_to_speak, final boolean current_speech_obj,
-			  final boolean bypass_no_sound, @Nullable final Integer after_speaking_code) {
+			  final boolean bypass_no_sound, final boolean notify_no_sound, @Nullable final Integer after_speaking_code) {
 		this.utterance_id = utterance_id;
 		this.after_speaking_code = after_speaking_code;
 		this.txt_to_speak = txt_to_speak;
 		this.bypass_no_sound = bypass_no_sound;
+		this.notify_no_sound = notify_no_sound;
 
 		if (current_speech_obj) {
 			audio_stream = DEFAULT_AUDIO_STREAM;
@@ -104,6 +107,13 @@ final class SpeechObj {
 				}
 			}
 		}
+	}
+
+	/**
+	 * <p>Create an empty instance with: {@code this("", "", true, false, false, null)}.</p>
+	 */
+	SpeechObj() {
+		this("", "", true, false, false, null);
 	}
 
 	@NonNull

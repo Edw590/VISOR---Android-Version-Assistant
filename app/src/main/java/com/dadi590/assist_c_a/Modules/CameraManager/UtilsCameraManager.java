@@ -31,7 +31,7 @@ import androidx.annotation.Nullable;
 /**
  * <p>Camera Manager related utilities.</p>
  */
-public final class UtilsCameraManager {
+final class UtilsCameraManager {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>

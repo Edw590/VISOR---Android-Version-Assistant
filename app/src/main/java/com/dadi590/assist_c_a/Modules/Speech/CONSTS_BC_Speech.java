@@ -75,7 +75,7 @@ public final class CONSTS_BC_Speech {
 	static final String EXTRA_REMOVE_SPEECH_3 = "Speech_EXTRA_REMOVE_SPEECH_3";
 
 	/**
-	 * <p>Executed function: {@link Speech2#speak(String, int, boolean, Integer)}.</p>
+	 * <p>Executed function: {@link Speech2#speak(String, int, boolean, boolean, Integer)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
 	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
@@ -83,12 +83,14 @@ public final class CONSTS_BC_Speech {
 	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is false)</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_3}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_4}: optional (default is null)</p>
+	 * <p>- {@link #EXTRA_CALL_SPEAK_5}: mandatory</p>
 	 */
 	static final String ACTION_CALL_SPEAK = "Speech_ACTION_CALL_SPEAK";
 	static final String EXTRA_CALL_SPEAK_1 = "Speech_EXTRA_CALL_SPEAK_1";
 	static final String EXTRA_CALL_SPEAK_2 = "Speech_EXTRA_CALL_SPEAK_2";
 	static final String EXTRA_CALL_SPEAK_3 = "Speech_EXTRA_CALL_SPEAK_3";
 	static final String EXTRA_CALL_SPEAK_4 = "Speech_EXTRA_CALL_SPEAK_4";
+	static final String EXTRA_CALL_SPEAK_5 = "Speech_EXTRA_CALL_SPEAK_5";
 
 	/**
 	 * <p>Explanation: warns when the speech module is ready for use after the first time (means any time other than

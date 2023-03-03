@@ -43,7 +43,8 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 
 
 /**
@@ -54,7 +55,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -82,10 +83,10 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
-		final String[][] min_required_permissions = {{
+		final String[] min_required_permissions = {
 				Manifest.permission.RECEIVE_SMS,
-		}};
-		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0];
+		};
+		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions);
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -117,7 +118,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	 */
 	static void processSmsMsgs(@NonNull final SmsMessage[] sms_messages) {
 		for (final SmsMessage sms_message : sms_messages) {
-			final String sender = sms_message.getOriginatingAddress();
+			@Nullable final String sender = sms_message.getOriginatingAddress();
 			//String message = stringBuilder.toString();
 			System.out.println("&&&&&&&&&&&&&&&&&");
 			System.out.println(sender);
@@ -125,16 +126,17 @@ public final class SmsMsgsProcessor implements IModuleInst {
 			System.out.println("&&&&&&&&&&&&&&&&&");
 
 			// Update the Values Storage
-			ValuesStorage.setValue(ValuesStorage.Keys.last_sms_msg_time, System.currentTimeMillis());
-			ValuesStorage.setValue(ValuesStorage.Keys.last_sms_msg_number, sender);
+			UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_TIME, System.currentTimeMillis());
 
 			final String speak;
 			if (UtilsTelephony.isPrivateNumber(sender)) {
 				speak = "Sir, attention! New message from a private number!";
+				UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_NUMBER, "[Private number]");
 			} else {
 				speak = "Sir, new message from " + UtilsTelephony.getWhatToSayAboutNumber(sender) + ".";
+				UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_NUMBER, sender);
 			}
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
 		}
 	}
 

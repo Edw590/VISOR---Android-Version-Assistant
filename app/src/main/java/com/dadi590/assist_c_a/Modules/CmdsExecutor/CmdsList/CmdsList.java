@@ -69,6 +69,8 @@ public final class CmdsList {
 		public static final String CMD_MEDIA_PREVIOUS = "25";
 		public static final String CMD_CONFIRM = "26";
 		public static final String CMD_REJECT = "27";
+		public static final String CMD_STOP_LISTENING = "28";
+		public static final String CMD_START_LISTENING = "29";
 
 		/**
 		 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -164,7 +166,9 @@ public final class CmdsList {
 				put(CmdIds.CMD_MEDIA_NEXT,                CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 24
 				put(CmdIds.CMD_MEDIA_PREVIOUS,            CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 25
 				put(CmdIds.CMD_CONFIRM,                   CmdAddInfo.CMDi_INF1_ASSIST_CMD);       // 26
-				put(CmdIds.CMD_REJECT,                    CmdAddInfo.CMDi_INF1_ASSIST_CMD);     // 27
+				put(CmdIds.CMD_REJECT,                    CmdAddInfo.CMDi_INF1_ASSIST_CMD);       // 27
+				put(CmdIds.CMD_STOP_LISTENING,            CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 28
+				put(CmdIds.CMD_START_LISTENING,           CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 29
 			}
 		};
 
@@ -214,35 +218,40 @@ public final class CmdsList {
 			{CmdIds.CMD_MEDIA_PREVIOUS, ACD.CMDi_TYPE_MANUAL, "previous", "", "media/song/songs/music/musics/video/videos"},                                // 25
 			{CmdIds.CMD_CONFIRM, ACD.CMDi_TYPE_MANUAL, "i", "", "do/confirm/approve/certify"},                                                              // 26
 			{CmdIds.CMD_REJECT, ACD.CMDi_TYPE_MANUAL, "i", "", "don't/reject/disapprove"},                                                                  // 27
+			{CmdIds.CMD_STOP_LISTENING, ACD.CMDi_TYPE_STOP, "", "", "listening"},                                                                           // 28
+			{CmdIds.CMD_START_LISTENING, ACD.CMDi_TYPE_MANUAL, "start begin", "", "listening"},                                                                   // 29
 	};
 	static final int CMDS_LIST_len = CMDS_LIST.length;
 
 	public static final String[] CMDS_LIST_description = {
-			"Turn on/off flashlight/lantern",                                        // 1
-			"(Ask for the time)",                                                    // 2
-			"(Ask for the date)",                                                    // 3
-			"Turn on/off Wi-Fi",                                                     // 4
-			"Turn on/off mobile data",                                               // 5
-			"Turn on/off bluetooth",                                                 // 6
-			"Answer call",                                                           // 7
-			"End call",                                                              // 9
-			"Turn on/off speaker/speakers",                                          // 10
-			"Turn on/off airplane mode",                                             // 11
-			"(Ask for the battery percentage/status/level)",                         // 12
-			"Shut down the device/phone",                                            // 13
-			"[Fast] reboot the device/phone [into recovery/safe mode/bootloader]",   // 14
-			"Take a [frontal] picture/photo",                                        // 15
-			"Record audio/sound",                                                    // 16
-			"(Ask to repeat what was just said)",                                    // 17
-			"Call (a contact name)",                                                 // 18
-			"Turn on/off the power/battery saver mode",                              // 19
-			"Stop recording [audio/sound]",                                          // 20
-			"Stop media/song/music/video",                                           // 21
-			"Pause media/song/music/video",                                          // 22
-			"Play media/song/music/video",                                           // 23
-			"Next media/song/music/video",                                           // 24
-			"Previous media/song/music/video",                                       // 25
-			"I do/confirm/approve/certify (confirm action when VISOR requests it)",  // 26
-			"I don't/reject/disapprove (reject action instead)",                     // 27
+			"Turn on/off flashlight/lantern",                                             // 1
+			"(Ask for the time)",                                                         // 2
+			"(Ask for the date)",                                                         // 3
+			"Turn on/off Wi-Fi",                                                          // 4
+			"Turn on/off mobile data",                                                    // 5
+			"Turn on/off bluetooth",                                                      // 6
+			"Answer call",                                                                // 7
+			"End call",                                                                   // 9
+			"Turn on/off speaker/speakers",                                               // 10
+			"Turn on/off airplane mode",                                                  // 11
+			"(Ask for the battery percentage/status/level)",                              // 12
+			"Shut down the device/phone",                                                 // 13
+			"[Fast] reboot the device/phone [into recovery/safe mode/bootloader]",        // 14
+			"Take a [frontal] picture/photo",                                             // 15
+			"Record audio/sound",                                                         // 16
+			"(Ask to repeat what was just said)",                                         // 17
+			"Call (a contact name)",                                                      // 18
+			"Turn on/off the power/battery saver mode",                                   // 19
+			"Stop recording [audio/sound]",                                               // 20
+			"Stop media/song/music/video",                                                // 21
+			"Pause media/song/music/video",                                               // 22
+			"Play media/song/music/video",                                                // 23
+			"Next media/song/music/video",                                                // 24
+			"Previous media/song/music/video",                                            // 25
+			"I do/confirm/approve/certify (confirm action when VISOR requests it)",       // 26
+			"I don't/reject/disapprove (reject action instead)",                          // 27
+			"Stop listening (hotword recognizer - useful if VISOR is not a " +            // 28
+					"system app, in which case he'll lock the microphone on himself)",
+			"Start listening (if stopped, to start again - or hold the Power button)",    // 29
 	};
 }

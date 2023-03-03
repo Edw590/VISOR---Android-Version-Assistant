@@ -24,6 +24,7 @@ package com.dadi590.assist_c_a.ActivitiesFragments;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
+import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -93,7 +95,7 @@ public final class FragDevelopment extends Fragment {
 				//startActivity(intent);
 
 				//System.out.println("HHHHHHHHHHHHHHHHHH");
-				//System.out.println(ValuesStorage.getValue(ValuesStorage.last_phone_call_time, 0L));
+				//System.out.println(UtilsStaticStorage.getValue(ValuesStorage.last_phone_call_time, 0L));
 				//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");
@@ -140,6 +142,8 @@ public final class FragDevelopment extends Fragment {
 
 				//MainActTests.for_tests();
 
+				UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC, false);
+
 				System.out.println("------------------------");
 				System.out.println("IS_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_SYSTEM_APP));
 				System.out.println("IS_UPDATED_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_UPDATED_SYSTEM_APP));
@@ -182,7 +186,7 @@ public final class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, true, null);
 			}
 		});
 		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {

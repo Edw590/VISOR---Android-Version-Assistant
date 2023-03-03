@@ -37,17 +37,14 @@ import androidx.fragment.app.Fragment;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsTimeDate;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.ValueObj;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.Value;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.ms.square.android.expandabletextview.ExpandableTextView;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
 public final class FragValuesStorageViewer extends Fragment {
-
-	View current_view = null;
-
-	final ValueObj[] values_list = ValuesStorage.getValuesArrays();
 
 	@Nullable
 	@Override
@@ -60,38 +57,42 @@ public final class FragValuesStorageViewer extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		current_view = view;
-
-		final LinearLayout linearLayout = current_view.findViewById(R.id.frag_values_storage_viewer_linear_layout);
+		final LinearLayout linearLayout = view.findViewById(R.id.frag_values_storage_viewer_linear_layout);
+		final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
 
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 DP seems to be enough as margins.
+		// 15 SP seems to be enough as margins.
 		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
+		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
 				resources.getDisplayMetrics());
 
 		int i = 0;
-		for (final ValueObj valueObj : values_list) { // Add a TextView for each value.
+		for (final Value value : ValuesRegistry.getArray()) { // Add a TextView for each value.
 			final TextView textView = new TextView(requireContext());
 			textView.setId(i); // Set the ID to be the index of the value in the list
 			textView.setLayoutParams(layoutParams);
-			textView.setPadding(padding_px, padding_px, padding_px, padding_px);
+			textView.setPadding(padding_px, padding_px, padding_px, 0);
 			textView.setTextColor(Color.BLACK);
 			textView.setTextIsSelectable(true);
-
-			final String text = "Name: " + valueObj.pretty_name + "\nType: " + valueObj.type +
-					"\nTime: " + getTimeDateStr(valueObj.getPrevTime()) + "\nPrev: " + valueObj.getPrevValue() +
-					"\nTime: " + getTimeDateStr(valueObj.getTime()) + "\nCurr: " + valueObj.getValue();
+			final String text = "Name: " + value.pretty_name + "\nType: " + value.type +
+					"\nTime: " + getTimeDateStr(value.getPrevTime()) + "\nPrev: " + value.getPrevData() +
+					"\nTime: " + getTimeDateStr(value.getTime()) + "\nCurr: " + value.getData();
 			textView.setText(text);
-
 			linearLayout.addView(textView);
+
+			final ExpandableTextView expandableTextView = (ExpandableTextView) layoutInflater
+					.inflate(R.layout.expandable_text_view, null);
+			expandableTextView.setText(value.description);
+			expandableTextView.setPadding(padding_px, 0, padding_px, padding_px);
+			linearLayout.addView(expandableTextView);
+
 			++i;
 		}
 	}
 
 	private static String getTimeDateStr(final long time) {
-		return ValueObj.DEFAULT_TIME == time ? "never" : UtilsTimeDate.getTimeDateStr(time);
+		return Value.DEFAULT_TIME == time ? "never" : UtilsTimeDate.getTimeDateStr(time);
 	}
 }

@@ -51,12 +51,13 @@ import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +70,11 @@ import ACD.ACD;
  */
 public final class CmdsExecutor implements IModuleInst {
 
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
+	private final Handler main_handler;
+
 	// This variable can't be local. It must memorize the last value, so they must always remain in memory.
 	// Also, because of that, the instance of this class must also remain in memory, as it's done in the ModulesList.
 	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
@@ -78,32 +84,36 @@ public final class CmdsExecutor implements IModuleInst {
 
 	private static final String NO_CMD = "";
 	private final class Command {
-		@NonNull String command_str;
-		@NonNull String cmd_action;
-		@Nullable Runnable runnable;
+		/** The command code that comes out of the ACD. */
+		@NonNull String command_code;
+		/** A description to be spoken of the command action. Complete the sentence: "This command is used to..." */
+		@NonNull String cmd_spoken_action;
+		/** A Runnable to execute after the command is completed. */
+		@Nullable Runnable what_to_do;
+		/** The time when the command was detected. */
 		long time_ms_cmd_detection;
 
 		Command() {
-			command_str = "";
-			cmd_action = "";
-			runnable = null;
+			command_code = "";
+			cmd_spoken_action = "";
+			what_to_do = null;
 			time_ms_cmd_detection = 0L;
 		}
 
-		void resetFields(@NonNull final String command_str, @NonNull final String cmd_spoken_action,
+		/**
+		 * @param command_code {@link #command_code}
+		 * @param cmd_spoken_action {@link #cmd_spoken_action}
+		 * @param what_to_do {@link #what_to_do}
+		 */
+		void resetFields(@NonNull final String command_code, @NonNull final String cmd_spoken_action,
 						 @Nullable final Runnable what_to_do) {
-			this.command_str = command_str;
-			this.cmd_action = cmd_spoken_action;
-			this.runnable = what_to_do;
+			this.command_code = command_code;
+			this.cmd_spoken_action = cmd_spoken_action;
+			this.what_to_do = what_to_do;
 			time_ms_cmd_detection = System.currentTimeMillis();
 		}
 	}
 	private Command previous_cmd = new Command();
-
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
-	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
-			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -220,7 +230,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 			String cmd_to_check = cmd_id;
 			if (CmdsList.CmdAddInfo.CMDi_INF1_ASSIST_CMD.equals(CmdsList.CmdAddInfo.CMDi_INFO.get(cmd_to_check))) {
-				cmd_to_check = previous_cmd.command_str;
+				cmd_to_check = previous_cmd.command_code;
 			}
 			// Keep it checking with CMDi_INF1_DO_SOMETHING and inverting the output. That way, if cmd_to_check is ""
 			// (no previous command), it won't equal DO_SOMETHING and will set cmdi_only_speak to true.
@@ -321,7 +331,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setMobileDataEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-						case (UtilsShell.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Mobile Data connection toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -481,7 +491,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-						case (UtilsShell.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Airplane Mode toggled.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -518,8 +528,8 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_ASK_BATTERY_PERCENT): {
 					if (!only_returning) {
-						final Boolean battery_present = ValuesStorage.
-								getValueObj(ValuesStorage.Keys.battery_present).getValue();
+						final Boolean battery_present = UtilsRegistry.
+								getValueObj(ValuesRegistry.Keys.BATTERY_PRESENT).getData();
 						if (null != battery_present && !battery_present) {
 							final String speak = "There is no battery present on the device.";
 							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
@@ -529,8 +539,8 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					final Integer battery_percentage = ValuesStorage
-							.getValueObj(ValuesStorage.Keys.battery_percent).getValue();
+					final Integer battery_percentage = UtilsRegistry
+							.getValueObj(ValuesRegistry.Keys.BATTERY_PERCENT).getData();
 					final String speak;
 					if (null == battery_percentage) {
 						speak = "Battery percentage not available yet.";
@@ -709,8 +719,9 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					final int contact_index = (int) ACD.getSubCmdIndex(cmd_variant);
-					final String contact_name = TelephonyManagement.ALL_CONTACTS[contact_index][0];
-					final String contact_number = TelephonyManagement.ALL_CONTACTS[contact_index][1];
+					final String[][] contacts_list = TelephonyManagement.getContactsList();
+					final String contact_name = contacts_list[contact_index][0];
+					final String contact_number = contacts_list[contact_index][1];
 
 					final Runnable do_after_confirm = new Runnable() {
 						@Override
@@ -801,7 +812,7 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsCmdsExecutor.speak(speak, true, null);
 					} else {
 						switch (UtilsAndroidPower.setBatterySaverModeEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-							case (UtilsShell.NO_ERR): {
+							case (UtilsShell.ErrCodes.NO_ERR): {
 								final String speak = "Battery Saver Mode toggled.";
 								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 
@@ -956,7 +967,7 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_CONFIRM):
 				case (CmdsList.CmdIds.CMD_REJECT): {
-					if (null == previous_cmd.runnable ||
+					if (null == previous_cmd.what_to_do ||
 							(previous_cmd.time_ms_cmd_detection > (System.currentTimeMillis() + 60_000L))) {
 						// No runnable to execute (no command needing confirmation then) or the previous command was
 						// more than a minute ago.
@@ -964,13 +975,31 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
 					} else {
 						if (cmd_id.equals(CmdsList.CmdIds.CMD_CONFIRM)) {
-							previous_cmd.runnable.run();
+							previous_cmd.what_to_do.run();
 						} else {
-							UtilsCmdsExecutor.speak(previous_cmd.cmd_action + " rejected, sir.", cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(previous_cmd.cmd_spoken_action + " rejected, sir.", cmdi_only_speak, null);
 						}
 					}
 
 					previous_cmd.resetFields(NO_CMD, "", null);
+					break;
+				}
+				case (CmdsList.CmdIds.CMD_STOP_LISTENING): {
+					UtilsSpeechRecognizersBC.stopRecognition();
+
+					final String speak = "Background speech recognition stopped.";
+					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+					previous_cmd.resetFields(NO_CMD, "stop listening in the background", null);
+					break;
+				}
+				case (CmdsList.CmdIds.CMD_START_LISTENING): {
+					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+
+					final String speak = "Background speech recognition started.";
+					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+
+					previous_cmd.resetFields(NO_CMD, "start listening in the background", null);
 					break;
 				}
 			}

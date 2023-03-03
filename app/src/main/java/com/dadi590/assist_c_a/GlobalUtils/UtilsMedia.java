@@ -21,9 +21,7 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
-import android.os.Environment;
-
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -59,66 +57,32 @@ public final class UtilsMedia {
 	 *
 	 * @param media_type one of the constants
 	 *
-	 * @return the {@link File} in case it was possible to generate it, null otherwise (the external storage may not be
-	 * mounted or it was not possible to create the necessary sub-directories)
+	 * @return the {@link File}
 	 */
-	@Nullable
+	@NonNull
 	public static File getOutputMediaFile(final int media_type){
-		if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			return null;
-		}
-		String folder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + GL_CONSTS.MEDIA_FOLDER_REL_PATH;
-		switch (media_type) {
-			case (AUDIO): {
-				folder += "Audio recordings/";
-				break;
-			}
-			case (PHOTO): {
-				folder += "Photos/";
-				break;
-			}
-			case (VIDEO): {
-				folder += "Video recordings/";
-				break;
-			}
-			case (SCREENSHOT): {
-				folder += "Screenshots/";
-				break;
-			}
-		}
-
-		if (UtilsShell.NO_ERR != UtilsFilesDirs.createDirectory(folder)) {
-			return null;
-		}
-
-		// Create the storage directory if it does not exist
-		// In the beginning it's checked if the storage is available and that method returns true if and only if
-		// the storage has read/write access - so the folder can be created. No need to check for nullability.
-		final File media_folder = new File(folder);
-
-		// Create a media file name
+		String file_path = GL_CONSTS.VISOR_EXT_FOLDER_PATH;
 		final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 				.format(System.currentTimeMillis());
-		File mediaFile = null;
 		switch (media_type) {
 			case (AUDIO): {
-				mediaFile = new File(media_folder.getPath() + "/AUD_" + time_stamp + ".aac");
+				file_path += "Audio recordings/AUD_" + time_stamp + ".aac";
 				break;
 			}
 			case (PHOTO): {
-				mediaFile = new File(media_folder.getPath() + "/PHO_" + time_stamp + ".jpg");
+				file_path += "Photos/PIC_" + time_stamp + ".jpg";
 				break;
 			}
 			case (VIDEO): {
-				mediaFile = new File(media_folder.getPath() + "/VID_" + time_stamp + ".mp4");
+				file_path += "Video recordings/VID_" + time_stamp + ".mp4";
 				break;
 			}
 			case (SCREENSHOT): {
-				mediaFile = new File(media_folder.getPath() + "/SCR_" + time_stamp + ".jpg");
+				file_path += "Screenshots/SCR_" + time_stamp + ".jpg";
 				break;
 			}
 		}
 
-		return mediaFile;
+		return new File(new File(file_path), file_path);
 	}
 }

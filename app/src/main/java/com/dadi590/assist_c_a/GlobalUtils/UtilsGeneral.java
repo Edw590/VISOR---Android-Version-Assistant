@@ -21,16 +21,14 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
-import android.Manifest;
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.AudioDeviceInfo;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecord;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -47,6 +45,7 @@ import com.dadi590.assist_c_a.ApplicationClass;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -177,11 +176,13 @@ public final class UtilsGeneral {
 	 * <p>Vibrate the device once for the amount of time given.</p>
 	 *
 	 * @param duration milliseconds to vibrate
+	 *
+	 * @return true if the device will vibrate, false if there's no vibrator service
 	 */
-	public static void vibrateDeviceOnce(final long duration) {
+	public static boolean vibrateDeviceOnce(final long duration) {
 		final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		if (null == vibrator) {
-			return;
+			return false;
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -189,6 +190,8 @@ public final class UtilsGeneral {
 		} else {
 			vibrator.vibrate(duration);
 		}
+
+		return true;
 	}
 
 	/**
@@ -223,51 +226,6 @@ public final class UtilsGeneral {
 				queryIntentActivities(intent, flags);
 
 		return !list.isEmpty();
-	}
-
-	/**
-	 * <p>Checks if a {@link android.media.MediaRecorder.AudioSource} is available for immediate use.</p>
-	 *
-	 * @param audio_source the audio source to check
-	 *
-	 * @return true if it's available for immediate use, false otherwise (doesn't exist on the device or is busy) OR if
-	 * there is no permission to record audio (check that before calling this function)
-	 */
-	public static boolean isAudioSourceAvailable(final int audio_source) {
-		final int sample_rate = 44100;
-		final int channel_config = AudioFormat.CHANNEL_IN_MONO;
-		final int audio_format = AudioFormat.ENCODING_PCM_16BIT;
-
-		if (!UtilsPermsAuths.checkSelfPermission(Manifest.permission.RECORD_AUDIO)) {
-			return false;
-		}
-
-		final AudioRecord audioRecord;
-		try {
-			audioRecord = new AudioRecord(audio_source, sample_rate, channel_config, audio_format,
-					AudioRecord.getMinBufferSize(sample_rate, channel_config, audio_format));
-		} catch (final IllegalStateException ignored) {
-			return false;
-		}
-
-		final boolean initialized = AudioRecord.STATE_INITIALIZED == audioRecord.getState();
-
-		boolean success_recording = false;
-		if (initialized) {
-			try {
-				audioRecord.startRecording();
-				success_recording = audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING;
-			} catch (final IllegalStateException ignored) {
-			}
-		}
-
-		if (initialized) {
-			// If it's initialized, stop it.
-			audioRecord.stop();
-		}
-		audioRecord.release();
-
-		return success_recording;
 	}
 
 	/**
@@ -352,5 +310,19 @@ public final class UtilsGeneral {
 	@Nullable
 	public static IBinder getService(@NonNull final String name) {
 		return ServiceManager.getService(name);
+	}
+
+	/**
+	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @Nullable on it from AndroidX
+	 * to provide warnings.</p>
+	 *
+	 * @param name same as in {@link ServiceManager#getService(String)}
+	 *
+	 * @return same as in {@link ServiceManager#getService(String)}
+	 */
+	@NonNull
+	public static NotificationManager getNotificationManager() {
+		// Won't be null, because the Main Service won't start if there's no notification service on the device.
+		return (NotificationManager) Objects.requireNonNull(getSystemService(Context.NOTIFICATION_SERVICE));
 	}
 }

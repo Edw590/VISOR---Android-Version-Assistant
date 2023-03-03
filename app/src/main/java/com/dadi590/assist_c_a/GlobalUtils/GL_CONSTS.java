@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.GlobalUtils;
 
+import android.os.Environment;
+
 import com.dadi590.assist_c_a.R;
 
 /**
@@ -59,14 +61,18 @@ public final class GL_CONSTS {
 
 	// Notifications
 	public static final int NOTIF_ID_MAIN_SRV_FOREGROUND = 1;
-	public static final int NOTIF_ID_PLS_SRV_FOREGROUND = 2; // PLS = Protected Lock Screen
+	public static final int NOTIF_ID_PLS_SRV_FOREGROUND = 2;
 	public static final int NOTIF_ID_SPEECHES = 3;
+	public static final int NOTIF_ID_GOOGLE_RECOG_FOREGROUND = 4;
 	public static final String CH_ID_MAIN_SRV_FOREGROUND = "MainSrv:FOREGROUND";
 	public static final String CH_ID_PLS_SRV_FOREGROUND = "ProtectedLockScrSrv:FOREGROUND";
 	public static final String CH_ID_SPEECHES = "Speech2:Speeches";
+	public static final String CH_ID_GOOGLE_RECOG_FOREGROUND = "GoogleRecognition:FOREGROUND";
 
 	// Media
-	public static final String MEDIA_FOLDER_REL_PATH = ASSISTANT_NAME_WO_DOTS + "/";
+	/** The complete path to the VISOR folder on the external storage. */
+	public static final String VISOR_EXT_FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+			ASSISTANT_NAME_WO_DOTS + "/";
 
 	// TTS
 	public static final String PREFERRED_TTS_ENGINE = "ivona.tts";

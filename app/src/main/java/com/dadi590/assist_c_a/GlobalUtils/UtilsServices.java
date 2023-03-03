@@ -42,24 +42,6 @@ public final class UtilsServices {
 	}
 
 	/**
-	 * <p>Restarts a service by either stopping it normally or terminating it's PID (TERMINATING THE WHOLE PROCESS), and
-	 * then starts it again normally (unless it was already started, like by the system).</p>
-	 *
-	 * @param service_class the class of the service to restart
-	 * @param intent same as in {@link #startService(Class, Intent, boolean)}
-	 * @param force_restart true to force stopping the service, false to stop normally
-	 */
-	public static void restartService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
-									  final boolean force_restart) {
-		if (force_restart) {
-			UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(service_class));
-		} else {
-			stopService(service_class);
-		}
-		startService(service_class, intent, true, true);
-	}
-
-	/**
 	 * <p>Stops a service.</p>
 	 *
 	 * @param service_class the class of the service to stop
@@ -71,6 +53,8 @@ public final class UtilsServices {
 
 	/**
 	 * <p>Starts a service without additional parameters in case it's not already running.</p>
+	 * <p>Attention: don't call this function for background services too often - read the
+	 * {@link Service#startService(Intent)} doc. The function can take multiple milliseconds to complete.</p>
 	 *
 	 * @param service_class the class of the service to start
 	 * @param intent the intent to use to start the service, or null if it's to use the default intent (no extras or
@@ -78,9 +62,9 @@ public final class UtilsServices {
 	 * @param foreground from Android 8 Oreo onwards, true to start in foreground as of {@link Build.VERSION_CODES#O},
 	 *                   false to start in background; below that, this value has no effect as the service is always
 	 *                   started in background
-	 * @param check_already_running if true, the startService() will only be called if the service is not running; if
-	 *                              false, the function will be called anyways (note that that means onStartCommand()
-	 *                              will be called again, as it's called every time startService() is called)
+	 * @param check_already_running if true, startService() will only be called if the service is not running; if false,
+	 *                              the function will be called anyways (note that that means onStartCommand() will be
+	 *                              called again, as it's called every time startService() is called)
 	 */
 	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
 									final boolean foreground, final boolean check_already_running) {
@@ -89,17 +73,14 @@ public final class UtilsServices {
 		}
 
 		final Context context = UtilsGeneral.getContext();
-		final Intent intent_to_use;
-		if (intent == null) {
-			intent_to_use = new Intent(context, service_class);
-		} else {
-			intent_to_use = intent;
+		final Intent intent_to_use = null == intent ? new Intent(context, service_class) : intent;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && foreground) {
+			context.startForegroundService(intent_to_use);
+
+			return;
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			if (foreground) {
-				context.startForegroundService(intent_to_use);
-			}
-		}
+
 		// Do NOT call this in high frequency. It's said on the docs that it takes various milliseconds to process this
 		// call.
 		context.startService(intent_to_use);

@@ -35,9 +35,9 @@ import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
  * <p>This is the module which controls the assistant's speech recognition.</p>
@@ -61,7 +61,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -90,16 +90,16 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
-		final String[][] min_required_permissions = {{
+		final String[] min_required_permissions = {
 				Manifest.permission.RECORD_AUDIO,
-		}};
+		};
 
 		final boolean google_recog_available = UtilsSpeechRecognizers.isGoogleAppEnabled();
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, google_recog_available);
+		UtilsRegistry.setValue(ValuesRegistry.Keys.GOOGLE_RECOG_AVAILABLE, google_recog_available);
 
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0] &&
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions) &&
 				UtilsCheckHardwareFeatures.isMicrophoneSupported() && google_recog_available;
 	}
 	// IModuleInst stuff
@@ -116,7 +116,6 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 			final IntentFilter intentFilter = new IntentFilter();
 
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED);
-			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_POCKETSPHINX_RECOG_STARTED);
 
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
@@ -132,40 +131,36 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	private final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
+			final int google_module_index = ModulesList.getElementIndex(GOOGLE_RECOGNIZER);
 			while (true) {
 				// Also keep updating the ValuesStorage values in case there is some issue and the services don't get to
 				// update the value to false when they stop running (for example process killed by the system).
 
+				final PocketSphinxRecognition instance = (PocketSphinxRecognition) ModulesList.getElementValue(
+						ModulesList.getElementIndex(PocketSphinxRecognition.class), ModulesList.ELEMENT_INSTANCE);
+				if (null != instance) {
+					instance.prepareRecognizer();
+				}
+
 				if (!stop_speech_recognition) {
 					if (GOOGLE_RECOGNIZER == current_recognizer) {
-						final boolean is_running = UtilsServices.isServiceRunning(GoogleRecognition.class);
-
-						// Update the Values Storage
-						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, is_running);
-
-						if (!is_running) {
+						if (!ModulesList.isElementFullyWorking(google_module_index)) {
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
 					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
-						final boolean is_running = UtilsServices.isServiceRunning(PocketSphinxRecognition.class);
-
-						// Update the Values Storage
-						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, is_running);
-
-						if (!is_running) {
+						if (!PocketSphinxRecognition.isListening()) {
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
 					}
 
 					if (NO_RECOGNIZER == current_recognizer) {
-						// Update the Values Storage
-						ValuesStorage.setValue(ValuesStorage.Keys.pocketsphinx_recog_available, false);
-						ValuesStorage.setValue(ValuesStorage.Keys.google_recog_available, false);
-
-						UtilsSpeechRecognizers.terminateSpeechRecognizers();
-						UtilsSpeechRecognizers.startPocketSphinxRecognition();
+						UtilsSpeechRecognizers.stopSpeechRecognizers();
+						if (UtilsSpeechRecognizers.startPocketSphinxRecognition()) {
+							current_recognizer = POCKETSPHINX_RECOGNIZER;
+							wait_time = DEFAULT_WAIT_TIME;
+						}
 					}
 				}
 
@@ -198,16 +193,10 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 					break;
 				}
-				case CONSTS_BC_SpeechRecog.ACTION_POCKETSPHINX_RECOG_STARTED: {
-					current_recognizer = POCKETSPHINX_RECOGNIZER;
-					wait_time = DEFAULT_WAIT_TIME;
-
-					break;
-				}
 
 
 				case CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE: {
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.stopSpeechRecognizers();
 					UtilsSpeechRecognizers.startGoogleRecognition();
 
 					stop_speech_recognition = false;
@@ -216,7 +205,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					break;
 				}
 				case CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX: {
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.stopSpeechRecognizers();
 					UtilsSpeechRecognizers.startPocketSphinxRecognition();
 
 					stop_speech_recognition = false;
@@ -228,7 +217,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					stop_speech_recognition = true;
 					wait_time = DEFAULT_WAIT_TIME;
 
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.stopSpeechRecognizers();
 
 					break;
 				}
@@ -236,7 +225,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					//stop_speech_recognition = false; - this doesn't change with this call
 					wait_time = DEFAULT_WAIT_TIME;
 
-					UtilsSpeechRecognizers.terminateSpeechRecognizers();
+					UtilsSpeechRecognizers.stopSpeechRecognizers();
 
 					break;
 				}

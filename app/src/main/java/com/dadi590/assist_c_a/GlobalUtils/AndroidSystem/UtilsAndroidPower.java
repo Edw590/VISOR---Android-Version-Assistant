@@ -92,7 +92,7 @@ public final class UtilsAndroidPower {
 				try {
 					powerManager.shutdown(false, PowerManager.SHUTDOWN_USER_REQUESTED, false);
 
-					return UtilsShell.NO_ERR;
+					return UtilsShell.ErrCodes.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			} else {
@@ -110,7 +110,7 @@ public final class UtilsAndroidPower {
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, false, false).ret_var;
 
 				if (ret_method) {
-					return UtilsShell.NO_ERR;
+					return UtilsShell.ErrCodes.NO_ERR;
 				}
 			}
 		}
@@ -211,7 +211,7 @@ public final class UtilsAndroidPower {
 				try {
 					iPowerManager.reboot(false, reason, false);
 
-					return UtilsShell.NO_ERR;
+					return UtilsShell.ErrCodes.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			} else {
@@ -221,7 +221,7 @@ public final class UtilsAndroidPower {
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, reason).ret_var;
 
 				if (ret_method) {
-					return UtilsShell.NO_ERR;
+					return UtilsShell.ErrCodes.NO_ERR;
 				}
 			}
 
@@ -274,5 +274,37 @@ public final class UtilsAndroidPower {
 		}
 
 		return UtilsAndroid.PERM_DENIED;
+	}
+
+	/**
+	 * <p>Turn on the screen temporarily.</p>
+	 *
+	 * @return true if the screen was turned on, false if the power service is not available on the device
+	 */
+	public static boolean turnScreenOnTemp() {
+		final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+		if (null == powerManager) {
+			return false;
+		}
+
+		final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK |
+				PowerManager.ACQUIRE_CAUSES_WAKEUP |
+				PowerManager.ON_AFTER_RELEASE, UtilsGeneral.getContext().getPackageName()+"::WakeLock");
+
+		// Acquire and release the wakelock so that the screen turns on and the CPU can turn it off whenever it wants
+		// because we no longer want it on.
+		wakeLock.acquire(1L);
+
+		return true;
+	}
+
+	/**
+	 * <p>Turn the screen off by pressing the Power key.</p>
+	 *
+	 * @return true if the screen was turned off, false if there are no root permissions
+	 */
+	public static boolean turnScreenOffTEST_THIS() {
+		// todo To be tested
+		return UtilsShell.noErr(UtilsShell.executeShellCmd("input keyevent 26", false, true).error_code);
 	}
 }

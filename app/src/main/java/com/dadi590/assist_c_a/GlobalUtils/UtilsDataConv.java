@@ -65,7 +65,7 @@ public final class UtilsDataConv {
 
 	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 	/**
-	 * <p>Converts the given byte array into a string of the type "00 00 00", in which the 0s are hexadecimal
+	 * <p>Converts the given byte array into a string of the type "XX XX XX", in which the Xs are hexadecimal
 	 * digits.</p>
 	 *
 	 * @param bytes the byte array
@@ -93,7 +93,7 @@ public final class UtilsDataConv {
 
 	private static final char[] OCT_ARRAY = "01234567".toCharArray();
 	/**
-	 * <p>Converts the given byte array into a string of the type "000 000 000", in which the letters are octal
+	 * <p>Converts the given byte array into a string of the type "XXX XXX XXX", in which the Xs are octal
 	 * digits.</p>
 	 *
 	 * @param bytes the byte array

@@ -39,9 +39,11 @@ import androidx.annotation.RequiresPermission;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.SettingsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>Global telephony-related utilities.</p>
@@ -69,7 +71,8 @@ public final class UtilsTelephony {
 	public static final String NO_MATCHES = "3234_NO_MATCHES";
 	public static final String MULTIPLE_MATCHES = "3234_MULTIPLE_MATCHES";
 	/**
-	 * <p>Gets the name of a contact through its phone number.</p>
+	 * <p>Gets the name of a contact through its phone number searching on the
+	 * {@link TelephonyManagement#CONTACTS_LIST}.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
 	 * <p>- {@link #NO_MATCHES} --> returned when no number was found for the given phone number</p>
@@ -77,17 +80,17 @@ public final class UtilsTelephony {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param number the phone number of the contact
-	 * @param location_search location where to look for the contact
+	 * @param first_match in case of multiple matches, return the 1st match, or else warn about multiple matches
 	 *
 	 * @return the name of the contact or one of the constants
 	 */
 	@NonNull
 	@RequiresPermission(Manifest.permission.READ_CONTACTS)
-	public static String getNameFromNum(@NonNull final String number, final int location_search) {
-		final Collection<String> matches = new ArrayList<>(10); // 10 matches at most as a start, I guess?
+	public static String getNameFromNum(@NonNull final String number, final boolean first_match) {
+		final List<String> matches = new ArrayList<>(10); // 10 matches at most as a start, I guess?
 		String last_name_found = "";
 
-		for (final String[] contact : getAllContacts(location_search)) {
+		for (final String[] contact : TelephonyManagement.getContactsList()) {
 			final String name = contact[0];
 			final String phoneNo = contact[1];
 
@@ -124,6 +127,10 @@ public final class UtilsTelephony {
 			// If only one match, the last name found is returned (the only one found).
 			return last_name_found;
 		} else {
+			if (first_match) {
+				return matches.get(0);
+			}
+
 			return MULTIPLE_MATCHES;
 		}
 	}
@@ -174,7 +181,9 @@ public final class UtilsTelephony {
 	public static String getWhatToSayAboutNumber(@NonNull final String number) {
 		final String ret;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
-			ret = getNameFromNum(number, ALL_CONTACTS);
+			final boolean first_match = UtilsRegistry.getValueObj(SettingsRegistry.Keys.CONTACTS_1ST_MATCH).getData();
+
+			ret = getNameFromNum(number, first_match);
 		} else {
 			ret = NO_MATCHES;
 		}

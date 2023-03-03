@@ -206,7 +206,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 			bitmap = null;
 
 			final File image_file = UtilsMedia.getOutputMediaFile(UtilsMedia.PHOTO);
-			if (image_file == null) {
+			if (!image_file.mkdirs()) {
 				final Intent broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_ERR_CANT_CREATE_FILE);
 				UtilsApp.sendInternalBroadcast(broadcast_intent);
 
@@ -291,7 +291,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 				camera.takePicture(shutterCallback, null, pictureCallback);
 			} catch (final RuntimeException ignored) {
 				final String speak = "Error taking the picture, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			}
 		}
 	};

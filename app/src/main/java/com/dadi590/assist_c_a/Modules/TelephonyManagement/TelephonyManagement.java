@@ -31,8 +31,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
-import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.SettingsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.dadi590.assist_c_a.ModulesList;
@@ -43,8 +43,8 @@ import com.dadi590.assist_c_a.ModulesList;
  */
 public final class TelephonyManagement implements IModuleInst {
 
-	@NonNull
-	public static String[][] ALL_CONTACTS = {};
+	@NonNull private static String[][] contacts_list = {};
+	private static final Object lock = new Object();
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -86,46 +86,26 @@ public final class TelephonyManagement implements IModuleInst {
 	final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-			boolean module_startup = true;
-
-			final int[] modules_indexes = {
-					ModulesList.getElementIndex(PhoneCallsProcessor.class),
-					ModulesList.getElementIndex(SmsMsgsProcessor.class),
-			};
-			final Class<?>[] modules_classes = {
-					PhoneCallsProcessor.class,
-					SmsMsgsProcessor.class,
-			};
-			final int num_modules = modules_indexes.length;
-
 			while (true) {
-				for (int i = 0; i < num_modules; ++i) {
-					final int module_index = modules_indexes[i];
+				// Update the contacts list
+				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
+					// Nested synchronization as said here: https://stackoverflow.com/a/21462631/8228163.
+					synchronized (lock) {
+						synchronized (contacts_list) {
+							// Every CHECK_INTERNAL seconds, update the contacts list for commands to be available for new
+							// contacts or to remove from it removed contacts, or to update updated contacts (like number or
+							// name or whatever). Also if the READ_CONTACTS permissions was just granted, add the contacts from
+							// scratch.
+							final boolean only_sim = UtilsRegistry.getValueObj(SettingsRegistry.Keys.CONTACTS_SIM_ONLY).getData();
+							contacts_list = UtilsTelephony.getAllContacts(only_sim ?
+									UtilsTelephony.CONTACTS_SIM : UtilsTelephony.ALL_CONTACTS);
+							UtilsCmdsList.updateMakeCallCmdContacts();
 
-					if (ModulesList.isElementSupported(modules_classes[i]) && !ModulesList.isElementFullyWorking(module_index)) {
-						ModulesList.restartElement(module_index);
-
-						if (!module_startup) {
-							final String speak = "Attention - Module restarted: " +
-									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+							System.out.println("~~~~~~~~~~~~~~~~~~");
+							System.out.println(contacts_list.length);
 						}
 					}
 				}
-
-				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
-					// Every CHECK_INTERNAL seconds, update the contacts list for commands to be available for new
-					// contacts or to remove from it removed contacts, or to update updated contacts (like number or
-					// name or whatever). Also if the READ_CONTACTS permissions was just granted, add the contacts from
-					// scratch.
-					ALL_CONTACTS = UtilsTelephony.getAllContacts(UtilsTelephony.ALL_CONTACTS);
-					UtilsCmdsList.updateMakeCallCmdContacts(ALL_CONTACTS);
-
-					System.out.println("~~~~~~~~~~~~~~~~~~");
-					System.out.println(ALL_CONTACTS.length);
-				}
-
-				module_startup = false;
 
 				try {
 					Thread.sleep(ModulesManager.CHECK_INTERVAL);
@@ -135,4 +115,19 @@ public final class TelephonyManagement implements IModuleInst {
 			}
 		}
 	});
+
+	/**
+	 * <p>Get a clone of the {@link #contacts_list}.</p>
+	 *
+	 * @return the close
+	 */
+	@NonNull
+	public static String[][] getContactsList() {
+		synchronized (lock) {
+			synchronized (contacts_list) {
+				// Do NOT remove the clone() from here - not sure what happens to synchronization!
+				return contacts_list.clone();
+			}
+		}
+	}
 }

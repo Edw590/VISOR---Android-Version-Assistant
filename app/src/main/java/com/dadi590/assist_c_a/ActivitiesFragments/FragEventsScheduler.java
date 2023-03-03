@@ -75,7 +75,7 @@ public final class FragEventsScheduler extends Fragment {
 		final String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
 
-		for (int i = 0; i < ModulesList.elements_list_length; ++i) { // Add a switch for each module.
+		for (int i = 0; i < ModulesList.ELEMENTS_LIST_LENGTH; ++i) { // Add a switch for each module.
 			final SwitchCompat switchCompat = new SwitchCompat(requireContext());
 			switchCompat.setEnabled(false);
 			switchCompat.setLayoutParams(layoutParams);

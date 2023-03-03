@@ -23,6 +23,7 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.RecognitionListener;
@@ -31,13 +32,20 @@ import android.speech.SpeechRecognizer;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
+import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
+import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsAudio;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,6 +78,13 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 	@Nullable private SpeechRecognizer speechRecognizer = null;
 
 	boolean is_listening = false;
+	boolean partial_results = false;
+
+	//String last_processed_speech = "";
+	//int partial_results_last_index = 0;
+	//long partial_results_last_time = 0L;
+	//String process_speech_string = "";
+	//String total_processed_speech = "";
 
 	private static final String ON_START_COMMAND_STR = "onStartCommand";
 	private static final String ON_READY_FOR_SPEECH_STR = "onReadyForSpeech";
@@ -94,45 +109,23 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 		}
 	};
 
-	@Override
-	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
-        /*
-		If the service was killed by its PID and the system restarted it, this might appear in the logs:
+	private static final Intent speech_recognizer_intent;
+	static final ObjectClasses.NotificationInfo notificationInfo;
+	static {
+		// Static stuff here to try to get the service to start even if milliseconds sooner, since it takes a bit to
+		// start already.
 
-        Scheduling restart of crashed service com.dadi590.assist_c_a/.SpeechRecognizer.Google in 1000ms
-        Scheduling restart of crashed service com.dadi590.assist_c_a/.SpeechRecognizer.PocketSphinx in 11000ms
-        Start proc 1090:com.dadi590.assist_c_a:null/u0a95 for service com.dadi590.assist_c_a/.SpeechRecognizer.Google
+		notificationInfo = new ObjectClasses.NotificationInfo(
+				GL_CONSTS.CH_ID_GOOGLE_RECOG_FOREGROUND,
+				"Google recognition notification",
+				"",
+				NotificationCompat.PRIORITY_LOW,
+				"Listening...",
+				"",
+				null
+		);
 
-        This below is supposed to fix that - if there's not EXTRA_TIME_START on the intent with a time that is 1 second
-        or less ago relative to the current time, the service will be stopped immediately.
-        */
-		boolean stop_now = true;
-		if (intent != null && intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
-			// Must have been called 1 second ago at most - else it was the system restarting it or something.
-			stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
-		}
-		if (stop_now) {
-			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
-			stopSelf();
-			UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
-
-			return START_NOT_STICKY;
-		}
-
-		final Intent intent1 = new Intent(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED);
-		UtilsApp.sendInternalBroadcast(intent1);
-
-		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
-		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
-		if (!UtilsGeneral.isThreadWorking(frozen_methods_checker)) {
-			// This check here above is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
-			frozen_methods_checker.start();
-		}
-
-		last_method_called_when = System.currentTimeMillis();
-		last_method_called = ON_START_COMMAND_STR;
-
-		final Intent speech_recognizer_intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		speech_recognizer_intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		speech_recognizer_intent.setPackage(UtilsSpeechRecognizers.google_app_pkg_name);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -149,13 +142,80 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 		// EXTRA_MAX_RESULTS does nothing... 2 people say that on StackOverflow (last one in 2018), but might start
 		// working some day, so keep it here anyways.
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1); // Doesn't work either.*/
+	}
+
+	@Override
+	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
+        /*
+		If the service was killed by its PID and the system restarted it, this might appear in the logs:
+
+        Scheduling restart of crashed service com.dadi590.assist_c_a/.SpeechRecognizer.Google in 1000ms
+        Scheduling restart of crashed service com.dadi590.assist_c_a/.SpeechRecognizer.PocketSphinx in 11000ms
+        Start proc 1090:com.dadi590.assist_c_a:null/u0a95 for service com.dadi590.assist_c_a/.SpeechRecognizer.Google
+
+        This below is supposed to fix that - if there's not EXTRA_TIME_START on the intent with a time that is 1 second
+        or less ago relative to the current time, the service will be stopped immediately.
+        */
+		boolean stop_now = true;
+		if (intent != null) {
+			if (intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
+				// Must have been called 1 second ago at most - else it was the system restarting it or something.
+				stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
+			}
+			partial_results = intent.getBooleanExtra(CONSTS_SpeechRecog.EXTRA_PARTIAL_RESULTS, false);
+		}
+		if (stop_now) {
+			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
+			stopSelf();
+			UtilsSpeechRecognizersBC.terminateSpeechRecognizers();
+
+			return START_NOT_STICKY;
+		}
+
+		startForeground(GL_CONSTS.NOTIF_ID_GOOGLE_RECOG_FOREGROUND, UtilsNotifications.getNotification(notificationInfo).
+				setOngoing(true).
+				build());
+
+		UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED));
+
+		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
+		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
+		if (!UtilsGeneral.isThreadWorking(frozen_methods_checker)) {
+			// This check here above is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
+			frozen_methods_checker.start();
+		}
+
+		last_method_called_when = System.currentTimeMillis();
+		last_method_called = ON_START_COMMAND_STR;
 
 		System.out.println("TTTTTTTTTTTTTT");
 
 		final RecognitionListener speechRecognitionListener = new SpeechRecognitionListener();
 		speechRecognizer = SpeechRecognizer.createSpeechRecognizer(UtilsGeneral.getContext());
 		speechRecognizer.setRecognitionListener(speechRecognitionListener);
-		speechRecognizer.startListening(speech_recognizer_intent);
+
+		// Don't notify about the speech if there was no sound - there's already a notification.
+		UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION, false, null);
+
+		try {
+			// Just a bit. Not the speech full time. But enough so that right after he finishes, the recognizer is
+			// ready. This also depends on device speed though... 500L is for BV9500. Maybe it's good enough usually.
+			// EDIT: keep this here even if the speech is just notified - we need to wait for the microphone usage check
+			// because it's saying it's in use when it shouldn't be, so waiting a bit helped.
+			Thread.sleep(500L);
+		} catch (final InterruptedException ignored) {
+			return START_NOT_STICKY;
+		}
+
+		if (UtilsAudio.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
+			speechRecognizer.startListening(speech_recognizer_intent);
+		} else {
+			final String speak = "Resources are busy";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+		}
 
 		return START_NOT_STICKY;
 	}
@@ -183,9 +243,14 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_READY_FOR_SPEECH_STR;
 
-
-			// Vibrate to indicate it's ready to listen.
+			// Indicate it's ready to listen.
 			UtilsGeneral.vibrateDeviceOnce(300L);
+			//final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE); API 16-
+			//final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE); API 17+
+			//if (null != powerManager && powerManager.screen.displaUtilsRoot.isRootAvailable()) {
+			//	UtilsAndroidPower.turnScreenOnTemp();
+			//	UtilsAndroidPower.turnScreenOff();
+			//}
 		}
 
 		@Override
@@ -244,7 +309,37 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onPartialResults(final Bundle partialResults) {
+			//if (partial_results) {
+			//	ArrayList<String> matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+			//	final String match = matches.get(0).toLowerCase(Locale.ENGLISH);
+
+			//	System.out.println("++++++++++++++++++++++++++");
+			//	System.out.println(match);
+
+			//	if (!match.equals(last_processed_speech) && match.length() - 1 > partial_results_last_index) {
+			//		process_speech_string = match.substring(partial_results_last_index);
+			//		partial_results_last_time = System.currentTimeMillis();
+			//		System.out.println(process_speech_string);
+			//	}
+			//	System.out.println("++++++++++++++++++++++++++");
+
+			//	//Atualiza a Google App e o reconhecimento de voz e mete isto a funcionar decentemente.
+
+			//	// TO DO ISTO FALA PELAS COLUNAS COM OS PHONES LIGADOS SE A TAREFA FOR CHAMADA POR AQUI, MAS SE FOR PELO onResults JÁ É SÓ PELOS PHONES!!!!!!!!!!!!!!!
+			//	//  PS: Pela MainAct também vai pelos 2 sítios. Só pelo onResults é que não vai, ao que parece.
+			//}
 			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo
+			// todo Take care of this!!!! This seems to need the other thread (that has been missing since a few years)
 		}
 
 		@Override
@@ -255,12 +350,27 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 			is_listening = false;
 
 			final List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+			final String match = matches.get(0).toLowerCase(Locale.ENGLISH);
 
 			System.out.println("--------------------------");
 			System.out.println(matches);
 			System.out.println("--------------------------");
 
-			UtilsCmdsExecutorBC.processTask(matches.get(0).toLowerCase(Locale.ENGLISH), false, false);
+			UtilsCmdsExecutorBC.processTask(match, false, false);
+
+
+
+			//if (!matches.isEmpty()) {
+			//	if (match.length() - 1 > partial_results_last_index && !match.equals(total_processed_speech.toString())) {
+			//		process_speech_string = match.substring(partial_results_last_index);
+			//		System.out.println("A------------------------A");
+			//		System.out.println(process_speech_string);
+			//		System.out.println("A------------------------A");
+			//		if (!process_speech_string.equals(last_processed_speech)) {
+			//			UtilsCmdsExecutorBC.processTask(match.substring(partial_results_last_index), false, false);
+			//		}
+			//	}
+			//}
 
 			stopRecognizer();
 			stopSelf();

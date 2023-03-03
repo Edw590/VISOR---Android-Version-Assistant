@@ -23,7 +23,7 @@ package com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList;
 
 import androidx.annotation.NonNull;
 
-import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
+import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 
 import java.util.Locale;
 
@@ -41,17 +41,16 @@ public final class UtilsCmdsList {
 	}
 
 	/**
-	 * <p>Update the contacts names list on the ACD module to the ones provided.</p>
-	 *
-	 * @param all_contacts same as returned by {@link UtilsTelephony#getAllContacts(int)}
+	 * <p>Update the contacts names list on the ACD module.</p>
 	 */
-	public static void updateMakeCallCmdContacts(@NonNull final String[][] all_contacts) {
-		if (0 == all_contacts.length) {
+	public static void updateMakeCallCmdContacts() {
+		final String[][] contacts_list = TelephonyManagement.getContactsList();
+		if (0 == contacts_list.length) {
 			return;
 		}
-		
+
 		final StringBuilder contacts_names_list = new StringBuilder(500*20); // To start, 500 contacts, 20 chars per each
-		for (final String[] contact : all_contacts) {
+		for (final String[] contact : contacts_list) {
 			contacts_names_list.append(contact[0].toLowerCase(Locale.getDefault())).append("|");
 		}
 

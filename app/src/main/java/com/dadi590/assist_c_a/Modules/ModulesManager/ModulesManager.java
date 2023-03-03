@@ -76,37 +76,21 @@ public final class ModulesManager implements IModuleInst {
 		public void run() {
 			boolean module_startup = true;
 
-			final List<Class<?>> elements_classes = new ArrayList<>(ModulesList.elements_list_length);
+			final List<Class<?>> elements_classes = new ArrayList<>(ModulesList.ELEMENTS_LIST_LENGTH);
 
 			// Check all modules' support and put on a list to later warn if there were changes of support or not.
-			final boolean[] elements_support = new boolean[ModulesList.elements_list_length];
-			for (int module_index = 0; module_index < ModulesList.elements_list_length; ++module_index) {
+			final boolean[] elements_support = new boolean[ModulesList.ELEMENTS_LIST_LENGTH];
+			for (int module_index = 0; module_index < ModulesList.ELEMENTS_LIST_LENGTH; ++module_index) {
 				final Class<?> element_class = (Class<?>) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_CLASS);
 				elements_classes.add(element_class);
-
-				final int elem_type2 = (int) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_TYPE2);
-				if (ModulesList.TYPE2_MODULE == elem_type2 || ModulesList.TYPE2_SUBMODULE == elem_type2) {
-					// Must be a module or a submodule.
-					elements_support[module_index] = ModulesList.isElementSupported(element_class);
-				}
+				elements_support[module_index] = ModulesList.isElementSupported(element_class);
 			}
 
 			while (true) {
-				for (int module_index = 0; module_index < ModulesList.elements_list_length; ++module_index) {
-					final int elem_type2 = (int) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_TYPE2);
-					final boolean is_module = ModulesList.TYPE2_MODULE == elem_type2;
-
-					final boolean element_supported;
-					if (is_module || ModulesList.TYPE2_SUBMODULE == elem_type2) {
-						element_supported = ModulesList.isElementSupported(elements_classes.get(module_index));
-						// Keep updating if the modules are supported or not, in case the user changes the app permissions.
-						ModulesList.setElementValue(module_index, ModulesList.ELEMENT_SUPPORTED, element_supported);
-					} else {
-						// Not module, nor submodule (no idea yet, no other types exist currently).
-						continue;
-					}
-
-					// From here, only check stuff on modules or submodules, and only act (start/stop) on modules.
+				for (int module_index = 0; module_index < ModulesList.ELEMENTS_LIST_LENGTH; ++module_index) {
+					final boolean element_supported = ModulesList.isElementSupported(elements_classes.get(module_index));
+					// Keep updating if the modules are supported or not, in case the user changes the app permissions.
+					ModulesList.setElementValue(module_index, ModulesList.ELEMENT_SUPPORTED, element_supported);
 
 					if (element_supported) {
 						if (!elements_support[module_index]) {
@@ -114,20 +98,20 @@ public final class ModulesManager implements IModuleInst {
 							final String speak = "The following module is now supported by hardware or application " +
 									"permissions changes: " +
 									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
 						}
 						// startModule() already checks if the module is supported or not, but the manager would still
 						// call isModuleFullyWorking() for nothing, so I've put this in the if statement too.
 						// Also only keep checking and restarting the module if it's a module to check and restart and
 						// not to check only (in which case the TYP2 value would be negative).
-						if (is_module && !ModulesList.isElementFullyWorking(module_index) &&
+						if (!ModulesList.isElementFullyWorking(module_index) &&
 								((int) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_TYPE1) > 0)) {
 							ModulesList.restartElement(module_index);
 							// Start everything the first time. If it has to restart a module, warn about it.
 							if (!module_startup) {
 								final String speak = "Attention - Module restarted: " +
 										ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 							}
 						}
 					} else {
@@ -136,13 +120,12 @@ public final class ModulesManager implements IModuleInst {
 							final String speak = "Attention - The following module stopped being supported by " +
 									"hardware or application permissions changes: " +
 									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 						}
-						if (is_module) {
-							// If the user disabled some permission, or some hardware component was disconnected and
-							// Android detected it, stop the module (if it was running, anyway).
-							ModulesList.stopElement(module_index);
-						}
+
+						// If the user disabled some permission, or some hardware component was disconnected and
+						// Android detected it, stop the module (if it was running, anyway).
+						ModulesList.stopElement(module_index);
 					}
 
 					elements_support[module_index] = element_supported;

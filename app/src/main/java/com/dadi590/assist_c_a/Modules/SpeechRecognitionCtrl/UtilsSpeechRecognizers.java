@@ -22,19 +22,20 @@
 package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.content.Intent;
-import android.media.MediaRecorder;
 import android.os.Build;
 
+import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCryptoHashing;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNativeLibs;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
-import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
 
 /**
  * <p>Utilities for use with Google and PocketSphinx speech recognizers.</p>
@@ -89,13 +90,10 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>Start Google's speech recognition, first calling automatically, controller is running.</p>
+	 * <p>Start Google's speech recognition asynchronously.</p>
 	 */
 	static void startGoogleRecognition() {
 		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-		if (!ModulesList.isElementRunning(ModulesList.getElementIndex(SpeechRecognitionCtrl.class))) {
-			return;
-		}
 
 		try {
 			// Wait just a bit before checking if the microphone is available or not (has proven useful on BV9500,
@@ -108,52 +106,51 @@ public final class UtilsSpeechRecognizers {
 		// No need to check if Google's recognition is supported or not because the Controller will only be activated if
 		// the recognition is available (checked on isSupported() every CHECK_TIME on the Manager).
 
-		if (UtilsGeneral.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
-			final Intent intent = new Intent(UtilsGeneral.getContext(), GoogleRecognition.class);
-			intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
-			UtilsServices.startService(GoogleRecognition.class, intent, false, true);
-		} else {
-			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
-		}
+		final Intent intent = new Intent(UtilsGeneral.getContext(), GoogleRecognition.class);
+		intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
+		UtilsServices.startService(GoogleRecognition.class, intent, false, true);
 	}
 
 	/**
-	 * <p>Start PocketSphinx's speech recognition, first calling automatically, if the controller is running.</p>
+	 * <p>Start PocketSphinx's speech recognition synchronously.</p>
+	 *
+	 * @return true if the recognition started, false if an error occurred
 	 */
-	static void startPocketSphinxRecognition() {
+	static boolean startPocketSphinxRecognition() {
+		final boolean started;
+
 		System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-		if (!ModulesList.isElementRunning(ModulesList.getElementIndex(SpeechRecognitionCtrl.class))) {
-			return;
-		}
 
 		final boolean pocketsphinx_recog_available = isPocketSphinxLibAvailable();
-		if (pocketsphinx_recog_available && UtilsGeneral.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
-			final Intent intent = new Intent(UtilsGeneral.getContext(), PocketSphinxRecognition.class);
-			intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
-			UtilsServices.startService(PocketSphinxRecognition.class, intent, false, true);
+		if (pocketsphinx_recog_available) {
+			started = PocketSphinxRecognition.startListening();
 		} else {
 			// Set no-value to be equal to true value (so that VISOR warns anyway even before the value being there -
 			// would mean it's assuming the recognition was there, or just to warn the user at the app startup).
-			final boolean recog_available = ValuesStorage.getValueObj(ValuesStorage.Keys.pocketsphinx_recog_available).
-					getValue(true);
+			final boolean recog_available = UtilsRegistry.getValueObj(ValuesRegistry.Keys.POCKETSPHINX_RECOG_AVAILABLE).
+					getData(true);
 			if (recog_available) { // Warn only once when it was there and stopped being.
-				final String speak = "Attention - Background speech recognition is not available. Either the microphone" +
-						"is being used already or PocketSphinx's correct library file was not found.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+				final String speak = "Attention - Background speech recognition is not available. PocketSphinx's " +
+						"correct library file was not found.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 			}
+
+			started = false;
 		}
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.pocketsphinx_recog_available, pocketsphinx_recog_available);
+		UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_RECOG_AVAILABLE, pocketsphinx_recog_available);
+
+		return started;
 	}
 
 	/**
-	 * <p>Terminate the PID of the PocketSphinx and Google speech recognizers' processes, if they're running.</p>
+	 * <p>Stop both speech recognizers synchronously.</p>
 	 */
-	static void terminateSpeechRecognizers() {
+	static void stopSpeechRecognizers() {
 		System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(PocketSphinxRecognition.class));
+		PocketSphinxRecognition.stopListening();
 		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(GoogleRecognition.class));
+		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_GOOGLE_RECOG_FOREGROUND);
 	}
 }

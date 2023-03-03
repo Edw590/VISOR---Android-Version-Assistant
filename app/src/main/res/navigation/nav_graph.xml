@@ -55,9 +55,9 @@
 		android:label="@string/fragNearbyDevices_title_ACA"
 		tools:layout="@layout/frag_nearby_devices" />
 	<fragment
-		android:id="@+id/frag_events_scheduler"
-		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragEventsScheduler"
-		android:label="@string/fragEventsScheduler_title_ACA"
-		tools:layout="@layout/frag_events_scheduler" />
+		android:id="@+id/frag_settings"
+		android:name="com.dadi590.assist_c_a.ActivitiesFragments.FragSettings"
+		android:label="@string/fragSettings_title_ACA"
+		tools:layout="@layout/frag_settings" />
 
 </navigation>

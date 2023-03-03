@@ -22,8 +22,11 @@
 package com.dadi590.assist_c_a.Modules.DeviceLocator;
 
 import android.Manifest;
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,7 +52,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsLocationRelative;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNetwork;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,10 +69,15 @@ public final class DeviceLocator implements IModuleInst {
 	// This below can be null if there's no Bluetooth adapter or there was some error, so Nullable for NPE warnings
 	@Nullable final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	// This one can be null if there's no BLE on the device or there was some error, so NPE warnings are useful
-	@Nullable final BluetoothLeScanner bluetoothLeScanner;
+	@Nullable BluetoothLeScanner bluetoothLeScanner = null;
+	@Nullable BluetoothAdapter.LeScanCallback leScanCallback = null;
 
 	@Nullable final WifiManager wifiManager = UtilsCheckHardwareFeatures.isWifiSupported() ?
 			UtilsNetwork.getWifiManager() : null;
+
+	@Nullable BluetoothHeadset bluetoothHeadset = null;
+	@Nullable BluetoothA2dp bluetoothA2dp = null;
+	ArrayList<Object> bluetooth_profiles = new ArrayList<>(BluetoothProfile.MAX_PROFILE_ID);
 
 
 	private final DeviceObj current_device = new DeviceObj();
@@ -76,7 +85,7 @@ public final class DeviceLocator implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	boolean enabled_by_visor_bt = false;
 	private static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes
@@ -157,12 +166,22 @@ public final class DeviceLocator implements IModuleInst {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 
-		ValuesStorage.setValue(ValuesStorage.Keys.curr_network_type, UtilsNetwork.getCurrentNetworkType());
+		UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
 
-		if ((bluetoothAdapter != null) && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
-			bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-		} else {
-			bluetoothLeScanner = null;
+		if (null != bluetoothAdapter) {
+			bluetoothAdapter.getProfileProxy(UtilsGeneral.getContext(), serviceListener, BluetoothProfile.HEADSET);
+			bluetoothAdapter.getProfileProxy(UtilsGeneral.getContext(), serviceListener, BluetoothProfile.A2DP);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+				leScanCallback = new BluetoothAdapter.LeScanCallback() {
+					@Override
+					public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
+
+					}
+				};
+			}
 		}
 
 		registerReceiver();
@@ -180,12 +199,12 @@ public final class DeviceLocator implements IModuleInst {
 				// That way it's not tempered with by VISOR enabling and disabling Wi-Fi, because the network type is
 				// checked before any of that happens (and there's a delay, so the previous iteration won't impact here).
 				// Or there are also no broadcast delays if the function call is right here.
-				ValuesStorage.setValue(ValuesStorage.Keys.curr_network_type, UtilsNetwork.getCurrentNetworkType());
+				UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
 
 
 				// Public IP (must be next to the network type check - so that it's known where the IP belongs to)
 				if (System.currentTimeMillis() >= last_check_when_public_ip + waiting_time_public_ip) {
-					ValuesStorage.setValue(ValuesStorage.Keys.public_ip, UtilsNetwork.getExternalIpAddress());
+					UtilsRegistry.setValue(ValuesRegistry.Keys.PUBLIC_IP, UtilsNetwork.getExternalIpAddress());
 
 					last_check_when_public_ip = System.currentTimeMillis();
 				}
@@ -391,17 +410,32 @@ public final class DeviceLocator implements IModuleInst {
 					final BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 					if (BluetoothAdapter.STATE_CONNECTING == state || BluetoothAdapter.STATE_CONNECTED == state) {
 						if (enabled_by_visor_bt) {
-							// If a device is at minimum attempting to connect, turn the adapter off instantly.
-							// Reason why I don't "just" disconnect the device or stop it from even trying to connect in
-							// the first place explained in ACTION_STATE_CHANGED's case.
-							setBluetoothEnabled(false);
-
-							//Só aqui? Periodicamente era melhor. Com o mesmo intervalo do WiFi por ser baixa energia? Ou talvez até a cada minuto ou algo do género?
-							//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-							//	bluetoothLeScanner.startScan();
-							//} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-							//	bluetoothAdapter.startLeScan();
-							//}
+							boolean headset_disconnect = false;
+							if (null != bluetoothHeadset) {
+								try {
+									headset_disconnect = bluetoothHeadset.disconnect(bluetoothDevice);
+								} catch (final Throwable ignored) {
+									// A Throwable is being thrown here. No description. No idea why it happens.
+								}
+							}
+							boolean a2dp_disconnect = false;
+							if (null != bluetoothA2dp) {
+								try {
+									a2dp_disconnect = bluetoothA2dp.disconnect(bluetoothDevice);
+								} catch (final Throwable ignored) {
+								}
+							}
+							// It seems disconnect() returns true if the device is not connected with the profile the
+							// method is called from - so it must return true for all profiles to mean it's fully
+							// disconnected.
+							if (!headset_disconnect || !a2dp_disconnect) {
+								// If a device is at minimum attempting to connect, turn the adapter off instantly.
+								// Reason why I don't "just" disconnect the device or stop it from even trying to
+								// connect in the first place explained in ACTION_STATE_CHANGED's case.
+								// EDIT: it's now attempting to disconnect the device. Doesn't work on Oreo 8.1, but
+								// maybe it works in some other version(s).
+								setBluetoothEnabled(false);
+							}
 						}
 					}
 
@@ -413,7 +447,7 @@ public final class DeviceLocator implements IModuleInst {
 				////////////////////////////////////////////////
 				// Wi-Fi
 				case (WifiManager.RSSI_CHANGED_ACTION): {
-					ValuesStorage.setValue(ValuesStorage.Keys.dist_router, UtilsLocationRelative.
+					UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, UtilsLocationRelative.
 							getRealDistanceRSSI(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 									UtilsLocationRelative.DEFAULT_TX_POWER));
 
@@ -422,22 +456,15 @@ public final class DeviceLocator implements IModuleInst {
 				case (WifiManager.WIFI_STATE_CHANGED_ACTION): {
 					assert null != wifiManager; // Change in Wi-Fi connection, so it's not null.
 
+
 					final int wifi_state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
 					if (WifiManager.WIFI_STATE_ENABLED == wifi_state) {
-						boolean turn_off = false;
-						if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-							if (!wifiManager.startScan() && enabled_by_visor_wifi) {
-								turn_off = true;
-							}
-						} else if (enabled_by_visor_wifi) {
-							turn_off = true;
-						}
-
-						if (turn_off) {
+						if (!wifiManager.startScan() && enabled_by_visor_wifi) {
 							setWifiEnabled(false);
 						}
-					} else if (WifiManager.WIFI_STATE_DISABLED == wifi_state) {
-						ValuesStorage.setValue(ValuesStorage.Keys.dist_router, "-1");
+					} else if (WifiManager.WIFI_STATE_DISABLING == wifi_state ||
+							WifiManager.WIFI_STATE_DISABLED == wifi_state) {
+						UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, "-1");
 						enabled_by_visor_wifi = false;
 					}
 
@@ -509,7 +536,9 @@ public final class DeviceLocator implements IModuleInst {
 							getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)).getState();
 					if (NetworkInfo.State.CONNECTING == state || NetworkInfo.State.CONNECTED == state) {
 						if (enabled_by_visor_wifi) {
-							wifiManager.disconnect();
+							if (!wifiManager.disconnect()) {
+								setWifiEnabled(false);
+							}
 						}
 					}
 
@@ -521,7 +550,7 @@ public final class DeviceLocator implements IModuleInst {
 				////////////////////////////////////////////////
 				// Network type
 				case (ConnectivityManager.CONNECTIVITY_ACTION): {
-					ValuesStorage.setValue(ValuesStorage.Keys.curr_network_type, UtilsNetwork.getCurrentNetworkType());
+					UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
 
 					break;
 				}
@@ -554,10 +583,37 @@ public final class DeviceLocator implements IModuleInst {
 		}
 	};
 
-	final BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
+	BluetoothProfile.ServiceListener serviceListener = new BluetoothProfile.ServiceListener() {
 		@Override
-		public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
+		public void onServiceConnected(final int profile, final BluetoothProfile proxy) {
+			switch (profile) {
+				case (BluetoothProfile.HEADSET): {
+					bluetoothHeadset = (BluetoothHeadset) proxy;
 
+					break;
+				}
+				case (BluetoothProfile.A2DP): {
+					bluetoothA2dp = (BluetoothA2dp) proxy;
+
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(final int profile) {
+			switch (profile) {
+				case (BluetoothProfile.HEADSET): {
+					bluetoothHeadset = null;
+
+					break;
+				}
+				case (BluetoothProfile.A2DP): {
+					bluetoothA2dp = null;
+
+					break;
+				}
+			}
 		}
 	};
 }

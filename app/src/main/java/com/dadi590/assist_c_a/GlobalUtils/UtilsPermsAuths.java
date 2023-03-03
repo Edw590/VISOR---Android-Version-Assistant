@@ -43,7 +43,6 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -67,12 +66,12 @@ public final class UtilsPermsAuths {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "No permissions left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 		}
 	}
 
@@ -86,12 +85,12 @@ public final class UtilsPermsAuths {
 		if (0 == auths_left) {
 			if (warn_success) {
 				final String speak = "No authorizations left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			}
 		} else {
 			final String speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 					"authorizations left to grant: " + auths_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 		}
 	}
 
@@ -223,9 +222,8 @@ public final class UtilsPermsAuths {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
 			// screen for the user to grant it.
-			final NotificationManager mNotificationManager = (NotificationManager) UtilsGeneral.
-					getSystemService(Context.NOTIFICATION_SERVICE);
-			if (null != mNotificationManager && !mNotificationManager.isNotificationPolicyAccessGranted()) {
+			final NotificationManager mNotificationManager = (NotificationManager) UtilsGeneral.getNotificationManager();
+			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "cmd notification allow_dnd " + package_name;
 					UtilsShell.executeShellCmd(command, false, true);
@@ -409,24 +407,15 @@ public final class UtilsPermsAuths {
 	 *
 	 * @param permissions an array with inner arrays of the same as in {@link #checkSelfPermission(String)}
 	 *
-	 * @return in each index of the return array, true if the app holds all the permissions in that sub-list, false if
-	 * at least one is missing
+	 * @return true if the app holds all the permissions in that sub-list, false if at least one is missing
 	 */
-	@NonNull
-	public static boolean[] checkSelfPermissions(@NonNull final String[][] permissions) {
-		final boolean[] list_accepted = new boolean[permissions.length];
-		Arrays.fill(list_accepted, true);
-
-		final int permissions_length = permissions.length;
-		for (int i = 0; i < permissions_length; ++i) {
-			for (final String permission : permissions[i]) {
-				if (!checkSelfPermission(permission)) {
-					list_accepted[i] = false;
-					break;
-				}
+	public static boolean checkSelfPermissions(@NonNull final String[] permissions) {
+		for (final String permission : permissions) {
+			if (!checkSelfPermission(permission)) {
+				return false;
 			}
 		}
 
-		return list_accepted;
+		return true;
 	}
 }

@@ -32,7 +32,7 @@
 	<string name="fragValuesStorageViewer_title_ACA">Global values</string>
 	<string name="fragCmdsList_title_ACA">Available commands</string>
 	<string name="fragNearbyDevices_title_ACA">Nearby devices/APs</string>
-	<string name="fragEventsScheduler_title_ACA">Events Scheduler</string>
+	<string name="fragSettings_title_ACA">Settings</string>
 
 
 

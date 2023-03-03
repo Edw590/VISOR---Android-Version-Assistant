@@ -105,7 +105,7 @@ public final class UtilsCertificates {
 	@Nullable
 	public static Boolean checkCertsPkg(@NonNull final String package_name, @NonNull final Map<?, ?>[] list_cert_hashes) {
 		final String[][] possible_hash_algos = UtilsCryptoHashing.getPossibleHashAlgorithms();
-		final int hash_algo_to_use = possible_hash_algos.length - 1; // Last one (safest)
+		final int hash_algo_to_use = UtilsCryptoHashing.IDX_MAX_ALGO; // Last one (safest)
 
 		final Signature[] other_app_signatures = getAppSignatures(package_name);
 		if (other_app_signatures == null) {

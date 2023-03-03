@@ -107,7 +107,7 @@ public final class Speech2 implements IModuleInst {
 	TextToSpeech tts = null;
 	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
 	final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
-	SpeechObj current_speech_obj = new SpeechObj("", "", true, false, null);
+	SpeechObj current_speech_obj = new SpeechObj();
 	String last_thing_said = "";
 	@Nullable private AudioFocusRequest audioFocusRequest = null;
 	private final VolumeDndObj volumeDndObj = new VolumeDndObj();
@@ -135,12 +135,11 @@ public final class Speech2 implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	// The module only runs if this returns non-null. This is just to suppress warnings along the class (even though a
 	// warning will appear on isSupported() because "it's never null" --> it's not when the module starts...
-	@NonNull static final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.
-			getSystemService(Context.NOTIFICATION_SERVICE);
+	static final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getNotificationManager();
 	// The audio support is checked internally. If there's no audio support, the speeches are notified and not attempted
 	// to be spoken.
 	@NonNull final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
@@ -185,7 +184,7 @@ public final class Speech2 implements IModuleInst {
 	public static boolean isSupported() {
 		// The module checks internally if there is audio output available or not and if there isn't, it uses
 		// notifications instead, so those must always be present (also in case of vibration mode).
-		return null != notificationManager;
+		return true;
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -201,9 +200,14 @@ public final class Speech2 implements IModuleInst {
 				new Intent(ACTION_CLEAR_NOTIF_MSGS), PendingIntent.FLAG_CANCEL_CURRENT |
 						(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
-				GL_CONSTS.CH_ID_SPEECHES, "Not spoken text", "Text skipped in speech for whatever reason, like no " +
-				"device sound", NotificationCompat.PRIORITY_MAX, GL_CONSTS.ASSISTANT_NAME + " notifications", "",
-				pendingIntent);
+				GL_CONSTS.CH_ID_SPEECHES,
+				"Not spoken text",
+				"Text skipped in speech for whatever reason, like no device sound",
+				NotificationCompat.PRIORITY_MAX,
+				GL_CONSTS.ASSISTANT_NAME + " notifications",
+				"",
+				pendingIntent
+		);
 		speeches_notif_builder = UtilsNotifications.getNotification(notificationInfo).
 				setVisibility(NotificationCompat.VISIBILITY_PRIVATE).
 				setDeleteIntent(pendingIntent).
@@ -232,8 +236,6 @@ public final class Speech2 implements IModuleInst {
 	 *                         way the function can execute tasks that can only be done in the module initialization
 	 */
 	void initializeTts(final boolean from_constructor) {
-		System.out.println("3333333333333333333333333");
-
 		if (!from_constructor) {
 			// If it's not from the constructor, it's not null and therefore the resources must be released before
 			// reinitializing the TTS.
@@ -257,7 +259,7 @@ public final class Speech2 implements IModuleInst {
 							// from here. Also, it will speak only the first time the problem arises, not every
 							// time until it's fixed.
 							speak("ATTENTION - TTS IS NOT AVAILABLE. The Speech module will keep retrying  until a " +
-									"TTS voice is detected.", PRIORITY_CRITICAL, true, null);
+									"TTS voice is detected.", PRIORITY_CRITICAL, true, true, null);
 
 							// todo This is not getting here when I load a wrong folder to disable all voices on Ivona TTS...
 
@@ -482,38 +484,35 @@ public final class Speech2 implements IModuleInst {
 	 * @param txt_to_speak what to speak
 	 * @param speech_priority one of the constants (ordered according with their priority from lowest to highest)
 	 * @param bypass_no_sound true to request a no-sound (like Do Not Disturb or Vibrate mode) bypass, false otherwise
-	 *                         (note: the device will be put back to the original state of before calling this function,
-	 *                         after the speech ends)
+	 * (note: the device will be put back to the original state of before calling this function,
+	 * after the speech ends)
+	 * @param notify_no_sound true to notify about the speech if there was no sound to speak or audio not is supported,
+	 * false not to notify
 	 * @param after_speaking_code a unique reference which will be broadcast as soon as the speech is finished (for
-	 *                            example, a unique reference to a {@link Runnable} which is detected by a receiver and
-	 *                            which will execute the Runnable that corresponds to the reference); or null, if nothing
-	 *                            is required to be done after the speech finishes
+	 * example, a unique reference to a {@link Runnable} which is detected by a receiver and
+	 * which will execute the Runnable that corresponds to the reference); or null, if nothing
+	 * is required to be done after the speech finishes
 	 *
 	 * @return same as in {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)} (depending on the device API level) in case the speech began
 	 * being spoken immediately; one of the constants otherwise.
 	 */
 	int speak(@NonNull final String txt_to_speak, final int speech_priority, final boolean bypass_no_sound,
-					@Nullable final Integer after_speaking_code) {
+			  final boolean notify_no_sound, @Nullable final Integer after_speaking_code) {
 
-		return speakInternal(txt_to_speak, speech_priority, bypass_no_sound, null, after_speaking_code);
+		return speakInternal(txt_to_speak, speech_priority, bypass_no_sound, null, notify_no_sound, after_speaking_code);
 	}
 
 	/**
-	 * <p>Same as in {@link #speak(String, int, boolean, Integer)}, but with additional parameters to be used only
+	 * <p>Same as in {@link #speak(String, int, boolean, boolean, Integer)}, but with additional parameters to be used only
 	 * internally to the class - this is the main speak() method.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, boolean, Integer)}
-	 * @param priority same as in {@link #speak(String, int, boolean, Integer)}
-	 * @param bypass_no_sound same as in {@link #speak(String, int, boolean, Integer)}
 	 * @param utterance_id the utterance ID to be used to re-register the given speech in case it's already in the lists,
-	 *                     null if it's not already in the lists
-	 * @param after_speaking_code same as in {@link #speak(String, int, boolean, Integer)}
-	 *
-	 * @return same as in {@link #speak(String, int, boolean, Integer)}
+	 * null if it's not already in the lists
 	 */
 	private int speakInternal(final String txt_to_speak, final int priority, final boolean bypass_no_sound,
-							  @Nullable final String utterance_id, @Nullable final Integer after_speaking_code) {
+							  @Nullable final String utterance_id, final boolean notify_no_sound,
+							  @Nullable final Integer after_speaking_code) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he
@@ -526,14 +525,15 @@ public final class Speech2 implements IModuleInst {
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
 		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported()) {
-			// If there's really no audio output support, just put a notification and that's it.
-
-			addSpeechToNotif(txt_to_speak);
+			if (notify_no_sound) {
+				// If there's no audio output support, just put a notification and that's it.
+				addSpeechToNotif(txt_to_speak);
+			}
 
 			return TextToSpeech.SUCCESS;
 		}
-		// Else, if it's now supported, let it check by itself if the TTS is ready or not. If it's not, the next
-		// speech will use it after it's restarted.
+		// Else, if it's supported, let it check by itself if the TTS is ready or not. If it's not, the next speech will
+		// use it after it's restarted.
 
 		SpeechObj new_speech_obj = null;
 		String utterance_id_to_use;
@@ -558,7 +558,8 @@ public final class Speech2 implements IModuleInst {
 					break;
 				}
 			}
-			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, bypass_no_sound, after_speaking_code);
+			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, bypass_no_sound, notify_no_sound,
+					after_speaking_code);
 			arrays_speech_objs.get(priority).add(new_speech_obj);
 		} else {
 			utterance_id_to_use = utterance_id;
@@ -587,16 +588,18 @@ public final class Speech2 implements IModuleInst {
 			if (tts_error_code != TextToSpeech.SUCCESS) {
 				initializeTts(false); // Restart the TTS instance if it's not working.
 
-				// In case some error occurred (for example, the engine was uninstalled), notify the speech, "call
-				// skipCurrentSpeech()", and reinitialize the TTS object.
-				addSpeechToNotif(current_speech_obj.txt_to_speak);
+				if (current_speech_obj.notify_no_sound) {
+					// In case some error occurred (for example, the engine was uninstalled), notify the speech, "call
+					// skipCurrentSpeech()", and reinitialize the TTS object.
+					addSpeechToNotif(current_speech_obj.txt_to_speak);
+				}
 
 				// Custom implementation of skipCurrentSpeech(). The difference here is that as tts.stop() will return
 				// ERROR, this will ignore it (it's ERROR not because it couldn't stop it because it was running - no,
 				// in this case it's because TTS is not even working properly, which cannot be predicted with just
 				// ERROR and hence here must be a difference implementation knowing that here specifically ERROR means
 				// TTS not working and not failure in stopping a speaking speech).
-				current_speech_obj = new SpeechObj("", "", true, false, null);
+				current_speech_obj = new SpeechObj();
 				onStop(utterance_id_to_use, true);
 			}
 
@@ -630,9 +633,9 @@ public final class Speech2 implements IModuleInst {
 	 * <p>Sends the specified string to {@link TextToSpeech#speak(CharSequence, int, Bundle, String)} or
 	 * {@link TextToSpeech#speak(String, int, HashMap)}.</p>
 	 * <br>
-	 * <p>Attention: not to be called except from inside {@link #speak(String, int, boolean, Integer)}.</p>
+	 * <p>Attention: not to be called except from inside {@link #speak(String, int, boolean, boolean, Integer)}.</p>
 	 *
-	 * @param txt_to_speak same as in {@link #speak(String, int, boolean, Integer)}
+	 * @param txt_to_speak same as in {@link #speak(String, int, boolean, boolean, Integer)}
 	 * @param utterance_id the utterance ID to register the speech
 	 * @param audio_stream the audio stream to be used to speak the speech
 	 *
@@ -705,7 +708,7 @@ public final class Speech2 implements IModuleInst {
 		// the program flow continue to be only one (onDone() is called in another thread but nothing is done, so we
 		// continue here to onStop()). Read also above the if statement on onDone().
 		final SpeechObj old_speech_obj = current_speech_obj;
-		current_speech_obj = new SpeechObj("", "", true, false, null);
+		current_speech_obj = new SpeechObj();
 		if (tts.stop() == TextToSpeech.ERROR) {
 			current_speech_obj = old_speech_obj;
 
@@ -959,8 +962,10 @@ public final class Speech2 implements IModuleInst {
 				UtilsSpeech2.broadcastAfterSpeakCode(current_speech_obj.after_speaking_code);
 			}
 
-			// Notify the speech before skipping it (don't skip the notification).
-			addSpeechToNotif(current_speech_obj.txt_to_speak);
+			if (current_speech_obj.notify_no_sound) {
+				// Notify the speech before skipping it (don't skip the notification).
+				addSpeechToNotif(current_speech_obj.txt_to_speak);
+			}
 
 			skipCurrentSpeech();
 		} else {
@@ -1004,7 +1009,7 @@ public final class Speech2 implements IModuleInst {
 			// be done, was already done by onStop(). This in case onDone is called. If it's not, no matter - onStop()
 			// already did onDone()'s job as a failsafe measure.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", true, false, null);
+				current_speech_obj = new SpeechObj();
 				speechTreatment(utteranceId);
 			}
 		}
@@ -1022,7 +1027,7 @@ public final class Speech2 implements IModuleInst {
 			// both are called, which one is called first. So in any case, the first to be called will stop the other
 			// one from being called this way.
 			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj("", "", true, false, null);
+				current_speech_obj = new SpeechObj();
 				speechTreatment(utteranceId);
 			}
 		}
@@ -1122,6 +1127,7 @@ public final class Speech2 implements IModuleInst {
 				final int audio_stream = correct_speech_obj.audio_stream;
 				final Integer runnable = correct_speech_obj.after_speaking_code;
 				final boolean bypass_no_sound = correct_speech_obj.bypass_no_sound;
+				final boolean notify_no_sound = correct_speech_obj.notify_no_sound;
 
 				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
@@ -1142,7 +1148,7 @@ public final class Speech2 implements IModuleInst {
 					user_changed_volume = false;
 				}
 
-				speakInternal(speech, speech_priority, bypass_no_sound, utterance_id, runnable);
+				speakInternal(speech, speech_priority, bypass_no_sound, utterance_id, notify_no_sound, runnable);
 
 				try {
 					// This being here won't cause any stop in the assistant once this module is a Service in a separate
@@ -1247,13 +1253,14 @@ public final class Speech2 implements IModuleInst {
 					final int speech_priority = intent.getIntExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_3, -1);
 					@Nullable final Integer after_speaking_code = intent.hasExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4) ?
 								intent.getIntExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4, -1) : null;
+					final boolean notify_no_sound = intent.getBooleanExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_5, false);
 					// The -1 doesn't matter here just above, because if the extra doesn't exist, that means
 					// after_speaking_code is supposedly null but can't be sent as null because it's an int, so the
 					// extra is not sent at all. So in that case, here it's put as null too. If the extra exists, then a
 					// value other than null is to be put on after_speaking_code, and so it is. Conclusion: -1 is never
 					// used.
 
-					speak(txt_to_speak, speech_priority, bypass_no_sound, after_speaking_code);
+					speak(txt_to_speak, speech_priority, bypass_no_sound, notify_no_sound, after_speaking_code);
 
 					break;
 				}
@@ -1280,9 +1287,9 @@ public final class Speech2 implements IModuleInst {
 					//  something. Then he'd say he didn't say anything (a human wouldn't know what would have been said
 					//  5 minutes ago or more - just ask again if that much time passed already).
 					if (last_thing_said.isEmpty()) {
-						speak("I haven't said anything.", PRIORITY_USER_ACTION, true, null);
+						speak("I haven't said anything.", PRIORITY_USER_ACTION, true, true, null);
 					} else {
-						speak("I said: " + last_thing_said, PRIORITY_USER_ACTION, true, null);
+						speak("I said: " + last_thing_said, PRIORITY_USER_ACTION, true, true, null);
 					}
 
 					break;

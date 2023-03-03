@@ -88,10 +88,39 @@ public final class UtilsCryptoEnDecrypt {
 	private static final byte[] RAW_AAD_SEPARATOR = RAW_AAD_SEPARATOR_STR.getBytes(Charset.defaultCharset());
 
 	// Scrypt parameters - tested a bit slow on MiTab Advance and slower on BV9500 (wtf). Good enough, I think.
-	// Memory required to calculate the keys: 128 * N * r * p --> 128 * 16_384 * 8 * 1 = 16_777_216 B = 16.8 MB
-	private static final int SCRYPT_N = 16_384;
+	// Memory required to calculate the keys: 128 * N * r * p --> 128 * 8_192 * 8 * 1 = 8_388_608 B = 8.4 MB
+	// EDIT: changed from 16_384 to 8_192 to be faster on BV9500 (takes a few seconds still, maybe 30).
+	private static final int SCRYPT_N = 8_192;
 	private static final int SCRYPT_R = 8;
 	private static final int SCRYPT_P = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// todo IMPLEMENT TIME-CONSTANT PREVENTIONS!!!! Check the other todo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -118,12 +147,17 @@ public final class UtilsCryptoEnDecrypt {
 	 */
 	@Nullable
 	public static byte[] encryptBytes(@NonNull final byte[] raw_password1, @NonNull final byte[] raw_password2,
-									  @NonNull final byte[] raw_data, @NonNull final byte[] raw_aad_suffix) {
+									  @NonNull final byte[] raw_data, @Nullable final byte[] raw_aad_suffix) {
 		if (UtilsGeneral.isDeviceRunningOnLowMemory()) {
 			return null;
 		}
 
-		final byte[] raw_aad_ready = getAADReady(raw_aad_suffix);
+		@Nullable final byte[] raw_aad_ready;
+		if (null == raw_aad_suffix) {
+			raw_aad_ready = null;
+		} else {
+			raw_aad_ready = getAADReady(raw_aad_suffix);
+		}
 		final byte[] randomized_raw_data = randomizeData(raw_data);
 		final byte[] iv = getIv();
 		final byte[][] keys = getKeys(raw_password1, raw_password2);
@@ -228,6 +262,8 @@ public final class UtilsCryptoEnDecrypt {
 		// I guess. I don't understand enough of this to be sure it's not needed here.
 		// EDIT: pretty sure it's not needed here. Both HMACs are known anyways. Just need to read the original encrypted
 		// message, modify it and we have the modified HMAC. Then compare them.
+		// todo THIS IS WRONG - NOTHING is known here! The memory is all protected! If it's unknown, must be protected!
+		//  DO THIS
 		if (!Arrays.equals(supposed_hmac, message_hmac)) {
 			// Check if the 2 MACs are equal. If they're not, the message has been tampered with.
 			return null;
@@ -361,8 +397,8 @@ public final class UtilsCryptoEnDecrypt {
 	 */
 	@NonNull
 	private static byte[][] getKeys(@NonNull final byte[] password1, @NonNull final byte[] password2) {
-		final byte[] password1_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password1, 5);
-		final byte[] password2_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password2, 5);
+		final byte[] password1_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password1, UtilsCryptoHashing.IDX_MAX_ALGO);
+		final byte[] password2_sha512 = UtilsCryptoHashing.getHashBytesOfBytes(password2, UtilsCryptoHashing.IDX_MAX_ALGO);
 
 		// No need to check for OutOfMemoryError because the encrypt and decrypt functions already check for low memory.
 		return new byte[][]{

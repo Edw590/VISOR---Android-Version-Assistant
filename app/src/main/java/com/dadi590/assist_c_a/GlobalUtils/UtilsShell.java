@@ -26,7 +26,6 @@ import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +35,36 @@ import java.util.List;
  */
 public final class UtilsShell {
 
-	/** No permissions for the completion of the shell operations (might mean no root access in case root was requested
-	 * to access something which can only be accessed with root permissions). */
-	public static final int PERM_DENIED = 13;
-	/** No error in the shell operations. */
-	public static final int NO_ERR = 0;
+	/**
+	 * <p>Some useful error SH error codes.</p>
+	 * <p>Note that only positive codes are possible. This means functions can return internal negative codes and those
+	 * won't be mixed up with shell codes.</p>
+	 */
+	public static final class ErrCodes {
+		/** No error in the shell operations. */
+		public static final int NO_ERR = 0;
+		/** "Catchall for general errors." */
+		public static final int GEN_ERR = 1;
+		/** "Misuse of shell builtins (according to Bash documentation)." */
+		public static final int WRONG_USAGE = 2;
+		/** No permission to access the path. */
+		public static final int PERM_DENIED = 13;
+	}
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
 	private UtilsShell() {
+	}
+	/**
+	 * <p>Checks if the error code is equal to 0, meaning there was no error.</p>
+	 *
+	 * @param error_code the error code to check
+	 *
+	 * @return true if it's 0, false otherwise
+	 */
+	public static boolean noErr(final int error_code) {
+		return UtilsShell.ErrCodes.NO_ERR == error_code;
 	}
 
 	/**
@@ -94,13 +113,12 @@ public final class UtilsShell {
 	 *                   otherwise (useful to execute commands with or without root allowed without wanting the error
 	 *                   from calling su to appear on the output stream)
 	 *
-	 * @return an instance of {@link CmdOutputObj}, and if any I/O error or OutOfMemoryError error occurs (no command
-	 * errors trigger an exception) OR {@code retrieve_streams} is set to true, the streams will both be null
+	 * @return an instance of {@link CmdOutputObj}, and if any error occurs, -1 will be returned
 	 */
 	@NonNull
 	public static CmdOutputObj executeShellCmd(@NonNull final List<String> commands_list,
 											   final boolean retrieve_streams, final boolean attempt_su) {
-		int exit_code = -1; // Won't happen unless the thread is interrupted, and I'm not sure what happens after that.
+		int exit_code = -1;
 		final byte[][] ret_streams = {null, null};
 
 		Process process = null;
@@ -172,18 +190,8 @@ public final class UtilsShell {
 			}
 
 			exit_code = process.waitFor();
-		} catch (final IOException | OutOfMemoryError ignored) {
-			if (null != process) {
-				try {
-					exit_code = process.waitFor();
-				} catch (final InterruptedException ignored1) {
-					return new CmdOutputObj(exit_code, null, null);
-				}
-			}
-			ret_streams[0] = null;
-			ret_streams[1] = null;
-		} catch (final InterruptedException ignored) {
-			return new CmdOutputObj(exit_code, null, null);
+		} catch (final Throwable ignored) {
+			exit_code = -1;
 		}
 
 		return new CmdOutputObj(exit_code, ret_streams[0], ret_streams[1]);
@@ -193,18 +201,20 @@ public final class UtilsShell {
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
 	public static final class CmdOutputObj {
+		/** The SH shell exit code. */
 		public final int error_code;
-		// Don't add @Nullable or @NonNull on the streams. Let the developer decide which is the case.
+		// Don't add @Nullable or @NonNull to the streams. Let the developer decide which is the case.
+		/** The output stream of the terminal. */
 		public final byte[] output_stream;
+		/** The error stream of the terminal. */
 		public final byte[] error_stream;
 
 		/**
 		 * <p>Main class constructor.</p>
 		 *
-		 * @param error_code the SH shell exit code (usable constants are available in this class, like {@link #NO_ERR}
-		 * or {@link #PERM_DENIED}, which always match the SH shell codes)
-		 * @param output_stream the output stream of the terminal
-		 * @param error_stream the error stream of the terminal
+		 * @param error_code {@link #error_code}
+		 * @param output_stream {@link #output_stream}
+		 * @param error_stream {@link #error_stream}
 		 */
 		public CmdOutputObj(final int error_code, @Nullable final byte[] output_stream,
 							@Nullable final byte[] error_stream) {

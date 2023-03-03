@@ -21,6 +21,7 @@
 
 package com.dadi590.assist_c_a.MainSrvc;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -37,8 +38,10 @@ import com.dadi590.assist_c_a.ActivitiesFragments.ActMain;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsRoot;
 import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
@@ -47,17 +50,9 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.ModulesList;
 
 /**
- * The main {@link Service} of the application - MainService.
+ * The Main {@link Service} of the application, running in foreground.
  */
 public final class MainSrvc extends Service {
-
-	//////////////////////////////////////
-	// Class variables
-
-	// Private variables //
-
-	//////////////////////////////////////
-
 
 	@Override
 	public void onCreate() {
@@ -65,23 +60,40 @@ public final class MainSrvc extends Service {
 
 		// Do this only once, when the service is created and while it's not destroyed
 
+		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.
+				getSystemService(Context.NOTIFICATION_SERVICE);
+		if (null == notificationManager) {
+			throw new RuntimeException("No notification service on the device - the app will not proceed");
+		}
+
+		/*if (!UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+			// The app can only work if the storage permission is granted.
+			final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
+					GL_CONSTS.CH_ID_MAIN_SRV_NO_NOTIFS,
+					"Storage permission warning",
+					"",
+					NotificationCompat.PRIORITY_MAX,
+					"Warning - external storage not accessible!",
+					"This app only works if the storage permission is granted. Grant it and click on Terminate app for " +
+							"the app to restart.",
+					null
+			);
+			notificationManager.notify(0, UtilsNotifications.getNotification(notificationInfo).build());
+
+			return;
+		}*/
+
 		final Intent intent1 = new Intent(this, ActMain.class);
 		intent1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		int flag_immutable = 0;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			flag_immutable = PendingIntent.FLAG_IMMUTABLE;
-		}
+		final int flag_immutable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
 		final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, flag_immutable |
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		final ObjectClasses.NotificationInfo notificationInfo = new ObjectClasses.NotificationInfo(
 				GL_CONSTS.CH_ID_MAIN_SRV_FOREGROUND,
 				"Main notification",
 				"",
-				NotificationCompat.PRIORITY_MIN, // Ignore the warning. The API level is checked later.
-				// If I'm not forgetting anything (writing this much time after I put the code here), this (only) gets
-				// the notification in the bottom of the other ones with MIN importance. If it's MIN, the notification
-				// will be on the top of the list when it starts. With UNSPECIFIED, it gets to the bottom.
+				NotificationCompat.PRIORITY_MIN,
 				GL_CONSTS.ASSISTANT_NAME + " Systems running",
 				"",
 				pendingIntent
@@ -92,11 +104,7 @@ public final class MainSrvc extends Service {
 
 		// Register the receiver before the speech module is started
 		try {
-			final IntentFilter intentFilter = new IntentFilter();
-
-			intentFilter.addAction(CONSTS_BC_Speech.ACTION_READY);
-
-			registerReceiver(broadcastReceiver, new IntentFilter(intentFilter));
+			registerReceiver(broadcastReceiver, new IntentFilter(CONSTS_BC_Speech.ACTION_READY));
 		} catch (final IllegalArgumentException ignored) {
 		}
 
@@ -123,17 +131,14 @@ public final class MainSrvc extends Service {
 				if (!ModulesList.isElementFullyWorking(mods_manager_index)) {
 					ModulesList.restartElement(mods_manager_index);
 					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				}
 
 				try {
 					Thread.sleep(ModulesManager.CHECK_INTERVAL/2L);
 				} catch (final InterruptedException ignored) {
-
-					// todo Hopefully this won't happen. Not sure what to do here?
-					// Can't kill the PID for the system to restart the app - might corrupt ongoing stuff.
-
-					return;
+					// Terminate the app so that the system restarts it.
+					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 				}
 			}
 		}
@@ -143,7 +148,7 @@ public final class MainSrvc extends Service {
 	 * <p>The sole purpose of this receiver is detect when the speech module is ready so the Main Service can start
 	 * everything else.</p>
 	 */
-	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
 			if (intent == null || intent.getAction() == null) {
@@ -164,7 +169,7 @@ public final class MainSrvc extends Service {
 						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 							final String speak = "WARNING - Installed as privileged application but without updates. " +
 									"Only emergency code commands will be available below Android Marshmallow.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 						}
 						//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
 						//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
@@ -177,7 +182,7 @@ public final class MainSrvc extends Service {
 					case (UtilsApp.NON_PRIVILEGED): {
 						final String speak = "WARNING - Installed as non-privileged application! Privileged app " +
 								"features may not be available.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 
 						break;
 					}
@@ -186,7 +191,7 @@ public final class MainSrvc extends Service {
 				if (!UtilsApp.isDeviceAdmin()) {
 					final String speak = "WARNING - The application is not a Device Administrator! Some security " +
 							"features may not be available.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				}
 
 				/* todo if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
@@ -218,21 +223,21 @@ public final class MainSrvc extends Service {
 					case UtilsMainSrvc.UNSUPPORTED_OS_VERSION: {
 						final String speak = "The power button long press detection will not be available. Your " +
 								"Android version is not supported.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 
 						break;
 					}
 					case UtilsMainSrvc.UNSUPPORTED_HARDWARE: {
 						final String speak = "The power button long press detection will not be available. " +
 								"Your hardware does not seem to support the detection.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 
 						break;
 					}
 					case UtilsMainSrvc.PERMISSION_DENIED: {
 						final String speak = "The power button long press detection will not be available. The " +
 								"permission to draw a system overlay was denied.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 
 						break;
 					}
@@ -243,10 +248,10 @@ public final class MainSrvc extends Service {
 				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
 				// ready.
 				final String speak = "Ready, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 
 				try {
-					unregisterReceiver(this);
+					unregisterReceiver(broadcastReceiver);
 				} catch (final IllegalArgumentException ignored) {
 				}
 			}

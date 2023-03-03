@@ -36,7 +36,8 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.R;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 
 /**
  * <p>Main Service related utilities.</p>
@@ -101,8 +102,8 @@ public final class UtilsMainSrvc {
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
 
-					final boolean is_recording_audio = ValuesStorage.
-							getValueObj(ValuesStorage.Keys.is_recording_audio_internally).getValue(false);
+					final boolean is_recording_audio = UtilsRegistry.
+							getValueObj(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).getData(false);
 					if (is_recording_audio) {
 						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 						UtilsAudioRecorderBC.recordAudio(false, -1, true);

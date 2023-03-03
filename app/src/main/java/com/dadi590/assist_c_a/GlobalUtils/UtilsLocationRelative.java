@@ -207,7 +207,7 @@ public final class UtilsLocationRelative {
 		// 248 + 8 header = 256 bytes each packet
 		final String command_str = "ping -c " + NUM_PACKETS + " -i 0.5 -n -s 248 -t 1 -v " + ip;
 		final UtilsShell.CmdOutputObj command = UtilsShell.executeShellCmd(command_str, true, false);
-		if (UtilsShell.NO_ERR != command.error_code) {
+		if (UtilsShell.ErrCodes.NO_ERR != command.error_code) {
 			return -1.0;
 		}
 

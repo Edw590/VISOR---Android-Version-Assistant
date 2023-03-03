@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
@@ -72,7 +73,7 @@ public final class UtilsAndroidConnectivity {
 	 *
 	 * @return same as in {@link WifiManager#setWifiEnabled(boolean)} if the Wi-Fi state is the same as requested or is
 	 * alreaedy being changed to the requested state (which means {@link WifiManager#WIFI_STATE_UNKNOWN} will not be
-	 * returned), or a SH shell exit code other than {@link UtilsShell#NO_ERR}
+	 * returned), or a SH shell exit code other than {@link UtilsShell.ErrCodes#NO_ERR}
 	 */
 	public static int setWifiEnabled(final boolean enabled) {
 		final WifiManager wifiManager = UtilsNetwork.getWifiManager();
@@ -94,7 +95,7 @@ public final class UtilsAndroidConnectivity {
 			final String command = "svc wifi " + (enabled ? "enabled" : "disabled");
 			final int error_code = UtilsShell.executeShellCmd(command, false, true).error_code;
 
-			return UtilsShell.NO_ERR == error_code ? UtilsAndroid.NO_ERR : error_code;
+			return UtilsShell.ErrCodes.NO_ERR == error_code ? UtilsAndroid.NO_ERR : error_code;
 		}
 	}
 
@@ -194,24 +195,38 @@ public final class UtilsAndroidConnectivity {
 			}
 		}
 		if (needs_broadcast) {
-			if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_SYSTEM_APP)) {
+			if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
 				// WRITE_SETTINGS is for system apps (or AppOps, but doesn't matter). WRITE_SECURE_SETTINGS is for
 				// privileged apps.
 				// ACTION_AIRPLANE_MODE_CHANGED is only sent by system apps, so any system app, I guess.
 				// Therefore, this check is only to ensure the app is not a normal app with permission granted
 				// by AppOps and it's yes a system app one.
-				context.sendBroadcast(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state",
-						(enabled ? "true" : "false")));
+				// EDIT: now I'm checking only for privileged apps. WRITE_SETTINGS is the one needed here on old Android
+				// versions, and there it was a system (privileged) permission. Then went to WRITE_SECURE_SETTINGS,
+				// which is privileged. So just check for privileged. Still on Oreo 8.1 I can't broadcast it for some
+				// reason. So try/catch.
+				final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state",
+						(enabled ? "true" : "false"));
+				try {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 &&
+							UtilsPermsAuths.checkSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS)) {
+						context.sendBroadcastAsUser(intent, UserHandle.ALL);
+					} else {
+						context.sendBroadcast(intent);
+					}
 
-				return UtilsShell.NO_ERR;
-			} else {
-				// Broadcast
-				final String broadcast_string = "am broadcast -a " + Intent.ACTION_AIRPLANE_MODE_CHANGED +
-						" --ez state " + (enabled ? "true" : "false");
-				// Hopefully it's not too bad if the broadcast is not sent in this case. Because part will have
-				// been done by this point (setting set), and it's a hassle to check for both operations.
-				return UtilsShell.executeShellCmd(broadcast_string, false, true).error_code;
+					return UtilsShell.ErrCodes.NO_ERR;
+				} catch (final SecurityException ignored) {
+					// Means it could not send the broadcast
+				}
 			}
+
+			// Broadcast
+			final String broadcast_string = "am broadcast -a " + Intent.ACTION_AIRPLANE_MODE_CHANGED +
+					" --ez state " + (enabled ? "true" : "false");
+			// Hopefully it's not too bad if the broadcast is not sent in this case. Because part will have
+			// been done by this point (setting set), and it's a hassle to check for both operations.
+			return UtilsShell.executeShellCmd(broadcast_string, false, true).error_code;
 		}
 
 		return UtilsAndroid.PERM_DENIED;
@@ -277,7 +292,7 @@ public final class UtilsAndroidConnectivity {
 				// Ignore the API warning. The function exists since Lollipop on @hide.
 				telephonyManager.setDataEnabled(enabled);
 
-				return UtilsShell.NO_ERR;
+				return UtilsShell.ErrCodes.NO_ERR;
 			} else {
 				// Deprecated as of Lollipop 5.0.
 				final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "setMobileDataEnabled",
@@ -286,7 +301,7 @@ public final class UtilsAndroidConnectivity {
 				UtilsReflection.invokeMethod(method, connectivityManager, enabled);
 				// Will always work
 
-				return UtilsShell.NO_ERR;
+				return UtilsShell.ErrCodes.NO_ERR;
 			}
 		}
 

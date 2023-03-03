@@ -73,12 +73,4 @@ final class CONSTS_BC_SpeechRecog {
 	 * <p>Extras: none.</p>
 	 */
 	public static final String ACTION_GOOGLE_RECOG_STARTED = "SpeechRecognition_ACTION_GOOGLE_RECOG_STARTED";
-
-	/**
-	 * <p>Explanation: informs that PocketSphinx's speech recognition has began.</p>
-	 * <p>Is broadcast by the class(es): {@link PocketSphinxRecognition}.</p>
-	 * <p>To be received only by the class(es): any chosen class.</p>
-	 * <p>Extras: none.</p>
-	 */
-	public static final String ACTION_POCKETSPHINX_RECOG_STARTED = "SpeechRecognition_ACTION_POCKETSPHINX_RECOG_STARTED";
 }

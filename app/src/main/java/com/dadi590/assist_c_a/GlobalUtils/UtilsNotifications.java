@@ -125,11 +125,7 @@ public final class UtilsNotifications {
 		final NotificationChannel channel = new NotificationChannel(id, chName, importance);
 		channel.setDescription(description);
 
-		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.
-				getSystemService(Context.NOTIFICATION_SERVICE);
-		if (null == notificationManager) {
-			return;
-		}
+		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getNotificationManager();
 
 		try {
 			notificationManager.createNotificationChannel(channel);
@@ -140,5 +136,14 @@ public final class UtilsNotifications {
 			channel.setImportance(NotificationManager.IMPORTANCE_MIN);
 			notificationManager.createNotificationChannel(channel);
 		}
+	}
+
+	/**
+	 * <p>Same as {@link NotificationManager#cancel(int)}.</p>
+	 */
+	public static void cancelNotification(final int id) {
+		final NotificationManager notificationManager =
+				(NotificationManager) UtilsGeneral.getNotificationManager();
+		notificationManager.cancel(id);
 	}
 }

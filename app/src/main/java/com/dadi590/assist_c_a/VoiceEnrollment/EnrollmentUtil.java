@@ -130,7 +130,6 @@ public class EnrollmentUtil {
 	 * @param keyphraseId The keyphrase ID to look-up the sound model for.
 	 * @return {@code true} if the call succeeds, {@code false} otherwise.
 	 */
-	@Nullable
 	public boolean deleteSoundModel(int keyphraseId, String bcp47Locale) {
 		if (keyphraseId <= 0) {
 			//Log.ie(TAG, "Keyphrase must have a valid ID");
@@ -265,6 +264,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static String getLocale(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			// It was returning a String too, aside from the commented line (when I switched from API 29 to 30)
 			//return keyphrase.getLocale();
 			// It was returning a Locale too, aside from the commented line (when I switched from API 32 back to 29)
 			return keyphrase.locale;
@@ -272,6 +272,7 @@ public class EnrollmentUtil {
 			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "locale");
 			assert null != value; // Will never be null
 
+			//return Locale.forLanguageTag(value);
 			return value;
 		}
 	}
@@ -291,12 +292,12 @@ public class EnrollmentUtil {
 	static int[] getUsers(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 			//return keyphrase.getUsers();
-			return keyphrase.users;
+			return keyphrase.users.clone();
 		} else {
 			final int[] value = (int[]) UtilsReflection.getFieldValue(keyphrase, "users");
 			assert null != value; // Will never be null
 
-			return value;
+			return value.clone();
 		}
 	}
 }

@@ -25,12 +25,21 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+
+import kotlin.io.FilesKt;
 
 /**
  * <p>Utilities related to files and directories.</p>
+ * <p>All the functions try to do what they're supposed through SDK methods. If it's not possible (no permissions, for
+ * example), they'll resort to shell commands, in which they will attempt to request SU permission.</p>
+ * <p>For the reason above, all functions work with shell exit codes - get some from {@link UtilsShell.ErrCodes}.</p>
  */
 public final class UtilsFilesDirs {
 
@@ -42,7 +51,11 @@ public final class UtilsFilesDirs {
 
 
 
-	// todo Use SDK methods (faster) unless some error happens, and only then use shell commands
+
+
+	// ALWAYS TEST SHELL COMMANDS IN OLD ANDROID VERSIONS!!!!! For example, hex in echo doesn't work in old versions.
+
+
 
 
 
@@ -50,11 +63,20 @@ public final class UtilsFilesDirs {
 	 * <p>Removes a path (to whatever), empty or not, using the rm shell command.</p>
 	 *
 	 * @param path the path
-	 * @param recursive same as rm's "r" parameter
+	 * @param recursive true to apply recursively, false to apply only to the given path
 	 *
-	 * @return a SH shell exit code
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)} or -1 also in case there's some error
+	 * deleting the path
 	 */
-	public static int removePath(@NonNull final File path, final boolean recursive) {
+	public static int removePath(@NonNull final String path, final boolean recursive) {
+		try {
+			final File path_file = new File(path);
+			if (recursive ? FilesKt.deleteRecursively(path_file) : path_file.delete()) {
+				return UtilsShell.ErrCodes.NO_ERR;
+			}
+		} catch (final Exception ignored) {
+		}
+
 		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path + "'";
 
 		return UtilsShell.executeShellCmd(command, false, true).error_code;
@@ -65,10 +87,45 @@ public final class UtilsFilesDirs {
 	 *
 	 * @param path the path to the create
 	 *
-	 * @return a SH shell exit code
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}
 	 */
 	public static int createDirectory(@NonNull final String path) {
+		try {
+			final File path_file = new File(path);
+			if (path_file.mkdirs()) {
+				return UtilsShell.ErrCodes.NO_ERR;
+			}
+		} catch (final Exception ignored) {
+		}
+
 		final String command = "mkdir -p '" + path + "'";
+
+		return UtilsShell.executeShellCmd(command, false, true).error_code;
+	}
+
+	/**
+	 * <p>Move file or directory to directory.</p>
+	 *
+	 * @param src_path the source path
+	 * @param dest_path the destination path
+	 *
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}
+	 */
+	public static int movePath(@NonNull final String src_path, @NonNull final String dest_path) {
+		try {
+			final File src_path_file = new File(src_path);
+			final File dest_path_file = new File(dest_path);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				Files.move(src_path_file.toPath(), dest_path_file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+				return UtilsShell.ErrCodes.NO_ERR;
+			} else if (src_path_file.renameTo(dest_path_file)) {
+				return UtilsShell.ErrCodes.NO_ERR;
+			}
+		} catch (final Exception ignored) {
+		}
+
+		final String command = "mv -f '" + src_path + "' '" + dest_path + "'";
 
 		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}
@@ -80,32 +137,40 @@ public final class UtilsFilesDirs {
 	 *
 	 * @return the file size in bytes, or -1 if an error occurred (no permissions or no file)
 	 */
-	public static int getFileSize(@NonNull final String file_path) {
-		final String command = "ls -l '" + file_path + "'";
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(command, true, true);
-		final String output_data = UtilsDataConv.bytesToPrintable(cmdOutputObj.output_stream, false);
-
-		if (0 != cmdOutputObj.error_code) {
-			return -1;
+	public static long getFileSize(@NonNull final String file_path) {
+		try {
+			final File file = new File(file_path);
+			if (file.exists()) {
+				return file.length();
+			}
+		} catch (final Exception ignored) {
 		}
 
-		return Integer.parseInt(output_data.split(" ")[3]);
+		final String command = "ls -l '" + file_path + "'";
+		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(command, true, true);
+
+		if (0 != cmdOutputObj.error_code) {
+			return -1L;
+		}
+
+		final String output_data = UtilsDataConv.bytesToPrintable(cmdOutputObj.output_stream, false);
+
+		return Long.parseLong(output_data.split(" ")[3]);
 	}
 
 	/**
 	 * <p>Reads the bytes from the given file using the cat shell command.</p>
-	 * <p>ATTENTION: no more than 10 MiB can be read using this function, to prevent out of memory errors.</p>
 	 *
 	 * @param file_path the path to the file
 	 *
-	 * @return the bytes of the file or null in case there was an error reading the file or the file size was greater
-	 * than 10 MiB
+	 * @return the bytes of the file or null in case there was an error reading the file or an error occurred
 	 */
 	@Nullable
 	public static byte[] readFileBytes(@NonNull final String file_path) {
-		final int file_size = getFileSize(file_path);
-		if (-1 == file_size || file_size > 10_485_760) {
-			// Not larger than 10 MiB, at least for now (not needed).
+		try {
+			return FileUtils.readFileToByteArray(new File(file_path));
+		} catch (final Exception ignored) {
+		} catch (final OutOfMemoryError ignored) {
 			return null;
 		}
 
@@ -118,24 +183,40 @@ public final class UtilsFilesDirs {
 
 	/**
 	 * <p>Writes the given files bytes to a file (replaces all file contents).</p>
-	 * <p>Only ONLY with small files!!! <strong>This function requires allocating 3-4 times the file size into
-	 * memory!</strong></p>
+	 * <p>ATTENTION: try not to give too big files to this function without checking write permissions, because the
+	 * function that uses shell commands is (notice the name) {@link #writeSmallFile(String, byte[])}.</p>
 	 *
 	 * @param file_path the path to the file
 	 * @param file_bytes the bytes to write
 	 *
-	 * @return a SH shell exit code
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}
 	 */
-	public static int writeSmallFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
+	public static int writeFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
+		try {
+			FileUtils.writeByteArrayToFile(new File(file_path), file_bytes);
+
+			return UtilsShell.ErrCodes.NO_ERR;
+		} catch (final Exception ignored) {
+		}
+
+		return writeSmallFile(file_path, file_bytes);
+	}
+
+	/**
+	 * <p>Same as {@link #writeFile(String, byte[])}, but only uses a shell command.</p>
+	 * <p>ONLY with small files!!! <strong>This function allocates 4-5 times the file size into memory!</strong></p>
+	 * <p>Allocates 4 times more on KitKat-, and 5 times MORE below that.</p>
+	 */
+	private static int writeSmallFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
 		final String bytes_data;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			// This is here because hex takes less size on memory than octal when in string representation (2 vs 3 chars).
 			// On miTab Advance (KitKat 4.4.2), hex is supported, so I'm putting it as minimum for it (didn't check
 			// APIs 16-18 though).
-			bytes_data = "\\x" + UtilsDataConv.bytesToHex(file_bytes).replace(" ", "\\x"); // 3 * file size
+			bytes_data = "\\x" + UtilsDataConv.bytesToHex(file_bytes).replace(" ", "\\x"); // 4 * file size
 		} else {
 			// Leave it in octal form here. Android 4.0.3 doesn't support hex with echo, it seems - but supports octal.
-			bytes_data = "\\0" + UtilsDataConv.bytesToOctal(file_bytes).replace(" ", "\\0"); // 4 * file size
+			bytes_data = "\\0" + UtilsDataConv.bytesToOctal(file_bytes).replace(" ", "\\0"); // 5 * file size
 		}
 
 		final String command = "echo -ne '" + bytes_data + "' > '" + file_path + "'";
@@ -144,37 +225,37 @@ public final class UtilsFilesDirs {
 	}
 
 	/**
-	 * <p>Copies the file on the source path to another file on the destination path.</p>
-	 * <p>Only ONLY with small files!!! <strong>This function requires allocating 4-5 times the file size into
-	 * memory!</strong></p>
+	 * <p>Copies the source path to the destination path (file, directory, whatever).</p>
+	 * <p>ATTENTION: try not to give too big files to this function without checking write permissions and SDK version,
+	 * because... read this: {@link #writeFile(String, byte[])} - can only happen below Android KitKat.</p>
 	 *
 	 * @param src_path the source file path
 	 * @param dest_path the destination file path
 	 *
-	 * @return a SH shell exit code, or also -1 if the source file could not be read
+	 * @return if on KitKat+, same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}; else, aside from that,
+	 * -1 if the source file could not be read
 	 */
-	public static int copySmallFile(@NonNull final String src_path, @NonNull final String dest_path) {
-		final byte[] src_bytes = readFileBytes(src_path); // First time with the file bytes
-		if (null == src_bytes) {
-			return -1;
+	public static int copyPath(@NonNull final String src_path, @NonNull final String dest_path) {
+		try {
+			FileUtils.copyFile(new File(src_path), new File(dest_path));
+
+			return UtilsShell.ErrCodes.NO_ERR;
+		} catch (final Exception ignored) {
 		}
 
-		return writeSmallFile(src_path, src_bytes); // Plus 3 or 4 times the size, depending on the API level
-	}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			// cp was added on KitKat
+			final String command = "cp -rf '" + src_path + "' '" + dest_path + "'";
 
-	/**
-	 * <p>Copies the source path to the destination path (file, directory, whatever).</p>
-	 *
-	 * @param src_path the source path
-	 * @param dest_path the destination path
-	 *
-	 * @return a SH shell exit code
-	 */
-	@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-	public static int copyPath(@NonNull final String src_path, @NonNull final String dest_path) {
-		final String command = "cp -rf '" + src_path + "' '" + dest_path + "'";
+			return UtilsShell.executeShellCmd(command, false, true).error_code;
+		} else {
+			final byte[] src_bytes = readFileBytes(src_path);
+			if (null == src_bytes) {
+				return -1;
+			}
 
-		return UtilsShell.executeShellCmd(command, false, true).error_code;
+			return writeFile(dest_path, src_bytes); // 4 times the size
+		}
 	}
 
 	/**
@@ -182,10 +263,11 @@ public final class UtilsFilesDirs {
 	 *
 	 * @param path the path
 	 * @param permissions the permissions
+	 * @param recursive true to apply recursively, false to apply only to the given path
 	 *
-	 * @return a SH shell exit code
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}
 	 */
-	public static int chmod(@NonNull final String path, final int permissions, final boolean recursive) {
+	public static int chmodMISSING_SDK_METHOD(@NonNull final String path, final int permissions, final boolean recursive) {
 		final String command = "chmod " + permissions + (recursive ? " -R " : " ") + "'" + path + "'";
 
 		return UtilsShell.executeShellCmd(command, false, true).error_code;
@@ -196,10 +278,15 @@ public final class UtilsFilesDirs {
 	 *
 	 * @param path the path
 	 *
-	 * @return a SH shell exit code
+	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean, boolean)}, with 0 meaning the path exists
 	 */
 	public static int checkPathExists(@NonNull final String path) {
-		final String command = "ls '" + path+ "'";
+		try {
+			return new File(path).exists() ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.WRONG_USAGE;
+		} catch (final Exception ignored) {
+		}
+
+		final String command = "ls '" + path + "'";
 
 		return UtilsShell.executeShellCmd(command, false, true).error_code;
 	}

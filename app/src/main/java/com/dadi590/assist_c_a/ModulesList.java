@@ -36,7 +36,8 @@ import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.PowerProcessor.PowerProcessor;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.CONSTS_SpeechRecog;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.GoogleRecognition;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.PocketSphinxRecognition;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
@@ -44,7 +45,6 @@ import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 /**
  * <p>The list of modules and submodules ("elements") of the assistant plus information about their status.</p>
@@ -90,66 +90,72 @@ public final class ModulesList {
 	public static final int TYPE1_INSTANCE_CHK_ONLY = -TYPE1_INSTANCE;
 	public static final int TYPE1_LIBRARY = -3;
 
-	public static final int TYPE2_MODULE = 0;
-	public static final int TYPE2_SUBMODULE = 1;
-
 	// To disable an element, just comment its line here and be sure you disable its usages everywhere else or pray the
 	// app won't crash because of negative index from getModuleIndex() in case it's used for the disabled element.
 	/** List of all modules of the app, and also the wanted submodules to be shown on the Modules Status - check which
-	 * is what with {@link #ELEMENT_TYPE2}. They must also be in the order of module startup (the Modules Manager must
+	 * is what with {@link #ELEMENT_IS_MODULE}. They must also be in the order of module startup (the Modules Manager must
 	 * be the first one).*/
-	private static final ElementsObj[] elements_list = {
-			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, TYPE2_MODULE),
+	private static final ElementsObj[] ELEMENTS_LIST = {
+			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, true),
+			//new ElementsObj(PreferencesManager.class, "Preferences Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			//new ElementObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(PowerProcessor.class, "Power Processor", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
-			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE_CHK_ONLY, TYPE2_SUBMODULE),
-			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, TYPE2_MODULE),
+			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
+			new ElementsObj(PowerProcessor.class, "Power Processor", TYPE1_INSTANCE, true),
+			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),
+			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
+			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),
+			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true),
+			new ElementsObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, true),
+			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),
+			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, true),
 
 			// todo Make a new class for libraries? And get them to return on a standard function the supported
 			//  architectures. Then check if the file is present or at least if the library has been loaded by catching
 			//  a Throwable.
 			//new ElementsObj(ACD.ACD.class, "Advanced Commands Detection", TYPE1_LIBRARY, TYPE2_MODULE),
 
-			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, TYPE2_MODULE),
-			new ElementsObj(CONSTS_SpeechRecog.POCKETSPHINX_RECOG_CLASS, "Hotword recognizer", TYPE1_SERVICE_SEP, TYPE2_SUBMODULE),
-			new ElementsObj(CONSTS_SpeechRecog.GOOGLE_RECOG_CLASS, "Commands recognizer", TYPE1_SERVICE_SEP, TYPE2_SUBMODULE),
-			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, TYPE2_MODULE),
+			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, true),
+			new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
+			new ElementsObj(GoogleRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
+			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, true),
 	};
-	public static final int elements_list_length = elements_list.length;
+	public static final int ELEMENTS_LIST_LENGTH = ELEMENTS_LIST.length;
 	/**
 	 * <p>Class for the (sub)modules of the list.</p>
 	 */
 	private static final class ElementsObj {
-		@NonNull final Class<?> elem_class;
-		final int elem_type1;
-		@NonNull final String elem_name;
-		final int elem_type2;
-		boolean elem_supported = false;
-		@Nullable Object element_instance = null;
-		boolean disable_elem = false;
+		/** The class of the element. */
+		@NonNull final Class<?> cls;
+		/** The type 1 of the element ({@code TYPE1_}-started constants). */
+		final int type1;
+		/** The name of the element to present to users. */
+		@NonNull final String name;
+		/** True if the element is a module, false if it's a submodule. */
+		final boolean is_module;
+		/** True to say that the element is supported on the device, including hardware support, permissions, etc; false
+		 * otherwise. */
+		boolean supported = false;
+		/** The instance reference of the object - only if the element is of type |{@link #TYPE1_INSTANCE}|. */
+		@Nullable Object instance = null;
+		/** True if the user chose to disable the element, false otherwise. */
+		boolean disable = false;
 
 		/**
-		 * <p>Main class constructor.</p>
+		 * .
 		 *
-		 * @param elem_class the class of the element
-		 * @param elem_name the name of the element to present to users
-		 * @param elem_type1 the type 1 of the element ({@code TYPE1_}-started constants)
-		 * @param elem_type2 the type 2 of the element ({@code TYPE2_}-started constants)
+		 * @param cls {@link #cls}
+		 * @param name {@link #name}
+		 * @param type1 {@link #type1}
+		 * @param is_module {@link #is_module}
 		 */
-		ElementsObj(@NonNull final Class<?> elem_class, @NonNull final String elem_name, final int elem_type1,
-					final int elem_type2) {
-			this.elem_class = elem_class;
-			this.elem_name = elem_name;
-			this.elem_type1 = elem_type1;
-			this.elem_type2 = elem_type2;
+		ElementsObj(@NonNull final Class<?> cls, @NonNull final String name, final int type1,
+					final boolean is_module) {
+			this.cls = cls;
+			this.name = name;
+			this.type1 = type1;
+			this.is_module = is_module;
 
-			this.elem_supported = isElementSupported(elem_class);
+			supported = isElementSupported(cls);
 		}
 	}
 
@@ -162,12 +168,13 @@ public final class ModulesList {
 	public static final int ELEMENT_CLASS = 0;
 	public static final int ELEMENT_NAME = 1;
 	public static final int ELEMENT_TYPE1 = 2;
-	public static final int ELEMENT_TYPE2 = 3;
-	public static final int ELEMENT_INSTANCE = 4;
-	public static final int ELEMENT_SUPPORTED = 5;
-	public static final int ELEMENT_DISABLE = 6;
+	public static final int ELEMENT_IS_MODULE = 3;
+	public static final int ELEMENT_AUTO_RESTART = 4;
+	public static final int ELEMENT_INSTANCE = 5;
+	public static final int ELEMENT_SUPPORTED = 6;
+	public static final int ELEMENT_DISABLE = 7;
 	/**
-	 * <p>Get the value on the {@link #elements_list} associated with the given key, for a specific element.</p>
+	 * <p>Get the value on the {@link #ELEMENTS_LIST} associated with the given key, for a specific element.</p>
 	 * <br>
 	 * <p><strong>WARNING:</strong> CHECK FIRST if the value you're getting matches the indexed element!!! If you get
 	 * a MODULE_ value from an element which is a submodule, bad things will happen - the function is not made to handle
@@ -178,45 +185,43 @@ public final class ModulesList {
 	 * nullability, as it's supposed.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #ELEMENT_CLASS} --> for {@code key}: the class of the element.</p>
-	 * <p>- {@link #ELEMENT_NAME} --> for {@code key}: the element name to show to the user</p>
-	 * <p>- {@link #ELEMENT_TYPE1} --> for {@code key}: the TYPE1_-started constant of the element</p>
-	 * <p>- {@link #ELEMENT_TYPE2} --> for {@code key}: the TYPE2_-started constant of the element</p>
-	 * <p>- {@link #ELEMENT_INSTANCE} --> for {@code key}: the instance of the element (only useful if it's of
-	 * |{@link #TYPE1_INSTANCE}|)</p>
-	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: if the element is supported on the device or not, including
-	 * hardware support and permissions</p>
-	 * <p>- {@link #ELEMENT_DISABLE} --> for {@code key}: if the element has been disabled by the user or not</p>
+	 * <p>- {@link #ELEMENT_CLASS} --> for {@code key}: {@link ElementsObj#cls}</p>
+	 * <p>- {@link #ELEMENT_NAME} --> for {@code key}: {@link ElementsObj#name}</p>
+	 * <p>- {@link #ELEMENT_TYPE1} --> for {@code key}: {@link ElementsObj#type1}</p>
+	 * <p>- {@link #ELEMENT_IS_MODULE} --> for {@code key}: {@link ElementsObj#is_module}</p>
+	 * <p>- {@link #ELEMENT_INSTANCE} --> for {@code key}: {@link ElementsObj#instance}</p>
+	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: {@link ElementsObj#supported}</p>
+	 * <p>- {@link #ELEMENT_DISABLE} --> for {@code key}: {@link ElementsObj#disable}</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param element_index the index of the element
 	 * @param key the key of the value to get (one of the constants)
 	 *
 	 * @return the value associated with the given key, which may or may not be null, depending on type of the wanted
-	 * value as listed on {@link #elements_list}'s documentation
+	 * value as listed on {@link #ELEMENTS_LIST}'s documentation
 	 */
 	public static Object getElementValue(final int element_index, final int key) {
 		switch (key) {
 			case ELEMENT_CLASS: {
-				return elements_list[element_index].elem_class;
+				return ELEMENTS_LIST[element_index].cls;
 			}
 			case ELEMENT_NAME: {
-				return elements_list[element_index].elem_name;
+				return ELEMENTS_LIST[element_index].name;
 			}
 			case ELEMENT_TYPE1: {
-				return elements_list[element_index].elem_type1;
+				return ELEMENTS_LIST[element_index].type1;
 			}
-			case ELEMENT_TYPE2: {
-				return elements_list[element_index].elem_type2;
+			case ELEMENT_IS_MODULE: {
+				return ELEMENTS_LIST[element_index].is_module;
 			}
 			case ELEMENT_INSTANCE: {
-				return elements_list[element_index].element_instance;
+				return ELEMENTS_LIST[element_index].instance;
 			}
 			case ELEMENT_SUPPORTED: {
-				return elements_list[element_index].elem_supported;
+				return ELEMENTS_LIST[element_index].supported;
 			}
 			case ELEMENT_DISABLE: {
-				return elements_list[element_index].disable_elem;
+				return ELEMENTS_LIST[element_index].disable;
 			}
 		}
 
@@ -227,11 +232,11 @@ public final class ModulesList {
 	}
 
 	/**
-	 * <p>Set the value on the {@link #elements_list} associated with the given key, for a specific element.</p>
+	 * <p>Set the value on the {@link #ELEMENTS_LIST} associated with the given key, for a specific element.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: same as in {@link #getElementValue(int, int)}</p>
-	 * <p>- {@link #ELEMENT_DISABLE} --> for {@code key}: same as in {@link #getElementValue(int, int)}</p>
+	 * <p>- {@link #ELEMENT_SUPPORTED} --> for {@code key}: {@link ElementsObj#supported}</p>
+	 * <p>- {@link #ELEMENT_DISABLE} --> for {@code key}: {@link ElementsObj#disable}</p>p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param element_index the index of the element
@@ -241,12 +246,12 @@ public final class ModulesList {
 	public static void setElementValue(final int element_index, final int key, @NonNull final Object value) {
 		switch (key) {
 			case ELEMENT_SUPPORTED: {
-				elements_list[element_index].elem_supported = (boolean) value;
+				ELEMENTS_LIST[element_index].supported = (boolean) value;
 
 				break;
 			}
 			case ELEMENT_DISABLE: {
-				elements_list[element_index].disable_elem = (boolean) value;
+				ELEMENTS_LIST[element_index].disable = (boolean) value;
 
 				break;
 			}
@@ -269,13 +274,10 @@ public final class ModulesList {
 			case (TYPE1_INSTANCE): {
 				return null != getElementValue(element_index, ELEMENT_INSTANCE);
 			}
-			case (TYPE1_LIBRARY): {
-
+			default: {
+				return false;
 			}
 		}
-
-		// Won't ever get here.
-		return false;
 	}
 
 	/**
@@ -286,27 +288,32 @@ public final class ModulesList {
 	 * @return true if it's fully working, false otherwise
 	 */
 	public static boolean isElementFullyWorking(final int element_index) {
-		if (TYPE1_SERVICE_SEP == Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
-			// Assume it's fully working if it's of TYPE1_SERVICE_SEP, which doesn't implement IModule (no way of
-			// knowing yet).
-			return isElementRunning(element_index);
+		switch (Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
+			case (TYPE1_SERVICE_SEP): {
+				// Assume it's fully working if it's of TYPE1_SERVICE_SEP, which doesn't implement IModule (no way of
+				// knowing yet).
+				return isElementRunning(element_index);
+			}
+			case (TYPE1_INSTANCE): {
+				return isElementRunning(element_index) &&
+						((IModuleInst) getElementValue(element_index, ELEMENT_INSTANCE)).isFullyWorking();
+			}
+			default: {
+				return false;
+			}
 		}
-
-		// The element instance will never been null because that's what's checked inside isElementRunning().
-		return isElementRunning(element_index) && Objects.requireNonNull(getIModuleInstance(element_index))
-				.isFullyWorking();
 	}
 
 	/**
-	 * <p>The index of the element in the {@link #elements_list}.</p>
+	 * <p>The index of the element in the {@link #ELEMENTS_LIST}.</p>
 	 *
 	 * @param element_class the class of the element
 	 *
 	 * @return the index of the element
 	 */
 	public static int getElementIndex(@NonNull final Class<?> element_class) {
-		for (int element_index = 0; element_index < elements_list_length; ++element_index) {
-			if ((Class<?>) getElementValue(element_index, ELEMENT_CLASS) == element_class) {
+		for (int element_index = 0; element_index < ELEMENTS_LIST_LENGTH; ++element_index) {
+			if (getElementValue(element_index, ELEMENT_CLASS) == element_class) {
 				return element_index;
 			}
 		}
@@ -321,7 +328,7 @@ public final class ModulesList {
 	 * <p>In case it's a Service, it will be started in background (not foreground), as the Main Service is already in
 	 * foreground - one is enough according to the Android security policies.</p>
 	 * <p>In case it's just to start the element and keep a reference to it, its reference will be stored on the
-	 * {@link #elements_list}.</p>
+	 * {@link #ELEMENTS_LIST}.</p>
 	 *
 	 * @param element_index the index of the element to start
 	 */
@@ -333,17 +340,14 @@ public final class ModulesList {
 
 		switch (Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
 			case (ModulesList.TYPE1_SERVICE_SEP): {
-				// startService() already checks if the service is running or not.
 				UtilsServices.startService(element_class, null, false, true);
 
 				break;
 			}
 			case (ModulesList.TYPE1_INSTANCE): {
 				if (!ModulesList.isElementRunning(element_index)) {
-					System.out.println(element_class);
 					try {
-						elements_list[element_index].element_instance = element_class.getConstructor()
-								.newInstance();
+						ELEMENTS_LIST[element_index].instance = element_class.getConstructor().newInstance();
 					} catch (final NoSuchMethodException e) {
 						e.printStackTrace();
 					} catch (final IllegalAccessException e) {
@@ -386,10 +390,13 @@ public final class ModulesList {
 			case (ModulesList.TYPE1_INSTANCE): {
 				if (ModulesList.isElementRunning(element_index)) {
 					((IModuleInst) getElementValue(element_index, ELEMENT_INSTANCE)).destroy();
-					elements_list[element_index].element_instance = null;
+					ELEMENTS_LIST[element_index].instance = null;
 				}
 
 				break;
+			}
+			default: {
+				// Nothing
 			}
 		}
 	}
@@ -403,22 +410,6 @@ public final class ModulesList {
 	public static void restartElement(final int element_index) {
 		stopElement(element_index);
 		startElement(element_index);
-	}
-
-	/**
-	 * <p>Get the element instance cast as an {@link IModuleInst}.</p>
-	 *
-	 * @param element_index the index of the element to get as an {@link IModuleInst}
-	 *
-	 * @return the {@link IModuleInst} instance; null in case the element is not running OR is not of
-	 * {@link #TYPE1_INSTANCE}
-	 */
-	@Nullable
-	private static IModuleInst getIModuleInstance(final int element_index) {
-		if (TYPE1_INSTANCE != Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
-			return null;
-		}
-		return (IModuleInst) getElementValue(element_index, ELEMENT_INSTANCE);
 	}
 
 	/**

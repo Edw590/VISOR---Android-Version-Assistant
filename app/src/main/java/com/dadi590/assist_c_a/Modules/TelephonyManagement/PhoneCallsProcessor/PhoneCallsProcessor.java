@@ -45,7 +45,8 @@ import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -73,7 +74,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -103,11 +104,11 @@ public final class PhoneCallsProcessor implements IModuleInst {
 
 	public static boolean isSupported() {
 		@SuppressLint("InlinedApi")
-		final String[][] min_required_permissions = {{
+		final String[] min_required_permissions = {
 				Manifest.permission.READ_CALL_LOG,
 				Manifest.permission.READ_PHONE_STATE,
-		}};
-		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0];
+		};
+		return TelephonyManagement.isSupported() && UtilsPermsAuths.checkSelfPermissions(min_required_permissions);
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
@@ -182,20 +183,20 @@ public final class PhoneCallsProcessor implements IModuleInst {
 		// todo This only works when Precise Call States are not being used.... Don't forget that.
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.last_phone_call_time, System.currentTimeMillis());
+		UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_PHONE_CALL_TIME, System.currentTimeMillis());
 
 		boolean active_number = false;
 		for (final ArrayList<String> call : calls_state) {
 			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
 				// Update the Values Storage
-				ValuesStorage.setValue(ValuesStorage.Keys.curr_phone_call_number, call.get(0));
+				UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, call.get(0));
 
 				active_number = true;
 			}
 		}
 		if (!active_number) {
 			// Update the Values Storage
-			ValuesStorage.setValue(ValuesStorage.Keys.curr_phone_call_number, "");
+			UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, "");
 		}
 	}
 
@@ -211,12 +212,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				}
 				break;
 			}
@@ -226,12 +227,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
 				}
 				break;
 			}
@@ -240,11 +241,11 @@ public final class PhoneCallsProcessor implements IModuleInst {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
 				}
 				break;
 			}

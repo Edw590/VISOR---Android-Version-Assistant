@@ -51,6 +51,7 @@
 	<uses-permission android:name="android.permission.VIBRATE"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous+ permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
@@ -105,6 +106,8 @@
 	<uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.STATUS_BAR"
+		tools:ignore="ProtectedPermissions" />
+	<uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"
 		tools:ignore="ProtectedPermissions" />
 
 	<!-- There can only be one Package Installer and Package Verifier in the system -> Play Store is both, so forget it,
@@ -304,11 +307,6 @@
 			android:exported="false"
 			android:directBootAware="true"
 			android:process=":Google_Speech_Recognition" />
-		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.PocketSphinxRecognition"
-			android:permission=""
-			android:exported="false"
-			android:directBootAware="true"
-			android:process=":PocketSphinx_Speech_Recognition" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:permission="android.permission.BIND_DEVICE_ADMIN"

@@ -91,7 +91,7 @@ public final class UtilsApp {
 	 * Deletes the app private cache folder.
 	 */
 	public static void deleteAppCache() {
-		UtilsFilesDirs.removePath(UtilsGeneral.getContext().getCacheDir(), true);
+		UtilsFilesDirs.removePath(UtilsGeneral.getContext().getCacheDir().getAbsolutePath(), true);
 	}
 
 	/**

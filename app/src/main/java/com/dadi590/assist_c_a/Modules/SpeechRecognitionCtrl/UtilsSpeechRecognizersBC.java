@@ -60,8 +60,7 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION} and executes
-	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION}.</p>
 	 */
 	public static void stopRecognition() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
@@ -70,8 +69,7 @@ public final class UtilsSpeechRecognizersBC {
 	}
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_TERMINATE_RECOGNIZERS} and executes
-	 * {@link UtilsSpeechRecognizers#terminateSpeechRecognizers()} immediately.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_TERMINATE_RECOGNIZERS}.</p>
 	 */
 	public static void terminateSpeechRecognizers() {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS);

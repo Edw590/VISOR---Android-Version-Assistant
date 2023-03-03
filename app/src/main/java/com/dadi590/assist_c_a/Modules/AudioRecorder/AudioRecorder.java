@@ -42,12 +42,14 @@ import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.ValuesStorage.ValuesStorage;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The audio recorder module of the assistant.</p>
@@ -63,7 +65,7 @@ public final class AudioRecorder implements IModuleInst {
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
-	private Handler main_handler = null;
+	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -93,11 +95,11 @@ public final class AudioRecorder implements IModuleInst {
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
-		final String[][] min_required_permissions = {{
+		final String[] min_required_permissions = {
 				Manifest.permission.RECORD_AUDIO,
 				Manifest.permission.WRITE_EXTERNAL_STORAGE,
-		}};
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)[0]
+		};
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)
 				&& UtilsCheckHardwareFeatures.isMicrophoneSupported();
 	}
 	// IModuleInst stuff
@@ -111,7 +113,7 @@ public final class AudioRecorder implements IModuleInst {
 		main_handler = new Handler(main_handlerThread.getLooper());
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, false);
+		UtilsRegistry.setValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY, false);
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -135,21 +137,18 @@ public final class AudioRecorder implements IModuleInst {
 	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
-		final Boolean is_recording = ValuesStorage.getValueObj(ValuesStorage.Keys.is_recording_audio_internally).
-				getValue(false);
+		final Boolean is_recording = UtilsRegistry.getValueObj(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).
+				getData(false);
 
 		if (start) {
 			if (is_recording) {
 				final String speak = "Already on it sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			} else {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						startRecording(audio_source);
-						final Boolean is_recording = ValuesStorage.
-								getValueObj(ValuesStorage.Keys.is_recording_audio_internally).getValue(false);
-						if (audio_source == MediaRecorder.AudioSource.MIC && !is_recording) {
+						if ((startRecording(audio_source) != NO_ERRORS) && (audio_source == MediaRecorder.AudioSource.MIC)) {
 							// In case of an error and that the microphone is the audio source, start the background
 							// recognition again (if it's not the microphone, then the speech recognition didn't stop
 							// in the first place).
@@ -159,13 +158,13 @@ public final class AudioRecorder implements IModuleInst {
 				};
 				runnables.add(runnable);
 				final String speak = "Starting now, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, runnable.hashCode());
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, runnable.hashCode());
 			}
 		} else {
 			if (is_recording) {
 				stopRecording();
 				final String speak = "Stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 				runnables.remove(0);
 
 				if (restart_pocketsphinx) {
@@ -173,7 +172,7 @@ public final class AudioRecorder implements IModuleInst {
 				}
 			} else {
 				final String speak = "Already stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			}
 		}
 	}
@@ -201,42 +200,43 @@ public final class AudioRecorder implements IModuleInst {
 	 * @return one of the constants
 	 */
 	int startRecording(final int audioSource) {
-		// Do NOT change the encoder and format settings. I've put those because they are compatible with all devices
-		// that the app supports, and the sound is still very good.
-
 		recorder = new MediaRecorder();
 		try {
 			recorder.setAudioSource(audioSource);
-		} catch (final RuntimeException ignored) {
+		} catch (final RuntimeException e) {
+			e.printStackTrace();
 			stopRecording();
 
 			final String speak = "Error 1 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 
 			return ERR_PERM_CAP_AUDIO;
 		}
+
+		// Do NOT change the encoder and format settings. I've put those because they are compatible with all devices
+		// that the app supports, and the sound is still very good.
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		final File file;
-		file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
-		if (null == file) {
+		final File file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
+		if (!Objects.requireNonNull(file.getParentFile()).mkdirs()) {
 			stopRecording();
 
 			final String speak = "Error 2 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 
 			return ERR_CREATE_FILE;
 		}
-		final String fileName = file.getAbsolutePath();
-		recorder.setOutputFile(fileName);
+		final String file_path = file.getAbsolutePath();
+		recorder.setOutputFile(file_path);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
 
 		try {
 			recorder.prepare();
 		} catch (final IOException e) {
+			e.printStackTrace();
 			stopRecording();
 
 			final String speak = "Error 3 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			file.delete();
 
 			return ERR_PREP_RECORDING;
@@ -249,7 +249,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 4 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
 			file.delete();
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
@@ -262,7 +262,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, true);
+		UtilsRegistry.setValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY, true);
 
 		return NO_ERRORS;
 	}
@@ -281,7 +281,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		ValuesStorage.setValue(ValuesStorage.Keys.is_recording_audio_internally, false);
+		UtilsRegistry.setValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY, false);
 	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
