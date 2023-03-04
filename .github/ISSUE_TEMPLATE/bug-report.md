@@ -7,26 +7,26 @@ assignees: DADi590
 
 ---
 
-**Describe the bug** <!--[Title;]-->
+**Describe the bug**
 A clear and concise description of what the bug is.
 
-**How to reproduce** <!--[Title;]-->
+**How to reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior** <!--[Title;]-->
+**Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots** <!--[Title;]-->
+**Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Device information (please complete it):** <!--[Title;]-->
- - Device: [e.g. Samsung Galaxy Invisible Pro]
- - OS: [e.g. Android 98.3a]
- - App version [e.g. v2050_13_32]
+**Device information:**
+ - Device: device name
+ - OS: name and version
+ - App version: version name
 
-**Additional information** <!--[Title;]-->
+**Additional information**
 Add any other information about the problem here.
