@@ -1,14 +1,14 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report of a problem on the app
 title: "[BUG]"
 labels: bug
-assignees: DADi590
+assignees: Edw590
 
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A description of what the bug is.
 
 **How to reproduce**
 Steps to reproduce the behavior:
