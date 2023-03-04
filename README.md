@@ -14,7 +14,7 @@ They say "debug" at the end because they're debug type APKs, meaning you can use
 They're pre-releases because I don't have any settings yet. So everything is how I programmed it and can't be changed. When I have a settings page I might start releasing the versions as actual releases.
 
 ## Test Android versions and devices (in order of use)
-- Oreo 8.1 on a Blackview BV9500 (most used to test - my current phone). This is also the Android version I'm making the app for (can't test it on newer than 8.1 anyway).
+- Oreo 8.1 on a Blackview BV9500 (most used to test - my current phone). This is also the Android version I'm making the app for (can't test it on newer than 8.1 anyway) - though I think most of the app (or everything) works on newer versions due to backwards compatibility, so feel free to install it on newer Android versions.
 - KitKat 4.4.2 on my Wolder miTab Advance tablet
 - Ice Cream Sandwich 4.0.3 on the Android Studio Emulator
 - Lollipop 5.0 on a OnePlus X (the phone with the broken screen that gave reason to the app)
