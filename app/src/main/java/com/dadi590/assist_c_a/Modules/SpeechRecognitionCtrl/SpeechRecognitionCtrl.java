@@ -55,6 +55,8 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 	@Nullable Class<?> current_recognizer = NO_RECOGNIZER;
 
+	long google_requested_when = 0L;
+
 	private static final long DEFAULT_WAIT_TIME = 5_000L;
 	long wait_time = DEFAULT_WAIT_TIME;
 
@@ -115,7 +117,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTING);
 
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
@@ -133,9 +135,6 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		public void run() {
 			final int google_module_index = ModulesList.getElementIndex(GOOGLE_RECOGNIZER);
 			while (true) {
-				// Also keep updating the ValuesStorage values in case there is some issue and the services don't get to
-				// update the value to false when they stop running (for example process killed by the system).
-
 				final PocketSphinxRecognition instance = (PocketSphinxRecognition) ModulesList.getElementValue(
 						ModulesList.getElementIndex(PocketSphinxRecognition.class), ModulesList.ELEMENT_INSTANCE);
 				if (null != instance) {
@@ -145,21 +144,30 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				if (!stop_speech_recognition) {
 					if (GOOGLE_RECOGNIZER == current_recognizer) {
 						if (!ModulesList.isElementFullyWorking(google_module_index)) {
+							google_requested_when = 0L;
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
 					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
 						if (!PocketSphinxRecognition.isListening()) {
+							google_requested_when = 0L;
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
 					}
 
 					if (NO_RECOGNIZER == current_recognizer) {
-						UtilsSpeechRecognizers.stopSpeechRecognizers();
-						if (UtilsSpeechRecognizers.startPocketSphinxRecognition()) {
-							current_recognizer = POCKETSPHINX_RECOGNIZER;
-							wait_time = DEFAULT_WAIT_TIME;
+						if (0L == google_requested_when) {
+							UtilsSpeechRecognizers.stopSpeechRecognizers();
+							if (UtilsSpeechRecognizers.startPocketSphinxRecognition()) {
+								current_recognizer = POCKETSPHINX_RECOGNIZER;
+								wait_time = DEFAULT_WAIT_TIME;
+							}
+						} else if (System.currentTimeMillis() > google_requested_when + 2000L) {
+							// If Google's recognizer was requested but could not be started for some reason (probably
+							// some error starting the service, who knows), keep trying to start it.
+							UtilsSpeechRecognizers.stopSpeechRecognizers();
+							UtilsSpeechRecognizers.startGoogleRecognition();
 						}
 					}
 				}
@@ -187,7 +195,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED: {
+				case CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTING: {
 					current_recognizer = GOOGLE_RECOGNIZER;
 					wait_time = 500L;
 
@@ -199,6 +207,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					UtilsSpeechRecognizers.stopSpeechRecognizers();
 					UtilsSpeechRecognizers.startGoogleRecognition();
 
+					google_requested_when = System.currentTimeMillis();
 					stop_speech_recognition = false;
 					wait_time = DEFAULT_WAIT_TIME;
 
@@ -208,6 +217,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					UtilsSpeechRecognizers.stopSpeechRecognizers();
 					UtilsSpeechRecognizers.startPocketSphinxRecognition();
 
+					google_requested_when = 0L;
 					stop_speech_recognition = false;
 					wait_time = DEFAULT_WAIT_TIME;
 
@@ -216,6 +226,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				case CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION: {
 					stop_speech_recognition = true;
 					wait_time = DEFAULT_WAIT_TIME;
+					google_requested_when = 0L;
 
 					UtilsSpeechRecognizers.stopSpeechRecognizers();
 
@@ -223,6 +234,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				}
 				case CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS: {
 					//stop_speech_recognition = false; - this doesn't change with this call
+					google_requested_when = 0L;
 					wait_time = DEFAULT_WAIT_TIME;
 
 					UtilsSpeechRecognizers.stopSpeechRecognizers();

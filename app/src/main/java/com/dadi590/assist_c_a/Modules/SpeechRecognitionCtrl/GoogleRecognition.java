@@ -102,10 +102,16 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 		{
 			// Don't forget the sleep time of the thread is 1 second, so the waiting time here must be a multiple of
 			// that (or not, but 1.5 seconds == 2 seconds in this case of 1 second sleep).
-			put(ON_START_COMMAND_STR, 3_000L);
-			put(ON_READY_FOR_SPEECH_STR, 3_000L);
-			put(ON_BEGINNING_OF_SPEECH_STR, 3_000L);
-			put(ON_END_OF_SPEECH_STR, 5_000L);
+			// PS: these times are now also including user action and method action delay, not just probable good frozen
+			// timings.
+			put(ON_START_COMMAND_STR, 2_000L); // 2 seconds to call onReadyForSpeech() after starting the service
+			put(ON_READY_FOR_SPEECH_STR, 5_000L); // Waits for user speech to begin - give people some time (this is
+			// also decided by the recognizer itself - if it sees there's no speech, it will call onEndOfSpeech() (or
+			// onError(), I think, not sure anymore))
+			put(ON_BEGINNING_OF_SPEECH_STR, Long.MAX_VALUE); // Speech duration - as long as the user wants. If there's
+			// no one actually talking, let the recognizer decide that. I hasn't froze so far on onBeginningOfSpeech().
+			put(ON_END_OF_SPEECH_STR, 3_000L); // Time since speech ending until results are gotten - Internet
+			// connection doesn't take more than 3 seconds...
 		}
 	};
 
@@ -176,7 +182,11 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 				setOngoing(true).
 				build());
 
-		UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTED));
+		// This must be before starting the thread (sets the last_method_called variable, used in the thread).
+		last_method_called_when = System.currentTimeMillis();
+		last_method_called = ON_START_COMMAND_STR;
+
+		System.out.println("TTTTTTTTTTTTTT");
 
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
 		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
@@ -185,10 +195,9 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 			frozen_methods_checker.start();
 		}
 
-		last_method_called_when = System.currentTimeMillis();
-		last_method_called = ON_START_COMMAND_STR;
-
-		System.out.println("TTTTTTTTTTTTTT");
+		// After starting the thread - without the thread, this can stay working forever without being working, and if
+		// a problem occurred while starting it, the controller will restart t
+		UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_GOOGLE_RECOG_STARTING));
 
 		final RecognitionListener speechRecognitionListener = new SpeechRecognitionListener();
 		speechRecognizer = SpeechRecognizer.createSpeechRecognizer(UtilsGeneral.getContext());
@@ -432,8 +441,10 @@ public final class GoogleRecognition extends Service implements IModuleSrv {
 				System.out.println(System.currentTimeMillis());
 				System.out.println(last_method_called_when + last_methods_called_map.get(last_method_called));
 				System.out.println(System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called));
-				if (System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
+				if (Long.MAX_VALUE != last_methods_called_map.get(last_method_called) &&
+						System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
 					// If the recognizer got frozen, terminate the process.
+					// Also don't check the time if the method has no wait time (MAX_VALUE).
 					stopSelf();
 					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 				}

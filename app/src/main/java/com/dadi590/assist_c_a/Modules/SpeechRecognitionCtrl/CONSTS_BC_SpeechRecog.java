@@ -67,10 +67,10 @@ final class CONSTS_BC_SpeechRecog {
 	static final String ACTION_TERMINATE_RECOGNIZERS = "SpeechRecognition_ACTION_TERMINATE_RECOGNIZERS";
 
 	/**
-	 * <p>Explanation: informs that Google's speech recognition has began.</p>
+	 * <p>Explanation: informs that Google's speech recognizer is initializing.</p>
 	 * <p>Is broadcast by the class(es): {@link GoogleRecognition}.</p>
 	 * <p>To be received only by the class(es): any chosen class.</p>
 	 * <p>Extras: none.</p>
 	 */
-	public static final String ACTION_GOOGLE_RECOG_STARTED = "SpeechRecognition_ACTION_GOOGLE_RECOG_STARTED";
+	public static final String ACTION_GOOGLE_RECOG_STARTING = "SpeechRecognition_ACTION_GOOGLE_RECOG_STARTING";
 }
