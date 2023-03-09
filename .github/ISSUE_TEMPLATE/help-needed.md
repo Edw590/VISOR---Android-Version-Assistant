@@ -2,18 +2,18 @@
 name: Help needed
 about: Help using the app
 title: "[HELP]"
-labels: ''
-assignees: DADi590
+labels: 'help'
+assignees: Edw590
 
 ---
 
-**What do you need help with?** <!--[Title;]-->
+**What do you need help with?**
 
 
-**What's the problem?** <!--[Title;]-->
+**What's the problem?**
 
 
-**Please complete the following information:** <!--[Title;]-->
- - Device: [e.g. Samsung Galaxy Invisible Pro]
- - OS: [e.g. Android 98.3a]
- - App version [e.g. v2050_13_32]
+**Device information:**
+ - Device: device name
+ - OS: name and version
+ - App version: version name

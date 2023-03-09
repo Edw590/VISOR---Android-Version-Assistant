@@ -7,7 +7,4 @@ assignees: ''
 
 ---
 
-**What is the question about?** <!--[Title;]-->
-
-
-**What is the actual question?** <!--[Title;]-->
+**What is the question?**
