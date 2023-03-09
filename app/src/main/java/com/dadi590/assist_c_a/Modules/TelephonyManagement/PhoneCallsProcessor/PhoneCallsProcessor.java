@@ -60,6 +60,11 @@ import java.util.Objects;
  */
 public final class PhoneCallsProcessor implements IModuleInst {
 
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
+	private final Handler main_handler;
+
 	// 50 call events from the point the phone receives a call to when it ends the last call. More than than that, wow,
 	// I guess. Amazingly busy person? In that case, the array will reallocate itself with the double of the size. Won't
 	// be normal anyway.
@@ -72,11 +77,6 @@ public final class PhoneCallsProcessor implements IModuleInst {
 	 * <p>- mapCallLogToCALL_PHASE.put(MISSED_TYPE, CALL_PHASE_LOST)</p>
 	 */
 	private final LinkedHashMap<Integer, Integer> mapCallLogToCALL_PHASE;
-
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
-	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
-			ModulesList.ELEMENT_NAME));
-	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -178,7 +178,9 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				return;
 			}
 			for (final NumAndPhase sub_ret : ret) {
-				whatToDo(sub_ret);
+				if (null != sub_ret) {
+					whatToDo(sub_ret);
+				}
 			}
 		}
 

@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -47,9 +48,9 @@ import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsAudio;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
@@ -76,14 +77,17 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			ModulesList.ELEMENT_NAME));
 	private Handler main_handler;
 
-	@Nullable private SpeechRecognizer speechRecognizer = null;
+	private SpeechRecognizer recognizer = null;
 
 	boolean is_listening = false;
+	boolean is_working = false;
 	boolean partial_results = false;
 
 	String listening_speech_id = "";
 	boolean visor_spoke = false;
 	boolean wait = true;
+
+	private FrozenMethodsChecker frozen_methods_checker = null;
 
 	//String last_processed_speech = "";
 	//int partial_results_last_index = 0;
@@ -160,6 +164,23 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	///////////////////////////////////////////////////////////////
 
 	@Override
+	public void onCreate() {
+		main_handlerThread.start();
+		main_handler = new Handler(main_handlerThread.getLooper());
+
+		try {
+			// This must be started in another thread to change the 'wait' variable. Else it would run on the main
+			// process thread, like the while loop (not very useful...).
+			UtilsContext.getContext().registerReceiver(broadcastReceiver,
+					new IntentFilter(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID), null, main_handler);
+		} catch (final IllegalArgumentException ignored) {
+		}
+
+		recognizer = SpeechRecognizer.createSpeechRecognizer(UtilsContext.getContext());
+		recognizer.setRecognitionListener(new SpeechRecognitionListener());
+	}
+
+	@Override
 	public int onStartCommand(@Nullable final Intent intent, final int flags, final int startId) {
         /*
 		If the service was killed by its PID and the system restarted it, this might appear in the logs:
@@ -181,98 +202,117 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		}
 		if (stop_now) {
 			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
-			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 
-			return START_NOT_STICKY;
+			return START_STICKY;
 		}
 
-		startForeground(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND, UtilsNotifications.getNotification(notificationInfo).
-				setOngoing(true).
-				build());
+		// DON'T WASTE TIME TRYING TO HAVE THIS AS AN INSTANTIATED MODULE
+		// The SpeechRecognizer class MUST be ran from the MAIN app thread. Luckily it also works with the main thread
+		// of a new process. The infinity_thread of the controller is not the main app thread... So keep it in a
+		// separate process.
+
+		boolean wait_mic = !UtilsAudio.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC);
+
+		System.out.println("2GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG2");
+		System.out.println(is_working);
+		System.out.println(wait_mic);
+
+		if (is_working) {
+			stopListening(true);
+			wait_mic = true;
+		}
+		if (wait_mic) {
+			try {
+				// Wait 1 second if the microphone is busy, to see if it stops being.
+				Thread.sleep(1000L);
+			} catch (final InterruptedException ignored) {
+				return START_STICKY;
+			}
+		}
+
+		if (UtilsAudio.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
+			startListening();
+		} else {
+			// Else, if the microphone doesn't stop being busy, means it's in use elsewhere (recording, in a call, who
+			// knows), so warn about it and don't do anything.
+			final String speak = "Resources are busy";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+		}
+
+		return START_STICKY;
+	}
+
+	boolean startListening() {
+		System.out.println("TTTTTTTTTTTTTT");
+		last_method_called = null;
+		last_method_called_when = 0L;
 
 		// This must be done before starting the thread.
 		last_method_called = ON_START_COMMAND_STR;
 
-		System.out.println("TTTTTTTTTTTTTT");
-
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
 		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
-		if (!UtilsGeneral.isThreadWorking(frozen_methods_checker)) {
-			// This check here above is because onEndOfSpeech() was just called twice in a row... Wtf. Don't remove this.
-			frozen_methods_checker.start();
+		if (null != frozen_methods_checker) {
+			// In case the previous one wasn't interrupted.
+			frozen_methods_checker.interrupt();
 		}
+		frozen_methods_checker = new FrozenMethodsChecker();
+		frozen_methods_checker.start();
 
 		// After starting the thread - without the thread, this can stay working forever without being working, and if
 		// a problem occurred while starting it, the controller will restart t
 		UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING));
 
-		speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-		speechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
+		// Don't notify about the speech if there was no sound - there's already a notification.
+		listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION,
+				Speech2.MODE1_NO_NOTIF, null);
+		visor_spoke = UtilsSpeech2.mightSpeak();
 
-		try {
-			// We need to wait for the microphone usage check because it's saying it's in use when it shouldn't be, so
-			// waiting a bit helped.
-			Thread.sleep(500L);
-		} catch (final InterruptedException ignored) {
-			return START_NOT_STICKY;
-		}
+		// Right before calling startListening() but also before the while true just in case it would get stuck.
+		last_method_called_when = System.currentTimeMillis();
 
-		if (UtilsAudio.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC)) {
-			main_handlerThread.start();
-			main_handler = new Handler(main_handlerThread.getLooper());
-
+		// Don't begin recognizing if VISOR didn't finish speaking (else he will recognize his own speech and end
+		// the recognition if there's nothing said right after it).
+		// Also no problem if this gets stuck because the Speech module is restarting or something - the checker
+		// thread will terminate the recognizer in that case.
+		while (wait) {
 			try {
-				// This must be started in another thread to change the 'wait' variable. Else it would run on the main
-				// process thread, like the while loop (not very useful...).
-				registerReceiver(broadcastReceiver, new IntentFilter(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID), null,
-						main_handler);
-			} catch (final IllegalArgumentException ignored) {
+				Thread.sleep(100L);
+			} catch (final InterruptedException ignored) {
+				return false;
 			}
-
-			// Don't notify about the speech if there was no sound - there's already a notification.
-			listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION,
-					Speech2.MODE1_NO_NOTIF, null);
-			visor_spoke = UtilsSpeech2.mightSpeak();
-
-			// Right before calling startListening() but also before the while true just in case it would get stuck.
-			last_method_called_when = System.currentTimeMillis();
-
-			// Don't begin recognizing if VISOR didn't finish speaking (else he will recognize his own speech and end
-			// the recognition if there's nothing said right after it).
-			// Also no problem if this gets stuck because the Speech module is restarting or something - the checker
-			// thread will terminate the recognizer in that case.
-			while (wait) {
-				try {
-					Thread.sleep(100L);
-				} catch (final InterruptedException ignored) {
-					return START_NOT_STICKY;
-				}
-			}
-
-			// todo Instead of this, have VISOR detect if he's on speakers or headphones. If on speakers, mute the
-			//  microphone with AudioManager.setMicrophoneMute() until he stops speaking.
-
-			speechRecognizer.startListening(speech_recognizer_intent);
-		} else {
-			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
-
-			shutdownRecognizer();
-			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 
-		return START_NOT_STICKY;
+		// todo Instead of this, have VISOR detect if he's on speakers or headphones. If on speakers, mute the
+		//  microphone with AudioManager.setMicrophoneMute() until he stops speaking.
+
+		is_working = true;
+
+		recognizer.startListening(speech_recognizer_intent);
+
+		UtilsContext.getNotificationManager().notify(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND,
+				UtilsNotifications.getNotification(notificationInfo).setOngoing(true).build());
+
+		return true;
 	}
 
-	/**
-	 * <p>Shuts down (destroys) the {@link SpeechRecognizer} instance.</p>
-	 */
-	void shutdownRecognizer() {
-		if (speechRecognizer != null) {
-			speechRecognizer.destroy();
-			speechRecognizer = null;
+	final Runnable stop_listening = new Runnable() {
+		@Override
+		public void run() {
+			recognizer.stopListening();
+			frozen_methods_checker.interrupt();
+			UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND);
+			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED));
+			is_listening = false;
+			is_working = false;
+		}
+	};
+
+	void stopListening(final boolean main_thread) {
+		if (main_thread) {
+			stop_listening.run();
+		} else {
+			new Handler(Looper.getMainLooper()).post(stop_listening);
 		}
 	}
 
@@ -375,9 +415,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			System.out.println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
 			System.out.println(error);
 
-			shutdownRecognizer();
-			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			stopListening(true);
 		}
 
 		@Override
@@ -445,9 +483,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			//	}
 			//}
 
-			shutdownRecognizer();
-			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			stopListening(true);
 		}
 
 		@Override
@@ -496,7 +532,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	 * <p>The thread stops when one of the results functions are called (which will terminate the process when it
 	 * finishes) - everything went fine.</p>
 	 */
-	Thread frozen_methods_checker = new Thread(new Runnable() {
+	final class FrozenMethodsChecker extends Thread {
 		@Override
 		public void run() {
 			while (last_method_called != null) {
@@ -513,9 +549,9 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 						System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
 					// If the recognizer got frozen, terminate the process.
 					// Also don't check the time if the method has no wait time (MAX_VALUE).
-					shutdownRecognizer();
-					stopSelf();
-					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+					last_method_called = null;
+					last_method_called_when = 0L;
+					stopListening(false);
 				}
 				try {
 					Thread.sleep(1_000L);
@@ -524,7 +560,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 				}
 			}
 		}
-	});
+	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -555,18 +591,8 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		}
 	};
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-
-		shutdownRecognizer();
-		stopSelf();
-		UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
-	}
-
-
-	@Override
 	@Nullable
+	@Override
 	public IBinder onBind(@Nullable final Intent intent) {
 		return null;
 	}

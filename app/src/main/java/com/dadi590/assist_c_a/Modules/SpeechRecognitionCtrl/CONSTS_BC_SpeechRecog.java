@@ -77,4 +77,12 @@ final class CONSTS_BC_SpeechRecog {
 	 * <p>Extras: none.</p>
 	 */
 	public static final String ACTION_CMDS_RECOG_STARTING = "SpeechRecognition_ACTION_CMDS_RECOG_STARTING";
+
+	/**
+	 * <p>Explanation: informs that the commands speech recognizer stopped listening.</p>
+	 * <p>Is broadcast by the class(es): {@link CommandsRecognition}.</p>
+	 * <p>To be received only by the class(es): any chosen class.</p>
+	 * <p>Extras: none.</p>
+	 */
+	public static final String ACTION_CMDS_RECOG_STOPPED = "SpeechRecognition_ACTION_CMDS_RECOG_STOPPED";
 }

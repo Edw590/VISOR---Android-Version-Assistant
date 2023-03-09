@@ -107,7 +107,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	}
 
 	/**
-	 * <p>Prepare the recognizer instance asynchronously.</p>
+	 * <p>Prepare the recognizer instance.</p>
 	 *
 	 * @return true if the recognizer is ready to work, false if an error occurred
 	 */
@@ -159,7 +159,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	/**
 	 * <p>Shuts down the recognizer instance and a call to {@link #prepareRecognizer()} will be needed again.</p>
 	 */
-	private synchronized static void shutdownRecognizer() {
+	private static void shutdownRecognizer() {
 		is_listening = false;
 
 		if (null != recognizer) {

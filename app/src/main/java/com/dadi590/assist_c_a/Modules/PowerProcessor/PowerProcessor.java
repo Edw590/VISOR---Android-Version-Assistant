@@ -47,6 +47,11 @@ import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry
  */
 public final class PowerProcessor implements IModuleInst {
 
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
+	private final Handler main_handler;
+
 	// Minimum and maximum recommended battery percentage values to increase its life
 	private static final int PERCENT_MIN = 20;
 	private static final int PERCENT_MAX = 80;
@@ -58,11 +63,6 @@ public final class PowerProcessor implements IModuleInst {
 	private int last_detected_percent = -1;
 	boolean actions_power_mode_broadcast = false;
 	boolean better_battery_present = false;
-
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
-	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
-			ModulesList.ELEMENT_NAME));
-	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff

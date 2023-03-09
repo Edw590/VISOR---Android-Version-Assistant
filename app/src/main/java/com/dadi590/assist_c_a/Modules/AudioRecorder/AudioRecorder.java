@@ -47,21 +47,18 @@ import com.dadi590.assist_c_a.ModulesList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * <p>The audio recorder module of the assistant.</p>
  */
 public final class AudioRecorder implements IModuleInst {
 
-	@Nullable private MediaRecorder recorder = null;
-
-	private static final String aud_src_tmp_file = "audioSourceCheck";
-
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
 	private final Handler main_handler;
+
+	@Nullable private MediaRecorder recorder = null;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -208,7 +205,9 @@ public final class AudioRecorder implements IModuleInst {
 		// that the app supports, and the sound is still very good.
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		final File file = UtilsMedia.getOutputMediaFile(UtilsMedia.AUDIO);
-		if (!Objects.requireNonNull(file.getParentFile()).mkdirs()) {
+		final File folder = file.getParentFile();
+		assert folder != null; // Won't be null, there's always a parent folder
+		if (!folder.exists() && !file.getParentFile().mkdirs()) {
 			stopRecording();
 
 			final String speak = "Error 2 sir.";

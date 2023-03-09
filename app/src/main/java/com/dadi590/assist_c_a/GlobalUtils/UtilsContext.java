@@ -39,6 +39,7 @@ import java.util.Objects;
  * <p>Utilties related to Context stuff.</p>
  */
 public class UtilsContext {
+
 	/**
 	 * <p>Returns the Application Context.</p>
 	 * <p>Main note: do NOT use on Content Provider classes. Only on Activities, Services and Receivers. Read the doc of
@@ -80,12 +81,10 @@ public class UtilsContext {
 	}
 
 	/**
-	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @Nullable on it from AndroidX
-	 * to provide warnings.</p>
+	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @NonNull on it because the app won't even
+	 * start if there's no Notification Service on the device from AndroidX.</p>
 	 *
-	 * @param name same as in {@link ServiceManager#getService(String)}
-	 *
-	 * @return same as in {@link ServiceManager#getService(String)}
+	 * @return same as in {@link ServiceManager#getService(String)} except it won't be null
 	 */
 	@NonNull
 	public static NotificationManager getNotificationManager() {

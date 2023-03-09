@@ -100,7 +100,7 @@ public final class UtilsMainSrvc {
 
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
-				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
+				if ("globalactions".equals(reason)) { // "globalactions" == Power menu
 					if (UtilsRegistry.getValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).getData(false)) {
 						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 						UtilsAudioRecorderBC.recordAudio(false, -1, true);
@@ -108,12 +108,7 @@ public final class UtilsMainSrvc {
 						// If it's not recording audio, start the commands recognizer.
 						UtilsSpeechRecognizersBC.startCommandsRecognition();
 					}
-				}/* else if ("homekey".equals(reason)) {
-					// Here the recognizers are stopped because the user might be wanting to start the cmds recognition
-					// from the Google App or wherever else and the microphone would be in use - so this stops it.
-					// Update: this just detects a home key PRESS, not hold. So it's of no use and is now disabled.
-				} else if ("recentapps".equals(reason)) {
-                }*/
+				}
 			}
 		};
 

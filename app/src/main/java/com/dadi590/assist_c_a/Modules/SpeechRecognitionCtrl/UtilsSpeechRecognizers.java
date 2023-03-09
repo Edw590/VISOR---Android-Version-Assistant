@@ -94,20 +94,12 @@ public final class UtilsSpeechRecognizers {
 	static void startCommandsRecognition() {
 		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
 
-		try {
-			// Wait just a bit before checking if the microphone is available or not (has proven useful on BV9500,
-			// especially after stopping recording).
-			Thread.sleep(650L);
-		} catch (final InterruptedException ignored) {
-			return;
-		}
-
 		// No need to check if the cmds recognition is supported or not because the Controller will only be activated if
 		// the recognition is available (checked on isSupported() every CHECK_TIME on the Manager).
 
 		final Intent intent = new Intent(UtilsContext.getContext(), CommandsRecognition.class);
 		intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
-		UtilsServices.startService(CommandsRecognition.class, intent, false, true);
+		UtilsServices.startService(CommandsRecognition.class, intent, false, false);
 	}
 
 	/**
@@ -147,9 +139,25 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Stop both speech recognizers synchronously.</p>
 	 */
 	static void stopSpeechRecognizers() {
-		System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-		PocketSphinxRecognition.stopListening();
+		System.out.println("1YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY1");
+		stopPocketSphinxRecognition();
+		stopCommandsRecognizer();
+	}
+
+	/**
+	 * <p>Stop the commands speech recognizer synchronously.</p>
+	 */
+	static void stopCommandsRecognizer() {
+		System.out.println("2YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY2");
 		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(CommandsRecognition.class));
 		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND);
+	}
+
+	/**
+	 * <p>Stop PocketSphinx's speech recognizer synchronously.</p>
+	 */
+	static void stopPocketSphinxRecognition() {
+		System.out.println("3YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY3");
+		PocketSphinxRecognition.stopListening();
 	}
 }

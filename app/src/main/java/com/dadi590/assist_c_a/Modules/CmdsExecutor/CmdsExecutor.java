@@ -677,7 +677,8 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_RECORD_MEDIA): {
 					switch (cmd_variant) {
-						case (CmdsList.CmdRetIds.RET_16_AUDIO): {
+						case (CmdsList.CmdRetIds.RET_16_AUDIO_1):
+						case (CmdsList.CmdRetIds.RET_16_AUDIO_2): {
 							if (!only_returning) {
 								if (!(boolean) ModulesList.getElementValue(
 										ModulesList.getElementIndex(AudioRecorder.class), ModulesList.ELEMENT_SUPPORTED)) {
@@ -709,9 +710,10 @@ public final class CmdsExecutor implements IModuleInst {
 
 							break;
 						}
-						case (CmdsList.CmdRetIds.RET_16_VIDEO_REAR):
-						case (CmdsList.CmdRetIds.RET_16_VIDEO_FRONTAL): {
+						case (CmdsList.CmdRetIds.RET_16_VIDEO_1):
+						case (CmdsList.CmdRetIds.RET_16_VIDEO_2): {
 							// todo
+							// todo Also missing the record frontal and rear video commands (this one is generic)
 
 							break;
 						}

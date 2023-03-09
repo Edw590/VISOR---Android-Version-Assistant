@@ -36,6 +36,7 @@ import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.ModulesList;
@@ -58,6 +59,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	@Nullable Class<?> current_recognizer = NO_RECOGNIZER;
 
 	long cmds_recog_requested_when = 0L;
+	boolean cmds_recog_is_listening = false;
 
 	private static final long DEFAULT_WAIT_TIME = 5_000L;
 	long wait_time = DEFAULT_WAIT_TIME;
@@ -120,6 +122,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 			final IntentFilter intentFilter = new IntentFilter();
 
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING);
+			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED);
 
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_CMDS_RECOG);
 			intentFilter.addAction(CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX);
@@ -137,6 +140,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		public void run() {
 			final int cmds_recog_module_index = ModulesList.getElementIndex(COMMANDS_RECOGNIZER);
 			while (true) {
+				UtilsServices.startService(CommandsRecognition.class, null, false, true);
 				final PocketSphinxRecognition instance = (PocketSphinxRecognition) ModulesList.getElementValue(
 						ModulesList.getElementIndex(PocketSphinxRecognition.class), ModulesList.ELEMENT_INSTANCE);
 				if (null != instance) {
@@ -161,7 +165,9 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					if (NO_RECOGNIZER == current_recognizer) {
 						if (0L == cmds_recog_requested_when) {
 							if (!UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
-								UtilsSpeechRecognizers.stopSpeechRecognizers();
+								if (cmds_recog_is_listening) {
+									UtilsSpeechRecognizers.stopCommandsRecognizer();
+								}
 								if (UtilsSpeechRecognizers.startPocketSphinxRecognition()) {
 									current_recognizer = POCKETSPHINX_RECOGNIZER;
 									wait_time = DEFAULT_WAIT_TIME;
@@ -170,7 +176,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 						} else if (System.currentTimeMillis() > cmds_recog_requested_when + 2000L) {
 							// If the cmds recognizer was requested but could not be started for some reason (probably
 							// some error starting the service, who knows), keep trying to start it.
-							UtilsSpeechRecognizers.stopSpeechRecognizers();
+							UtilsSpeechRecognizers.stopPocketSphinxRecognition();
 							UtilsSpeechRecognizers.startCommandsRecognition();
 						}
 					}
@@ -199,16 +205,25 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////
 
-				case CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING: {
+				case (CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING): {
+					cmds_recog_is_listening = true;
 					current_recognizer = COMMANDS_RECOGNIZER;
 					wait_time = 500L;
 
 					break;
 				}
+				case (CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED): {
+					cmds_recog_requested_when = 0L;
+					cmds_recog_is_listening = false;
+					current_recognizer = NO_RECOGNIZER;
+					wait_time = DEFAULT_WAIT_TIME;
+
+					break;
+				}
 
 
-				case CONSTS_BC_SpeechRecog.ACTION_START_CMDS_RECOG: {
-					UtilsSpeechRecognizers.stopSpeechRecognizers();
+				case (CONSTS_BC_SpeechRecog.ACTION_START_CMDS_RECOG): {
+					UtilsSpeechRecognizers.stopPocketSphinxRecognition();
 					UtilsSpeechRecognizers.startCommandsRecognition();
 
 					cmds_recog_requested_when = System.currentTimeMillis();
@@ -217,8 +232,10 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 					break;
 				}
-				case CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX: {
-					UtilsSpeechRecognizers.stopSpeechRecognizers();
+				case (CONSTS_BC_SpeechRecog.ACTION_START_POCKET_SPHINX): {
+					if (cmds_recog_is_listening) {
+						UtilsSpeechRecognizers.stopCommandsRecognizer();
+					}
 					if (!UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
 						// Still stop. Just don't restart PocketSphinx.
 						UtilsSpeechRecognizers.startPocketSphinxRecognition();
@@ -230,10 +247,11 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 					break;
 				}
-				case CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION: {
+				case (CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION): {
+					cmds_recog_requested_when = 0L;
 					stop_speech_recognition = true;
 					wait_time = DEFAULT_WAIT_TIME;
-					cmds_recog_requested_when = 0L;
+					cmds_recog_is_listening = false;
 
 					UtilsSpeechRecognizers.stopSpeechRecognizers();
 
@@ -242,10 +260,11 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 					break;
 				}
-				case CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS: {
+				case (CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS): {
 					//stop_speech_recognition = false; - this doesn't change with this call
 					cmds_recog_requested_when = 0L;
 					wait_time = DEFAULT_WAIT_TIME;
+					cmds_recog_is_listening = false;
 
 					UtilsSpeechRecognizers.stopSpeechRecognizers();
 

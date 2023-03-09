@@ -97,9 +97,10 @@ public final class CmdsList {
 		public static final String RET_15_REAR = ".00001";
 		public static final String RET_15_FRONTAL = ".00002";
 
-		public static final String RET_16_AUDIO = ".00001";
-		public static final String RET_16_VIDEO_REAR = ".00002";
-		public static final String RET_16_VIDEO_FRONTAL = ".00003";
+		public static final String RET_16_AUDIO_1 = ".00001";
+		public static final String RET_16_AUDIO_2 = ".00003";
+		public static final String RET_16_VIDEO_1 = ".00002";
+		public static final String RET_16_VIDEO_2 = ".00004";
 
 		public static final String RET_20_ANY = ".00001";
 		public static final String RET_20_AUDIO = ".00002";
@@ -153,8 +154,8 @@ public final class CmdsList {
 				put(CmdIds.CMD_TOGGLE_SPEAKERS,           CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 10
 				put(CmdIds.CMD_TOGGLE_AIRPLANE_MODE,      CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 11
 				put(CmdIds.CMD_ASK_BATTERY_PERCENT,       CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 12
-				put(CmdIds.CMD_POWER_SHUT_DOWN,          CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 13
-				put(CmdIds.CMD_POWER_REBOOT,             CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 14
+				put(CmdIds.CMD_POWER_SHUT_DOWN,           CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 13
+				put(CmdIds.CMD_POWER_REBOOT,              CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 14
 				put(CmdIds.CMD_TAKE_PHOTO,                CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 15
 				put(CmdIds.CMD_RECORD_MEDIA,              CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 16
 				put(CmdIds.CMD_SAY_AGAIN,                 CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 17
@@ -204,11 +205,11 @@ public final class CmdsList {
 			{CmdIds.CMD_POWER_SHUT_DOWN, ACD.CMDi_TYPE_SHUT_DOWN, "", "", "device/phone"},                                                                  // 13
 			{CmdIds.CMD_POWER_REBOOT, ACD.CMDi_TYPE_REBOOT, "fast", "fast|"+ACD.ANY_MAIN_WORD+" -fast", "reboot/restart device/phone|device/phone|device/phone recovery|device/phone safe mode|device/phone bootloader"},  // 14
 			{CmdIds.CMD_TAKE_PHOTO, ACD.CMDi_TYPE_NONE, "take", "", "picture/photo|frontal picture/photo"},                                                 // 15
-			{CmdIds.CMD_RECORD_MEDIA, ACD.CMDi_TYPE_RECORD, "", "", "audio/sound|video/camera"},                                                            // 16
+			{CmdIds.CMD_RECORD_MEDIA, ACD.CMDi_TYPE_START, "record", "record|record|"+ACD.ANY_MAIN_WORD+" -record", "audio/sound|video/camera|recording audio/sound|recording video/camera"},                              // 16
 			{CmdIds.CMD_SAY_AGAIN, ACD.CMDi_TYPE_REPEAT_SPEECH, "", "", "again|say|said"},                                                                  // 17
 			{CmdIds.CMD_TOGGLE_POWER_SAVER_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "power/battery saver"},                                                   // 19
 			{CmdIds.CMD_STOP_RECORD_MEDIA, ACD.CMDi_TYPE_STOP, "", "", "recording/record|recording/record audio/sound"},                                    // 20
-			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"},           // 21
+			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"},          // 21
 			{CmdIds.CMD_CONFIRM, ACD.CMDi_TYPE_NONE, "i", "", "do/confirm/approve/certify"},                                                                // 22
 			{CmdIds.CMD_REJECT, ACD.CMDi_TYPE_NONE, "i", "", "don't/reject/disapprove"},                                                                    // 23
 			{CmdIds.CMD_STOP_LISTENING, ACD.CMDi_TYPE_STOP, "", "", "listening"},                                                                           // 24

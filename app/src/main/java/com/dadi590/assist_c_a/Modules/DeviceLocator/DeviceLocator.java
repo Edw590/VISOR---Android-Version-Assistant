@@ -67,6 +67,11 @@ import java.util.Locale;
  */
 public final class DeviceLocator implements IModuleInst {
 
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
+	private final Handler main_handler;
+
 	// This below can be null if there's no Bluetooth adapter or there was some error, so Nullable for NPE warnings
 	@Nullable final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	// This one can be null if there's no BLE on the device or there was some error, so NPE warnings are useful
@@ -82,11 +87,6 @@ public final class DeviceLocator implements IModuleInst {
 
 
 	private final DeviceObj current_device = new DeviceObj();
-
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
-	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
-			ModulesList.ELEMENT_NAME));
-	private final Handler main_handler;
 
 	boolean enabled_by_visor_bt = false;
 	private static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes

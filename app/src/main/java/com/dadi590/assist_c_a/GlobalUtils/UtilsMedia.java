@@ -83,6 +83,6 @@ public final class UtilsMedia {
 			}
 		}
 
-		return new File(new File(file_path), file_path);
+		return new File(file_path);
 	}
 }

@@ -426,7 +426,9 @@ public final class ModulesList {
 		// them.
 		final Method method = UtilsReflection.getMethod(element_class, "isSupported");
 		// In case this throws an error while I'm messing with the modules, so that I know in which module is the error.
-		System.out.println(element_class);
+		if (null == method) {
+			System.out.println(element_class);
+		}
 		// It's never null when it gets here, unless I was dumb and forgot to put the method in some class.
 		assert null != method;
 		// No need to check for errors invoking the method - there will be none. It's always declared and

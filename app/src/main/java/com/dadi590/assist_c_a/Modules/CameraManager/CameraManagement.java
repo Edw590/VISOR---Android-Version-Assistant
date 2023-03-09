@@ -56,6 +56,11 @@ import java.util.List;
  */
 public final class CameraManagement implements IModuleInst {
 
+	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
+			ModulesList.ELEMENT_NAME));
+	private final Handler main_handler;
+
 	@Nullable private Camera camera_old = null;
 	@Nullable TakePictureOld takePictureOld = null;
 
@@ -67,11 +72,6 @@ public final class CameraManagement implements IModuleInst {
 
 	boolean flashlight_was_on_before_pic = false;
 	boolean first_pic_of_two = false;
-
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
-	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
-			ModulesList.ELEMENT_NAME));
-	private final Handler main_handler;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
