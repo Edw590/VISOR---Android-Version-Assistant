@@ -59,12 +59,12 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if available, false otherwise
 	 */
 	public static boolean isTelephonySupported(final boolean check_phone_calls) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
 				UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 			// TelecomManager.getAllPhoneAccounts() needs MODIFY_PHONE_STATE (by experience).
-			final TelecomManager telecomManager = (TelecomManager) UtilsGeneral.getSystemService(Context.TELECOM_SERVICE);
+			final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
 			if (null == telecomManager) {
 				return false;
 			}
@@ -112,7 +112,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if audio output is supported, false otherwise
 	 */
 	public static boolean isAudioOutputSupported() {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 
 		Boolean has_audio_output_feature = null;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -126,7 +126,7 @@ public final class UtilsCheckHardwareFeatures {
 		// "I tested this feature on my MOTO 360 (no speaker), it don't has this feature, and Ticwatch (with
 		// speaker) do have this feature. But when I connected a Bluetooth headset to the MOTO 360, it still
 		// don't have this feature, this confused me." --> https://stackoverflow.com/a/32903108/8228163.
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
 		if (null == audioManager) {
 			return false;
 		}
@@ -155,7 +155,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if current location can be reported on the device, false otherwise
 	 */
 	public static boolean isLocationSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if current precise location can be reported on the device, false otherwise
 	 */
 	public static boolean isPreciseLocationSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
 	}
 
 	/**
@@ -173,7 +173,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if current coarse location can be reported on the device, false otherwise
 	 */
 	public static boolean isCoarseLocationSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
 	}
 
 	/**
@@ -183,7 +183,7 @@ public final class UtilsCheckHardwareFeatures {
 	 */
 	@SuppressLint("UnsupportedChromeOsCameraSystemFeature")
 	public static boolean isCameraSupported() {
-		final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
+		final PackageManager packageManager = UtilsContext.getContext().getPackageManager();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 		} else {
@@ -198,7 +198,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if camera flash is supported, false otherwise
 	 */
 	public static boolean isCameraFlashSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
 	}
 
 	/**
@@ -207,7 +207,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if microphone is supported, false otherwise
 	 */
 	public static boolean isMicrophoneSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
 	}
 
 	/**
@@ -216,7 +216,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if microphone is supported, false otherwise
 	 */
 	public static boolean isWifiSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
 	}
 
 	/**
@@ -225,7 +225,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if microphone is supported, false otherwise
 	 */
 	public static boolean isBluetoothSupported() {
-		return UtilsGeneral.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
 	}
 
 	/**
@@ -234,7 +234,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if microphone is supported, false otherwise
 	 */
 	public static boolean isMobileDataSupported() {
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsGeneral.
+		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (null == connectivityManager) {
 			return false;
@@ -253,7 +253,7 @@ public final class UtilsCheckHardwareFeatures {
 	 * @return true if microphone is supported, false otherwise
 	 */
 	public static boolean isAnyDataNetworkSupported() {
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsGeneral.
+		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (null == connectivityManager) {
 			return false;

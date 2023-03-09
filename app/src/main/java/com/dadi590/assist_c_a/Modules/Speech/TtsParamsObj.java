@@ -24,7 +24,7 @@ package com.dadi590.assist_c_a.Modules.Speech;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * <p>An instantiated class to serve as a multi-type array for the {@link TextToSpeech} speak() methods.</p>
@@ -32,5 +32,5 @@ import java.util.HashMap;
 final class TtsParamsObj {
 
 	final Bundle bundle = new Bundle(2);
-	final HashMap<String, String> hashmap = new HashMap<>(3);
+	final LinkedHashMap<String, String> hashmap = new LinkedHashMap<>(3);
 }

@@ -23,26 +23,25 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.content.Intent;
 import android.os.Build;
+import android.speech.RecognizerIntent;
 
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCryptoHashing;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNativeLibs;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
-import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 
 /**
- * <p>Utilities for use with Google and PocketSphinx speech recognizers.</p>
+ * <p>Utilities for use with the commands and PocketSphinx speech recognizers.</p>
  */
 public final class UtilsSpeechRecognizers {
-
-	static final String google_app_pkg_name = "com.google.android.googlequicksearchbox";
 
 	private static final String[] hashes_PocketSphinx_lib_files = {
 			// All SHA-512
@@ -59,12 +58,12 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>Checks if the Google app is installed and enabled for the Google speech recognition.</p>
+	 * <p>Checks if an app is available for the {@link RecognizerIntent#ACTION_RECOGNIZE_SPEECH} intent.</p>
 	 *
-	 * @return true if it is the Google app is installed and enabled, false otherwise
+	 * @return true if there's one, false otherwise
 	 */
-	static boolean isGoogleAppEnabled() {
-		return UtilsApp.APP_ENABLED == UtilsApp.appEnabledStatus(google_app_pkg_name);
+	static boolean isCmdsRecogAppAvailable() {
+		return UtilsGeneral.isIntentActionAvailable(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
 	}
 
 	/**
@@ -90,9 +89,9 @@ public final class UtilsSpeechRecognizers {
 	}
 
 	/**
-	 * <p>Start Google's speech recognition asynchronously.</p>
+	 * <p>Start the commands speech recognition asynchronously.</p>
 	 */
-	static void startGoogleRecognition() {
+	static void startCommandsRecognition() {
 		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
 
 		try {
@@ -103,12 +102,12 @@ public final class UtilsSpeechRecognizers {
 			return;
 		}
 
-		// No need to check if Google's recognition is supported or not because the Controller will only be activated if
+		// No need to check if the cmds recognition is supported or not because the Controller will only be activated if
 		// the recognition is available (checked on isSupported() every CHECK_TIME on the Manager).
 
-		final Intent intent = new Intent(UtilsGeneral.getContext(), GoogleRecognition.class);
+		final Intent intent = new Intent(UtilsContext.getContext(), CommandsRecognition.class);
 		intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
-		UtilsServices.startService(GoogleRecognition.class, intent, false, true);
+		UtilsServices.startService(CommandsRecognition.class, intent, false, true);
 	}
 
 	/**
@@ -127,12 +126,12 @@ public final class UtilsSpeechRecognizers {
 		} else {
 			// Set no-value to be equal to true value (so that VISOR warns anyway even before the value being there -
 			// would mean it's assuming the recognition was there, or just to warn the user at the app startup).
-			final boolean recog_available = UtilsRegistry.getValueObj(ValuesRegistry.Keys.POCKETSPHINX_RECOG_AVAILABLE).
+			final boolean recog_available = UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_RECOG_AVAILABLE).
 					getData(true);
 			if (recog_available) { // Warn only once when it was there and stopped being.
 				final String speak = "Attention - Background speech recognition is not available. PocketSphinx's " +
 						"correct library file was not found.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 			}
 
 			started = false;
@@ -150,7 +149,7 @@ public final class UtilsSpeechRecognizers {
 	static void stopSpeechRecognizers() {
 		System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
 		PocketSphinxRecognition.stopListening();
-		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(GoogleRecognition.class));
-		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_GOOGLE_RECOG_FOREGROUND);
+		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(CommandsRecognition.class));
+		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND);
 	}
 }

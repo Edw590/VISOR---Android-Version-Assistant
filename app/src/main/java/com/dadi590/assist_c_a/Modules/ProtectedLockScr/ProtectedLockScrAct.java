@@ -41,7 +41,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
@@ -103,7 +103,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 	// API 29 - that's on public APIs only, not internal ones.
 	// Also the "WrongConstant" STATUS_BAR_SERVICE works, so can't be that wrong - ignore too.
 	@SuppressLint({"NewApi", "WrongConstant"})
-	@Nullable final StatusBarManager statusBarManager = (StatusBarManager) UtilsGeneral.getSystemService(STATUS_BAR_SERVICE);
+	@Nullable final StatusBarManager statusBarManager = (StatusBarManager) UtilsContext.getSystemService(STATUS_BAR_SERVICE);
 	// At least compiling with API 29, the method on StatusBarManager is still collapsePanels(), so all cool using the
 	// internal API directly without reflection.
 
@@ -306,7 +306,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 		// the permission will be granted automatically - some times, not always, it's confusing, might have to do with
 		// who is the creator of the app, like Facebook...).
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			final Context context = UtilsGeneral.getContext();
+			final Context context = UtilsContext.getContext();
 			if (Settings.canDrawOverlays(context)) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 					if (UtilsSysApp.mainFunction(context.getPackageName(), UtilsSysApp.IS_SYSTEM_APP)) {
@@ -343,9 +343,9 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 			layoutParams.height = (int) (50.0F * getResources().getDisplayMetrics().scaledDensity);
 			layoutParams.format = PixelFormat.TRANSPARENT;
 
-			final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+			final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
 			if (null != windowManager) {
-				view = new customViewGroup(UtilsGeneral.getContext());
+				view = new customViewGroup(UtilsContext.getContext());
 				windowManager.addView(view, layoutParams);
 			}
 		}

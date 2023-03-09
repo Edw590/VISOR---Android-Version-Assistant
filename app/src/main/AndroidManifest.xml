@@ -52,6 +52,7 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 	<!-- Dangerous+ permissions (runtime permissions - those that need to be explicitly granted by the user)  -->
@@ -75,14 +76,14 @@
 		tools:ignore="ProtectedPermissions" /> <!-- Or Pre-installed, not just AppOps. -->
 
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
-	<!-- Development permissions (must be explicitly granted with "pm grant/revoke" through ADB) -->
+	<!-- Development permissions (must be explicitly granted with "pm grant/revoke" through ADB - su works too) -->
 	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
 		tools:ignore="ProtectedPermissions" />
 	<!-- todo ALWAYS ADD NEW PERMISSIONS TO THE PERMISSION REQUESTER!!!!!!!!!!!! -->
 
 	<!-- Privileged apps'+ permissions (only by having the app installed in /system/priv-app, or below KitKat, in
 	/system/app) -->
-	<!-- For some of these permissions to work, hidden/internal APIs must be used to compile the app -->
+	<!-- For some of these permissions to show, hidden/internal APIs must be used to compile the app -->
 	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
@@ -264,10 +265,24 @@
 			 runtime permissions -->
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.LAUNCHER" />
-
 				<action android:name="android.intent.action.VIEW" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity android:name="com.dadi590.assist_c_a.ActivitiesFragments.ActAssist"
+			android:permission=""
+			android:exported="true"
+			android:directBootAware="true"
+			android:autoRemoveFromRecents="true"
+			android:excludeFromRecents="true"
+			android:theme="@android:style/Theme.NoDisplay">
+			<intent-filter>
+				<action android:name="android.intent.action.ASSIST" />
+				<action android:name="android.intent.action.VOICE_COMMAND" />
+				<action android:name="android.intent.action.VOICE_ASSIST" />
+
+				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
 		<activity android:name="com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct"
@@ -302,11 +317,11 @@
 			android:exported="false"
 			android:directBootAware="true"
 			android:process=":Protected_Lock_Screen" />
-		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.GoogleRecognition"
+		<service android:name="com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true"
-			android:process=":Google_Speech_Recognition" />
+			android:process=":Commands_Speech_Recognition" />
 
 		<receiver android:name="com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:permission="android.permission.BIND_DEVICE_ADMIN"
@@ -680,6 +695,7 @@
 
 		<!-- This works, but was never tested because STATE_HARDWARE_UNSUPPORTED or UNAVAILABLE - I need a more powerful
 		 device for that.
+		 Link about this: https://source.android.com/docs/devices/automotive/voice/voice_interaction_guide/app_development#hotwords
 		 Required manifest permission removed until necessary again: PACKAGE_USAGE_STATS -->
 		<!-- AlwaysOnHotwordDetector attempts - ->
 		<activity android:name="com.dadi590.assist_c_a.VoiceEnrollment.TestEnrollmentActivity"

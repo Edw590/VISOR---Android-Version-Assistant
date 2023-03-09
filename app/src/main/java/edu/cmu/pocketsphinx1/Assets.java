@@ -75,27 +75,21 @@ public class Assets {
 	protected static final String TAG = Assets.class.getSimpleName();
 
 	public static final String ASSET_LIST_NAME = "assets.lst";
-	public static final String SYNC_DIR = "sync";
+	public static final String SYNC_DIR = "PocketSphinxFiles";
 	public static final String HASH_EXT = ".md5";
 
 	private final AssetManager assetManager;
-	private final File externalDir;
+	private final File cacheDir;
 
 	/**
 	 * Creates new instance for asset synchronization
 	 *
 	 * @param context
 	 *            application context
-	 *
-	 * @throws IOException
-	 *             if the directory does not exist
-	 *
-	 * @see android.content.Context#getExternalFilesDir
-	 * @see android.os.Environment#getExternalStorageState
 	 */
 	public Assets(Context context) {
-		File appDir = context.getFilesDir(); // Changed to the private app files directory
-		externalDir = new File(appDir, SYNC_DIR);
+		File appDir = context.getCacheDir(); // Changed to the private app cache directory
+		cacheDir = new File(appDir, SYNC_DIR);
 		assetManager = context.getAssets();
 	}
 
@@ -108,7 +102,7 @@ public class Assets {
 	 *            path to sync the files
 	 */
 	public Assets(Context context, String dest) {
-		externalDir = new File(dest);
+		cacheDir = new File(dest);
 		assetManager = context.getAssets();
 	}
 
@@ -117,8 +111,8 @@ public class Assets {
 	 *
 	 * @return path to application directory or null if it does not exists
 	 */
-	public File getExternalDir() {
-		return externalDir;
+	public File getCacheDir() {
+		return cacheDir;
 	}
 
 	/**
@@ -144,7 +138,7 @@ public class Assets {
 	public Map<String, String> getExternalItems() {
 		try {
 			Map<String, String> items = new HashMap<String, String>();
-			File assetFile = new File(externalDir, ASSET_LIST_NAME);
+			File assetFile = new File(cacheDir, ASSET_LIST_NAME);
 			for (String line : readLines(new FileInputStream(assetFile))) {
 				String[] fields = line.split(" ");
 				items.put(fields[0], fields[1]);
@@ -201,7 +195,7 @@ public class Assets {
 	 *             if an I/O error occurs
 	 */
 	public void updateItemList(Map<String, String> items) throws IOException {
-		File assetListFile = new File(externalDir, ASSET_LIST_NAME);
+		File assetListFile = new File(cacheDir, ASSET_LIST_NAME);
 		PrintWriter pw = new PrintWriter(new FileOutputStream(assetListFile));
 		for (Map.Entry<String, String> entry : items.entrySet())
 			pw.format("%s %s\n", entry.getKey(), entry.getValue());
@@ -218,7 +212,7 @@ public class Assets {
 	 */
 	public File copy(String asset) throws IOException {
 		InputStream source = openAsset(asset);
-		File destinationFile = new File(externalDir, asset);
+		File destinationFile = new File(cacheDir, asset);
 		destinationFile.getParentFile().mkdirs();
 		OutputStream destination = new FileOutputStream(destinationFile);
 		byte[] buffer = new byte[1024];
@@ -253,7 +247,7 @@ public class Assets {
 
 		for (String path : items.keySet()) {
 			if (!items.get(path).equals(externalItems.get(path))
-					|| !(new File(externalDir, path).exists()))
+					|| !(new File(cacheDir, path).exists()))
 				newItems.add(path);
 			else
 				Log.i(TAG,
@@ -270,13 +264,13 @@ public class Assets {
 		}
 
 		for (String path : unusedItems) {
-			File file = new File(externalDir, path);
+			File file = new File(cacheDir, path);
 			file.delete();
 			Log.i(TAG, String.format("Removing asset %s", file));
 		}
 
 		updateItemList(items);
-		return externalDir;
+		return cacheDir;
 	}
 
 }

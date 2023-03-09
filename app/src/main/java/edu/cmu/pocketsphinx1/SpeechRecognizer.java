@@ -42,6 +42,7 @@ import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.dadi590.assist_c_a.GlobalUtils.UtilsAudio;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 
 import java.io.File;
@@ -56,10 +57,20 @@ import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 
 /**
- * Main class to access recognizer functions. After configuration this class
+ * <p>Main class to access recognizer functions. After configuration this class
  * starts a listener thread which records the data and recognizes it using
  * Pocketsphinx engine. Recognition events are passed to a client using
- * {@link RecognitionListener}
+ * {@link RecognitionListener}</p>
+ * <br>
+ * <p><strong>Attention:</strong> same hypothesis won't be sent 2+ times in a row! Even if
+ * it's correctly detected the 2+ times, with minutes apart, for example!
+ * This is because the Decoder keeps on sending the last hypothesis until it detects a
+ * new one, not mattering if we send audio with nothing on it, even all 0s (tested).
+ * Though, not detecting the same twice or more in a row is not a problem IN VISOR's CASE
+ * because on the first correct detection, the recognition will be stopped. So no
+ * problem in not detecting any more correct detections - it will be stopped on the 1st one
+ * anyway.</p>
+ * <p>The code for this is in end of the while loop on the run() method of the RecognizerThread.</p>
  *
  */
 public class SpeechRecognizer {
@@ -74,9 +85,18 @@ public class SpeechRecognizer {
 
 	public final int audio_source;
 
-	private Thread recognizerThread;
+	@Nullable Thread recognizerThread;
+
+	float gain = 5.0f;
 
 	final Handler mainHandler;
+
+	// Race condition. Calling cancel() or stop() interrupts the thread and sets it to null --> doesn't mean the thread
+	// stops right away. It may take a bit to actually stop (next while() iteration) - but it's already set as
+	// null and so it's "dead" and therefore supposedly decoder.endUtt() was already called --> no (or yes -
+	// race condition). So decoder.setSearch() fails because it hasn't ended the utterance yet. This fixes all those
+	// problems, by setting it in the beginning of the thread's run() method and resetting it in the end.
+	int thread_state = 0;
 
 	final Collection<RecognitionListener> listeners = new HashSet<RecognitionListener>();
 
@@ -134,11 +154,15 @@ public class SpeechRecognizer {
 	/**
 	 * Starts recognition. Does nothing if recognition is active.
 	 *
-	 * @return true if recognition was started, false if it was already active
+	 * @return true if recognition was started or was already active, false if it's still shutting down and was not
+	 * started (try again)
 	 */
 	public boolean startListening(String searchName) {
-		if (null != recognizerThread)
+		if (1 == thread_state) {
+			return true;
+		} else if (2 == thread_state) {
 			return false;
+		}
 
 		//Log.ii(TAG, String.format("Start recognition \"%s\"", searchName));
 		decoder.setSearch(searchName);
@@ -153,11 +177,15 @@ public class SpeechRecognizer {
 	 *
 	 * @timeout - timeout in milliseconds to listen.
 	 *
-	 * @return true if recognition was started, false if it was already active
+	 * @return true if recognition was started or was already active, false if it's still shutting down and was not
+	 * started (try again)
 	 */
 	public boolean startListening(String searchName, int timeout) {
-		if (null != recognizerThread)
+		if (1 == thread_state) {
+			return true;
+		} else if (2 == thread_state) {
 			return false;
+		}
 
 		//Log.ii(TAG, String.format("Start recognition \"%s\"", searchName));
 		decoder.setSearch(searchName);
@@ -167,9 +195,11 @@ public class SpeechRecognizer {
 	}
 
 	private boolean stopRecognizerThread() {
-		if (null == recognizerThread)
+		if (1 != thread_state) {
 			return false;
+		}
 
+		thread_state = 2;
 		recognizerThread.interrupt();
 		recognizerThread = null;
 		return true;
@@ -336,35 +366,40 @@ public class SpeechRecognizer {
 		@Override
 		public void run() {
 
+			thread_state = 1;
+
 			recorder.startRecording();
 			if (recorder.getRecordingState() == AudioRecord.RECORDSTATE_STOPPED) {
-				recorder.stop();
-				IOException ioe = new IOException(
+				final IOException ioe = new IOException(
 						"Failed to start recording. Microphone might be already in use.");
 				mainHandler.post(new OnErrorEvent(ioe));
+
+				recognizerThread = null;
+
+				thread_state = 0;
 				return;
 			}
 
 			//Log.id(TAG, "Starting decoding");
 
 			decoder.startUtt();
-			short[] buffer = new short[bufferSize];
+			final short[] buffer = new short[bufferSize];
 			boolean inSpeech = decoder.getInSpeech();
+			String last_hypothesis_str = "";
 
 			// Skip the first buffer, usually zeroes
 			recorder.read(buffer, 0, buffer.length);
 
-			boolean carry_on = true;
-			while (carry_on && !interrupted()
-					&& ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
-				int nread = recorder.read(buffer, 0, buffer.length);
+			while (!interrupted() && ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
+				final int nread = recorder.read(buffer, 0, bufferSize);
+				UtilsAudio.adjustGainBuffer(buffer, gain);
 
 				if (nread < 0) {
 					mainHandler.post(new OnErrorEvent(new RuntimeException("error reading audio buffer, nread = " + nread)));
 
-					carry_on = false;
+					break; // If an error occurred, leave - else shouldn't throw an error, just some warning
 				} else if (nread > 0) {
-					decoder.processRaw(buffer, nread, false, false);
+					decoder.processRaw(buffer, (long) nread, false, false);
 
 					// int max = 0;
 					// for (int i = 0; i < nread; i++) {
@@ -381,11 +416,26 @@ public class SpeechRecognizer {
 						remainingSamples = timeoutSamples;
 
 					final Hypothesis hypothesis = decoder.hyp();
-					mainHandler.post(new ResultEvent(hypothesis, false));
+					if (null != hypothesis) {
+						final String hypothesis_str = hypothesis.getHypstr();
+						if (!last_hypothesis_str.equals(hypothesis_str)) {
+
+							// WARNING: this means that the same hypothesis won't be sent 2+ times in a row! Even if
+							// it's correctly detected the 2+ times, with minutes apart, for example!
+							// This is here because the Decoder keeps on sending the last hypothesis until it detects a
+							// new one, not mattering if we send audio with nothing on it, even all 0s (tested).
+							// Though, not detecting the same twice or more in a row is not a problem IN VISOR's CASE
+							// because on the first correct detection, the recognition will be stopped. So no problem in
+							// not detecting any more correct detections - it will be stopped on the 1st one anyway.
+
+							mainHandler.post(new ResultEvent(hypothesis, false));
+							last_hypothesis_str = hypothesis_str;
+						}
+					}
 				}
 
 				if (timeoutSamples != NO_TIMEOUT) {
-					remainingSamples = remainingSamples - nread;
+					remainingSamples -= nread;
 				}
 			}
 
@@ -402,6 +452,8 @@ public class SpeechRecognizer {
 			if (timeoutSamples != NO_TIMEOUT && remainingSamples <= 0) {
 				mainHandler.post(new TimeoutEvent());
 			}
+
+			thread_state = 0;
 		}
 	}
 

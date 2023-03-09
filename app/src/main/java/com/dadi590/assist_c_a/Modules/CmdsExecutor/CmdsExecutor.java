@@ -21,14 +21,12 @@
 
 package com.dadi590.assist_c_a.Modules.CmdsExecutor;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,6 +40,7 @@ import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroid;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidPower;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidTelephony;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNativeLibs;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
@@ -51,17 +50,17 @@ import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.dadi590.assist_c_a.Modules.CameraManager.CameraManagement;
 import com.dadi590.assist_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.ModulesList;
+import com.dadi590.assist_c_a.TasksList;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import ACD.ACD;
 
@@ -75,42 +74,47 @@ public final class CmdsExecutor implements IModuleInst {
 			ModulesList.ELEMENT_NAME));
 	private final Handler main_handler;
 
-	// This variable can't be local. It must memorize the last value, so they must always remain in memory.
-	// Also, because of that, the instance of this class must also remain in memory, as it's done in the ModulesList.
-	// The variable is static to be able to be changed without needing the instance of the module (the module utils).
-	private static boolean some_cmd_detected = false;
+	private boolean some_cmd_detected = false;
 
-	static final List<Runnable> after_speak_runnables = new ArrayList<>(10);
+	boolean ask_anything_else = true;
 
-	private static final String NO_CMD = "";
 	private final class Command {
 		/** The command code that comes out of the ACD. */
-		@NonNull String command_code;
+		@NonNull final String command_code;
 		/** A description to be spoken of the command action. Complete the sentence: "This command is used to..." */
-		@NonNull String cmd_spoken_action;
-		/** A Runnable to execute after the command is completed. */
-		@Nullable Runnable what_to_do;
+		@NonNull final String cmd_spoken_action;
+		/** The {@link TasksList.Task#task_id} of the task to execute after the command is completed. */
+		final int task_id;
 		/** The time when the command was detected. */
-		long time_ms_cmd_detection;
+		final long detection_when;
 
+		/**
+		 * <p>Initialize all to defaults.</p>
+		 */
 		Command() {
 			command_code = "";
 			cmd_spoken_action = "";
-			what_to_do = null;
-			time_ms_cmd_detection = 0L;
+			task_id = -1;
+			detection_when = 0L;
 		}
 
 		/**
+		 * <p>Main class constructor.</p>
+		 *
 		 * @param command_code {@link #command_code}
 		 * @param cmd_spoken_action {@link #cmd_spoken_action}
-		 * @param what_to_do {@link #what_to_do}
+		 * @param what_to_do {@link #task_id}
 		 */
-		void resetFields(@NonNull final String command_code, @NonNull final String cmd_spoken_action,
-						 @Nullable final Runnable what_to_do) {
+		Command(@NonNull final String command_code, @NonNull final String cmd_spoken_action,
+				@Nullable final Runnable what_to_do) {
 			this.command_code = command_code;
 			this.cmd_spoken_action = cmd_spoken_action;
-			this.what_to_do = what_to_do;
-			time_ms_cmd_detection = System.currentTimeMillis();
+			if (null == what_to_do) {
+				task_id = -1;
+			} else {
+				task_id = TasksList.addTask(what_to_do);
+			}
+			detection_when = System.currentTimeMillis();
 		}
 	}
 	private Command previous_cmd = new Command();
@@ -129,10 +133,12 @@ public final class CmdsExecutor implements IModuleInst {
 	@Override
 	public void destroy() {
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
+
+		some_cmd_detected = false;
 
 		is_module_destroyed = true;
 	}
@@ -152,9 +158,6 @@ public final class CmdsExecutor implements IModuleInst {
 	public CmdsExecutor() {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
-
-		// Static variable. If the module is restarted, this must be reset.
-		some_cmd_detected = false;
 
 		registerReceiver();
 	}
@@ -188,14 +191,15 @@ public final class CmdsExecutor implements IModuleInst {
 		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
 					"detected.";
-			UtilsCmdsExecutor.speak(speak, false, null);
+			UtilsCmdsExecutor.speak(speak, 0, null);
 
 			return APU_UNAVAILABLE;
 		}
 
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
 
 		some_cmd_detected = false;
+		ask_anything_else = true;
 
 		final String detected_cmds_str = ACD.main(sentence_str, false, true);
 		final String[] detected_cmds = detected_cmds_str.split(ACD.CMDS_SEPARATOR);
@@ -212,14 +216,14 @@ public final class CmdsExecutor implements IModuleInst {
 			UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 			final String speak = "WARNING! There was a problem processing the commands sir. This needs a fix. " +
 					"The error was the following: " + detected_cmds_str + ". You said: " + sentence_str;
-			UtilsCmdsExecutor.speak(speak, false, null);
+			UtilsCmdsExecutor.speak(speak, Speech2.MODE1_ALWAYS_NOTIFY, null);
 			System.out.println("EXECUTOR - ERR_PROC_CMDS");
 
 			return ERR_PROC_CMDS;
 		}
 
 		for (final String command : detected_cmds) {
-			final int dot_index = command.indexOf('.');
+			final int dot_index = command.indexOf((int) '.');
 			if (-1 == dot_index) {
 				// No command.
 				continue;
@@ -234,8 +238,8 @@ public final class CmdsExecutor implements IModuleInst {
 			}
 			// Keep it checking with CMDi_INF1_DO_SOMETHING and inverting the output. That way, if cmd_to_check is ""
 			// (no previous command), it won't equal DO_SOMETHING and will set cmdi_only_speak to true.
-			final boolean cmdi_only_speak = !CmdsList.CmdAddInfo.CMDi_INF1_DO_SOMETHING.
-					equals(CmdsList.CmdAddInfo.CMDi_INFO.get(cmd_to_check));
+			final int speech_mode2 = CmdsList.CmdAddInfo.CMDi_INF1_ONLY_SPEAK.
+					equals(CmdsList.CmdAddInfo.CMDi_INFO.get(cmd_to_check)) ? Speech2.MODE2_BYPASS_NO_SND : Speech2.MODE2_DEFAULT;
 
 			switch (cmd_id) {
 				case (CmdsList.CmdIds.CMD_TOGGLE_FLASHLIGHT): {
@@ -245,7 +249,7 @@ public final class CmdsExecutor implements IModuleInst {
 					UtilsCameraManagerBC.useCamera(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
 							CameraManagement.USAGE_FLASHLIGHT_ON : CameraManagement.USAGE_FLASHLIGHT_OFF);
 
-					previous_cmd.resetFields(command, "toggle flashlight", null);
+					previous_cmd = new Command(command, "toggle flashlight", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_ASK_TIME): {
@@ -253,9 +257,9 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					final String speak = "It's " + UtilsTimeDate.getTimeStr(-1L);
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
-					previous_cmd.resetFields(command, "ask time", null);
+					previous_cmd = new Command(command, "ask time", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_ASK_DATE): {
@@ -263,9 +267,9 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					final String speak = "Today's " + UtilsTimeDate.getDateStr(-1L);
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
-					previous_cmd.resetFields(command, "ask date", null);
+					previous_cmd = new Command(command, "ask date", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_WIFI): {
@@ -273,57 +277,57 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setWifiEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Wi-Fi toggled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Wi-Fi service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to toggle the Wi-Fi.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (WifiManager.WIFI_STATE_DISABLED): {
+						case (UtilsAndroid.ALREADY_DISABLED): {
 							final String speak = "The Wi-Fi is already disabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (WifiManager.WIFI_STATE_DISABLING): {
+						case (UtilsAndroid.ALREADY_DISABLING): {
 							final String speak = "The Wi-Fi is already being disabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (WifiManager.WIFI_STATE_ENABLED): {
+						case (UtilsAndroid.ALREADY_ENABLED): {
 							final String speak = "The Wi-Fi is already enabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (WifiManager.WIFI_STATE_ENABLING): {
+						case (UtilsAndroid.ALREADY_ENABLING): {
 							final String speak = "The Wi-Fi is already being enabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error toggling the Wi-Fi.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "toggle wifi", null);
+					previous_cmd = new Command(command, "toggle wifi", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_MOBILE_DATA): {
@@ -333,31 +337,31 @@ public final class CmdsExecutor implements IModuleInst {
 					switch (UtilsAndroidConnectivity.setMobileDataEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Mobile Data connection toggled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Telephony service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to toggle the Mobile Data connection.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error toggling the Mobile Data connection.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "toggle mobile data connection", null);
+					previous_cmd = new Command(command, "toggle mobile data connection", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_BLUETOOTH): {
@@ -365,125 +369,129 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					switch (UtilsAndroidConnectivity.setBluetoothEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Bluetooth toggled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "The device does not feature a Bluetooth adapter.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.GEN_ERR): {
+						case (UtilsShell.ErrCodes.GEN_ERR): {
 							final String speak = "Error toggling the Bluetooth.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to toggle the Bluetooth.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (BluetoothAdapter.STATE_OFF): {
+						case (UtilsAndroid.ALREADY_DISABLED): {
 							final String speak = "The Bluetooth is already disabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (BluetoothAdapter.STATE_TURNING_OFF): {
+						case (UtilsAndroid.ALREADY_DISABLING): {
 							final String speak = "The Bluetooth is already being disabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (BluetoothAdapter.STATE_ON): {
+						case (UtilsAndroid.ALREADY_ENABLED): {
 							final String speak = "The Bluetooth is already enabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (BluetoothAdapter.STATE_TURNING_ON): {
+						case (UtilsAndroid.ALREADY_ENABLING): {
 							final String speak = "The Bluetooth is already being enabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error toggling the Bluetooth.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "toggle bluetooth", null);
+					previous_cmd = new Command(command, "toggle bluetooth", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_ANSWER_CALL): {
 					switch (UtilsAndroidTelephony.answerPhoneCall()) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Call answered.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Telephony service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.GEN_ERR): {
+						case (UtilsShell.ErrCodes.GEN_ERR): {
 							final String speak = "Error answering the call.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "answer call", null);
+					previous_cmd = new Command(command, "answer call", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_END_CALL): {
 					switch (UtilsAndroidTelephony.endPhoneCall()) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Call ended.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Telephony service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.GEN_ERR): {
+						case (UtilsShell.ErrCodes.GEN_ERR): {
 							final String speak = "Error ending the call.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "end call", null);
+					previous_cmd = new Command(command, "end call", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_SPEAKERS): {
 					final String speak;
-					if (UtilsAndroidTelephony.setCallSpeakerphoneEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-						speak = "Speakerphone toggled.";
+					if (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER).getData("").isEmpty()) {
+						speak = "The device not in a phone call.";
 					} else {
-						speak = "Audio service not available on the device.";
+						if (UtilsAndroidTelephony.setCallSpeakerphoneEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
+							speak = "Speakerphone toggled.";
+						} else {
+							speak = "Audio service not available on the device.";
+						}
 					}
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
-					previous_cmd.resetFields(command, "toggle speakerphone", null);
+					previous_cmd = new Command(command, "toggle speakerphone", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_AIRPLANE_MODE): {
@@ -493,46 +501,46 @@ public final class CmdsExecutor implements IModuleInst {
 					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Airplane Mode toggled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to toggle the Airplane Mode.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.ALREADY_DISABLED): {
 							final String speak = "The Airplane Mode is already disabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						case (UtilsAndroid.ALREADY_ENABLED): {
 							final String speak = "The Airplane Mode is already enabled.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error toggling the Airplane Mode.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "toggle airplane mode", null);
+					previous_cmd = new Command(command, "toggle airplane mode", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_ASK_BATTERY_PERCENT): {
 					if (!only_returning) {
 						final Boolean battery_present = UtilsRegistry.
-								getValueObj(ValuesRegistry.Keys.BATTERY_PRESENT).getData();
+								getValue(ValuesRegistry.Keys.BATTERY_PRESENT).getData();
 						if (null != battery_present && !battery_present) {
 							final String speak = "There is no battery present on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 						}
 					}
 
@@ -540,19 +548,19 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					final Integer battery_percentage = UtilsRegistry
-							.getValueObj(ValuesRegistry.Keys.BATTERY_PERCENT).getData();
+							.getValue(ValuesRegistry.Keys.BATTERY_PERCENT).getData();
 					final String speak;
 					if (null == battery_percentage) {
 						speak = "Battery percentage not available yet.";
 					} else {
 						speak = "Battery percentage: " + battery_percentage + "%.";
 					}
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
-					previous_cmd.resetFields(command, "ask battery percentage", null);
+					previous_cmd = new Command(command, "ask battery percentage", null);
 					break;
 				}
-				case (CmdsList.CmdIds.CMD_SHUT_DOWN_DEVICE): {
+				case (CmdsList.CmdIds.CMD_POWER_SHUT_DOWN): {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
@@ -560,36 +568,38 @@ public final class CmdsExecutor implements IModuleInst {
 					// EDIT: sometimes he doesn't say that. Now it says something anyway.
 
 					switch (UtilsAndroidPower.shutDownDevice()) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Shutting down the device...";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+
+							ask_anything_else = false;
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Power service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to shut down the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error shutting down the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "shut down device", null);
+					previous_cmd = new Command(command, "shut down device", null);
 					break;
 				}
-				case (CmdsList.CmdIds.CMD_REBOOT_DEVICE): {
+				case (CmdsList.CmdIds.CMD_POWER_REBOOT): {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
@@ -624,33 +634,35 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 
 					switch (UtilsAndroidPower.rebootDevice(reboot_mode)) {
-						case (UtilsAndroid.NO_ERR): {
+						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Rebooting the device...";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+
+							ask_anything_else = false;
 
 							break;
 						}
 						case (UtilsAndroid.NOT_AVAILABLE): {
 							final String speak = "Power service not available on the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
-						case (UtilsAndroid.PERM_DENIED): {
+						case (UtilsShell.ErrCodes.PERM_DENIED): {
 							final String speak = "No permission to reboot the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 						default: {
 							final String speak = "Unspecified error rebooting the device.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 							break;
 						}
 					}
 
-					previous_cmd.resetFields(command, "reboot device", null);
+					previous_cmd = new Command(command, "reboot device", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TAKE_PHOTO): {
@@ -660,7 +672,7 @@ public final class CmdsExecutor implements IModuleInst {
 					UtilsCameraManagerBC.useCamera(cmd_variant.equals(CmdsList.CmdRetIds.RET_15_REAR) ?
 							CameraManagement.USAGE_TAKE_REAR_PHOTO : CameraManagement.USAGE_TAKE_FRONTAL_PHOTO);
 
-					previous_cmd.resetFields(command, "take photo", null);
+					previous_cmd = new Command(command, "take photo", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_RECORD_MEDIA): {
@@ -669,22 +681,30 @@ public final class CmdsExecutor implements IModuleInst {
 							if (!only_returning) {
 								if (!(boolean) ModulesList.getElementValue(
 										ModulesList.getElementIndex(AudioRecorder.class), ModulesList.ELEMENT_SUPPORTED)) {
-									final String speak = "Audio recording is not supported on this device through either " +
-											"hardware or application permissions limitations.";
-									UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+									final String speak = "Audio recording is not supported on this device through " +
+											"either hardware or application permissions limitations.";
+									UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 									continue;
 								}
 							}
 
-							// Can only start recording when the Google speech recognition has finished. Not before, or
-							// other things the user might want to say will be ignored (not cool).
+							// Can only start recording when the commands speech recognition has finished. Not before,
+							// or other things the user might want to say will be ignored (not cool).
 							if (!partial_results) {
 								some_cmd_detected = true;
 								if (only_returning) continue;
 
-								UtilsSpeechRecognizersBC.stopRecognition();
-								UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC, false);
+								ask_anything_else = false;
+
+								UtilsSpeechRecognizersBC.stopRecognition(new Runnable() {
+									@Override
+									public void run() {
+										UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC, false);
+									}
+								});
+
+								previous_cmd = new Command(command, "record audio", null);
 							}
 
 							break;
@@ -697,7 +717,6 @@ public final class CmdsExecutor implements IModuleInst {
 						}
 					}
 
-					previous_cmd.resetFields(command, "record media", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_SAY_AGAIN): {
@@ -711,7 +730,7 @@ public final class CmdsExecutor implements IModuleInst {
 					// Also make sure if there are things with higher priority on the lists that the last thing said is
 					// the last thing said when it was requested.
 
-					previous_cmd.resetFields(command, "repeat last speech", null);
+					previous_cmd = new Command(command, "repeat last speech", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_CALL_CONTACT): {
@@ -739,7 +758,7 @@ public final class CmdsExecutor implements IModuleInst {
 													", since it is an emergency number. " +
 													"Instead, it was only dialed and requires your manual confirmation " +
 													"to proceed the call.";
-											UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+											UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 											break;
 										}
@@ -747,32 +766,29 @@ public final class CmdsExecutor implements IModuleInst {
 											final String speak = "Insufficient privileges to call numbers. The number " +
 													"was instead only dialed and requires your manual confirmation " +
 													"to proceed the call.";
-											UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+											UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 											break;
 										}
 										case (UtilsAndroid.NOT_AVAILABLE): {
 											final String speak = "Phone calls not supported on the device.";
-											UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+											UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 											break;
 										}
 									}
-
-									UtilsCmdsExecutor.removeRunnableFromList(this.hashCode());
 								}
 							};
-							UtilsCmdsExecutor.addRunnableToList(runnable);
 
 							final String speak = "Calling " + contact_name + " now, sir.";
-							UtilsCmdsExecutor.speak(speak, cmdi_only_speak, runnable.hashCode());
+							UtilsCmdsExecutor.speak(speak, speech_mode2, runnable);
 						}
 					};
 
 					final String spoken_action = "phone call " + contact_name;
-					UtilsCmdsExecutor.requestConfirmation(spoken_action, cmdi_only_speak);
+					requestConfirmation(spoken_action, speech_mode2);
 
-					previous_cmd.resetFields(command, spoken_action, do_after_confirm);
+					previous_cmd = new Command(command, spoken_action, do_after_confirm);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_STOP_RECORD_MEDIA): {
@@ -782,15 +798,26 @@ public final class CmdsExecutor implements IModuleInst {
 					boolean stop_audio = false;
 					boolean stop_video = false;
 
-					if (cmd_variant.equals(CmdsList.CmdRetIds.RET_20_AUDIO)) {
-						stop_audio = true;
-					} else if (cmd_variant.equals(CmdsList.CmdRetIds.RET_20_VIDEO)) {
-						stop_video = true;
-					} else if (cmd_variant.equals(CmdsList.CmdRetIds.RET_20_ANY)) {
-						stop_audio = true;
-						stop_video = true;
-					} else {
-						continue;
+					switch (cmd_variant) {
+						case CmdsList.CmdRetIds.RET_20_AUDIO: {
+							stop_audio = true;
+
+							break;
+						}
+						case CmdsList.CmdRetIds.RET_20_VIDEO: {
+							stop_video = true;
+
+							break;
+						}
+						case CmdsList.CmdRetIds.RET_20_ANY: {
+							stop_audio = true;
+							stop_video = true;
+
+							break;
+						}
+						default: {
+							continue;
+						}
 					}
 
 					if (stop_audio) {
@@ -800,7 +827,7 @@ public final class CmdsExecutor implements IModuleInst {
 						// todo
 					}
 
-					previous_cmd.resetFields(command, "stop recording media", null);
+					previous_cmd = new Command(command, "stop recording media", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_POWER_SAVER_MODE): {
@@ -809,197 +836,157 @@ public final class CmdsExecutor implements IModuleInst {
 
 					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 						final String speak = "Battery Saver Mode not available below Android Lollipop.";
-						UtilsCmdsExecutor.speak(speak, true, null);
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 					} else {
-						switch (UtilsAndroidPower.setBatterySaverModeEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
+						switch (UtilsAndroidPower.setBatterySaverEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 							case (UtilsShell.ErrCodes.NO_ERR): {
 								final String speak = "Battery Saver Mode toggled.";
-								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+								UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 								break;
 							}
-							case (UtilsAndroid.PERM_DENIED): {
+							case (UtilsShell.ErrCodes.PERM_DENIED): {
 								final String speak = "No permission to toggle the Battery Saver Mode.";
-								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+								UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 								break;
 							}
 							default: {
 								final String speak = "Unspecified error toggling the Battery Saver Mode.";
-								UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+								UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 
 								break;
 							}
 						}
 					}
 
-					previous_cmd.resetFields(command, "toggle power saver mode", null);
+					previous_cmd = new Command(command, "toggle power saver mode", null);
 					break;
 				}
-				case (CmdsList.CmdIds.CMD_MEDIA_STOP): {
+				case (CmdsList.CmdIds.CMD_CONTROL_MEDIA): {
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
 						if (null == audioManager) {
-							UtilsCmdsExecutor.speak("No audio available on the device.", cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak("No audio available on the device.", speech_mode2, null);
 
 							break;
 						}
 
-						if (audioManager.isMusicActive()) {
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_STOP));
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_STOP));
-						} else {
-							UtilsCmdsExecutor.speak("Already stopped sir.", cmdi_only_speak, null);
+						switch (cmd_variant) {
+							case (CmdsList.CmdRetIds.RET_21_PLAY): {
+								UtilsCmdsExecutor.speak("Playing now.", speech_mode2, null);
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY));
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY));
+
+								break;
+							}
+							case (CmdsList.CmdRetIds.RET_21_PAUSE): {
+								UtilsCmdsExecutor.speak("Paused sir.", speech_mode2, null);
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE));
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE));
+
+								break;
+							}
+							case (CmdsList.CmdRetIds.RET_21_STOP): {
+								UtilsCmdsExecutor.speak("Stopped sir.", speech_mode2, null);
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_STOP));
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_STOP));
+
+
+								break;
+							}
+							case (CmdsList.CmdRetIds.RET_21_NEXT): {
+								UtilsCmdsExecutor.speak("Next one sir.", speech_mode2, null);
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT));
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT));
+
+								break;
+							}
+							case (CmdsList.CmdRetIds.RET_21_PREVIOUS): {
+								UtilsCmdsExecutor.speak("Previous one sir.", speech_mode2, null);
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
+								audioManager.dispatchMediaKeyEvent(
+										new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
+
+								break;
+							}
 						}
 					} else {
 						final String speak = "Feature only available on Android KitKat on newer.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 					}
 
-					previous_cmd.resetFields(command, "stop media", null);
-					break;
-				}
-				case (CmdsList.CmdIds.CMD_MEDIA_PAUSE): {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						some_cmd_detected = true;
-						if (only_returning) continue;
-
-						if (null == audioManager) {
-							UtilsCmdsExecutor.speak("No audio available on the device.", cmdi_only_speak, null);
-
-							break;
-						}
-
-						if (audioManager.isMusicActive()) {
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE));
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE));
-						} else {
-							UtilsCmdsExecutor.speak("Already paused sir.", cmdi_only_speak, null);
-						}
-					} else {
-						final String speak = "Feature only available on Android KitKat on newer.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-					}
-
-					previous_cmd.resetFields(command, "pause media", null);
-					break;
-				}
-				case (CmdsList.CmdIds.CMD_MEDIA_PLAY): {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						some_cmd_detected = true;
-						if (only_returning) continue;
-
-						if (null == audioManager) {
-							UtilsCmdsExecutor.speak("No audio available on the device.", cmdi_only_speak, null);
-
-							break;
-						}
-
-						if (audioManager.isMusicActive()) {
-							UtilsCmdsExecutor.speak("Already playing sir.", cmdi_only_speak, null);
-						} else {
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY));
-							audioManager.dispatchMediaKeyEvent(
-									new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY));
-						}
-					} else {
-						final String speak = "Feature only available on Android KitKat on newer.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-					}
-
-					previous_cmd.resetFields(command, "play media", null);
-					break;
-				}
-				case (CmdsList.CmdIds.CMD_MEDIA_NEXT): {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						some_cmd_detected = true;
-						if (only_returning) continue;
-
-						if (null == audioManager) {
-							UtilsCmdsExecutor.speak("No audio available on the device.", cmdi_only_speak, null);
-
-							break;
-						}
-
-						UtilsCmdsExecutor.speak("Next one sir.", cmdi_only_speak, null);
-						audioManager.dispatchMediaKeyEvent(
-								new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT));
-						audioManager.dispatchMediaKeyEvent(
-								new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT));
-					} else {
-						final String speak = "Feature only available on Android KitKat on newer.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-					}
-
-					previous_cmd.resetFields(command, "next media", null);
-					break;
-				}
-				case (CmdsList.CmdIds.CMD_MEDIA_PREVIOUS): {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-						some_cmd_detected = true;
-						if (only_returning) continue;
-
-						if (null == audioManager) {
-							UtilsCmdsExecutor.speak("No audio available on the device.", cmdi_only_speak, null);
-
-							break;
-						}
-
-						UtilsCmdsExecutor.speak("Previous one sir.", cmdi_only_speak, null);
-						audioManager.dispatchMediaKeyEvent(
-								new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
-						audioManager.dispatchMediaKeyEvent(
-								new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
-					} else {
-						final String speak = "Feature only available on Android KitKat on newer.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
-					}
-
-					previous_cmd.resetFields(command, "previous media", null);
+					previous_cmd = new Command(command, "stop media", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_CONFIRM):
 				case (CmdsList.CmdIds.CMD_REJECT): {
-					if (null == previous_cmd.what_to_do ||
-							(previous_cmd.time_ms_cmd_detection > (System.currentTimeMillis() + 60_000L))) {
+					some_cmd_detected = true;
+					if (only_returning) continue;
+
+					if (previous_cmd.task_id < 0 ||
+							(previous_cmd.detection_when > (System.currentTimeMillis() + 60_000L))) {
 						// No runnable to execute (no command needing confirmation then) or the previous command was
 						// more than a minute ago.
 						final String speak = "There is nothing to confirm or reject, sir.";
-						UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
 					} else {
 						if (cmd_id.equals(CmdsList.CmdIds.CMD_CONFIRM)) {
-							previous_cmd.what_to_do.run();
+							new Thread(TasksList.removeTask(previous_cmd.task_id).runnable).start();
 						} else {
-							UtilsCmdsExecutor.speak(previous_cmd.cmd_spoken_action + " rejected, sir.", cmdi_only_speak, null);
+							UtilsCmdsExecutor.speak(previous_cmd.cmd_spoken_action + " rejected, sir.", speech_mode2, null);
 						}
 					}
 
-					previous_cmd.resetFields(NO_CMD, "", null);
+					previous_cmd = new Command();
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_STOP_LISTENING): {
-					UtilsSpeechRecognizersBC.stopRecognition();
+					some_cmd_detected = true;
+					if (only_returning) continue;
 
-					final String speak = "Background speech recognition stopped.";
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
+						final String speak = "Background hot-word recognition already stopped.";
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+					} else {
+						UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP, true);
+						UtilsSpeechRecognizersBC.stopRecognition(null);
 
-					previous_cmd.resetFields(NO_CMD, "stop listening in the background", null);
+						final String speak = "Background hot-word recognition stopped.";
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+					}
+
+					previous_cmd = new Command(command, "stop hot-word listening in the background", null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_START_LISTENING): {
-					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
+					some_cmd_detected = true;
+					if (only_returning) continue;
 
-					final String speak = "Background speech recognition started.";
-					UtilsCmdsExecutor.speak(speak, cmdi_only_speak, null);
+					if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
+						UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP, false);
+						// We could wait for the controller to restart it, but this way it's faster.
+						UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 
-					previous_cmd.resetFields(NO_CMD, "start listening in the background", null);
+						final String speak = "Background hot-word recognition started.";
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+					} else {
+						final String speak = "The background hot-word recognition is not stopped.";
+						UtilsCmdsExecutor.speak(speak, speech_mode2, null);
+					}
+
+					previous_cmd = new Command(command, "start hot-word listening in the background", null);
 					break;
 				}
 			}
@@ -1015,7 +1002,7 @@ public final class CmdsExecutor implements IModuleInst {
 				if (!something_said) {
 					if (!only_returning) {
 						final String speak = "Done.";
-						UtilsCmdsExecutor.speak(speak, false, null);
+						UtilsCmdsExecutor.speak(speak, 0, null);
 					}
 				}
 			} else if (!something_said) {
@@ -1026,13 +1013,28 @@ public final class CmdsExecutor implements IModuleInst {
 		}*/
 
 		if (some_cmd_detected) {
-			// Vibrate to indicate it did something.
-			UtilsGeneral.vibrateDeviceOnce(200L);
+			if (ask_anything_else) {
+				final String speak = "Anything else sir?";
+				UtilsCmdsExecutor.speak(speak, 0, UtilsSpeech2.CALL_COMMANDS_RECOG);
+			}
 
 			return SOMETHING_EXECUTED;
 		} else {
 			return NOTHING_EXECUTED;
 		}
+	}
+
+	/**
+	 * <p>Makes VISOR speak "Do you confirm to [action]?".</p>
+	 *
+	 * @param action the action mentioned above
+	 * @param mode same as in {@link Speech2#speak(String, int, int)}
+	 */
+	private void requestConfirmation(@NonNull final String action, final int mode) {
+		ask_anything_else = false;
+
+		final String speak = "Do you confirm to " + action + "?";
+		UtilsCmdsExecutor.speak(speak, mode, UtilsSpeech2.CALL_COMMANDS_RECOG);
 	}
 
 
@@ -1043,11 +1045,10 @@ public final class CmdsExecutor implements IModuleInst {
 	void registerReceiver() {
 		final IntentFilter intentFilter = new IntentFilter();
 
-		intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
 		intentFilter.addAction(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
 
 		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}
@@ -1073,20 +1074,6 @@ public final class CmdsExecutor implements IModuleInst {
 					final boolean only_returning = intent.getBooleanExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_3,
 							false);
 					processTask(sentence_str, partial_results, only_returning);
-
-					break;
-				}
-
-				case CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE: {
-					final int after_speak_code = intent.getIntExtra(
-							CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, -1);
-					for (final Runnable runnable : after_speak_runnables) {
-						if (runnable.hashCode() == after_speak_code) {
-							runnable.run();
-
-							return;
-						}
-					}
 
 					break;
 				}

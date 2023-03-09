@@ -38,9 +38,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
+import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
@@ -90,7 +92,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 	@Override
 	public void destroy() {
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
@@ -143,7 +145,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 			}
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
 					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
@@ -185,16 +187,18 @@ public final class PhoneCallsProcessor implements IModuleInst {
 		// Update the Values Storage
 		UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_PHONE_CALL_TIME, System.currentTimeMillis());
 
-		boolean active_number = false;
+		boolean number_active = false;
 		for (final ArrayList<String> call : calls_state) {
 			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
 				// Update the Values Storage
 				UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, call.get(0));
 
-				active_number = true;
+				number_active = true;
+
+				break;
 			}
 		}
-		if (!active_number) {
+		if (!number_active) {
 			// Update the Values Storage
 			UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, "");
 		}
@@ -212,12 +216,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
-							number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+							number_name + ". Do you want to do anything?";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2.CALL_COMMANDS_RECOG);
 				}
 				break;
 			}
@@ -227,12 +231,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 				}
 				break;
 			}
@@ -241,11 +245,11 @@ public final class PhoneCallsProcessor implements IModuleInst {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 				}
 				break;
 			}

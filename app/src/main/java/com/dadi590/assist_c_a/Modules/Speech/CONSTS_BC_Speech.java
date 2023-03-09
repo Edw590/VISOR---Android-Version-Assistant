@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
+import com.dadi590.assist_c_a.TasksList;
+
 import java.util.ArrayList;
 
 /**
@@ -35,10 +37,10 @@ public final class CONSTS_BC_Speech {
 	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
 	 * <p>To be received only by the class(es): any chosen class.</p>
 	 * <p>Extras:</p>
-	 * <p>- {@link #EXTRA_AFTER_SPEAK_CODE} (int): unique ID of the {@link Runnable} to run</p>
+	 * <p>- {@link #EXTRA_AFTER_SPEAK_ID_1} (String): the unique ID of the speech that took place</p>
 	 */
-	public static final String ACTION_AFTER_SPEAK_CODE = "Speech_ACTION_AFTER_SPEAK_CODE";
-	public static final String EXTRA_AFTER_SPEAK_CODE = "Speech_EXTRA_AFTER_SPEAK_CODE";
+	public static final String ACTION_AFTER_SPEAK_ID = "Speech_ACTION_AFTER_SPEAK_ID";
+	public static final String EXTRA_AFTER_SPEAK_ID_1 = "Speech_EXTRA_AFTER_SPEAK_ID_1";
 
 	/**
 	 * <p>Explanation: warns when the speech module is ready for use.</p>
@@ -75,14 +77,15 @@ public final class CONSTS_BC_Speech {
 	static final String EXTRA_REMOVE_SPEECH_3 = "Speech_EXTRA_REMOVE_SPEECH_3";
 
 	/**
-	 * <p>Executed function: {@link Speech2#speak(String, int, boolean, boolean, Integer)}.</p>
+	 * <p>Executed function: {@link Speech2#speak(String, int, int)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
 	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_1}: mandatory</p>
-	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is false)</p>
+	 * <p>- {@link #EXTRA_CALL_SPEAK_2}: optional (default is 0)</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_3}: mandatory</p>
-	 * <p>- {@link #EXTRA_CALL_SPEAK_4}: optional (default is null)</p>
+	 * <p>- {@link #EXTRA_CALL_SPEAK_4}: optional (default is null) - in this case it must be the hash code of the
+	 * runnable, runnable which must be manually added to the list through {@link TasksList#addTask(Runnable)}</p>
 	 * <p>- {@link #EXTRA_CALL_SPEAK_5}: mandatory</p>
 	 */
 	static final String ACTION_CALL_SPEAK = "Speech_ACTION_CALL_SPEAK";
@@ -91,15 +94,6 @@ public final class CONSTS_BC_Speech {
 	static final String EXTRA_CALL_SPEAK_3 = "Speech_EXTRA_CALL_SPEAK_3";
 	static final String EXTRA_CALL_SPEAK_4 = "Speech_EXTRA_CALL_SPEAK_4";
 	static final String EXTRA_CALL_SPEAK_5 = "Speech_EXTRA_CALL_SPEAK_5";
-
-	/**
-	 * <p>Explanation: warns when the speech module is ready for use after the first time (means any time other than
-	 * the module initialization time).</p>
-	 * <p>Is broadcast by the class(es): {@link Speech2}.</p>
-	 * <p>To be received only by the class(es): {@link Speech2}.</p>
-	 * <p>Extras: none.</p>
-	 */
-	static final String ACTION_READY_AGAIN = "Speech_ACTION_READY_AGAIN";
 
 	/**
 	 * <p>Explanation: requests the last speech to be spoken again.</p>

@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,11 +48,11 @@ public final class UtilsCertificates {
 	}
 
 	/** App certificates fingerprints whitelist (one or more). */
-	private static final Map<?, ?>[] ASSIST_C_A_RSA_CERTS_FINGERPRINTS = {
+	private static final LinkedHashMap<?, ?>[] ASSIST_C_A_RSA_CERTS_FINGERPRINTS = {
 			// Certificate 1
-			new HashMap<String, String>() {
+			new LinkedHashMap<String, String>() {
 				private static final long serialVersionUID = -8864195772334229619L;
-				@NonNull @Override public HashMap<String, String> clone() throws AssertionError {
+				@NonNull @Override public LinkedHashMap<String, String> clone() throws AssertionError {
 					throw new AssertionError();
 				}
 
@@ -87,7 +88,7 @@ public final class UtilsCertificates {
 	 */
 	public static boolean isThisAppCorrupt() {
 		// Below will never be null. Else, how is the app installed.
-		return !Objects.requireNonNull(checkCertsPkg(UtilsGeneral.getContext().getPackageName(),
+		return !Objects.requireNonNull(checkCertsPkg(UtilsContext.getContext().getPackageName(),
 				ASSIST_C_A_RSA_CERTS_FINGERPRINTS));
 	}
 
@@ -192,7 +193,7 @@ public final class UtilsCertificates {
 		final PackageInfo packageInfo;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 			try {
-				packageInfo = UtilsGeneral.getContext().getPackageManager().getPackageInfo(package_name,
+				packageInfo = UtilsContext.getContext().getPackageManager().getPackageInfo(package_name,
 						PackageManager.GET_SIGNING_CERTIFICATES);
 			} catch (final PackageManager.NameNotFoundException ignored) {
 				return null;
@@ -206,7 +207,7 @@ public final class UtilsCertificates {
 			}
 		} else {
 			try {
-				packageInfo = UtilsGeneral.getContext().getPackageManager().getPackageInfo(package_name,
+				packageInfo = UtilsContext.getContext().getPackageManager().getPackageInfo(package_name,
 						PackageManager.GET_SIGNATURES);
 
 				// The exploit can only happen on Android 4.4 KitKat and below ("According to the researchers who found

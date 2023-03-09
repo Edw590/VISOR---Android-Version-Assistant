@@ -104,7 +104,7 @@ public final class UtilsNetwork {
 	public static WifiManager getWifiManager() {
 		// The only warning will be here.
 		// EDIT: not anymore because I replaced all getSystemService() and getService() calls.
-		return (WifiManager) UtilsGeneral.getSystemService(Context.WIFI_SERVICE);
+		return (WifiManager) UtilsContext.getSystemService(Context.WIFI_SERVICE);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public final class UtilsNetwork {
 	 * @return same as {@link NetworkInfo#getType()} or {@link ConnectivityManager#TYPE_NONE} if there's no network
 	 */
 	public static int getCurrentNetworkType() {
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsGeneral.
+		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (null == connectivityManager) {
 			return ConnectivityManager.TYPE_NONE;

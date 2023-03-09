@@ -35,9 +35,11 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 
 import com.android.internal.telephony.ITelephony;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.UtilsTelephony;
 
 import java.lang.reflect.Method;
@@ -65,17 +67,16 @@ public final class UtilsAndroidTelephony {
 	 * <p>Answer a ringing phone call.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
 	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: telephony service not available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int answerPhoneCall() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
 					UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
-				final TelecomManager telecomManager = (TelecomManager) UtilsGeneral.getSystemService(Context.TELECOM_SERVICE);
+				final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
 				if (null == telecomManager) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
@@ -83,13 +84,13 @@ public final class UtilsAndroidTelephony {
 				try {
 					telecomManager.acceptRingingCall();
 
-					return UtilsAndroid.NO_ERR;
+					return UtilsShell.ErrCodes.NO_ERR;
 				} catch (final Exception ignored) {
 				}
 			}
 		} else {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
-				final IBinder iBinder = UtilsGeneral.getService(Context.TELEPHONY_SERVICE);
+				final IBinder iBinder = UtilsContext.getService(Context.TELEPHONY_SERVICE);
 				if (null == iBinder) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
@@ -104,7 +105,7 @@ public final class UtilsAndroidTelephony {
 				// The method will execute always.
 				UtilsReflection.invokeMethod(method, iTelephony);
 
-				return UtilsAndroid.NO_ERR;
+				return UtilsShell.ErrCodes.NO_ERR;
 			}
 		}
 
@@ -118,37 +119,34 @@ public final class UtilsAndroidTelephony {
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_HEADSETHOOK, Manifest.permission.CALL_PRIVILEGED);
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_CALL, Manifest.permission.CALL_PRIVILEGED);
 
-		return UtilsAndroid.NO_ERR;
+		return UtilsShell.ErrCodes.NO_ERR;
 	}
 
 	/**
 	 * <p>End the current phone call.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
-	 * <p>- {@link UtilsAndroid#GEN_ERR} --> for the returning value: if an error occurred and the operation did not
-	 * succeed</p>
 	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: telephony service not available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int endPhoneCall() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
-				final TelecomManager telecomManager = (TelecomManager) UtilsGeneral.getSystemService(Context.TELECOM_SERVICE);
+				final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
 				if (null == telecomManager) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
 				try {
-					return telecomManager.endCall() ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
+					return telecomManager.endCall() ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.GEN_ERR;
 				} catch (final Exception ignored) {
 				}
 			}
 		} else {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
-				final IBinder iBinder = UtilsGeneral.getService(Context.TELEPHONY_SERVICE);
+				final IBinder iBinder = UtilsContext.getService(Context.TELEPHONY_SERVICE);
 				if (null == iBinder) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
@@ -163,7 +161,7 @@ public final class UtilsAndroidTelephony {
 				// The return won't be null either.
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iTelephony).ret_var;
 
-				return ret_method ? UtilsAndroid.NO_ERR : UtilsAndroid.GEN_ERR;
+				return ret_method ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.GEN_ERR;
 			}
 		}
 
@@ -175,23 +173,26 @@ public final class UtilsAndroidTelephony {
 		// it works... When it doesn't, well, what can we do...
 		UtilsGeneral.broadcastKeyEvent(KeyEvent.KEYCODE_ENDCALL, Manifest.permission.CALL_PRIVILEGED);
 
-		return UtilsAndroid.NO_ERR;
+		return UtilsShell.ErrCodes.NO_ERR;
 	}
 
 	/**
 	 * <p>Sets the phone's speakerphone in a phone call.</p>
+	 * <p>Check first if the phone is in a phone call. If it's not, not sure what this does, as this is only intended
+	 * for phone calls.</p>
 	 *
 	 * @param enabled true to enable it, false to disable it
 	 *
 	 * @return true if the operation completed successfully, false if the Audio service is not available on the device
 	 */
 	public static boolean setCallSpeakerphoneEnabled(final boolean enabled) {
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
 		if (null == audioManager) {
 			return false;
 		}
 
-		audioManager.setMode(AudioManager.MODE_IN_CALL);
+		// Removed because this is supposed to be called only when in a phone call.
+		//audioManager.setMode(AudioManager.MODE_IN_CALL);
 		audioManager.setSpeakerphoneOn(enabled);
 
 		return true;
@@ -201,7 +202,6 @@ public final class UtilsAndroidTelephony {
 	 * <p>Places a phone call.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: if the operation completed successfully</p>
 	 * <p>- {@link UtilsAndroid#NO_CALL_ANY} --> for the returning value: no permission to call numbers</p>
 	 * <p>- {@link UtilsAndroid#NO_CALL_EMERGENCY} --> for the returning value: no permission to call emergency numbers</p>
 	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: phone calls not supported</p>
@@ -209,7 +209,7 @@ public final class UtilsAndroidTelephony {
 	 *
 	 * @param phone_number the phone number to call
 	 *
-	 * @return one of the constants
+	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int makePhoneCall(@NonNull final String phone_number) {
 		final Intent intent = new Intent("", Uri.fromParts("tel", phone_number, null));
@@ -225,14 +225,14 @@ public final class UtilsAndroidTelephony {
 			// As written on the AOSP code for ACTION_CALL_PRIVILEGED:
 			// "Perform a call to any number (emergency or not) specified by the data."
 			action = Intent.ACTION_CALL_PRIVILEGED;
-			return_code = UtilsAndroid.NO_ERR;
+			return_code = UtilsShell.ErrCodes.NO_ERR;
 		} else if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 			if (is_potentially_emergency_number) {
 				action = action_dial_emergency;
 				return_code = UtilsAndroid.NO_CALL_EMERGENCY;
 			} else {
 				action = Intent.ACTION_CALL;
-				return_code = UtilsAndroid.NO_ERR;
+				return_code = UtilsShell.ErrCodes.NO_ERR;
 			}
 		} else {
 			action = is_potentially_emergency_number ? action_dial_emergency : Intent.ACTION_DIAL;
@@ -241,7 +241,7 @@ public final class UtilsAndroidTelephony {
 		intent.setAction(action);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		try {
-			UtilsGeneral.getContext().startActivity(intent);
+			UtilsContext.getContext().startActivity(intent);
 		} catch (final ActivityNotFoundException ignored) {
 			return_code = UtilsAndroid.NOT_AVAILABLE;
 		}

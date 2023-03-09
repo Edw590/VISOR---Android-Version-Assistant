@@ -21,13 +21,15 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import android.content.Intent;
+import android.content.Context;
+import android.media.AudioManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +38,15 @@ import java.util.List;
 /**
  * <p>Speech API v2 related utilities.</p>
  */
-final class UtilsSpeech2 {
+public final class UtilsSpeech2 {
+
+	/** Simple runnable that calls {@link UtilsSpeechRecognizersBC#startCommandsRecognition()}. */
+	public static final Runnable CALL_COMMANDS_RECOG = new Runnable() {
+		@Override
+		public void run() {
+			UtilsSpeechRecognizersBC.startCommandsRecognition();
+		}
+	};
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -45,9 +55,26 @@ final class UtilsSpeech2 {
 	}
 
 	/**
+	 * <p>Use this right after calling {@link UtilsSpeech2BC#speak(String, int, int, Runnable)} to know if VISOR
+	 * <em>might</em> actually speak (means the ringer mode is in NORMAL - that's what is checked here).</p>
+	 * <p>"Might" because if he'll speak or not is checked right before the speech takes place, this is just an
+	 * approximation (and that's why it should be called right after the broadcast function - to give a bit of time).</p>
+	 *
+	 * @return true if he might speak, false if he might not
+	 */
+	public static boolean mightSpeak() {
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
+		if (null == audioManager) {
+			return false;
+		}
+
+		return AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode();
+	}
+
+	/**
 	 * <p>Generates a prefix for the speech utterance ID based on the speech priority.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, int)}
 	 *
 	 * @return the prefix to add to the beginning of the utterance ID
 	 */
@@ -61,7 +88,7 @@ final class UtilsSpeech2 {
 	 *
 	 * @param utteranceId the utterance ID of the speech to be analyzed
 	 *
-	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, boolean, boolean, Integer)}.
+	 * @return one of the {@code priority} parameters of {@link Speech2#speak(String, int, int)}.
 	 * In case an empty string is given, the lowest priority will be returned.
 	 */
 	static int getSpeechPriority(@NonNull final String utteranceId) {
@@ -75,19 +102,44 @@ final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Generates a random utterance ID with the prefix for the given priority.</p>
+	 * <p>Generates a random utterance ID with the prefix for the given priority, unique within
+	 * {@link Speech2#arrays_speech_objs}.</p>
 	 *
-	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param priority one of the {@code priority} parameters of {@link Speech2#speak(String, int, int)}
 	 *
 	 * @return the generated utterance ID
 	 */
 	@NonNull
-	static String generateUtteranceId(final int priority) {
+	static synchronized String generateUtteranceId(final int priority) {
 		// The generation of a random string must NOT have the following characters on it: "_" and "-", as they're used
 		// as prefix to differentiate different priorities of speeches.
 
 		final String utterance_id_prefix = getUtteranceIdPrefix(priority);
-		return utterance_id_prefix + UtilsGeneral.generateRandomString(CONSTS_Speech.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
+		String utterance_id_to_use = "";
+
+		// A while true to create random utterance IDs and ensure they have not been already used on the lists
+		while (true) {
+			utterance_id_to_use = utterance_id_prefix +
+					UtilsGeneral.generateRandomString(CONSTS_Speech.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
+
+			boolean match_found = false;
+			for (final Iterable<SpeechObj> speech_objs : Speech2.arrays_speech_objs) {
+				for (final SpeechObj speech_obj : speech_objs) {
+					if (speech_obj.utterance_id.equals(utterance_id_to_use)) {
+						match_found = true;
+						break;
+					}
+				}
+				if (match_found) {
+					break;
+				}
+			}
+			if (!match_found) {
+				break;
+			}
+		}
+
+		return utterance_id_to_use;
 	}
 
 	/**
@@ -137,18 +189,6 @@ final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Broadcast the {@code after_speaking_code} through {@link CONSTS_BC_Speech#ACTION_AFTER_SPEAK_CODE}.</p>
-	 *
-	 * @param code the code to broadcast
-	 */
-	static void broadcastAfterSpeakCode(final int code) {
-		final Intent intent = new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
-		intent.putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, code);
-
-		UtilsApp.sendInternalBroadcast(intent);
-	}
-
-	/**
 	 * <p>Get the ArrayLists of speech objects ready for use.</p>
 	 *
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
@@ -184,15 +224,6 @@ final class UtilsSpeech2 {
 			return null;
 		}
 
-		// This variable below is for, hopefully, faster access than being getting the array every time.
-		final SpeechObj speechObj = arrays_speech_objs.get(indexes[0]).get(indexes[1]);
-
-		// If there's an ID of a Runnable to run after the speech is finished, send the broadcast that that Runnable
-		// can be ran.
-		if (speechObj.after_speaking_code != null) {
-			UtilsSpeech2.broadcastAfterSpeakCode(speechObj.after_speaking_code);
-		}
-		// Here below must be the original array, so it can be modified
 		return arrays_speech_objs.get(indexes[0]).remove(indexes[1]);
 	}
 
@@ -202,7 +233,7 @@ final class UtilsSpeech2 {
 	 * <p>This method will return the ID of the <em>first</em> occurrence only in case there are multiple speeches with
 	 * the same string.</p>
 	 *
-	 * @param priority same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param priority same as in {@link Speech2#speak(String, int, int)}
 	 * @param speech the speech string to search the array for
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance
 	 *
@@ -223,7 +254,7 @@ final class UtilsSpeech2 {
 		return null;
 	}
 
-	public static final int UNKNOWN_PRIORITY = -1;
+	static final int UNKNOWN_PRIORITY = -1;
 	/**
 	 * <p>Gets the speech ID through its speech string.</p>
 	 * <br>
@@ -237,7 +268,7 @@ final class UtilsSpeech2 {
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param speech the speech string to search the arrays for
-	 * @param speech_priority same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)} or the constant. If it's the
+	 * @param speech_priority same as in {@link Speech2#speak(String, int, int)} or the constant. If it's the
 	 *                           constant, then the parameter {@code low_to_high} will be completely ignored
 	 * @param low_to_high true to search from lower priority arrays to higher ones, false to do the opposite
 	 * @param arrays_speech_objs the {@link Speech2#arrays_speech_objs} instance

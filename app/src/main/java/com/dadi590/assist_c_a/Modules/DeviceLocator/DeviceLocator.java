@@ -44,16 +44,17 @@ import android.os.PowerManager;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
-import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroid;
 import com.dadi590.assist_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsLocationRelative;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNetwork;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.ModulesList;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.dadi590.assist_c_a.ModulesList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,7 @@ public final class DeviceLocator implements IModuleInst {
 	@Nullable final WifiManager wifiManager = UtilsCheckHardwareFeatures.isWifiSupported() ?
 			UtilsNetwork.getWifiManager() : null;
 
-	@Nullable BluetoothHeadset bluetoothHeadset = null;
+	@Nullable BluetoothHeadset bluetoothHeadset = null; // todo PUT THIS IN A SEPARATE MODULE!!! (ConnectivityManager?)
 	@Nullable BluetoothA2dp bluetoothA2dp = null;
 	ArrayList<Object> bluetooth_profiles = new ArrayList<>(BluetoothProfile.MAX_PROFILE_ID);
 
@@ -134,7 +135,7 @@ public final class DeviceLocator implements IModuleInst {
 	public void destroy() {
 		infinity_thread.interrupt();
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
@@ -169,8 +170,8 @@ public final class DeviceLocator implements IModuleInst {
 		UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
 
 		if (null != bluetoothAdapter) {
-			bluetoothAdapter.getProfileProxy(UtilsGeneral.getContext(), serviceListener, BluetoothProfile.HEADSET);
-			bluetoothAdapter.getProfileProxy(UtilsGeneral.getContext(), serviceListener, BluetoothProfile.A2DP);
+			bluetoothAdapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
+			bluetoothAdapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.A2DP);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
@@ -279,19 +280,19 @@ public final class DeviceLocator implements IModuleInst {
 		}
 
 		try {
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}
 
 	void setWifiEnabled(final boolean enable) {
-		if (UtilsAndroid.GEN_ERR != UtilsAndroidConnectivity.setWifiEnabled(enable)) {
+		if (UtilsShell.ErrCodes.GEN_ERR != UtilsAndroidConnectivity.setWifiEnabled(enable)) {
 			enabled_by_visor_wifi = enable;
 		}
 	}
 
 	void setBluetoothEnabled(final boolean enable) {
-		if (UtilsAndroid.GEN_ERR != UtilsAndroidConnectivity.setBluetoothEnabled(enable)) {
+		if (UtilsShell.ErrCodes.GEN_ERR != UtilsAndroidConnectivity.setBluetoothEnabled(enable)) {
 			enabled_by_visor_bt = enable;
 		}
 	}
@@ -410,32 +411,15 @@ public final class DeviceLocator implements IModuleInst {
 					final BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 					if (BluetoothAdapter.STATE_CONNECTING == state || BluetoothAdapter.STATE_CONNECTED == state) {
 						if (enabled_by_visor_bt) {
-							boolean headset_disconnect = false;
-							if (null != bluetoothHeadset) {
-								try {
-									headset_disconnect = bluetoothHeadset.disconnect(bluetoothDevice);
-								} catch (final Throwable ignored) {
-									// A Throwable is being thrown here. No description. No idea why it happens.
-								}
-							}
-							boolean a2dp_disconnect = false;
-							if (null != bluetoothA2dp) {
-								try {
-									a2dp_disconnect = bluetoothA2dp.disconnect(bluetoothDevice);
-								} catch (final Throwable ignored) {
-								}
-							}
-							// It seems disconnect() returns true if the device is not connected with the profile the
-							// method is called from - so it must return true for all profiles to mean it's fully
-							// disconnected.
-							if (!headset_disconnect || !a2dp_disconnect) {
-								// If a device is at minimum attempting to connect, turn the adapter off instantly.
-								// Reason why I don't "just" disconnect the device or stop it from even trying to
-								// connect in the first place explained in ACTION_STATE_CHANGED's case.
-								// EDIT: it's now attempting to disconnect the device. Doesn't work on Oreo 8.1, but
-								// maybe it works in some other version(s).
-								setBluetoothEnabled(false);
-							}
+							// If a device is at minimum attempting to connect, turn the adapter off instantly.
+							// Reason why I don't "just" disconnect the device or stop it from even trying to
+							// connect in the first place explained in ACTION_STATE_CHANGED's case.
+							// EDIT: it's now attempting to disconnect the device. Doesn't work on Oreo 8.1, but
+							// maybe it works in some other version(s).
+							// EDIT 2: removed it. on BV9500 it's not being fast enough and the headset connected a few
+							// times. Back to instant-disable. The API says it must be in the connected state to
+							// actually disconnect() anyway.
+							setBluetoothEnabled(false);
 						}
 					}
 
@@ -560,7 +544,7 @@ public final class DeviceLocator implements IModuleInst {
 				////////////////////////////////////////////////
 				// Power Saver mode
 				case (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED): {
-					final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+					final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 					assert powerManager != null; // Broadcast received, so the service exists
 
 					if (powerManager.isPowerSaveMode()) {

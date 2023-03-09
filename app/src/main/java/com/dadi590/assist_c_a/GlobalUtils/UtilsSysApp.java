@@ -78,7 +78,7 @@ public final class UtilsSysApp {
 	 * @return same as in {@link #mainFunction(String, int)}
 	 */
 	public static boolean mainFunctionSelf(final int types_to_check) {
-		return mainFunction(UtilsGeneral.getContext().getPackageName(), types_to_check);
+		return mainFunction(UtilsContext.getContext().getPackageName(), types_to_check);
 	}
 
 	public static final int IS_PLATFORM_SIGNED_APP = 1;
@@ -110,7 +110,7 @@ public final class UtilsSysApp {
 	 * @return true if all the given types are true for the given app or if no types are provided, false otherwise
 	 */
 	public static boolean mainFunction(@Nullable final String package_name, final int types_to_check) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		final String package_name_to_use;
 		if (null == package_name) {
 			package_name_to_use = context.getPackageName();
@@ -214,7 +214,7 @@ public final class UtilsSysApp {
 		}
 
 		// Else, check by comparing signatures of a platform-signed app and the chosen app.
-		return UtilsGeneral.getContext().getPackageManager().checkSignatures(applicationInfo.packageName, "android")
+		return UtilsContext.getContext().getPackageManager().checkSignatures(applicationInfo.packageName, "android")
 				== PackageManager.SIGNATURE_MATCH;
 	}
 

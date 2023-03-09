@@ -29,7 +29,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.dadi590.assist_c_a.BroadcastRecvs.DeviceAdmin.UtilsDeviceAdmin;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 
 import java.lang.reflect.InvocationTargetException;
@@ -76,10 +76,10 @@ public final class UtilsProtectedLockScr {
 			// This way below seems to work perfectly to start an activity instantly after pressing Home button.
 			// Though, it doesn't work as of API 27, according with testing from a StackOverflow user and behaves exactly
 			// like startActivity() in this matter.
-			PendingIntent.getActivity(UtilsGeneral.getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT).send();
+			PendingIntent.getActivity(UtilsContext.getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT).send();
 		} catch (final Throwable ignored) { // This is very important, so Throwable.
 			// In case it didn't work for some reason, use the supposed normal way of starting an activity.
-			UtilsGeneral.getContext().startActivity(intent);
+			UtilsContext.getContext().startActivity(intent);
 		}
 	}
 
@@ -93,7 +93,7 @@ public final class UtilsProtectedLockScr {
 	 */
 	@NonNull
 	public static Intent getPLSIntent() {
-		final Intent intentPLS = new Intent(UtilsGeneral.getContext(), ProtectedLockScrAct.class);
+		final Intent intentPLS = new Intent(UtilsContext.getContext(), ProtectedLockScrAct.class);
 		intentPLS.addFlags(
 				Intent.FLAG_ACTIVITY_CLEAR_TOP |
 				Intent.FLAG_ACTIVITY_SINGLE_TOP |
@@ -120,7 +120,7 @@ public final class UtilsProtectedLockScr {
 			Arranja isso. Mete numa thread e impede de ser chamada mais que uma vez enquanto estiver a funcionar ou mete
 				a forçagem de permissões MEGA rápida --> tal como a função de iniciar o serviço, tenta metê-la ao máximo.*/
 
-		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsGeneral.getContext());
+		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsContext.getContext());
 		final Method method = UtilsReflection.getMethod(LockPatternUtils.class, "isLockScreenDisabled");
 		if (null != method) {
 			try {

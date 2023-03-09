@@ -105,7 +105,7 @@ public final class UtilsRegistry {
 	 * @return the value for the given key, in the appropriate type, or the default value
 	 */
 	@NonNull
-	public static Value getValueObj(@NonNull final String key) {
+	public static Value getValue(@NonNull final String key) {
 		final Value[] list;
 		if (key.startsWith(ValuesRegistry.PREFIX)) {
 			list = ValuesRegistry.VALUES_LIST;

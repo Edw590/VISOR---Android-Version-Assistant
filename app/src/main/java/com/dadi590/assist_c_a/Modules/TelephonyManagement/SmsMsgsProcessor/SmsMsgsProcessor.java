@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
@@ -71,7 +72,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	@Override
 	public void destroy() {
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
@@ -105,7 +106,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 			// Ignore the warning below. The constant exists on API 15, so exists at least on >= API 15.
 			intentFilter.addAction(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
 					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
@@ -136,7 +137,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 				speak = "Sir, new message from " + UtilsTelephony.getWhatToSayAboutNumber(sender) + ".";
 				UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_NUMBER, sender);
 			}
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 		}
 	}
 

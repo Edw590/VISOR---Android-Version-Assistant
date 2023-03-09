@@ -30,7 +30,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCertificates;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsServices;
 import com.dadi590.assist_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
@@ -96,24 +96,21 @@ public final class UtilsMainSrvc {
 			return UNSUPPORTED_OS_VERSION;
 		}
 
-		final LinearLayout linearLayout = new LinearLayout(UtilsGeneral.getContext()) {
+		final LinearLayout linearLayout = new LinearLayout(UtilsContext.getContext()) {
 
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power Menu
-
-					final boolean is_recording_audio = UtilsRegistry.
-							getValueObj(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).getData(false);
-					if (is_recording_audio) {
+					if (UtilsRegistry.getValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).getData(false)) {
 						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 						UtilsAudioRecorderBC.recordAudio(false, -1, true);
 					} else {
 						// If it's not recording audio, start the commands recognizer.
-						UtilsSpeechRecognizersBC.startGoogleRecognition();
+						UtilsSpeechRecognizersBC.startCommandsRecognition();
 					}
 				}/* else if ("homekey".equals(reason)) {
-					// Here the recognizers are stopped because the user might be wanting to start Google's recognition
-					// from the Google App and the microphone would be in use - so this stops it.
+					// Here the recognizers are stopped because the user might be wanting to start the cmds recognition
+					// from the Google App or wherever else and the microphone would be in use - so this stops it.
 					// Update: this just detects a home key PRESS, not hold. So it's of no use and is now disabled.
 				} else if ("recentapps".equals(reason)) {
                 }*/
@@ -122,8 +119,8 @@ public final class UtilsMainSrvc {
 
 		linearLayout.setFocusable(true);
 
-		final View view = LayoutInflater.from(UtilsGeneral.getContext()).inflate(R.layout.power_long_press_service_layout, linearLayout);
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.
+		final View view = LayoutInflater.from(UtilsContext.getContext()).inflate(R.layout.power_long_press_service_layout, linearLayout);
+		final WindowManager windowManager = (WindowManager) UtilsContext.
 				getSystemService(android.content.Context.WINDOW_SERVICE);
 
 		if (windowManager == null) {

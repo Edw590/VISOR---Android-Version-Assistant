@@ -36,7 +36,7 @@ import com.dadi590.assist_c_a.Modules.ModulesManager.ModulesManager;
 import com.dadi590.assist_c_a.Modules.PowerProcessor.PowerProcessor;
 import com.dadi590.assist_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
-import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.GoogleRecognition;
+import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.PocketSphinxRecognition;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
 import com.dadi590.assist_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
@@ -116,7 +116,7 @@ public final class ModulesList {
 
 			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, true),
 			new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
-			new ElementsObj(GoogleRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
+			new ElementsObj(CommandsRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
 			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, true),
 	};
 	public static final int ELEMENTS_LIST_LENGTH = ELEMENTS_LIST.length;

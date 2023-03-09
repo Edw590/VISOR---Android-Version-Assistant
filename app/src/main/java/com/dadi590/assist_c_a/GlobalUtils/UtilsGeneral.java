@@ -22,7 +22,6 @@
 package com.dadi590.assist_c_a.GlobalUtils;
 
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,8 +30,6 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.ServiceManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.KeyEvent;
@@ -40,12 +37,9 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.ApplicationClass;
-
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -68,12 +62,12 @@ public final class UtilsGeneral {
 	};
 
 	/**
-	 * <p>Checks if the Assistant Platforms Unifier module is available.</p>
-	 * <p>It does so by checking if the APU library file is available on the device.</p>
+	 * <p>Checks if the Advanced Commands Detection module is available.</p>
+	 * <p>It does so by checking if the ACD library file is available on the device.</p>
 	 *
-	 * @return true if it is available for use (APU library file on the device and on a correct folder), false otherwise
+	 * @return true if it is available for use (ACD library file on the device and on a correct folder), false otherwise
 	 */
-	public static boolean isAPUAvailable() {
+	public static boolean isACDAvailable() {
 		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			return false;
 		}
@@ -116,7 +110,7 @@ public final class UtilsGeneral {
 	 * @return true if an accessory with speakers is connected, false otherwise
 	 */
 	public static boolean areExtSpeakersOn() {
-		final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
 		if (null == audioManager) {
 			return false;
 		}
@@ -142,27 +136,13 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Returns the Application Context.</p>
-	 * <p>Main note: do NOT use on Content Provider classes. Only on Activities, Services and Receivers. Read the doc of
-	 * {@link ApplicationClass#application_context}, which is the variable returned by this function.</p>
-	 *
-	 * @return same as in {@link Context#getApplicationContext()}
-	 */
-	@NonNull
-	public static Context getContext() {
-		// This shouldn't return null ever, if used from Activities, Service, and Receivers. If it ever does, change
-		// @NonNull to @Nullable or think of/find something else/other method.
-		return ApplicationClass.application_context;
-	}
-
-	/**
 	 * <p>Checks if the device is currently running on low memory.</p>
 	 *
 	 * @return true if running on low memory, false otherwise
 	 */
 	public static boolean isDeviceRunningOnLowMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
 		if (null == activityManager) {
 			return false;
 		}
@@ -180,7 +160,7 @@ public final class UtilsGeneral {
 	 * @return true if the device will vibrate, false if there's no vibrator service
 	 */
 	public static boolean vibrateDeviceOnce(final long duration) {
-		final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		final Vibrator vibrator = (Vibrator) UtilsContext.getSystemService(Context.VIBRATOR_SERVICE);
 		if (null == vibrator) {
 			return false;
 		}
@@ -202,7 +182,7 @@ public final class UtilsGeneral {
 	 *                   restriction
 	 */
 	public static void broadcastKeyEvent(final int key_code, @Nullable final String permission) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		final Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
 		intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, key_code));
 		context.sendBroadcast(intent, permission);
@@ -222,7 +202,7 @@ public final class UtilsGeneral {
 	 * @return true if the intent is available, false otherwise
 	 */
 	public static boolean isIntentActionAvailable(@NonNull final Intent intent, final int flags) {
-		final List<ResolveInfo> list = UtilsGeneral.getContext().getPackageManager().
+		final List<ResolveInfo> list = UtilsContext.getContext().getPackageManager().
 				queryIntentActivities(intent, flags);
 
 		return !list.isEmpty();
@@ -235,7 +215,7 @@ public final class UtilsGeneral {
 	 */
 	public static long getAvailableRAM() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
 		if (null == activityManager) {
 			return Long.MAX_VALUE;
 		}
@@ -252,7 +232,7 @@ public final class UtilsGeneral {
 	 */
 	public static boolean isDeviceLowOnMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
 		if (null == activityManager) {
 			return false;
 		}
@@ -287,42 +267,20 @@ public final class UtilsGeneral {
 	}
 
 	/**
-	 * <p>Same as {@code Application}{@link Context#getSystemService(String)}, but that includes @Nullable on it from AndroidX
-	 * to provide warnings.</p>
+	 * <p>Get the default app for an intent.</p>
 	 *
-	 * @param name same as in {@link Context#getSystemService(String)}
+	 * @param intent the intent to check
 	 *
-	 * @return same as in {@link Context#getSystemService(String)}
-	 */
-	@Nullable
-	public static Object getSystemService(@NonNull final String name) {
-		return getContext().getSystemService(name);
-	}
-
-	/**
-	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @Nullable on it from AndroidX
-	 * to provide warnings.</p>
-	 *
-	 * @param name same as in {@link ServiceManager#getService(String)}
-	 *
-	 * @return same as in {@link ServiceManager#getService(String)}
-	 */
-	@Nullable
-	public static IBinder getService(@NonNull final String name) {
-		return ServiceManager.getService(name);
-	}
-
-	/**
-	 * <p>Same as {@link ServiceManager#getService(String)}, but that includes @Nullable on it from AndroidX
-	 * to provide warnings.</p>
-	 *
-	 * @param name same as in {@link ServiceManager#getService(String)}
-	 *
-	 * @return same as in {@link ServiceManager#getService(String)}
+	 * @return the default app package name, or an empty string if none is found
 	 */
 	@NonNull
-	public static NotificationManager getNotificationManager() {
-		// Won't be null, because the Main Service won't start if there's no notification service on the device.
-		return (NotificationManager) Objects.requireNonNull(getSystemService(Context.NOTIFICATION_SERVICE));
+	public static String getDefaultAppForIntent(@NonNull final Intent intent) {
+		final PackageManager packageManager = UtilsContext.getContext().getPackageManager();
+		final ResolveInfo resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		if (null == resolveInfo) {
+			return "";
+		}
+
+		return resolveInfo.activityInfo.packageName;
 	}
 }

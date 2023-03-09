@@ -40,7 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -122,7 +122,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 
 		flash_off_on = FLASH_MODE_OFF_ON.equals(chosen_flash_mode);
 
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+		final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
 		assert null != windowManager; // Module supported
 
 		final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
@@ -138,7 +138,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 		layoutParams.x = 0;
 		layoutParams.y = 0;
 
-		surfaceView = new SurfaceView(UtilsGeneral.getContext());
+		surfaceView = new SurfaceView(UtilsContext.getContext());
 
 		windowManager.addView(surfaceView, layoutParams);
 		final SurfaceHolder surfaceHolder = surfaceView.getHolder();
@@ -234,7 +234,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 				return;
 			}
 
-			MediaScannerConnection.scanFile(UtilsGeneral.getContext(), new String[]{image_file.toString()}, null, null);
+			MediaScannerConnection.scanFile(UtilsContext.getContext(), new String[]{image_file.toString()}, null, null);
 
 			camera.stopPreview();
 
@@ -291,7 +291,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 				camera.takePicture(shutterCallback, null, pictureCallback);
 			} catch (final RuntimeException ignored) {
 				final String speak = "Error taking the picture, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			}
 		}
 	};
@@ -376,7 +376,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 		camera_parameters.setJpegThumbnailQuality(chosen_quality_mode);
 		camera_parameters.setPictureFormat(ImageFormat.JPEG);
 
-		final WindowManager windowManager = (WindowManager) UtilsGeneral.getSystemService(Context.WINDOW_SERVICE);
+		final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
 		assert null != windowManager; // If the camera is available and this is how it's used, then this is also available
 
 		final int display_rotation = windowManager.getDefaultDisplay().getRotation();

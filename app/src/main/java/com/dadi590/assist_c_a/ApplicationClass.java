@@ -95,9 +95,6 @@ public final class ApplicationClass extends Application {
 			}
 		});
 
-		// Clear the app cache as soon as the app starts not to take unnecessary space
-		UtilsApp.deleteAppCache();
-
 		// Prepare the Advanced Commands Detection module commands array
 		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 

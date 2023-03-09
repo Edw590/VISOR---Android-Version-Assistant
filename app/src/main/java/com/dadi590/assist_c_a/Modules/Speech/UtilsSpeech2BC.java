@@ -21,16 +21,13 @@
 
 package com.dadi590.assist_c_a.Modules.Speech;
 
-import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
-import com.dadi590.assist_c_a.Modules.CmdsExecutor.CmdsExecutor;
+import com.dadi590.assist_c_a.TasksList;
 
 /**
  * <p>Functions to call to send information to {@link Speech2}, by using broadcasts.</p>
@@ -47,47 +44,24 @@ public final class UtilsSpeech2BC {
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_CALL_SPEAK}, but
 	 * {@code bypass_no_sound = true}.</p>
 	 *
-	 * @return in case there's no other speech on the list, true if the speech may be spoken, meaning the ringer mode is
-	 * set to normal (checked in-time - this is just a prediction based on the status at the time of calling this
-	 * function); false otherwise or if there's no Audio service on the device (meaning it won't speak anyway - a
-	 * notification will apear instead)
+	 * @return the speech ID
 	 */
-	public static boolean speak(@NonNull final String txt_to_speak, final int speech_priority,
-								final boolean notify_no_sound, @Nullable final Integer after_speaking_code) {
+	@NonNull
+	public static String speak(@NonNull final String txt_to_speak, final int speech_priority,
+								final int mode, @Nullable final Runnable after_speaking) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_Speech.ACTION_CALL_SPEAK);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1, txt_to_speak);
+		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_2, mode);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_3, speech_priority);
-		if (after_speaking_code != null) {
-			broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4, after_speaking_code);
+		if (after_speaking != null) {
+			broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4, TasksList.addTask(after_speaking));
 		}
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_5, notify_no_sound);
+		final String speech_id = UtilsSpeech2.generateUtteranceId(speech_priority);
+		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_5, speech_id);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 
-		final AudioManager audioManager = (AudioManager) UtilsGeneral.getSystemService(Context.AUDIO_SERVICE);
-		if (null == audioManager) {
-			return false;
-		} else {
-			return AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode();
-		}
-	}
-
-	/**
-	 * <p>Same as {@link #speak(String, int, boolean, Integer)}, but strictly for {@link CmdsExecutor} internal usage.</p>
-	 * <p>Reason: has the {@code bypass_sound} parameter available, which is not for normal use.</p>
-	 */
-	public static void speakExecutor(@NonNull final String txt_to_speak, final int speech_priority,
-							 final boolean bypass_no_sound, @Nullable final Integer after_speaking_code) {
-		final Intent broadcast_intent = new Intent(CONSTS_BC_Speech.ACTION_CALL_SPEAK);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1, txt_to_speak);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_2, bypass_no_sound);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_3, speech_priority);
-		if (after_speaking_code != null) {
-			broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4, after_speaking_code);
-		}
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_5, true);
-
-		UtilsApp.sendInternalBroadcast(broadcast_intent);
+		return speech_id;
 	}
 
 	/**

@@ -59,19 +59,22 @@ public final class ValuesRegistry {
 		// Flashlight
 		public static final String MAIN_FLASHLIGHT_ENABLED = PREFIX + "MAIN_FLASHLIGHT_ENABLED";
 		// Speech recognizers
-		public static final String GOOGLE_RECOG_AVAILABLE = PREFIX + "GOOGLE_RECOG_AVAILABLE";
+		public static final String COMMANDS_RECOG_AVAILABLE = PREFIX + "COMMANDS_RECOG_AVAILABLE";
 		public static final String POCKETSPHINX_RECOG_AVAILABLE = PREFIX + "POCKETSPHINX_RECOG_AVAILABLE";
+		public static final String POCKETSPHINX_REQUEST_STOP = PREFIX + "POCKETSPHINX_RECOG_STOPPED";
 	}
 
 	static final Value[] VALUES_LIST = {
 			// Note: if the value is not being updated, remove it from the list
 
+			// Power
 			new Value(Keys.BATTERY_PRESENT, "Power - Battery Present", Value.TYPE_BOOLEAN,
 					"Is the battery present?"),
 			new Value(Keys.BATTERY_PERCENT, "Power - Battery Percentage", Value.TYPE_INTEGER,
 					"The battery percentage"),
 			new Value(Keys.POWER_CONNECTED, "Power - Power Connected", Value.TYPE_BOOLEAN,
 					"Is the device connected to power?"),
+
 			// Device Locator
 			new Value(Keys.DIST_ROUTER, "Location - Distance to Wi-Fi router (m)", Value.TYPE_INTEGER,
 					"Distance in meters from the device to the Wi-Fi router of the current network"),
@@ -79,27 +82,34 @@ public final class ValuesRegistry {
 					"The public IP address from the current network connection"),
 			new Value(Keys.CURR_NETWORK_TYPE, "Location - Current network type", Value.TYPE_INTEGER,
 					"The current network type"),
+
 			// Telephony - Phone calls
 			new Value(Keys.LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)", Value.TYPE_LONG,
 					"Timestamp of the last phone call (in milliseconds)"),
 			new Value(Keys.CURR_PHONE_CALL_NUMBER, "Telephony - Number of current call", Value.TYPE_STRING,
 					"Number of the last phone call"),
+
 			// Telephony - SMS
 			new Value(Keys.LAST_SMS_MSG_TIME, "Telephony - Last SMS msg when (ms)", Value.TYPE_LONG,
 					"Timestamp of the last SMS message (in milliseconds)"),
 			new Value(Keys.LAST_SMS_MSG_NUMBER, "Telephony - Number of last SMS msg sender", Value.TYPE_STRING,
 					"Number of the last SMS message"),
+
 			// Audio Recorder
-			new Value(Keys.IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally", Value.TYPE_BOOLEAN,
+			new Value(Keys.IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally", Value.TYPE_BOOLEAN, false,
 					"Is VISOR recording audio internally?"),
+
 			// Flashlight
 			new Value(Keys.MAIN_FLASHLIGHT_ENABLED, "Camera - Main flashlight enabled (Android 6+)", Value.TYPE_BOOLEAN,
 					"Is the main flashlight enabled? (Only available from Android Marshmallow onwards)"),
+
 			// Speech Recognizers
-			new Value(Keys.GOOGLE_RECOG_AVAILABLE, "Speech recognition - Google available", Value.TYPE_BOOLEAN,
-					"Is the Google speech recognizer available?"),
-			new Value(Keys.POCKETSPHINX_RECOG_AVAILABLE, "Speech recognition - PocketSphinx available", Value.TYPE_BOOLEAN,
-					"Is the PocketSphinx speech recognizer available?"),
+			new Value(Keys.COMMANDS_RECOG_AVAILABLE, "Speech recognition - Commands available", Value.TYPE_BOOLEAN,
+					"Is the commands speech recognizer available?"),
+			new Value(Keys.POCKETSPHINX_RECOG_AVAILABLE, "Speech recognition - Hotword available", Value.TYPE_BOOLEAN,
+					"Is the hotword speech recognizer (PocketSphinx) available?"),
+			new Value(Keys.POCKETSPHINX_REQUEST_STOP, "Speech recognition - Hotword requested to stop", Value.TYPE_BOOLEAN, false,
+					"Was the hotword speech recognizer requested to stop?"),
 	};
 
 	/**

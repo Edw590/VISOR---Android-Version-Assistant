@@ -24,7 +24,6 @@ package com.dadi590.assist_c_a.Modules.Speech;
 import android.media.AudioManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 
@@ -64,32 +63,32 @@ final class SpeechObj {
 	static final int DEFAULT_AUDIO_STREAM = -3234;
 
 	@NonNull final String utterance_id;
-	@Nullable final Integer after_speaking_code;
+	final int task_id;
 	@NonNull String txt_to_speak; // Not final because of "As I was saying, " - interrupt the speech and say it again, changed
 	final int audio_stream;
-	final boolean bypass_no_sound;
-	final boolean notify_no_sound;
+	final int mode;
+	final long registered_when;
 
 	/**
 	 * <p>Main class constructor.</p>
 	 *
-	 * @param utterance_id same as in {@link Speech2#speakInternal(String, int, boolean, String, Integer)}, but must not
+	 * @param utterance_id same as in {@link Speech2#speakInternal(String, int, int, String, Runnable)}, but must not
 	 * be null
-	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param txt_to_speak same as in {@link Speech2#speak(String, int, int)}
 	 * @param current_speech_obj true if the instance is being created to reset the {@link Speech2#current_speech_obj} -
 	 * the audio stream will be set to {@link #DEFAULT_AUDIO_STREAM} as a "random" value;
 	 * false otherwise
-	 * @param bypass_no_sound same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
-	 * @param notify_no_sound
-	 * @param after_speaking_code same as in {@link Speech2#speak(String, int, boolean, boolean, Integer)}
+	 * @param mode same as in {@link Speech2#speak(String, int, int)}
+	 * @param registered_when when was this speech added to the speeches list
+	 * @param task_id same as in {@link Speech2#speak(String, int, int)}
 	 */
 	SpeechObj(@NonNull final String utterance_id, @NonNull final String txt_to_speak, final boolean current_speech_obj,
-			  final boolean bypass_no_sound, final boolean notify_no_sound, @Nullable final Integer after_speaking_code) {
+			  final int mode, final long registered_when, final int task_id) {
 		this.utterance_id = utterance_id;
-		this.after_speaking_code = after_speaking_code;
+		this.task_id = task_id;
 		this.txt_to_speak = txt_to_speak;
-		this.bypass_no_sound = bypass_no_sound;
-		this.notify_no_sound = notify_no_sound;
+		this.mode = mode;
+		this.registered_when = registered_when;
 
 		if (current_speech_obj) {
 			audio_stream = DEFAULT_AUDIO_STREAM;
@@ -110,16 +109,16 @@ final class SpeechObj {
 	}
 
 	/**
-	 * <p>Create an empty instance with: {@code this("", "", true, false, false, null)}.</p>
+	 * <p>Create an empty instance with: {@code this("", "", true, 0, {@link Long#MAX_VALUE}, null)}.</p>
 	 */
 	SpeechObj() {
-		this("", "", true, false, false, null);
+		this("", "", true, 0, Long.MAX_VALUE, -1);
 	}
 
 	@NonNull
 	@Override
 	public String toString() {
 		return "[\"" + utterance_id.substring(0, 20) + "...\", " + "\"" + txt_to_speak + "\", "
-				+ after_speaking_code + ", " + audio_stream + ", " + bypass_no_sound + "]";
+				+ task_id + ", " + audio_stream + ", " + mode + "]";
 	}
 }

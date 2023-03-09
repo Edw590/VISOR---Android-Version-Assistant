@@ -21,6 +21,14 @@
 
 package com.dadi590.assist_c_a.GlobalUtils.AndroidSystem;
 
+import android.bluetooth.BluetoothAdapter;
+import android.net.wifi.WifiManager;
+
+import androidx.annotation.NonNull;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * <p>General utilities for the Android system utilities classes.</p>
  */
@@ -32,21 +40,40 @@ public final class UtilsAndroid {
 	private UtilsAndroid() {
 	}
 
-	/** Generic error. */
-	public static final int GEN_ERR = 987670;
-	public static final int NO_ERR = 987671;
-	public static final int PERM_DENIED = 987672;
 	public static final int NOT_AVAILABLE = 987673;
 
-	public static final int ALREADY_ENABLED = -987674;
-	public static final int ALREADY_DISABLED = -987675;
+	public static final int ALREADY_ENABLED = -987570;
+	public static final int ALREADY_ENABLING = -987571;
+	public static final int ALREADY_DISABLED = -987572;
+	public static final int ALREADY_DISABLING = -987573;
 
-	public static final int MODE_NORMAL = -987676;
-	public static final int MODE_SAFE = -987677;
-	public static final int MODE_RECOVERY = -987678;
-	public static final int MODE_BOOTLOADER = -987679;
-	public static final int MODE_FAST = -987680;
+	public static final int MODE_NORMAL = -987470;
+	public static final int MODE_SAFE = -987471;
+	public static final int MODE_RECOVERY = -987472;
+	public static final int MODE_BOOTLOADER = -987473;
+	public static final int MODE_FAST = -987484;
 
-	public static final int NO_CALL_EMERGENCY = -987681;
-	public static final int NO_CALL_ANY = -987682;
+	public static final int NO_CALL_EMERGENCY = -987380;
+	public static final int NO_CALL_ANY = -987381;
+
+
+	static final Map<Integer, Integer> map_STATEs_to_consts = new LinkedHashMap<Integer, Integer>() {
+		private static final long serialVersionUID = 4089662568764366621L;
+		@NonNull
+		@Override public LinkedHashMap<Integer, Float> clone() throws AssertionError {
+			throw new AssertionError();
+		}
+
+		{
+			put(WifiManager.WIFI_STATE_ENABLED, ALREADY_ENABLED);
+			put(WifiManager.WIFI_STATE_ENABLING, ALREADY_ENABLING);
+			put(WifiManager.WIFI_STATE_DISABLED, ALREADY_DISABLED);
+			put(WifiManager.WIFI_STATE_DISABLING, ALREADY_DISABLING);
+
+			put(BluetoothAdapter.STATE_ON, ALREADY_ENABLED);
+			put(BluetoothAdapter.STATE_TURNING_ON, ALREADY_ENABLING);
+			put(BluetoothAdapter.STATE_OFF, ALREADY_DISABLED);
+			put(BluetoothAdapter.STATE_TURNING_OFF, ALREADY_DISABLING);
+		}
+	};
 }

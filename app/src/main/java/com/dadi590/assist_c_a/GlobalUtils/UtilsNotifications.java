@@ -55,7 +55,7 @@ public final class UtilsNotifications {
 	 */
 	@NonNull
 	public static NotificationCompat.Builder getNotification(@NonNull final ObjectClasses.NotificationInfo notificationInfo) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			// Faster than making a map...
 			int importance = NotificationManager.IMPORTANCE_UNSPECIFIED;
@@ -125,7 +125,7 @@ public final class UtilsNotifications {
 		final NotificationChannel channel = new NotificationChannel(id, chName, importance);
 		channel.setDescription(description);
 
-		final NotificationManager notificationManager = (NotificationManager) UtilsGeneral.getNotificationManager();
+		final NotificationManager notificationManager = (NotificationManager) UtilsContext.getNotificationManager();
 
 		try {
 			notificationManager.createNotificationChannel(channel);
@@ -143,7 +143,7 @@ public final class UtilsNotifications {
 	 */
 	public static void cancelNotification(final int id) {
 		final NotificationManager notificationManager =
-				(NotificationManager) UtilsGeneral.getNotificationManager();
+				(NotificationManager) UtilsContext.getNotificationManager();
 		notificationManager.cancel(id);
 	}
 }

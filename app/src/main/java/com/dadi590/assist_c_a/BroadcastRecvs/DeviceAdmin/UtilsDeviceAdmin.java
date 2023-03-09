@@ -25,7 +25,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Build;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 
 /**
  * <p>Device Administration related utilities.</p>
@@ -45,7 +45,7 @@ public final class UtilsDeviceAdmin {
 	 * or the {@link DevicePolicyManager} does not exist on the system
 	 */
 	public static boolean lockDevice() {
-		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsGeneral.
+		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsContext.
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
 		if (null == devicePolicyManager) {
 			return false;

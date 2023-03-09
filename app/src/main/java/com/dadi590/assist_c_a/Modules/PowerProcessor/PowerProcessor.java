@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -77,7 +78,7 @@ public final class PowerProcessor implements IModuleInst {
 	@Override
 	public void destroy() {
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
@@ -114,7 +115,7 @@ public final class PowerProcessor implements IModuleInst {
 			intentFilter.addAction(CONSTS.ACTION_HTC_QCK_POFF);
 			intentFilter.addAction(CONSTS.ACTION_ANDR_QCK_POFF);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
 	}
@@ -137,12 +138,12 @@ public final class PowerProcessor implements IModuleInst {
 		if (power_connected) {
 			if (last_detected_percent > PERCENT_MAX) {
 				final String speak = "Battery already above " + PERCENT_MAX + "%. Please disconnect the charger.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 			}
 		} else {
 			if (last_detected_percent < PERCENT_MIN) {
 				final String speak = "Battery still below " + PERCENT_MIN + "%. Please reconnect the charger.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 			}
 		}
 
@@ -255,7 +256,7 @@ public final class PowerProcessor implements IModuleInst {
 		// functions will warn based on them only --> then compare the values and be done with it.
 		// Still, use the power_connected status, but only if it's different than null, just to be sure no weird devices
 		// increase the percentage by mistake without being charging. This would warn in that case - now it won't.
-		final Boolean power_connected = UtilsRegistry.getValueObj(ValuesRegistry.Keys.POWER_CONNECTED).getData();
+		final Boolean power_connected = UtilsRegistry.getValue(ValuesRegistry.Keys.POWER_CONNECTED).getData();
 		if (null == power_connected || power_connected) {
 			// Don't do anything if by chance, another broadcast is sent without the battery level having changed.
 			if (battery_percentage > last_detected_percent) {
@@ -277,11 +278,11 @@ public final class PowerProcessor implements IModuleInst {
 		// Since I'm putting >= in the if statements, must be from greatest level to the lowest one.
 		if (battery_percentage == 100 && last_detected_percent < 100) {
 			final String speak = "Attention! Device fully charge! Please disconnect the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 		} else if (battery_percentage > PERCENT_MAX && last_detected_percent <= PERCENT_MAX) {
 			final String speak = "Attention! Above " + PERCENT_MAX + "% of battery reached! Please " +
 					"disconnect the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 		}
 	}
 
@@ -298,12 +299,12 @@ public final class PowerProcessor implements IModuleInst {
 			// VERY_LOW, then it already detected and warned about it.
 			final String speak = "WARNING! EXTREMELY LOW BATTERY OF " + battery_percentage + "% REACHED! " +
 					"Please connect the charger now!";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 		} else if (battery_percentage < PERCENT_LOW && last_detected_percent >= PERCENT_LOW) {
 			// Else in the same manner the LOW level.
 			final String speak = "ATTENTION! Below " + PERCENT_MIN + "% of battery reached. Please connect " +
 					"the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 		}
 	}
 
@@ -357,10 +358,10 @@ public final class PowerProcessor implements IModuleInst {
 
 					if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
 						final String speak = "Fast shut down detected.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 					} else {
 						final String speak = "Shut down detected.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 					}
 					// Note: must be very small speeches, since the phone will shut down fast.
 
@@ -372,7 +373,7 @@ public final class PowerProcessor implements IModuleInst {
 					// No idea if this is supposed detected at all (might be stopped before it gets here by the system
 					// as soon as it detects it or something).
 					final String speak = "Reboot detected.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 					// Note: must be a very small speech, since the phone will shut down fast.
 
 

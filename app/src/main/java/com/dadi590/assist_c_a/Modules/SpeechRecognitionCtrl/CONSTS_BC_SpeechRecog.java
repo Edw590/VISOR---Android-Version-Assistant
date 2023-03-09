@@ -21,6 +21,8 @@
 
 package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
+import com.dadi590.assist_c_a.TasksList;
+
 /**
  * <p>Actions, extras, and classes to use to send a broadcast to this module.</p>
  * <br>
@@ -35,12 +37,12 @@ final class CONSTS_BC_SpeechRecog {
 	}
 
 	/**
-	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to start the Google recognition.</p>
+	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to start the commands recognition.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
 	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
 	 * <p>Extras: none.</p>
 	 */
-	static final String ACTION_START_GOOGLE = "SpeechRecognition_ACTION_START_GOOGLE";
+	static final String ACTION_START_CMDS_RECOG = "SpeechRecognition_ACTION_START_CMDS_RECOG";
 
 	/**
 	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to start the PocketSphinx recognition.</p>
@@ -54,9 +56,11 @@ final class CONSTS_BC_SpeechRecog {
 	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to stop and keep stopped all speech recognizers.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeechRecognizersBC}.</p>
 	 * <p>To be received only by the class(es): {@link SpeechRecognitionCtrl}.</p>
-	 * <p>Extras: none.</p>
+	 * <p>Extras:</p>
+	 * <p>- {@link #EXTRA_STOP_RECOGNITION_1} (optional): the ID of a {@link TasksList.Task} to execute after stopping.</p>
 	 */
 	static final String ACTION_STOP_RECOGNITION = "SpeechRecognition_ACTION_STOP_RECOGNITION";
+	static final String EXTRA_STOP_RECOGNITION_1 = "SpeechRecognition_EXTRA_STOP_RECOGNITION_1";
 
 	/**
 	 * <p>Explanation: commands {@link SpeechRecognitionCtrl} to terminate all speech recognizers.</p>
@@ -67,10 +71,10 @@ final class CONSTS_BC_SpeechRecog {
 	static final String ACTION_TERMINATE_RECOGNIZERS = "SpeechRecognition_ACTION_TERMINATE_RECOGNIZERS";
 
 	/**
-	 * <p>Explanation: informs that Google's speech recognizer is initializing.</p>
-	 * <p>Is broadcast by the class(es): {@link GoogleRecognition}.</p>
+	 * <p>Explanation: informs that the commands speech recognizer is initializing.</p>
+	 * <p>Is broadcast by the class(es): {@link CommandsRecognition}.</p>
 	 * <p>To be received only by the class(es): any chosen class.</p>
 	 * <p>Extras: none.</p>
 	 */
-	public static final String ACTION_GOOGLE_RECOG_STARTING = "SpeechRecognition_ACTION_GOOGLE_RECOG_STARTING";
+	public static final String ACTION_CMDS_RECOG_STARTING = "SpeechRecognition_ACTION_CMDS_RECOG_STARTING";
 }

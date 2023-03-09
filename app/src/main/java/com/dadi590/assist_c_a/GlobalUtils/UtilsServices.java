@@ -47,7 +47,7 @@ public final class UtilsServices {
 	 * @param service_class the class of the service to stop
 	 */
 	public static void stopService(@NonNull final Class<?> service_class) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		context.stopService(new Intent(context, service_class));
 	}
 
@@ -72,7 +72,7 @@ public final class UtilsServices {
 			return;
 		}
 
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		final Intent intent_to_use = null == intent ? new Intent(context, service_class) : intent;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && foreground) {
@@ -100,7 +100,7 @@ public final class UtilsServices {
 		// Note: this method is called automatically before starting services, if it's chosen for it to - so don't put
 		// it using too much CPU time. Must be as fast as possible.
 
-		final ActivityManager activityManager = (ActivityManager) UtilsGeneral.getSystemService(Context.ACTIVITY_SERVICE);
+		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
 		if (null == activityManager) {
 			return false;
 		}

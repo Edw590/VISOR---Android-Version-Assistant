@@ -43,12 +43,12 @@ public final class GL_CONSTS {
 	 * <p>The name of the assistant as it's on {@link R.string#app_name_ACA}, but only what's the before the first space -
 	 * real location is on the strings.xml file.</p>
 	 */
-	public static final String ASSISTANT_NAME = UtilsGeneral.getContext().getString(R.string.app_name_ACA).split(" ")[0];
+	public static final String ASSISTANT_NAME = UtilsContext.getContext().getString(R.string.app_name_ACA).split(" ")[0];
 	/**
 	 * <p>The app description exactly as it's on {@link R.string#app_description_ACA} - real location is on the
 	 * strings.xml file.</p>
 	 */
-	public static final String APP_DESCRIPTION = UtilsGeneral.getContext().getString(R.string.app_description_ACA);
+	public static final String APP_DESCRIPTION = UtilsContext.getContext().getString(R.string.app_description_ACA);
 	/**
 	 * <p>The name of the assistant but with dots removed in case there are dots in {@link #ASSISTANT_NAME} (WO = W/O =
 	 * without).</p>
@@ -63,11 +63,11 @@ public final class GL_CONSTS {
 	public static final int NOTIF_ID_MAIN_SRV_FOREGROUND = 1;
 	public static final int NOTIF_ID_PLS_SRV_FOREGROUND = 2;
 	public static final int NOTIF_ID_SPEECHES = 3;
-	public static final int NOTIF_ID_GOOGLE_RECOG_FOREGROUND = 4;
+	public static final int NOTIF_ID_COMMANDS_RECOG_FOREGROUND = 4;
 	public static final String CH_ID_MAIN_SRV_FOREGROUND = "MainSrv:FOREGROUND";
 	public static final String CH_ID_PLS_SRV_FOREGROUND = "ProtectedLockScrSrv:FOREGROUND";
 	public static final String CH_ID_SPEECHES = "Speech2:Speeches";
-	public static final String CH_ID_GOOGLE_RECOG_FOREGROUND = "GoogleRecognition:FOREGROUND";
+	public static final String CH_ID_COMMANDS_RECOG_FOREGROUND = "CommandsRecognition:FOREGROUND";
 
 	// Media
 	/** The complete path to the VISOR folder on the external storage. */

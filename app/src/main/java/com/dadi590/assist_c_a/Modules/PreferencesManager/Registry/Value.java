@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 /**
  * <p>The class used to hold each value on the storage.</p>
  * <p>A value of null means the value has never been set before.</p>
+ * <p>This class is thread-safe.</p>
  */
 public final class Value {
 

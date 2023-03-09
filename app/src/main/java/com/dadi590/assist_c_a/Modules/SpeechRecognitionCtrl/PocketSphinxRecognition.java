@@ -24,10 +24,12 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 import android.os.Handler;
 import android.os.HandlerThread;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsAudio;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.ModulesList;
 
@@ -41,8 +43,8 @@ import edu.cmu.pocketsphinx1.SpeechRecognizer;
 import edu.cmu.pocketsphinx1.SpeechRecognizerSetup;
 
 /**
- * <p>This class activates PocketSphinx's speech recognition and automatically starts Google's if the assistant's name
- * is spoken.</p>
+ * <p>This class activates PocketSphinx's speech recognition and automatically starts the commands recognizer if the
+ * assistant's name is spoken.</p>
  */
 public final class PocketSphinxRecognition implements IModuleInst {
 
@@ -51,7 +53,8 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			new HandlerThread((String) ModulesList.getElementValue(element_index, ModulesList.ELEMENT_NAME));
 	final Handler main_handler;
 
-	@Nullable static SpeechRecognizer recognizer = null;
+	boolean preparing = false;
+	static SpeechRecognizer recognizer = null;
 	//@Nullable static SpeechRecognizerSetup speechRecognizerSetup = null;
 
 	private static final String KEYWORD_WAKEUP = "WAKEUP";
@@ -67,19 +70,14 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			return false;
 		}
 
-		return UtilsGeneral.isThreadWorking(main_handlerThread);
+		// The recognizer must be working. If it's not, at least must be being prepared. Not any? Problem happening.
+		return (null != recognizer || !preparing) && UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public void destroy() {
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
-		if (null != recognizer) {
-			recognizer.cancel();
-			recognizer.shutdown();
-			recognizer = null;
-		}
-
-		is_listening = false;
+		shutdownRecognizer();
 
 		is_module_destroyed = true;
 	}
@@ -100,7 +98,10 @@ public final class PocketSphinxRecognition implements IModuleInst {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 
-		is_listening = false;
+		// To be sure the recognizer is always shut down when the module starts (it's a static variable, so can remain
+		// active even if the module has an issue and crashes somewhere other than with the recognizer object). Must be
+		// a complete module restart, like what happens with the other modules.
+		shutdownRecognizer();
 
 		prepareRecognizer();
 	}
@@ -115,8 +116,11 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			return true;
 		}
 
+		preparing = true;
+
+		final File assetsDir;
 		try {
-			final File assetsDir = new Assets(UtilsGeneral.getContext()).syncAssets();
+			assetsDir = new Assets(UtilsContext.getContext()).syncAssets();
 
 			// The recognizer can be configured to perform multiple searches
 			// of different kind and switch between them
@@ -130,19 +134,15 @@ public final class PocketSphinxRecognition implements IModuleInst {
 					.setAcousticModel(new File(assetsDir, "en-us-5.2"))
 					.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
 					.setSampleRate(16000) // As per the used files (not the "8k" option, so they're the default 16 kHz)
-					.setKeywordThreshold(1.0f) // Goes from 1e-45f to 1 (manual testing). Adjust for false positives.
-					// The greater, the less false positives - though, more probability to fail to a true match.
-					// If the Google Hotword recognizer could be put to work... Maybe it would be better (the normal
-					// recognition is very good).
-					// But this seems to be enough for now, I guess. 0.25f seems to be enough.
-					//.setString("-logfn","/dev/null") - doesn't work on Android... It turns off logging, but "Cannot
-					// redirect log output".
+					//.setString("-logfn","/dev/null") - doesn't work on Android... Supposedly turns off logging, but a
+					// "Cannot redirect log output" error appears instead.
 
-					// There's an exception here, but this function is only called when the microphone is available, so
-					// this won't throw errors.
+					// There's an exception here, but this module is only started if there's permission to capture
+					// audio, so this won't throw errors.
 					.getRecognizer(main_handler);
 
 			recognizer.addListener(recognitionListener);
+
 			// Create keyword-activation search.
 			recognizer.addKeywordSearch(KEYWORD_WAKEUP, new File(assetsDir, "visor_keywords.gram"));
 		} catch (final IOException e) {
@@ -151,20 +151,40 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			return false;
 		}
 
+		preparing = false;
+
 		return true;
 	}
 
-	static boolean isListening() {
+	/**
+	 * <p>Shuts down the recognizer instance and a call to {@link #prepareRecognizer()} will be needed again.</p>
+	 */
+	private synchronized static void shutdownRecognizer() {
+		is_listening = false;
+
+		if (null != recognizer) {
+			recognizer.shutdown();
+			recognizer = null;
+		}
+	}
+
+	/**
+	 * <p>Get the listening state of the recognizer.</p>
+	 *
+	 * @return true if listening, false if stopped
+	 */
+	public static synchronized boolean isListening() {
 		return is_listening;
 	}
 
 	/**
-	 * <p>Starts listening in the background, and does nothing if it had already started.</p>
+	 * <p>Starts listening in the background, and does nothing if it's already listening.</p>
 	 *
 	 * @return true if the recognition started or was already started, false also if the recognizer is not ready and you
-	 * need to call {@link #prepareRecognizer} or if the audio source is busy
+	 * need to call {@link #prepareRecognizer} or if the audio source is busy or if it's still stopping (if it was
+	 * ordered to stop before calling this function) and you just need to call this function again
 	 */
-	static boolean startListening() {
+	static synchronized boolean startListening() {
 		if (null == recognizer) {
 			return false;
 		} else if (is_listening) {
@@ -175,16 +195,14 @@ public final class PocketSphinxRecognition implements IModuleInst {
 
 		is_listening = true;
 
-		recognizer.startListening(KEYWORD_WAKEUP);
-
-		return true;
+		return recognizer.startListening(KEYWORD_WAKEUP);
 	}
 
 	/**
-	 * <p>Stops listening, and does nothing if it had already stopped.</p>
+	 * <p>Cancels listening.</p>
 	 */
-	static void stopListening() {
-		if (null == recognizer) {
+	static synchronized void stopListening() {
+		if (!is_listening) {
 			return;
 		}
 
@@ -214,14 +232,20 @@ public final class PocketSphinxRecognition implements IModuleInst {
 		 * for final result in onResult.
 		 */
 		@Override
-		public void onPartialResult(@Nullable final Hypothesis hypothesis) {
+		public void onPartialResult(@NonNull final Hypothesis hypothesis) {
 			// null == recognizer to be sure it doesn't use other results after supposedly shutting down. This is a
 			// replacement to terminating the PID, which might make the controller restart this recognition.
 			// Also !is_listening to be sure it doesn't try to analyze more results after stopListening() is called.
-			if (!is_listening || hypothesis == null || null == recognizer) {
+			if (!is_listening) {
 				return;
 			}
-			final String[] hypothesis_list = hypothesis.getHypstr().split(" ");
+
+			// getBestScore() and getProb() both are always returning 0. Don't use them.
+			final String hypothesis_str = hypothesis.getHypstr();
+			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
+			System.out.println(hypothesis_str);
+
+			final String[] hypothesis_list = hypothesis_str.split(" {2}"); // The string is separated by 2 spaces
 			if (!hypothesis_list[0].contains("isor")) {
 				// Substring "isor" must be in the 1st or 2nd hypothesis. Else, ignore the detection.
 				if (hypothesis_list.length > 1) {
@@ -233,10 +257,10 @@ public final class PocketSphinxRecognition implements IModuleInst {
 				}
 			}
 
-			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
-			System.out.println(hypothesis.getHypstr());
-			stopListening(); // Stop listening or else this might try to start Google recognition various times (happened).
-			UtilsSpeechRecognizersBC.startGoogleRecognition();
+			System.out.println("+++ Matched +++");
+
+			stopListening(); // To ensure this is not called multiple times in a row (happened)
+			UtilsSpeechRecognizersBC.startCommandsRecognition();
 		}
 
 		/**

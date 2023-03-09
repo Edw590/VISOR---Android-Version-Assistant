@@ -32,7 +32,7 @@ import android.provider.Settings;
 
 import androidx.annotation.RequiresApi;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsReflection;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsShell;
@@ -53,12 +53,10 @@ public final class UtilsAndroidPower {
 	private UtilsAndroidPower() {
 	}
 
-	// todo Make the shutdown and reboot functions return with shell commands... --> EXECUTE ON ANOTHER THREAD!!!!!
+	// todo Make the shutdown and reboot functions return and with a code... --> EXECUTE ON ANOTHER THREAD!!!!!
 
 	// todo "CRITICAL APP ERROR" on the tablet on shutdown and with privileged system app permissions
 	// Didn't get to see the reason.
-
-	// todo Toggling the power saver mode freezes the app.... --> another thread
 
 	/**
 	 * <p>Shut down the device.</p>
@@ -68,11 +66,10 @@ public final class UtilsAndroidPower {
 	 * function will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
 	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: power service module not available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
-	 * @return one of the constants or a SH shell exit code
+	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int shutDownDevice() {
 		// The REBOOT permission is the one required here, not SHUTDOWN (tested and got an error saying it).
@@ -84,7 +81,7 @@ public final class UtilsAndroidPower {
 			// Also, shutdown() only exists from API 17 onwards. Hopefully the root way works.
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-				final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+				final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 				if (null == powerManager) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
@@ -96,7 +93,7 @@ public final class UtilsAndroidPower {
 				} catch (final Exception ignored) {
 				}
 			} else {
-				final IBinder iBinder = UtilsGeneral.getService(Context.POWER_SERVICE);
+				final IBinder iBinder = UtilsContext.getService(Context.POWER_SERVICE);
 				if (null == iBinder) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
@@ -149,19 +146,18 @@ public final class UtilsAndroidPower {
 	 * will NOT return (no idea how to change that, currently).</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
-	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: power service not available</p>
-	 * <br>
 	 * <p>- {@link UtilsAndroid#MODE_NORMAL} --> for {@code mode}: reboot device normally</p>
 	 * <p>- {@link UtilsAndroid#MODE_SAFE} --> for {@code mode}: reboot device into Safe Mode</p>
 	 * <p>- {@link UtilsAndroid#MODE_RECOVERY} --> for {@code mode}: reboot device into the Recovery</p>
 	 * <p>- {@link UtilsAndroid#MODE_BOOTLOADER} --> for {@code mode}: reboot device into the Bootloader (Fastboot)</p>
 	 * <p>- {@link UtilsAndroid#MODE_FAST} --> for {@code mode}: fast reboot device (reboot the userspace)</p>
+	 * <br>
+	 * <p>- {@link UtilsAndroid#NOT_AVAILABLE} --> for the returning value: power service not available</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param mode one of the constants
 	 *
-	 * @return one of the constants or a SH shell exit code
+	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int rebootDevice(final int mode) {
 		final String reason;
@@ -199,7 +195,7 @@ public final class UtilsAndroidPower {
 		}
 
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT)) {
-			final IBinder iBinder = UtilsGeneral.getService(Context.POWER_SERVICE);
+			final IBinder iBinder = UtilsContext.getService(Context.POWER_SERVICE);
 			if (null == iBinder) {
 				return UtilsAndroid.NOT_AVAILABLE;
 			}
@@ -244,52 +240,63 @@ public final class UtilsAndroidPower {
 
 	/**
 	 * <p>Toggles Android's Battery Saver mode from Android 5.0 onwards (below that it doesn't exist).</p>
-	 * <br>
-	 * <p><u>---CONSTANTS---</u></p>
-	 * <p>- {@link UtilsAndroid#NO_ERR} --> for the returning value: operation executed successfully</p>
-	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param enabled true to enable, false to disable
 	 *
-	 * @return a SH shell exit code
+	 * @return an SH shell exit code
 	 */
 	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-	public static int setBatterySaverModeEnabled(final boolean enabled) {
-		final boolean operation_finished;
+	public static int setBatterySaverEnabled(final boolean enabled) {
+		final boolean success;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)) {
-			operation_finished = Settings.Global.putString(UtilsGeneral.getContext().getContentResolver(),
-					Settings.Global.LOW_POWER_MODE, enabled ? "1" : "0");
+			success = Settings.Global.putInt(UtilsContext.getContext().getContentResolver(),
+					Settings.Global.LOW_POWER_MODE, enabled ? 1 : 0);
 
-			if (operation_finished) {
+			if (success) {
 				final List<String> commands = new ArrayList<>(2);
 				commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED + " --ez mode " +
-						(enabled ? "true" : "false") + " --receiver-registered-only");
+						enabled + " --receiver-registered-only");
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 					commands.add("am broadcast -a " + PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL +
-							" --ez mode " + (enabled ? "true" : "false"));
+							" --ez mode " + enabled);
 				}
 
 				return UtilsShell.executeShellCmd(commands, true, true).error_code;
 			}
 		}
 
-		return UtilsAndroid.PERM_DENIED;
+		return UtilsShell.ErrCodes.PERM_DENIED;
 	}
 
 	/**
-	 * <p>Turn on the screen temporarily.</p>
+	 * <p>Check if the Battery Saver mode is enabled or not.</p>
+	 *
+	 * @return true if enabled, false otherwise or if the power service is not available on the device
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+	public static boolean getBatterySaverEnabled() {
+		final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
+		if (null == powerManager) {
+			return false;
+		}
+
+		return powerManager.isPowerSaveMode();
+	}
+
+	/**
+	 * <p>Turn the screen on.</p>
 	 *
 	 * @return true if the screen was turned on, false if the power service is not available on the device
 	 */
-	public static boolean turnScreenOnTemp() {
-		final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+	public static boolean turnScreenOn() {
+		final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 		if (null == powerManager) {
 			return false;
 		}
 
 		final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK |
 				PowerManager.ACQUIRE_CAUSES_WAKEUP |
-				PowerManager.ON_AFTER_RELEASE, UtilsGeneral.getContext().getPackageName()+"::WakeLock");
+				PowerManager.ON_AFTER_RELEASE, UtilsContext.getContext().getPackageName()+"::WakeLock");
 
 		// Acquire and release the wakelock so that the screen turns on and the CPU can turn it off whenever it wants
 		// because we no longer want it on.
@@ -303,7 +310,7 @@ public final class UtilsAndroidPower {
 	 *
 	 * @return true if the screen was turned off, false if there are no root permissions
 	 */
-	public static boolean turnScreenOffTEST_THIS() {
+	public static boolean turnScreenOff_TEST_THIS() {
 		// todo To be tested
 		return UtilsShell.noErr(UtilsShell.executeShellCmd("input keyevent 26", false, true).error_code);
 	}

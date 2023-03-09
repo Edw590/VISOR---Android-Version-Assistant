@@ -25,6 +25,11 @@ import android.Manifest;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 
+import androidx.annotation.NonNull;
+
+/**
+ * <p>Audio-related utilities.</p>
+ */
 public final class UtilsAudio {
 	/**
 	 * <p>Checks if a {@link android.media.MediaRecorder.AudioSource} is available for immediate use.</p>
@@ -69,5 +74,25 @@ public final class UtilsAudio {
 		audioRecord.release();
 
 		return success_recording;
+	}
+
+	/**
+	 * <p>Adjusts the volume of raw audio data, for example gotten from {@link AudioRecord}.</p>
+	 * <p>Note that this function does not care about noise or anything at all - it just applies the same gain to ALL
+	 * bytes. If the gain would generate an overflow, {@link Short#MAX_VALUE} is used instead.</p>
+	 * <p>If gain is 1.0f, this function is a no-op.</p>
+	 *
+	 * @param audio_bytes the audio data
+	 * @param gain the gain to apply to the data
+	 */
+	public static void adjustGainBuffer(@NonNull final short[] audio_bytes, final float gain) {
+		if (0 == Float.compare(1.0f, gain)) {
+			return;
+		}
+
+		final int audio_length = audio_bytes.length;
+		for (int i = 0; i < audio_length; ++i) {
+			audio_bytes[i] = (short)Math.min((int)((float) audio_bytes[i] * gain), (int)Short.MAX_VALUE);
+		}
 	}
 }

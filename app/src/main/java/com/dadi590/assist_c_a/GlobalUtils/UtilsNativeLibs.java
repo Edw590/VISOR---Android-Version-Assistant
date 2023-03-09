@@ -45,7 +45,7 @@ public final class UtilsNativeLibs {
 	 */
 	@NonNull
 	public static String getPrimaryNativeLibsPath() {
-		return UtilsGeneral.getContext().getApplicationInfo().nativeLibraryDir;
+		return UtilsContext.getContext().getApplicationInfo().nativeLibraryDir;
 	}
 
 	public static final String POCKETSPHINX_LIB_NAME = "libpocketsphinx_jni.so";

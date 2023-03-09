@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.SettingsRegistry;
 import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
@@ -181,7 +181,7 @@ public final class UtilsTelephony {
 	public static String getWhatToSayAboutNumber(@NonNull final String number) {
 		final String ret;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
-			final boolean first_match = UtilsRegistry.getValueObj(SettingsRegistry.Keys.CONTACTS_1ST_MATCH).getData();
+			final boolean first_match = UtilsRegistry.getValue(SettingsRegistry.Keys.CONTACTS_1ST_MATCH).getData();
 
 			ret = getNameFromNum(number, first_match);
 		} else {
@@ -223,7 +223,7 @@ public final class UtilsTelephony {
 	@NonNull
 	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static String[] getLastCall() {
-		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
+		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
 		try (final Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null)) {
 			if (cursor == null) {
 				return new String[]{ERROR, ERROR};
@@ -249,7 +249,7 @@ public final class UtilsTelephony {
 	 */
 	@RequiresPermission(Manifest.permission.READ_CONTACTS)
 	public static int getTypeLastCallByNum(@NonNull final String number) {
-		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
+		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
 		try (final Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null)) {
 
 			if (cursor == null) {
@@ -277,7 +277,7 @@ public final class UtilsTelephony {
 	 */
 	public static boolean isEmergencyNumber(@NonNull final String phone_number) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.
 					getSystemService(Context.TELEPHONY_SERVICE);
 			if (null == telephonyManager) {
 				return false;
@@ -300,7 +300,7 @@ public final class UtilsTelephony {
 	 */
 	public static boolean isPotentialEmergencyNumber(@NonNull final String phone_number) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) UtilsGeneral.
+			final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.
 					getSystemService(Context.TELEPHONY_SERVICE);
 			if (null == telephonyManager) {
 				return false;
@@ -347,7 +347,7 @@ public final class UtilsTelephony {
 				break;
 		}
 
-		final ContentResolver contentResolver = UtilsGeneral.getContext().getContentResolver();
+		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
 
 		try (final Cursor cursor = contentResolver.query(uri_to_use, null, null, null, null)) {
 

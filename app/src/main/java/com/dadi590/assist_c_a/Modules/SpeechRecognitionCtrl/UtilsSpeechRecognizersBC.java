@@ -23,7 +23,10 @@ package com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl;
 
 import android.content.Intent;
 
+import androidx.annotation.Nullable;
+
 import com.dadi590.assist_c_a.GlobalUtils.UtilsApp;
+import com.dadi590.assist_c_a.TasksList;
 
 /**
  * <p>Functions to call to send information to {@link SpeechRecognitionCtrl}, by using broadcasts.</p>
@@ -40,11 +43,11 @@ public final class UtilsSpeechRecognizersBC {
 	// it broke down - leave the manager to keep modules working only, not these failsafe measures that are not too good.
 
 	/**
-	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_GOOGLE} and executes
-	 * {@link UtilsSpeechRecognizers#startGoogleRecognition()} immediately.</p>
+	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_START_CMDS_RECOG} and executes
+	 * {@link UtilsSpeechRecognizers#startCommandsRecognition()} immediately.</p>
 	 */
-	public static void startGoogleRecognition() {
-		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_GOOGLE);
+	public static void startCommandsRecognition() {
+		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_START_CMDS_RECOG);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}
@@ -61,9 +64,14 @@ public final class UtilsSpeechRecognizersBC {
 
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_SpeechRecog#ACTION_STOP_RECOGNITION}.</p>
+	 *
+	 * @param runnable the runnable associated with {@link CONSTS_BC_SpeechRecog#EXTRA_STOP_RECOGNITION_1}
 	 */
-	public static void stopRecognition() {
+	public static void stopRecognition(@Nullable final Runnable runnable) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
+		if (null != runnable) {
+			broadcast_intent.putExtra(CONSTS_BC_SpeechRecog.EXTRA_STOP_RECOGNITION_1, TasksList.addTask(runnable));
+		}
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

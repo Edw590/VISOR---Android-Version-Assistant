@@ -96,7 +96,7 @@ public final class TelephonyManagement implements IModuleInst {
 							// contacts or to remove from it removed contacts, or to update updated contacts (like number or
 							// name or whatever). Also if the READ_CONTACTS permissions was just granted, add the contacts from
 							// scratch.
-							final boolean only_sim = UtilsRegistry.getValueObj(SettingsRegistry.Keys.CONTACTS_SIM_ONLY).getData();
+							final boolean only_sim = UtilsRegistry.getValue(SettingsRegistry.Keys.CONTACTS_SIM_ONLY).getData();
 							contacts_list = UtilsTelephony.getAllContacts(only_sim ?
 									UtilsTelephony.CONTACTS_SIM : UtilsTelephony.ALL_CONTACTS);
 							UtilsCmdsList.updateMakeCallCmdContacts();

@@ -36,7 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.dadi590.assist_c_a.GlobalUtils.PERMS_CONSTS;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsProcesses;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsSysApp;
@@ -87,7 +87,7 @@ public final class FragDevelopment extends Fragment {
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
 
-				final Context context = UtilsGeneral.getContext();
+				final Context context = UtilsContext.getContext();
 
 				//UtilsLocationRelative.startIndRelDistance();
 
@@ -186,7 +186,7 @@ public final class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 			}
 		});
 		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {

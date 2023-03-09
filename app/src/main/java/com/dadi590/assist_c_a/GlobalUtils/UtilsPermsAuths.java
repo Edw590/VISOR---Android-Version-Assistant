@@ -66,12 +66,12 @@ public final class UtilsPermsAuths {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "No permissions left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
 		}
 	}
 
@@ -85,12 +85,12 @@ public final class UtilsPermsAuths {
 		if (0 == auths_left) {
 			if (warn_success) {
 				final String speak = "No authorizations left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			}
 		} else {
 			final String speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 					"authorizations left to grant: " + auths_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 		}
 	}
 
@@ -130,7 +130,7 @@ public final class UtilsPermsAuths {
 		final ArrayList<String> perms_to_request = new ArrayList<>(array_length);
 
 		if (request) {
-			final String partial_command = "pm grant " + UtilsGeneral.getContext().getPackageName() + " ";
+			final String partial_command = "pm grant " + UtilsContext.getContext().getPackageName() + " ";
 
 			for (int permission_list = 0; permission_list < list_to_use_len; ++permission_list) {
 				for (final String[] permission : list_to_use[permission_list]) {
@@ -209,7 +209,7 @@ public final class UtilsPermsAuths {
 	 * @return the number of not granted authorizations
 	 */
 	public static int checkRequestAuths(int what_to_do) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		final String package_name = context.getPackageName();
 		int missing_authorizations = 0;
 
@@ -219,10 +219,37 @@ public final class UtilsPermsAuths {
 			what_to_do = CHECK_ONLY;
 		}
 
+		// todo Finish and test this. Not sure what to do about the VOICE_-ones. Find an action for them.
+		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			final String assist_package = Settings.Secure.getString(context.getContentResolver(),
+					Settings.Secure.ASSISTANT);
+			if (!package_name.equals(assist_package)) {
+				if (ALSO_FORCE == what_to_do) {
+					// todo Missing forcing the authorization here
+				} else {
+					++missing_authorizations;
+
+					if (ALSO_REQUEST == what_to_do) {
+						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+							UtilsContext.startActivity(new Intent(Intent.ACTION_ASSIST));
+							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
+							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_COMMAND));
+						} else {
+							final Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+							UtilsContext.startActivity(intent);
+							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
+							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_COMMAND));
+						}
+					}
+				}
+			}
+		}*/
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
 			// screen for the user to grant it.
-			final NotificationManager mNotificationManager = (NotificationManager) UtilsGeneral.getNotificationManager();
+			final NotificationManager mNotificationManager = (NotificationManager) UtilsContext.getNotificationManager();
 			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "cmd notification allow_dnd " + package_name;
@@ -235,7 +262,7 @@ public final class UtilsPermsAuths {
 					if (ALSO_REQUEST == what_to_do) {
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						context.startActivity(intent);
+						UtilsContext.startActivity(intent);
 					}
 				}
 			}
@@ -255,13 +282,13 @@ public final class UtilsPermsAuths {
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						context.startActivity(intent);
+						UtilsContext.startActivity(intent);
 					}
 				}
 			}
 
 			// Check if the app can bypass battery optimizations and request it if not
-			final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE);
+			final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 			if (null != powerManager && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "dumpsys deviceidle whitelist +" + package_name;
@@ -272,11 +299,10 @@ public final class UtilsPermsAuths {
 					++missing_authorizations;
 
 					if (ALSO_REQUEST == what_to_do) {
-						final Intent intent = new Intent();
+						final Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-						intent.setData(Uri.parse("package:" + package_name));
-						context.startActivity(intent);
+						UtilsContext.startActivity(intent);
 					}
 				}
 			}
@@ -293,11 +319,10 @@ public final class UtilsPermsAuths {
 					++missing_authorizations;
 
 					if (ALSO_REQUEST == what_to_do) {
-						final Intent intent = new Intent();
+						final Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-						intent.setData(Uri.parse("package:" + package_name));
-						context.startActivity(intent);
+						UtilsContext.startActivity(intent);
 					}
 				}
 			}
@@ -315,7 +340,7 @@ public final class UtilsPermsAuths {
 					final Intent intent = new Intent();
 					intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(intent);
+					UtilsContext.startActivity(intent);
 				}
 			}
 		}
@@ -331,7 +356,7 @@ public final class UtilsPermsAuths {
 	 * <p>Forces enabling Device Administrator authorization to the app.</p>
 	 */
 	public static void forceDeviceAdmin1() {
-		final String full_device_admin_recv_name = new ComponentName(UtilsGeneral.getContext(),
+		final String full_device_admin_recv_name = new ComponentName(UtilsContext.getContext(),
 				DeviceAdminRecv.class).flattenToString();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			// dpm is only available from Lollipop onwards
@@ -399,7 +424,7 @@ public final class UtilsPermsAuths {
 	 * @return true if the app has the given permission, false otherwise
 	 */
 	public static boolean checkSelfPermission(@NonNull final String permission) {
-		return ContextCompat.checkSelfPermission(UtilsGeneral.getContext(), permission) == PackageManager.PERMISSION_GRANTED;
+		return ContextCompat.checkSelfPermission(UtilsContext.getContext(), permission) == PackageManager.PERMISSION_GRANTED;
 	}
 
 	/**

@@ -91,7 +91,7 @@ public final class UtilsApp {
 	 * Deletes the app private cache folder.
 	 */
 	public static void deleteAppCache() {
-		UtilsFilesDirs.removePath(UtilsGeneral.getContext().getCacheDir().getAbsolutePath(), true);
+		UtilsFilesDirs.removePath(UtilsContext.getContext().getCacheDir().getAbsolutePath(), true);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public final class UtilsApp {
 	 * @return true if the app is installed, false otherwise
 	 */
 	public static boolean isAppInstalled(@NonNull final String package_name) {
-		final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
+		final PackageManager packageManager = UtilsContext.getContext().getPackageManager();
 		try {
 			packageManager.getPackageInfo(package_name, 0);
 
@@ -133,7 +133,7 @@ public final class UtilsApp {
 	 * @return one of the constants
 	 */
 	public static int appEnabledStatus(@NonNull final String package_name) {
-		final PackageManager packageManager = UtilsGeneral.getContext().getPackageManager();
+		final PackageManager packageManager = UtilsContext.getContext().getPackageManager();
 		final int app_enabled_setting;
 		try {
 			app_enabled_setting = packageManager.getApplicationEnabledSetting(package_name);
@@ -161,7 +161,7 @@ public final class UtilsApp {
 	 * @return one of the constants
 	 */
 	public static int appInstallationType() {
-		final String package_name = UtilsGeneral.getContext().getPackageName();
+		final String package_name = UtilsContext.getContext().getPackageName();
 		if (UtilsSysApp.mainFunction(package_name, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP)) {
 			return UtilsSysApp.mainFunction(package_name, UtilsSysApp.IS_UPDATED_SYSTEM_APP) ?
 					PRIVILEGED_WITH_UPDATES : PRIVILEGED_WITHOUT_UPDATES;
@@ -177,8 +177,8 @@ public final class UtilsApp {
 	 * the device
 	 */
 	public static boolean isDeviceAdmin() {
-		final Context context = UtilsGeneral.getContext();
-		final DevicePolicyManager mDPM = (DevicePolicyManager) UtilsGeneral.getSystemService(Context.DEVICE_POLICY_SERVICE);
+		final Context context = UtilsContext.getContext();
+		final DevicePolicyManager mDPM = (DevicePolicyManager) UtilsContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
 		if (null == mDPM) {
 			return false;
 		}
@@ -196,7 +196,7 @@ public final class UtilsApp {
 	 * @param intent the intent to use with the broadcast
 	 */
 	public static void sendInternalBroadcast(@NonNull final Intent intent) {
-		final Context context = UtilsGeneral.getContext();
+		final Context context = UtilsContext.getContext();
 		intent.setPackage(context.getPackageName());
 		// Don't add setComponent() here. If it's an internal broadcast receiver to a class (a registered one), it
 		// will complicate things. Just make sure the broadcast action is only available for the class you want or

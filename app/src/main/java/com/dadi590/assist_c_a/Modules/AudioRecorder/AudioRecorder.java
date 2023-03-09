@@ -34,21 +34,19 @@ import androidx.annotation.Nullable;
 
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsMedia;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
-import com.dadi590.assist_c_a.Modules.Speech.CONSTS_BC_Speech;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.dadi590.assist_c_a.Modules.Speech.Speech2;
 import com.dadi590.assist_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.dadi590.assist_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.dadi590.assist_c_a.ModulesList;
-import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
-import com.dadi590.assist_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -57,8 +55,6 @@ import java.util.Objects;
 public final class AudioRecorder implements IModuleInst {
 
 	@Nullable private MediaRecorder recorder = null;
-
-	final List<Runnable> runnables = new ArrayList<>(1);
 
 	private static final String aud_src_tmp_file = "audioSourceCheck";
 
@@ -81,7 +77,7 @@ public final class AudioRecorder implements IModuleInst {
 	@Override
 	public void destroy() {
 		try {
-			UtilsGeneral.getContext().unregisterReceiver(broadcastReceiver);
+			UtilsContext.getContext().unregisterReceiver(broadcastReceiver);
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
@@ -118,10 +114,9 @@ public final class AudioRecorder implements IModuleInst {
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
 
-			intentFilter.addAction(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE);
 			intentFilter.addAction(CONSTS_BC_AudioRec.ACTION_RECORD_AUDIO);
 
-			UtilsGeneral.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
+			UtilsContext.getContext().registerReceiver(broadcastReceiver, new IntentFilter(intentFilter), null,
 					main_handler);
 		} catch (final IllegalArgumentException ignored) {
 		}
@@ -137,42 +132,38 @@ public final class AudioRecorder implements IModuleInst {
 	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
-		final Boolean is_recording = UtilsRegistry.getValueObj(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).
+		final boolean is_recording = UtilsRegistry.getValue(ValuesRegistry.Keys.IS_RECORDING_AUDIO_INTERNALLY).
 				getData(false);
 
 		if (start) {
 			if (is_recording) {
 				final String speak = "Already on it sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			} else {
 				final Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						if ((startRecording(audio_source) != NO_ERRORS) && (audio_source == MediaRecorder.AudioSource.MIC)) {
-							// In case of an error and that the microphone is the audio source, start the background
-							// recognition again (if it's not the microphone, then the speech recognition didn't stop
-							// in the first place).
+						if (startRecording(audio_source) != NO_ERRORS) {
+							// In case of an error, restart the hotword recognition again.
 							UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 						}
 					}
 				};
-				runnables.add(runnable);
 				final String speak = "Starting now, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, runnable.hashCode());
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, runnable);
 			}
 		} else {
 			if (is_recording) {
 				stopRecording();
 				final String speak = "Stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
-				runnables.remove(0);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 
 				if (restart_pocketsphinx) {
 					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 				}
 			} else {
 				final String speak = "Already stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			}
 		}
 	}
@@ -208,7 +199,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 1 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 
 			return ERR_PERM_CAP_AUDIO;
 		}
@@ -221,7 +212,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 2 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 
 			return ERR_CREATE_FILE;
 		}
@@ -236,7 +227,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 3 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			file.delete();
 
 			return ERR_PREP_RECORDING;
@@ -249,7 +240,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 4 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 			file.delete();
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;
@@ -304,21 +295,6 @@ public final class AudioRecorder implements IModuleInst {
 					final boolean restart_pocketsphinx = intent.getBooleanExtra(CONSTS_BC_AudioRec.EXTRA_RECORD_AUDIO_3,
 							true);
 					recordAudio(start, audio_source, restart_pocketsphinx);
-
-					break;
-				}
-
-				case CONSTS_BC_Speech.ACTION_AFTER_SPEAK_CODE: {
-					final int after_speak_code = intent.getIntExtra(
-							CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_CODE, -1);
-					for (final Runnable runnable : runnables) {
-						if (runnable.hashCode() == after_speak_code) {
-							System.out.println("TTTTTTTTTT");
-							runnable.run();
-
-							return;
-						}
-					}
 
 					break;
 				}

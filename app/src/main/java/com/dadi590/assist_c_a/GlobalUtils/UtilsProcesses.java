@@ -45,7 +45,7 @@ public final class UtilsProcesses {
      * @return the PID of the service of the given class or -1 if not found
      */
     public static int getRunningServicePID(@NonNull final Class<?> serviceClass) {
-        final ActivityManager manager = (ActivityManager) UtilsGeneral.getSystemService(Context.ACTIVITY_SERVICE);
+        final ActivityManager manager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
         if (null == manager) {
             return -1;
         }

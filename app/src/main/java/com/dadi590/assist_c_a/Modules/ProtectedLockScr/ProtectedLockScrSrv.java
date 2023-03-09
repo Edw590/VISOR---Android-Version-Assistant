@@ -39,7 +39,7 @@ import com.dadi590.assist_c_a.GlobalInterfaces.IModuleInst;
 import com.dadi590.assist_c_a.GlobalInterfaces.IModuleSrv;
 import com.dadi590.assist_c_a.GlobalUtils.GL_CONSTS;
 import com.dadi590.assist_c_a.GlobalUtils.ObjectClasses;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsGeneral;
+import com.dadi590.assist_c_a.GlobalUtils.UtilsContext;
 import com.dadi590.assist_c_a.GlobalUtils.UtilsNotifications;
 import com.dadi590.assist_c_a.MainSrvc.UtilsMainSrvc;
 
@@ -120,12 +120,12 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 			boolean device_is_secured;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				try {
-					final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsGeneral.getContext());
+					final LockPatternUtils lockPatternUtils = new LockPatternUtils(ProtectedLockScrSrv.this);
 					device_is_secured = lockPatternUtils.isLockScreenDisabled(UserHandle.myUserId());
 				} catch (final Throwable ignored) { // ANY error....
 					// This won't differentiate between None and Swipe though. But it's better than nothing, since the
 					// method for Lollipop and older doesn't seem to be working when I call it on Oreo 8.1 for some reason.
-					final KeyguardManager keyguardManager = (KeyguardManager) UtilsGeneral.
+					final KeyguardManager keyguardManager = (KeyguardManager) UtilsContext.
 							getSystemService(Context.KEYGUARD_SERVICE);
 					if (null == keyguardManager) {
 						device_is_secured = false;
