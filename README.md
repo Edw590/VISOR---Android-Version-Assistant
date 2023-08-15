@@ -4,6 +4,7 @@ Secondary project name: Assist_C_A (Assistant Client Android)
 ## Notice
 This project is a part of a bigger project, consisting of the following:
 - [V.I.S.O.R. - A better Android assistant](https://github.com/DADi590/VISOR---A-better-Android-assistant)
+- [V.I.S.O.R. - Server Version Assistant](https://github.com/Edw590/VISOR---Server-Version-Assistant)
 - [Advanced Commands Detection](https://github.com/DADi590/Advanced-Commands-Detection)
 
 ## Download
