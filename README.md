@@ -1,9 +1,9 @@
-# V.I.S.O.R. - A better Android assistant
-Secondary project name: Assist_C_A (Assistant Client Android)
+# V.I.S.O.R. - Android Version Assistant
+Secondary project name: VISOR_C_A (V.I.S.O.R. Client Android)
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:
-- [V.I.S.O.R. - A better Android assistant](https://github.com/DADi590/VISOR---A-better-Android-assistant)
+- [V.I.S.O.R. - Android Version Assistant](https://github.com/DADi590/VISOR---A-better-Android-assistant)
 - [V.I.S.O.R. - Server Version Assistant](https://github.com/Edw590/VISOR---Server-Version-Assistant)
 
 ## Download
