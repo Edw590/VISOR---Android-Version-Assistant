@@ -1,4 +1,4 @@
-:: Copyright 2023 DADi590
+:: Copyright 2023 Edw590
 ::
 :: Licensed to the Apache Software Foundation (ASF) under one
 :: or more contributor license agreements.  See the NOTICE file
@@ -23,9 +23,9 @@
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: --- App-specific details ---
-set app_package=com.dadi590.assist_c_a
+set app_package=com.edw590.visor_c_a
 :: Note: apk_name must not contain weird characters - it's used for the APK file name ()not including the extension).
-set apk_name=VISOR
+set apk_name=VISOR_C_A
 :: --- App-specific details ---
 
 :: When executing this scripts, Android Studio must have already generated the APK through Gradle-aware Make to the path

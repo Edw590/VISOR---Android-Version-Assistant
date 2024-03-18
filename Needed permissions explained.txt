@@ -142,14 +142,14 @@ These permissions, whatever they do, are just for precautions. They'll be used t
 app will NOT rely on them. Some other method will be made to do whatever they were supposed to do if there weren't
 vulnerabilities on them.
 
-com.dadi590.assist_c_a.permission.INTERNAL_RECEIVERS
+com.edw590.visor_c_a.permission.INTERNAL_RECEIVERS
 - This permission is to ensure that no other app receives internal communications of this app through broadcasts.
   Communication with other apps developed by me will be handled some other way, since this one is vulnerable.
 
   Note that there may be vulnerabilities and other apps could get the broadcasts. But still, this should make it harder.
   It's just a precaution, because all broadcasts are sent with a requirement that this must be the app receiving them.
 
-com.dadi590.assist_c_a.permission.INCOMING_EXT_COMMS
+com.edw590.visor_c_a.permission.INCOMING_EXT_COMMS
 - This permission exists for no other app to be able to communicate with this one, in the components that declare this
   permission (or that inherit it). Communication with other apps developed by me will be handled some other way, since
   this one is vulnerable.

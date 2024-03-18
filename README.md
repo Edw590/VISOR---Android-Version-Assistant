@@ -1,5 +1,5 @@
 # V.I.S.O.R. - A better Android assistant
-Secondary project name: Assist_C_A (Assistant Client Android)
+Secondary project name: VISOR_C_A (Assistant Client Android)
 
 ## Notice
 This project is a part of a bigger project, consisting of the following:

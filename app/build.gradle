@@ -24,11 +24,11 @@ plugins {
 }
 
 android {
-	namespace 'com.dadi590.assist_c_a'
+	namespace 'com.edw590.visor_c_a'
 
 	signingConfigs {
 		signingConfig {
-			final def propsFile = rootProject.file('PERSONAL_FILES_EOG\\signing_assist_c_a.SECRET')
+			final def propsFile = rootProject.file('PERSONAL_FILES_EOG\\signing_visor_c_a.SECRET')
 			final def props = new Properties()
 
 			props.load(new FileInputStream(propsFile))
@@ -52,7 +52,7 @@ android {
 
 	Versions for which the app was developed (developing to a version implies testing on that version):
 		- KitKat 4.4.2, API 19 (tablet) [secondary] --> until [still on it]
-		- Lollipop 5.1, API 22 (phone) [more rare] --> until [still on it]
+		- Lollipop 5.1, API 22 (phone) [rarer] --> until [still on it]
 		- Oreo 8.1, API 27 (phone) [main] --> until [still on it]
 
 	THIS ALSO MEANS THE APP'S FEATURES ARE ---ONLY--- BEING MADE FOR THE LATEST OF THE ANDROID VERSIONS ABOVE!!!!!
@@ -67,7 +67,7 @@ android {
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// ----- WARNING ----
+	// ----- WARNING -----
 	// When you change the compileSdkVersion, ALWAYS increment it!!! Don't jump one or more versions!!!
 	// This way, because of being using hidden/internal APIs that can be changed and no backwards compatibility given,
 	// Android Studio will warn if a change happened in the hidden/internal SDK (something deleted or changed, like
@@ -86,13 +86,13 @@ android {
 	// every time the app is killed or crashes?.
 	// Read here: https://developer.android.com/about/versions
 
-	// I'm only testing on API 27 at most. I'm compiling with 29 because the internal/hidden APIs on 26 or 27 don't work.
-	compileSdkVersion 29
-
 	defaultConfig {
-		applicationId "com.dadi590.assist_c_a"
+		applicationId "com.edw590.visor_c_a"
+		// I'm only testing on API 27 at most. I'm compiling with 29 because the internal/hidden APIs on 26 or 27 don't
+		// work.
+		compileSdk 29
 		//noinspection MinSdkTooLow
-		minSdkVersion 15
+		minSdkVersion 16
 		//noinspection ExpiredTargetSdkVersion
 		targetSdkVersion 23
 		versionCode 1
@@ -162,14 +162,13 @@ dependencies {
 	implementation "commons-io:commons-io:2.4"
 	implementation "com.ms-square:expandableTextView:0.1.4"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0"
-	//implementation "androidx.room:room-runtime:2.4.3"
-	//annotationProcessor "androidx.room:room-compiler:2.4.3"
+
 
 	/////////////////////
 	// Local files
 
 	// Platforms Unifier Module
-	implementation files("libs/AdvancedCommandsDetection.aar")
+	implementation files("libs/MainLibraries.aar")
 
 	// External
 	implementation files("libs/jutf7-1.0.0.jar")

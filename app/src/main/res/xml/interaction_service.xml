@@ -22,9 +22,9 @@
 
 <voice-interaction-service
 	xmlns:android="http://schemas.android.com/apk/res/android"
-    android:sessionService="com.dadi590.assist_c_a.VoiceInteraction.MainInteractionSessionService"
-    android:recognitionService="com.dadi590.assist_c_a.VoiceInteraction.MainRecognitionService"
-    android:settingsActivity="com.dadi590.assist_c_a.VoiceInteraction.SettingsActivity"
+    android:sessionService="com.edw590.visor_c_a.VoiceInteraction.MainInteractionSessionService"
+    android:recognitionService="com.edw590.visor_c_a.VoiceInteraction.MainRecognitionService"
+    android:settingsActivity="com.edw590.visor_c_a.VoiceInteraction.SettingsActivity"
 	android:supportsAssist="true"
 	android:supportsLaunchVoiceAssistFromKeyguard="true"
 	android:supportsLocalInteraction="true" />

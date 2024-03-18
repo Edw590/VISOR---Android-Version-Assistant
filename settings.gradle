@@ -20,4 +20,4 @@
  */
 
 include ':app'
-rootProject.name = "Assist_C_A"
+rootProject.name = "VISOR_C_A"

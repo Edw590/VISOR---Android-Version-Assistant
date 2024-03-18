@@ -1,5 +1,22 @@
-visor /1.0/
-visors /1.0/
-3234_isor /1.0/
-pfizer /1.0/
-wiser /1.0/
+visor listen again /0.25/
+visor recognize again /0.25/
+visor come back /0.25/
+
+
+ok visor /0.001/
+
+hey visor /0.001/
+visor hey /0.001/
+
+visor you there /0.01/
+visor are you there /0.01/
+are you there visor /0.01/
+
+visor come in /0.01/
+come in visor /0.01/
+
+visor wake up /0.01/
+wake up visor /0.01/
+
+visor talk to me /0.01/
+talk to me visor /0.01/

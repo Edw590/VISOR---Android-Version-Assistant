@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # CHANGE THESE FOR YOUR APP
-app_package="com.dadi590.androidos"
-dir_app_name="Assist_C_A"
+app_package="com.edw590.androidos"
+dir_app_name="VISOR_C_A"
 MAIN_ACTIVITY="Principal"
 
 ADB="adb" # how you execute adb

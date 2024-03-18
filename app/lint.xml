@@ -23,7 +23,7 @@
 <lint>
     <issue id="all">
         <ignore path="src/main/java/edu/cmu/pocketsphinx1" />
-        <ignore path="src/main/java/com/dadi590/assist_c_a/VoiceEnrollment" />
-        <ignore path="src/main/java/com/dadi590/assist_c_a/VoiceInteraction" />
+        <ignore path="src/main/java/com/edw590/visor_c_a/VoiceEnrollment" />
+        <ignore path="src/main/java/com/edw590/visor_c_a/VoiceInteraction" />
     </issue>
 </lint>

@@ -19,7 +19,7 @@
   ~ under the License.
   -->
 
-<!-- The suffix ACA means Assist_C_A (the project name). It's to differentiate in case libraries I import use app_name
+<!-- The suffix ACA means VISOR_C_A (the project name). It's to differentiate in case libraries I import use app_name
  already inside, and this way there's no conflict. -->
 <resources>
 	<string name="app_name_ACA">V.I.S.O.R.</string>

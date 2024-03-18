@@ -42816,7 +42816,6 @@ fischler F IH SH AH L ER
 fischler(2) F IH SH L ER
 fischman F IH SH M AH N
 fiscus F IH S K AH S
-fiser F AY Z ER
 fiserv F IH S ER V
 fisette F IH S EH T
 fish F IH SH
@@ -42951,7 +42950,6 @@ fixler F IH K S L ER
 fixmer F IH K S M ER
 fixture F IH K S CH ER
 fixtures F IH K S CH ER Z
-fizer F AY Z ER
 fizz F IH Z
 fizzle F IH Z AH L
 fizzled F IH Z AH L D
@@ -86467,7 +86465,6 @@ okane OW K EY N
 okano OW K AA N OW
 okasaki OW K AH S AA K IY
 okasan OW K EY Z AH N
-okay OW K EY
 okayed OW K EY D
 okays OW K EY Z
 okaz OW K AA Z
@@ -91657,8 +91654,6 @@ pfiffner F IH F N ER
 pfingsten F IH NG S T AH N
 pfister F IH S T ER
 pfisterer F IH S T ER ER
-pfizer F AY Z ER
-pfizer's F AY Z ER Z
 pflaum F L AW M
 pfleger F L IY G ER
 pfleiderer F L AY D ER ER
@@ -128151,8 +128146,6 @@ visitors V IH Z IH T ER Z
 visitors' V IH Z IH T ER Z
 visits V IH Z IH T S
 visnic V IH S N IH CH
-visor V AY Z ER
-visors V AY Z ER Z
 visscher V IH SH ER
 visser V IH S ER
 vist V IH S T
@@ -132076,7 +132069,6 @@ wisneski V IH S N EH S K IY
 wisnewski V IH S N EH F S K IY
 wisnieski V IH S N IY S K IY
 wisniewski W IH Z N IY EH F S K IY
-wisor W AY Z ER
 wisp W IH S P
 wispy W IH S P IY
 wiss W IH S
@@ -133037,7 +133029,6 @@ wyre W AY R
 wyrick W IH R IH K
 wyse W AY Z
 wyse's W AY Z IH Z
-wyser W AY Z ER
 wysiwig W IH Z IY W IH G
 wysocki V IH S OW T S K IY
 wysocki(2) V IH S AA T S K IY
@@ -134780,4 +134771,10 @@ zyuganov(2) Z UW G AA N AA V
 zyuganov's Z Y UW G AA N AA V Z
 zyuganov's(2) Z UW G AA N AA V Z
 zywicki Z IH W IH K IY
-3234_isor AY Z ER
+
+visor V AY Z ER
+visor(2) F AY Z ER
+visor(3) AY Z ER
+visor(4) V AY Z ER Z
+visor(5) W AY Z ER
+visor(6) V AY Z AH

@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Assist_C_A.iml" filepath="$PROJECT_DIR$/.idea/modules/Assist_C_A.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Assist_C_A.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Android.VISOR_C_A.iml" filepath="$PROJECT_DIR$/.idea/modules/Android.VISOR_C_A.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VISOR_C_A.app.unitTest.iml" />
     </modules>
   </component>
 </project>

@@ -22,4 +22,4 @@
 
 <recognition-service
 	xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="com.dadi590.assist_c_a.VoiceInteraction.SettingsActivity" />
+    android:settingsActivity="com.edw590.visor_c_a.VoiceInteraction.SettingsActivity" />

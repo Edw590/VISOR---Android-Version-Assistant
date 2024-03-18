@@ -42,8 +42,8 @@ import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.dadi590.assist_c_a.GlobalUtils.UtilsAudio;
-import com.dadi590.assist_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsAudio;
+import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class SpeechRecognizer {
 
 	@Nullable Thread recognizerThread;
 
-	float gain = 5.0f;
+	float gain = 3.0f;
 
 	final Handler mainHandler;
 
