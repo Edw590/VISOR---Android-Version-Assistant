@@ -35,16 +35,18 @@ final class CONSTS_BC_CmdsExec {
 	}
 
 	/**
-	 * <p>Executed function: {@link CmdsExecutor#processTask(String, boolean, boolean)}.</p>
+	 * <p>Executed function: {@link CmdsExecutor#processTask(String, boolean, boolean, boolean)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsCmdsExecutorBC}.</p>
 	 * <p>To be received only by the class(es): {@link CmdsExecutor}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_1}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_2}: mandatory</p>
 	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_3}: mandatory</p>
+	 * <p>- {@link #EXTRA_CALL_PROCESS_TASK_4}: mandatory</p>
 	 */
 	static final String ACTION_CALL_PROCESS_TASK = "CmdsExecutor_CALL_PROCESS_TASK";
 	static final String EXTRA_CALL_PROCESS_TASK_1 = "CmdsExecutor_EXTRA_CALL_PROCESS_TASK_1";
 	static final String EXTRA_CALL_PROCESS_TASK_2 = "CmdsExecutor_EXTRA_CALL_PROCESS_TASK_2";
 	static final String EXTRA_CALL_PROCESS_TASK_3 = "CmdsExecutor_EXTRA_CALL_PROCESS_TASK_3";
+	static final String EXTRA_CALL_PROCESS_TASK_4 = "CmdsExecutor_EXTRA_CALL_PROCESS_TASK_4";
 }

@@ -57,6 +57,18 @@ public final class UtilsAndroidConnectivity {
 
 	// todo Toggling the airplane mode freezes the app.... --> another thread
 
+
+	/**
+	 * <p>Gets the Wi-Fi state.</p>
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public static boolean getWifiEnabled() {
+		final WifiManager wifiManager = UtilsNetwork.getWifiManager();
+
+		return null != wifiManager && wifiManager.isWifiEnabled();
+	}
+
 	/**
 	 * <p>Toggles the Wi-Fi state.</p>
 	 * <br>
@@ -80,8 +92,8 @@ public final class UtilsAndroidConnectivity {
 		}
 
 		final int wifi_state = wifiManager.getWifiState();
-		if ((enabled && wifi_state == WifiManager.WIFI_STATE_ENABLED || wifi_state == WifiManager.WIFI_STATE_ENABLING) ||
-				(!enabled && wifi_state == WifiManager.WIFI_STATE_DISABLED || wifi_state == WifiManager.WIFI_STATE_DISABLING)) {
+		if (enabled ? wifi_state == WifiManager.WIFI_STATE_ENABLED || wifi_state == WifiManager.WIFI_STATE_ENABLING :
+				wifi_state == WifiManager.WIFI_STATE_DISABLED || wifi_state == WifiManager.WIFI_STATE_DISABLING) {
 			return UtilsAndroid.map_STATEs_to_consts.get(wifi_state);
 		}
 
@@ -89,10 +101,21 @@ public final class UtilsAndroidConnectivity {
 		if (UtilsContext.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.Q) {
 			return wifiManager.setWifiEnabled(enabled) ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.GEN_ERR;
 		} else {
-			final String command = "svc wifi " + (enabled ? "enabled" : "disabled");
+			final String command = "svc wifi " + (enabled ? "enable" : "disable");
 
-			return UtilsShell.executeShellCmd(command, true).exit_code;
+			return UtilsShell.executeShellCmd(true, command).exit_code;
 		}
+	}
+
+	/**
+	 * <p>Gets the Bluetooth state.</p>
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public static boolean getBluetoothEnabled() {
+		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+		return null != bluetoothAdapter && bluetoothAdapter.isEnabled();
 	}
 
 	/**
@@ -130,6 +153,22 @@ public final class UtilsAndroidConnectivity {
 	}
 
 	/**
+	 * <p>Gets the Airplane Mode state.</p>
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public static boolean getAirplaneModeEnabled() {
+		final Context context = UtilsContext.getContext();
+		final ContentResolver contentResolver = context.getContentResolver();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+			return Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+		} else {
+			return Settings.System.getInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+		}
+	}
+
+	/**
 	 * <p>Toggles the Airplane Mode state.</p>
 	 * <br>
 	 * <p><u>---CONSTANTS---</u></p>
@@ -145,12 +184,7 @@ public final class UtilsAndroidConnectivity {
 		final Context context = UtilsContext.getContext();
 		final ContentResolver contentResolver = context.getContentResolver();
 
-		final boolean airplane_mode_active;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			airplane_mode_active = Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
-		} else {
-			airplane_mode_active = Settings.System.getInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
-		}
+		final boolean airplane_mode_active = getAirplaneModeEnabled();
 
 		if (enabled && airplane_mode_active) {
 			return UtilsAndroid.ALREADY_ENABLED;
@@ -214,14 +248,50 @@ public final class UtilsAndroidConnectivity {
 			}
 
 			// Broadcast
-			final String broadcast_string = "am broadcast -a " + Intent.ACTION_AIRPLANE_MODE_CHANGED +
+			final String command = "am broadcast -a " + Intent.ACTION_AIRPLANE_MODE_CHANGED +
 					" --ez state " + enabled;
 			// Hopefully it's not too bad if the broadcast is not sent in this case. Because part will have
 			// been done by this point (setting set), and it's a hassle to check for both operations.
-			return UtilsShell.executeShellCmd(broadcast_string, true).exit_code;
+			return UtilsShell.executeShellCmd(true, command).exit_code;
 		}
 
 		return UtilsShell.ErrCodes.PERM_DENIED;
+	}
+
+	/**
+	 * <p>Gets the Mobile Data connection state.</p>
+	 *
+	 * @return true if enabled, false if disabled
+	 */
+	public static boolean getMobileDataEnabled() {
+		final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.getSystemService(Context.TELEPHONY_SERVICE);
+		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
+				getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			if (null == telephonyManager) {
+				return false;
+			}
+
+			return telephonyManager.isDataEnabled();
+		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			if (null == connectivityManager) {
+				return false;
+			}
+
+			// Deprecated as of Lollipop 5.0
+			final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "getMobileDataEnabled");
+			assert null != method; // Will never happen.
+			// The return won't be null either
+			return (boolean) UtilsReflection.invokeMethod(method, connectivityManager).ret_var;
+		} else { // L <= SDK_INT < O
+			if (null == telephonyManager) {
+				return false;
+			}
+
+			// Deprecated as of Oreo 8.0
+			return telephonyManager.getDataEnabled();
+		}
 	}
 
 	/**
@@ -239,35 +309,7 @@ public final class UtilsAndroidConnectivity {
 	 */
 	@SuppressLint("NewApi")
 	public static int setMobileDataEnabled(final boolean enabled) {
-		final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.getSystemService(Context.TELEPHONY_SERVICE);
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
-				getSystemService(Context.CONNECTIVITY_SERVICE);
-
-		final boolean mobile_data_active;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			if (null == telephonyManager) {
-				return UtilsAndroid.NOT_AVAILABLE;
-			}
-
-			mobile_data_active = telephonyManager.isDataEnabled();
-		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (null == connectivityManager) {
-				return UtilsAndroid.NOT_AVAILABLE;
-			}
-
-			// Deprecated as of Lollipop 5.0
-			final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "getMobileDataEnabled");
-			assert null != method; // Will never happen.
-			// The return won't be null either
-			mobile_data_active = (boolean) UtilsReflection.invokeMethod(method, connectivityManager, enabled).ret_var;
-		} else { // L <= SDK_INT < O
-			if (null == telephonyManager) {
-				return UtilsAndroid.NOT_AVAILABLE;
-			}
-
-			// Deprecated as of Oreo 8.0
-			mobile_data_active = telephonyManager.getDataEnabled();
-		}
+		final boolean mobile_data_active = getMobileDataEnabled();
 
 		if (enabled && mobile_data_active) {
 			return UtilsAndroid.ALREADY_ENABLED;
@@ -279,6 +321,11 @@ public final class UtilsAndroidConnectivity {
 			// With the magical permission we can use SDK methods.
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				// Ignore the API warning. The function exists since Lollipop on @hide.
+				final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.getSystemService(Context.TELEPHONY_SERVICE);
+				if (null == telephonyManager) {
+					return UtilsAndroid.NOT_AVAILABLE;
+				}
+
 				telephonyManager.setDataEnabled(enabled);
 
 				return UtilsShell.ErrCodes.NO_ERR;
@@ -287,6 +334,12 @@ public final class UtilsAndroidConnectivity {
 				final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "setMobileDataEnabled",
 						boolean.class);
 				assert null != method; // Will never happen
+				final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
+						getSystemService(Context.CONNECTIVITY_SERVICE);
+				if (null == connectivityManager) {
+					return UtilsAndroid.NOT_AVAILABLE;
+				}
+
 				UtilsReflection.invokeMethod(method, connectivityManager, enabled);
 				// Will always work
 
@@ -297,6 +350,6 @@ public final class UtilsAndroidConnectivity {
 		// Without the magical permission or in case the newest function stops being available, plan B: shell commands.
 		final String command = "svc data " + (enabled ? "enable" : "disable");
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 }

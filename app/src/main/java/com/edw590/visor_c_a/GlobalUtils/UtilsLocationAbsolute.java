@@ -243,7 +243,7 @@ public final class UtilsLocationAbsolute {
 	 */
 	private static long getAgeOfFix(@NonNull final Location location) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) * 1000L * 1000L);
+			return ((SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()) * 1000 * 1000);
 		} else {
 			return System.currentTimeMillis() - location.getTime();
 		}

@@ -31,6 +31,7 @@ import android.os.HandlerThread;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
+import com.edw590.visor_c_a.GlobalUtils.GPath;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsFilesDirs;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
@@ -125,8 +126,9 @@ public final class PreferencesManager implements IModuleInst {
 					if (null != preferences) {
 						StaticPreferences.updatePreferences(preferences);
 					} else {
-						if (!UtilsShell.noErr(UtilsFilesDirs.checkPathExists(StaticPreferences.PREFS_FILE_PATH))) {
-							// todo Estavas aqui
+						if (!UtilsShell.noErr(UtilsFilesDirs.checkPathExists(
+								new GPath(false, StaticPreferences.PREFS_FILE_PATH)))) {
+							// todo You were here
 						}
 					}
 				}

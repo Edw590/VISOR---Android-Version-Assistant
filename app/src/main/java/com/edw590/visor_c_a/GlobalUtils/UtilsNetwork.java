@@ -29,6 +29,9 @@ import android.net.wifi.WifiManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+
 import org.spongycastle.util.Arrays;
 
 import java.io.BufferedReader;
@@ -122,5 +125,29 @@ public final class UtilsNetwork {
 		final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
 		return null == networkInfo ? ConnectivityManager.TYPE_NONE : networkInfo.getType();
+	}
+
+	/**
+	 * <p>Wait for the network to be available.</p>
+	 *
+	 * @param timeout the timeout in seconds
+	 *
+	 * @return true if the network is available, false if the timeout was reached
+	 */
+	public static boolean waitForNetwork(final long timeout) {
+		final long start_time = System.currentTimeMillis();
+		while (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) == -1) {
+			if (System.currentTimeMillis() - start_time >= timeout * 1000) {
+				break;
+			}
+
+			try {
+				Thread.sleep(1000);
+			} catch (final InterruptedException ignored) {
+				break;
+			}
+		}
+
+		return UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) != -1;
 	}
 }

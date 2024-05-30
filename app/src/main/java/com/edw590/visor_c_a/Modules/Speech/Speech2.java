@@ -51,6 +51,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
+import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
@@ -141,7 +143,7 @@ public final class Speech2 implements IModuleInst {
 
 	// The module only runs if this returns non-null. This is just to suppress warnings along the class (even though a
 	// warning will appear on isSupported() because "it's never null" --> it's not when the module starts...
-	static final NotificationManager notificationManager = (NotificationManager) UtilsContext.getNotificationManager();
+	static final NotificationManager notificationManager = UtilsContext.getNotificationManager();
 	// The audio support is checked internally. If there's no audio support, the speeches are notified and not attempted
 	// to be spoken.
 	@NonNull final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
@@ -519,7 +521,7 @@ public final class Speech2 implements IModuleInst {
 	 * in the lists, or null if it's not already in the lists
 	 * @param task_id same as in {@link TasksList#removeTask(int)}
 	 */
-	int speakInternal(final String txt_to_speak, final int speech_priority, final int mode,
+	private int speakInternal(final String txt_to_speak, final int speech_priority, final int mode,
 							  @Nullable final String utterance_id, final int task_id) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
@@ -949,8 +951,12 @@ public final class Speech2 implements IModuleInst {
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (AudioManager.RINGER_MODE_NORMAL != audioManager.getRingerMode()) {
-			skip_speaking = (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) ||
+		if (AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode()) {
+			if (UtilsRegistry.getValue(ValuesRegistry.Keys.IS_USER_SLEEPING).getData(false)) {
+				skip_speaking = true;
+			}
+		} else {
+			skip_speaking = (PRIORITY_CRITICAL != UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) &&
 					0 == (current_speech_obj.mode & MODE2_BYPASS_NO_SND));
 		}
 
@@ -1171,7 +1177,7 @@ public final class Speech2 implements IModuleInst {
 					// Like it must do if it's saying something and a higher priority thing must be said. No one makes
 					// a break for that. Instead, stops the speech and says for example, "Attention sir, that task is over.
 					// Now carrying on what I was saying, (...)".
-					Thread.sleep(500L);
+					Thread.sleep(500);
 				} catch (final InterruptedException ignored) {
 				}
 

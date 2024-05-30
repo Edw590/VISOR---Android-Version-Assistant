@@ -221,7 +221,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		if (wait_mic) {
 			try {
 				// Wait 1 second if the microphone is busy, to see if it stops being.
-				Thread.sleep(1000L);
+				Thread.sleep(1000);
 			} catch (final InterruptedException ignored) {
 				return START_STICKY;
 			}
@@ -280,7 +280,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		// thread will terminate the recognizer in that case.
 		while (wait) {
 			try {
-				Thread.sleep(100L);
+				Thread.sleep(100);
 			} catch (final InterruptedException ignored) {
 				return false;
 			}
@@ -345,7 +345,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					if (UtilsShell.noErr(UtilsAndroidPower.setBatterySaverEnabled(false))) {
 						try {
 							// 100ms seemed a good value on BV9500. 50ms still was enough. So I chose 100 for slower devices.
-							Thread.sleep(100L);
+							Thread.sleep(100);
 						} catch (final InterruptedException ignored) {
 							return;
 						}
@@ -471,7 +471,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			System.out.println(matches);
 			System.out.println("--------------------------");
 
-			UtilsCmdsExecutorBC.processTask(first_match, false, false);
+			UtilsCmdsExecutorBC.processTask(first_match, false, false, false);
 
 
 
@@ -554,7 +554,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					stopListening(false);
 				}
 				try {
-					Thread.sleep(1_000L);
+					Thread.sleep(1_000);
 				} catch (final InterruptedException ignored) {
 					return;
 				}

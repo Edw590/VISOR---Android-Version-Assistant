@@ -76,7 +76,7 @@ public final class SomeValuesUpdater implements IModuleInst {
 
 
 				try {
-					Thread.sleep(10_000L);
+					Thread.sleep(10_000);
 				} catch (final InterruptedException ignored) {
 					return;
 				}

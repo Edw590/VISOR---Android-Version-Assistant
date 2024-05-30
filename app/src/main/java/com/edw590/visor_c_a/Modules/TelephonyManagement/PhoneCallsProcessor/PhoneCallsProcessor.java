@@ -247,11 +247,11 @@ public final class PhoneCallsProcessor implements IModuleInst {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
 				}
 				break;
 			}

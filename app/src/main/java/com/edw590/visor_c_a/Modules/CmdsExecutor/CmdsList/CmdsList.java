@@ -66,6 +66,9 @@ public final class CmdsList {
 		public static final String CMD_REJECT = "23";
 		public static final String CMD_STOP_LISTENING = "24";
 		public static final String CMD_START_LISTENING = "25";
+		public static final String CMD_TELL_WEATHER = "26";
+		public static final String CMD_TELL_NEWS = "27";
+		public static final String CMD_GONNA_SLEEP = "28";
 
 		/**
 		 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -167,6 +170,9 @@ public final class CmdsList {
 				put(CmdIds.CMD_REJECT,                    CmdAddInfo.CMDi_INF1_ASSIST_CMD);       // 23
 				put(CmdIds.CMD_STOP_LISTENING,            CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 24
 				put(CmdIds.CMD_START_LISTENING,           CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 25
+				put(CmdIds.CMD_TELL_WEATHER,              CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 26
+				put(CmdIds.CMD_TELL_NEWS,                 CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 27
+				put(CmdIds.CMD_GONNA_SLEEP,               CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 28
 			}
 		};
 
@@ -207,6 +213,7 @@ public final class CmdsList {
 			{CmdIds.CMD_TAKE_PHOTO, ACD.CMDi_TYPE_NONE, "take", "", "picture/photo|frontal picture/photo"},                                                 // 15
 			{CmdIds.CMD_RECORD_MEDIA, ACD.CMDi_TYPE_START, "record", "record|record|"+ACD.ANY_MAIN_WORD+" -record", "audio/sound|video/camera|recording audio/sound|recording video/camera"},                              // 16
 			{CmdIds.CMD_SAY_AGAIN, ACD.CMDi_TYPE_REPEAT_SPEECH, "", "", "again|say|said"},                                                                  // 17
+			// 18 is a dynamic command
 			{CmdIds.CMD_TOGGLE_POWER_SAVER_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "power/battery saver"},                                                   // 19
 			{CmdIds.CMD_STOP_RECORD_MEDIA, ACD.CMDi_TYPE_STOP, "", "", "recording/record|recording/record audio/sound"},                                    // 20
 			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"},          // 21
@@ -214,6 +221,9 @@ public final class CmdsList {
 			{CmdIds.CMD_REJECT, ACD.CMDi_TYPE_NONE, "i", "", "don't/reject/disapprove"},                                                                    // 23
 			{CmdIds.CMD_STOP_LISTENING, ACD.CMDi_TYPE_STOP, "", "", "listening"},                                                                           // 24
 			{CmdIds.CMD_START_LISTENING, ACD.CMDi_TYPE_START, "", "", "listening"},                                                                         // 25
+			{CmdIds.CMD_TELL_WEATHER, ACD.CMDi_TYPE_ASK, "", "", "weather"},                                                                                // 26
+			{CmdIds.CMD_TELL_NEWS, ACD.CMDi_TYPE_ASK, "", "", "news"},                                                                                      // 27
+			{CmdIds.CMD_GONNA_SLEEP, ACD.CMDi_TYPE_WILL_GO, "", "", "sleep"},                                                                               // 28
 	};
 	static final int CMDS_LIST_len = CMDS_LIST.length;
 
@@ -244,5 +254,8 @@ public final class CmdsList {
 					"system app, in which case he'll lock the microphone on himself)",
 			"Start listening (if stopped, to start again - or hold the Power button " +   // 25
 					"(or Home if VISOR is the device's assistant))",
+			"(Ask for the weather)",                                                      // 26
+			"(Ask for the news)",                                                         // 27
+			"(Say that the user is going to sleep)"                                       // 28
 	};
 }

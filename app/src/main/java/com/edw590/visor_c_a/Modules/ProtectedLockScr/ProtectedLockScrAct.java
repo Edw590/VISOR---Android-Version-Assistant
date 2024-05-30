@@ -206,7 +206,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 					// (80ms). So almost 1/4 of that should be fine, hopefully.
 					// Also beware not to put 0 or too low values, or that will get the app slower. 10ms I'd say is the
 					// limit, at least on BV9500. 20ms should be fine. Just to be above "fine", 25ms. Should be good.
-					Thread.sleep(25L);
+					Thread.sleep(25);
 				} catch (final InterruptedException ignored) {
 					return;
 				}

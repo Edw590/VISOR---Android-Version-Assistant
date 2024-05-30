@@ -43,7 +43,6 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Utilities related to checking and requesting permissions and authorizations.</p>
@@ -142,7 +141,7 @@ public final class UtilsPermsAuths {
 						// every time is too much work).
 						if (!checkSelfPermission(perm_name)) {
 							if (force_permissions) {
-								UtilsShell.executeShellCmd(partial_command + perm_name, true);
+								UtilsShell.executeShellCmd(true, partial_command + perm_name);
 
 								if (!checkSelfPermission(perm_name) && (0 == permission_list)) {
 									// Don't add the permission to the number of not granted permissions if it's not
@@ -253,7 +252,7 @@ public final class UtilsPermsAuths {
 			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "cmd notification allow_dnd " + package_name;
-					UtilsShell.executeShellCmd(command, true);
+					UtilsShell.executeShellCmd(true, command);
 
 					missing_authorizations += mNotificationManager.isNotificationPolicyAccessGranted() ? 0 : 1;
 				} else {
@@ -272,7 +271,7 @@ public final class UtilsPermsAuths {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "appops set " + package_name + " " + AppOpsManager.OP_SYSTEM_ALERT_WINDOW +
 							" allow";
-					UtilsShell.executeShellCmd(command, true);
+					UtilsShell.executeShellCmd(true, command);
 
 					missing_authorizations += Settings.canDrawOverlays(context) ? 0 : 1;
 				} else {
@@ -292,7 +291,7 @@ public final class UtilsPermsAuths {
 			if (null != powerManager && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "dumpsys deviceidle whitelist +" + package_name;
-					UtilsShell.executeShellCmd(command, true);
+					UtilsShell.executeShellCmd(true, command);
 
 					missing_authorizations += powerManager.isIgnoringBatteryOptimizations(package_name) ? 0 : 1;
 				} else {
@@ -312,7 +311,7 @@ public final class UtilsPermsAuths {
 				if (ALSO_FORCE == what_to_do) {
 					final String command = "appops set " + package_name + " " + AppOpsManager.OP_WRITE_SETTINGS +
 							" allow";
-					UtilsShell.executeShellCmd(command, true);
+					UtilsShell.executeShellCmd(true, command);
 
 					missing_authorizations += Settings.System.canWrite(context) ? 0 : 1;
 				} else {
@@ -362,9 +361,8 @@ public final class UtilsPermsAuths {
 			// dpm is only available from Lollipop onwards
 			// Have the "su" command already here and in one string alone to be as fast as possible executing this -
 			// the user may be attempting to uninstall the app and this must enable Device Admin back right away.
-			final List<String> commands = new ArrayList<>(1);
-			commands.add("su\ndpm set-active-admin " + full_device_admin_recv_name);
-			UtilsShell.executeShellCmd(commands, false);
+			final String command = "su\ndpm set-active-admin " + full_device_admin_recv_name;
+			UtilsShell.executeShellCmd(false, command);
 		} else {
 
 

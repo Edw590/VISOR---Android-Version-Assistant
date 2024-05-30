@@ -24,7 +24,6 @@ package com.edw590.visor_c_a.ActivitiesFragments;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,15 +41,14 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.GlobalUtils.UtilsSysApp;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
-import com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.R;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
+
+import GPT.GPT;
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>The main fragment to be used for development purposes.</p>
@@ -94,8 +92,47 @@ public final class FragDevelopment extends Fragment {
 
 				//UtilsLocationRelative.startIndRelDistance();
 
-				Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
+				final long curr_time = System.currentTimeMillis();
+				GPT.sendText(txt_to_send.getText().toString());
+
+				// Wait at most 10 seconds
+				while (System.currentTimeMillis() - curr_time < 60*1000) {
+					final String entry = GPT.getEntry(-1);
+					if (GPT.getTimeFromEntry(entry) >= curr_time) {
+						final String speak = GPT.getTextFromEntry(entry);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
+
+						break;
+					}
+
+					try {
+						Thread.sleep(1000);
+					} catch (final InterruptedException ignored) {
+					}
+				}
+
+				//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
+
+				//System.out.println("AAAAAAAAAAAAAAAAAAAAAAAA");
+				//System.out.println("Weather: " + OIG.getWeather());
+				//System.out.println();
+				//System.out.println("News: " + OIG.getNews());
+
+				/*String[] weather_data = {
+						"Lisboa",
+						"14ºC",
+						"70%",
+						"89%",
+						"39 km/h",
+						"Wind and rain"
+				};
+				final String speak = "The weather in " + weather_data[0] + " is " + weather_data[1] +
+						" with " + weather_data[5] + ", precipitation of " + weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
+						weather_data[4] + ".";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, Speech2.MODE2_BYPASS_NO_SND, null);*/
+
+				//UtilsCmdsExecutorBC.processTask("tell me the weather and the news", false, false, false);
 
 				//System.out.println("HHHHHHHHHHHHHHHHHH");
 				//System.out.println(UtilsStaticStorage.getValue(ValuesStorage.last_phone_call_time, 0L));
@@ -133,14 +170,14 @@ public final class FragDevelopment extends Fragment {
 				//final byte[] decrypted_message = UtilsSWA.decryptBytesCRYPTOENDECRYPT(password1, password2, encrypted_message, associated_authed_data);
 				//System.out.println(UtilsSWA.bytesToPrintableDATACONV(decrypted_message, true));
 
-				final List<String> commands = new ArrayList<>(2);
-				commands.add("svc power reboot deviceowner");
-				commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
+				//final List<String> commands = new ArrayList<>(2);
+				//commands.add("svc power reboot deviceowner");
+				//commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
 
 				//*Isto não funciona. Vê porquê
 
 				// As with the shutdown, execution will only get here if there was some error - but it can get here.
-				UtilsShell.executeShellCmd(commands, true);
+				//UtilsShell.executeShellCmd(commands, true);
 
 				//System.out.println("FFFFFFFFFFFFFFFFFFFFFFFF");
 				//final UtilsShell.CmdOutputObj cmd_output = UtilsShell.executeShellCmd("su -c id", false);
@@ -185,9 +222,9 @@ public final class FragDevelopment extends Fragment {
 				System.out.println("android.permission.MANAGE_VOICE_KEYPHRASES: " + UtilsPermsAuths.checkSelfPermission("android.permission.MANAGE_VOICE_KEYPHRASES"));
 				System.out.println("------------------------");
 
-				KeyphraseEnrollmentInfo keyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(UtilsContext.getContext().getPackageManager());
-				System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-				System.out.println(Arrays.toString(keyphraseEnrollmentInfo.listKeyphraseMetadata()));
+				//KeyphraseEnrollmentInfo keyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(UtilsContext.getContext().getPackageManager());
+				//System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+				//System.out.println(Arrays.toString(keyphraseEnrollmentInfo.listKeyphraseMetadata()));
 
 				// BUTTON FOR TESTING
 				// BUTTON FOR TESTING
@@ -225,7 +262,18 @@ public final class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String inserted_text = txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
-				UtilsCmdsExecutorBC.processTask(inserted_text, false, false);
+				if (inserted_text.startsWith("$ ")) {
+					final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(false, inserted_text.substring(2));
+					System.out.println("----------");
+					System.out.println(cmdOutput.exit_code);
+					System.out.println("-----");
+					System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.output_stream, false));
+					System.out.println("-----");
+					System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.error_stream, false));
+					System.out.println("----------");
+				} else {
+					UtilsCmdsExecutorBC.processTask(inserted_text, false, false, false);
+				}
 			}
 		});
 		requireView().findViewById(R.id.btn_force_stop).setOnClickListener(new View.OnClickListener() {

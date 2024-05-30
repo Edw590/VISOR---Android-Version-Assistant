@@ -51,24 +51,14 @@ public final class UtilsRegistry {
 	 * @param new_value the new value
 	 */
 	public static void setValue(@NonNull final String key, @NonNull final Object new_value) {
-		final Value[] list;
+		final int list;
 		if (key.startsWith(ValuesRegistry.PREFIX)) {
-			list = ValuesRegistry.VALUES_LIST;
+			list = LIST_VALUES;
 		} else {
-			list = SettingsRegistry.SETTINGS_LIST;
+			list = LIST_SETTINGS;
 		}
 
-		for (final Value value : list) {
-			if (key.equals(value.key)) {
-				value.setDataInternal(new_value);
-
-				final Intent intent = new Intent(CONSTS_BC_Registry.ACTION_VALUE_UPDATED);
-				intent.putExtra(CONSTS_BC_Registry.EXTRA_VALUE_UPDATED_1, key);
-				UtilsApp.sendInternalBroadcast(intent);
-
-				break;
-			}
-		}
+		setValue(list, key, new_value);
 	}
 
 	/**
@@ -86,11 +76,14 @@ public final class UtilsRegistry {
 
 		for (final Value value : list_to_use) {
 			if (key.equals(value.key)) {
-				value.setDataInternal(new_value);
+				// Only update the value if it's different
+				if (!new_value.equals(value.getData())) {
+					value.setDataInternal(new_value);
 
-				final Intent intent = new Intent(CONSTS_BC_Registry.ACTION_VALUE_UPDATED);
-				intent.putExtra(CONSTS_BC_Registry.EXTRA_VALUE_UPDATED_1, key);
-				UtilsApp.sendInternalBroadcast(intent);
+					final Intent intent = new Intent(CONSTS_BC_Registry.ACTION_VALUE_UPDATED);
+					intent.putExtra(CONSTS_BC_Registry.EXTRA_VALUE_UPDATED_1, key);
+					UtilsApp.sendInternalBroadcast(intent);
+				}
 
 				break;
 			}

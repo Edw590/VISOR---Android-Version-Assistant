@@ -31,7 +31,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import UtilsSWA.UtilsSWA;
 import kotlin.io.FilesKt;
@@ -66,12 +65,12 @@ public final class UtilsFilesDirs {
 	 * @param path the path
 	 * @param recursive true to apply recursively, false to apply only to the given path
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)} or -1 also in case there's some error
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)} or -1 also in case there's some error
 	 * deleting the path
 	 */
-	public static int removePath(@NonNull final String path, final boolean recursive) {
+	public static int removePath(@NonNull final GPath path, final boolean recursive) {
 		try {
-			final File path_file = new File(path);
+			final File path_file = new File(path.toString());
 			if (recursive ? FilesKt.deleteRecursively(path_file) : path_file.delete()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
@@ -80,7 +79,7 @@ public final class UtilsFilesDirs {
 
 		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
@@ -88,11 +87,11 @@ public final class UtilsFilesDirs {
 	 *
 	 * @param path the path to the create
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)}
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}
 	 */
-	public static int createDirectory(@NonNull final String path) {
+	public static int createDirectory(@NonNull final GPath path) {
 		try {
-			final File path_file = new File(path);
+			final File path_file = new File(path.toString());
 			if (path_file.mkdirs()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
@@ -101,7 +100,7 @@ public final class UtilsFilesDirs {
 
 		final String command = "mkdir -p '" + path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
@@ -110,12 +109,12 @@ public final class UtilsFilesDirs {
 	 * @param src_path the source path
 	 * @param dest_path the destination path
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)}
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}
 	 */
-	public static int movePath(@NonNull final String src_path, @NonNull final String dest_path) {
+	public static int movePath(@NonNull final GPath src_path, @NonNull final GPath dest_path) {
 		try {
-			final File src_path_file = new File(src_path);
-			final File dest_path_file = new File(dest_path);
+			final File src_path_file = new File(src_path.toString());
+			final File dest_path_file = new File(dest_path.toString());
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				Files.move(src_path_file.toPath(), dest_path_file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -128,7 +127,7 @@ public final class UtilsFilesDirs {
 
 		final String command = "mv -f '" + src_path + "' '" + dest_path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
@@ -138,9 +137,9 @@ public final class UtilsFilesDirs {
 	 *
 	 * @return the file size in bytes, or -1 if an error occurred (no permissions or no file)
 	 */
-	public static long getFileSize(@NonNull final String file_path) {
+	public static long getFileSize(@NonNull final GPath file_path) {
 		try {
-			final File file = new File(file_path);
+			final File file = new File(file_path.toString());
 			if (file.exists()) {
 				return file.length();
 			}
@@ -148,13 +147,13 @@ public final class UtilsFilesDirs {
 		}
 
 		final String command = "ls -l '" + file_path + "'";
-		final UtilsShell.CmdOutputObj cmdOutputObj = UtilsShell.executeShellCmd(command, true);
+		final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(true, command);
 
-		if (0 != cmdOutputObj.exit_code) {
+		if (0 != cmdOutput.exit_code) {
 			return -1L;
 		}
 
-		final String output_data = UtilsSWA.bytesToPrintableDATACONV(cmdOutputObj.output_stream, false);
+		final String output_data = UtilsSWA.bytesToPrintableDATACONV(cmdOutput.output_stream, false);
 
 		return Long.parseLong(output_data.split(" ")[3]);
 	}
@@ -167,9 +166,9 @@ public final class UtilsFilesDirs {
 	 * @return the bytes of the file or null in case there was an error reading the file or an error occurred
 	 */
 	@Nullable
-	public static byte[] readFileBytes(@NonNull final String file_path) {
+	public static byte[] readFileBytes(@NonNull final GPath file_path) {
 		try {
-			return FileUtils.readFileToByteArray(new File(file_path));
+			return FileUtils.readFileToByteArray(new File(file_path.toString()));
 		} catch (final Exception ignored) {
 		} catch (final OutOfMemoryError ignored) {
 			return null;
@@ -179,7 +178,7 @@ public final class UtilsFilesDirs {
 
 		// Ignore the warning about the clone. No problem with it. This is a utility method. It won't use the object
 		// for anything other than to return it. Performance gained (imagine it's a big file...).
-		return UtilsShell.executeShellCmd(command, true).output_stream;
+		return UtilsShell.executeShellCmd(true, command).output_stream;
 	}
 
 	/**
@@ -190,11 +189,11 @@ public final class UtilsFilesDirs {
 	 * @param file_path the path to the file
 	 * @param file_bytes the bytes to write
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)}
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}
 	 */
-	public static int writeFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
+	public static int writeFile(@NonNull final GPath file_path, @NonNull final byte[] file_bytes) {
 		try {
-			FileUtils.writeByteArrayToFile(new File(file_path), file_bytes);
+			FileUtils.writeByteArrayToFile(new File(file_path.toString()), file_bytes);
 
 			return UtilsShell.ErrCodes.NO_ERR;
 		} catch (final Exception ignored) {
@@ -208,7 +207,7 @@ public final class UtilsFilesDirs {
 	 * <p>ONLY with small files!!! <strong>This function allocates 4-5 times the file size into memory!</strong></p>
 	 * <p>Allocates 4 times more on KitKat+, and 5 times MORE below that.</p>
 	 */
-	private static int writeSmallFile(@NonNull final String file_path, @NonNull final byte[] file_bytes) {
+	private static int writeSmallFile(@NonNull final GPath file_path, @NonNull final byte[] file_bytes) {
 		final String bytes_data;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			// This is here because hex takes less size on memory than octal when in string representation (2 vs 3 chars).
@@ -222,7 +221,7 @@ public final class UtilsFilesDirs {
 
 		final String command = "echo -ne '" + bytes_data + "' > '" + file_path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
@@ -233,12 +232,12 @@ public final class UtilsFilesDirs {
 	 * @param src_path the source file path
 	 * @param dest_path the destination file path
 	 *
-	 * @return if on KitKat+, same as {@link UtilsShell#executeShellCmd(List, boolean)}; else, aside from that,
+	 * @return if on KitKat+, same as {@link UtilsShell#executeShellCmd(boolean, String)}; else, aside from that,
 	 * -1 if the source file could not be read
 	 */
-	public static int copyPath(@NonNull final String src_path, @NonNull final String dest_path) {
+	public static int copyPath(@NonNull final GPath src_path, @NonNull final GPath dest_path) {
 		try {
-			FileUtils.copyFile(new File(src_path), new File(dest_path));
+			FileUtils.copyFile(new File(src_path.toString()), new File(dest_path.toString()));
 
 			return UtilsShell.ErrCodes.NO_ERR;
 		} catch (final Exception ignored) {
@@ -248,7 +247,7 @@ public final class UtilsFilesDirs {
 			// cp was added on KitKat
 			final String command = "cp -rf '" + src_path + "' '" + dest_path + "'";
 
-			return UtilsShell.executeShellCmd(command, true).exit_code;
+			return UtilsShell.executeShellCmd(true, command).exit_code;
 		} else {
 			final byte[] src_bytes = readFileBytes(src_path);
 			if (null == src_bytes) {
@@ -266,12 +265,12 @@ public final class UtilsFilesDirs {
 	 * @param permissions the permissions
 	 * @param recursive true to apply recursively, false to apply only to the given path
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)}
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}
 	 */
-	public static int chmodMISSING_SDK_METHOD(@NonNull final String path, final int permissions, final boolean recursive) {
+	public static int chmodMISSING_SDK_METHOD(@NonNull final GPath path, final int permissions, final boolean recursive) {
 		final String command = "chmod " + permissions + (recursive ? " -R " : " ") + "'" + path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
@@ -279,16 +278,17 @@ public final class UtilsFilesDirs {
 	 *
 	 * @param path the path
 	 *
-	 * @return same as {@link UtilsShell#executeShellCmd(List, boolean)}, with 0 meaning the path exists
+	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}, with 0 meaning the path exists
 	 */
-	public static int checkPathExists(@NonNull final String path) {
+	public static int checkPathExists(@NonNull final GPath path) {
 		try {
-			return new File(path).exists() ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.WRONG_USAGE;
+			return new File(path.toString()).exists() ?
+					UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.WRONG_USAGE;
 		} catch (final Exception ignored) {
 		}
 
 		final String command = "ls '" + path + "'";
 
-		return UtilsShell.executeShellCmd(command, true).exit_code;
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 }

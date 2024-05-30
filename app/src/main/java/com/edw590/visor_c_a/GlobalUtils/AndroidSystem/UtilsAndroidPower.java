@@ -129,7 +129,7 @@ public final class UtilsAndroidPower {
 
 		// As said in the function doc, the above command does not return if it's successful. So, if it gets here,
 		// it's because there's no root access on the device and it did return (with some error in this case).
-		return UtilsShell.executeShellCmd(commands, true).exit_code;
+		return UtilsShell.executeShellCmd(true, commands).exit_code;
 	}
 
 	/**
@@ -235,7 +235,7 @@ public final class UtilsAndroidPower {
 		commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
 
 		// As with the shutdown, execution will only get here if there was some error - but it can get here.
-		return UtilsShell.executeShellCmd(commands, true).exit_code;
+		return UtilsShell.executeShellCmd(true, commands).exit_code;
 	}
 
 	/**
@@ -261,7 +261,7 @@ public final class UtilsAndroidPower {
 							" --ez mode " + enabled);
 				}
 
-				return UtilsShell.executeShellCmd(commands, true).exit_code;
+				return UtilsShell.executeShellCmd(true, commands).exit_code;
 			}
 		}
 
@@ -312,6 +312,6 @@ public final class UtilsAndroidPower {
 	 */
 	public static boolean turnScreenOff_TEST_THIS() {
 		// todo To be tested
-		return UtilsShell.noErr(UtilsShell.executeShellCmd("input keyevent 26", true).exit_code);
+		return UtilsShell.noErr(UtilsShell.executeShellCmd(true, "input keyevent 26").exit_code);
 	}
 }

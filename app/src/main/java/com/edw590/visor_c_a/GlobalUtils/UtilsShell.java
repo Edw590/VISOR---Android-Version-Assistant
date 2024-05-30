@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import UtilsSWA.UtilsSWA;
 
@@ -67,20 +67,20 @@ public final class UtilsShell {
 	}
 
 	/**
-	 * <p>Same as in {@link #executeShellCmd(List, boolean)}, but that allows to send a string instead of a
+	 * <p>Same as in {@link #executeShellCmd(boolean, Iterable)}, but that allows to send a string instead of a
 	 * list.</p>
 	 *
-	 * @param command the command(s - separated by new lines then) to execute
-	 * @param attempt_su same as in {@link #executeShellCmd(List, boolean)}
+	 * @param attempt_su same as in {@link #executeShellCmd(boolean, Iterable)}
+	 * @param command same as in {@link #executeShellCmd(boolean, Iterable)}
 	 *
-	 * @return same as in {@link #executeShellCmd(List, boolean)}
+	 * @return same as in {@link #executeShellCmd(boolean, Iterable)}
 	 */
 	@NonNull
-	public static CmdOutputObj executeShellCmd(@NonNull final String command, final boolean attempt_su) {
-		final List<String> commands = new ArrayList<>(1);
+	public static CmdOutput executeShellCmd(final boolean attempt_su, @NonNull final String command) {
+		final Collection<String> commands = new ArrayList<>(1);
 		commands.add(command);
 
-		return executeShellCmd(commands, attempt_su);
+		return executeShellCmd(attempt_su, commands);
 	}
 
 	/**
@@ -92,45 +92,45 @@ public final class UtilsShell {
 	 * constants. NEVER something that can be saved on the device storage.</p>
 	 * <br>
 	 * <p>Considerations to have:</p>
-	 * <p>- Don't put a new line at the end of each command since the function will automatically do that. In case for
-	 * some reason there's a new line character already as the last character, it won't put another one. In case the
-	 * command is empty, a new line will not be added.</p>
-	 * <p>- An empty command will not be recognized as a new line - it will be ignored. To enter a new line, simply
-	 * write yourself "\n" on the command string.</p>
+	 * <p>- The function will join the list with " && " after each command, so make sure they can be written as
+	 * one-liners.</p>
+	 * <p>- Don't put a new line at the end of each command.</p>
+	 * <p>- Don't add empty commands or just new lines.</p>
 	 * <p>- The return values are byte arrays. To get their printable form, use
-	 * {@link UtilsSWA#bytesToPrintableGENERAL(byte[], boolean)}.</p>
+	 * {@link UtilsSWA#bytesToPrintableDATACONV(byte[], boolean)}.</p>
 	 *
-	 * @param commands_list list of commands to execute, each in a new index
 	 * @param attempt_su true to, in case the app has root permissions, call su before the given commands, false
 	 * otherwise (useful to execute commands with or without root allowed without wanting the error
 	 * from calling su to appear on the output stream)
+	 * @param commands_list list of commands to execute
 	 *
-	 * @return an instance of {@link CmdOutputObj}, and if any error occurs, {@link UtilsSWA#GENERIC_ERR} will be returned
+	 * @return an instance of {@link CmdOutput}, and if any error occurs, {@link UtilsSWA#GENERIC_ERR} will be returned
 	 */
 	@NonNull
-	public static CmdOutputObj executeShellCmd(@NonNull final List<String> commands_list, final boolean attempt_su) {
+	public static CmdOutput executeShellCmd(final boolean attempt_su, @NonNull final Iterable<String> commands_list) {
 		int exit_code;
-		final byte[][] ret_streams = {null, null};
+		byte[] output_stream = null;
+		byte[] error_stream = null;
 
 		try {
-			final byte[] cmd_output = UtilsSWA.execCmdSHELL(String.join("\n", commands_list), attempt_su);
+			final byte[] cmd_output = UtilsSWA.execCmdSHELL(attempt_su, String.join("\n", commands_list));
 
 			exit_code = UtilsSWA.getExitCodeSHELL(cmd_output);
-			ret_streams[0] = UtilsSWA.getStdoutSHELL(cmd_output);
-			ret_streams[1] = UtilsSWA.getStderrSHELL(cmd_output);
+			output_stream = UtilsSWA.getStdoutSHELL(cmd_output);
+			error_stream = UtilsSWA.getStderrSHELL(cmd_output);
 		} catch (final Exception e) {
 			e.printStackTrace();
 
 			exit_code = UtilsSWA.GENERIC_ERR;
 		}
 
-		return new CmdOutputObj(exit_code, ret_streams[0], ret_streams[1]);
+		return new CmdOutput(exit_code, output_stream, error_stream);
 	}
 	/**
-	 * <p>Class to use for the returning value of {@link #executeShellCmd(List, boolean)}.</p>
+	 * <p>Class to use for the returning value of {@link #executeShellCmd(boolean, String)}.</p>
 	 * <p>Read the documentation of the class constructor to know more about it.</p>
 	 */
-	public static final class CmdOutputObj {
+	public static final class CmdOutput {
 		/** The SH shell exit code. */
 		public final int exit_code;
 		// Don't add @Nullable or @NonNull to the streams. Let the developer decide which is the case.
@@ -146,8 +146,8 @@ public final class UtilsShell {
 		 * @param output_stream {@link #output_stream}
 		 * @param error_stream {@link #error_stream}
 		 */
-		public CmdOutputObj(final int exit_code, @Nullable final byte[] output_stream,
-							@Nullable final byte[] error_stream) {
+		public CmdOutput(final int exit_code, @Nullable final byte[] output_stream,
+						 @Nullable final byte[] error_stream) {
 			this.exit_code = exit_code;
 			this.output_stream = output_stream;
 			this.error_stream = error_stream;

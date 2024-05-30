@@ -44,13 +44,15 @@ public final class UtilsCmdsExecutorBC {
 	 * @param sentence_str read the action's documentation
 	 * @param partial_results read the action's documentation
 	 * @param only_returning read the action's documentation
+	 * @param internal_usage read the action's documentation
 	 */
 	public static void processTask(@NonNull final String sentence_str, final boolean partial_results,
-								   final boolean only_returning) {
+								   final boolean only_returning, final boolean internal_usage) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_CmdsExec.ACTION_CALL_PROCESS_TASK);
 		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_1, sentence_str);
 		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_2, partial_results);
 		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_3, only_returning);
+		broadcast_intent.putExtra(CONSTS_BC_CmdsExec.EXTRA_CALL_PROCESS_TASK_4, internal_usage);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

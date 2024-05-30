@@ -109,7 +109,7 @@ public final class DeviceLocator implements IModuleInst {
 	// The minimum check time of all check times (for the thread wait time)
 	// EDIT: 30 seconds, so that if the Power Saver is disabled, after 30 seconds it will be noticed and the devices
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
-	private static final long CHECK_TIME_MIN = 30_000L;
+	public static final long CHECK_TIME_MIN = 30_000L;
 
 	public static final List<ExtDeviceObj> nearby_devices_bt = new ArrayList<>(64);
 	public static final List<ExtDeviceObj> nearby_aps_wifi = new ArrayList<>(64);
@@ -169,6 +169,7 @@ public final class DeviceLocator implements IModuleInst {
 		main_handler = new Handler(main_handlerThread.getLooper());
 
 		UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
+		UtilsRegistry.setValue(ValuesRegistry.Keys.AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled());
 
 		if (null != bluetoothAdapter) {
 			bluetoothAdapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
@@ -275,6 +276,9 @@ public final class DeviceLocator implements IModuleInst {
 			intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		}
 
+		// Airplane mode
+		intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+
 		// Power Saver
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
@@ -287,13 +291,13 @@ public final class DeviceLocator implements IModuleInst {
 	}
 
 	void setWifiEnabled(final boolean enable) {
-		if (UtilsShell.ErrCodes.GEN_ERR != UtilsAndroidConnectivity.setWifiEnabled(enable)) {
+		if (UtilsShell.ErrCodes.NO_ERR == UtilsAndroidConnectivity.setWifiEnabled(enable)) {
 			enabled_by_visor_wifi = enable;
 		}
 	}
 
 	void setBluetoothEnabled(final boolean enable) {
-		if (UtilsShell.ErrCodes.GEN_ERR != UtilsAndroidConnectivity.setBluetoothEnabled(enable)) {
+		if (UtilsShell.ErrCodes.NO_ERR == UtilsAndroidConnectivity.setBluetoothEnabled(enable)) {
 			enabled_by_visor_bt = enable;
 		}
 	}
@@ -536,6 +540,16 @@ public final class DeviceLocator implements IModuleInst {
 				// Network type
 				case (ConnectivityManager.CONNECTIVITY_ACTION): {
 					UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
+
+					break;
+				}
+
+
+				////////////////////////////////////////////////
+				////////////////////////////////////////////////
+				// Airplane mode
+				case (Intent.ACTION_AIRPLANE_MODE_CHANGED): {
+					UtilsRegistry.setValue(ValuesRegistry.Keys.AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled());
 
 					break;
 				}

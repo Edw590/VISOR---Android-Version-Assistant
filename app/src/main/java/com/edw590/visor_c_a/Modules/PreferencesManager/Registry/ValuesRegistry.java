@@ -48,6 +48,10 @@ public final class ValuesRegistry {
 		public static final String DIST_ROUTER = PREFIX + "DIST_ROUTER";
 		public static final String PUBLIC_IP = PREFIX + "PUBLIC_IP";
 		public static final String CURR_NETWORK_TYPE = PREFIX + "CURR_NETWORK_TYPE";
+		public static final String AIRPLANE_MODE_ON = PREFIX + "AIRPLANE_MODE_ON";
+		// User Locator
+		public static final String CURR_USER_LOCATION = PREFIX + "CURR_USER_LOCATION";
+		public static final String IS_USER_SLEEPING = PREFIX + "IS_USER_SLEEPING";
 		// Telephony - Phone calls
 		public static final String LAST_PHONE_CALL_TIME = PREFIX + "LAST_PHONE_CALL_TIME";
 		public static final String CURR_PHONE_CALL_NUMBER = PREFIX + "CURR_PHONE_CALL_NUMBER";
@@ -82,6 +86,14 @@ public final class ValuesRegistry {
 					"The public IP address from the current network connection"),
 			new Value(Keys.CURR_NETWORK_TYPE, "Location - Current network type", Value.TYPE_INTEGER,
 					"The current network type"),
+			new Value(Keys.AIRPLANE_MODE_ON, "Location - Airplane mode On", Value.TYPE_INTEGER,
+					"If the airplane mode is On"),
+
+			// User Locator
+			new Value(Keys.CURR_USER_LOCATION, "User Locator - Current user location", Value.TYPE_INTEGER,
+					"The current user location"),
+			new Value(Keys.IS_USER_SLEEPING, "User Locator - Is user sleeping", Value.TYPE_BOOLEAN,
+					"Is the user sleeping?"),
 
 			// Telephony - Phone calls
 			new Value(Keys.LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)", Value.TYPE_LONG,

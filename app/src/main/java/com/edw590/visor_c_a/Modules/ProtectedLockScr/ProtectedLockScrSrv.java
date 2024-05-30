@@ -171,7 +171,7 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 				UtilsMainSrvc.startMainService();
 
 				try {
-					Thread.sleep(1000L);
+					Thread.sleep(1000);
 				} catch (final InterruptedException ignored) {
 					return;
 				}

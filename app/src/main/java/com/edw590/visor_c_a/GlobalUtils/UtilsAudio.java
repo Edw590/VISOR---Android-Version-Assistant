@@ -22,8 +22,12 @@
 package com.edw590.visor_c_a.GlobalUtils;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -94,5 +98,60 @@ public final class UtilsAudio {
 		for (int i = 0; i < audio_length; ++i) {
 			audio_bytes[i] = (short)Math.min((int)((float) audio_bytes[i] * gain), (int)Short.MAX_VALUE);
 		}
+	}
+
+	/**
+	 * <p>Sets the audio modes of the device.</p>
+	 *
+	 * @param audio_stream the audio stream to set the volume of (use -1 to not change it) - use this in combination
+	 * with {@code volume}
+	 * @param volume the volume to set (use -1 to not change it)
+	 * @param ringer_mode the ringer mode to set (use -1 to not change it)
+	 * @param interruption_filter the interruption filter to set (use -1 to not change it)
+	 */
+	public static void setAudioModes(int audio_stream, int volume, int ringer_mode, int interruption_filter) {
+		final NotificationManager notificationManager = UtilsContext.getNotificationManager();
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
+
+		if (audio_stream != -1 && volume != -1 && audioManager != null) {
+			audioManager.setStreamVolume(audio_stream, volume, 0);
+		}
+
+		if (ringer_mode != -1 && audioManager != null) {
+			audioManager.setRingerMode(ringer_mode);
+		}
+
+		if (interruption_filter != -1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			notificationManager.setInterruptionFilter(interruption_filter);
+		}
+	}
+
+	/**
+	 * <p>Gets the audio modes of the device.</p>
+	 * <p>Use only one of the parameters at a time.</p>
+	 *
+	 * @param audio_stream the audio stream to get the volume of (use -1 to not get it)
+	 * @param ringer_mode get the ringer mode
+	 * @param interruption_filter get the interruption filter
+	 *
+	 * @return the audio mode requested, or -1 if it wasn't requested or if it's not available (like no audio on device)
+	 */
+	public static int getAudioModes(int audio_stream, boolean ringer_mode, boolean interruption_filter) {
+		final NotificationManager notificationManager = UtilsContext.getNotificationManager();
+		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
+
+		if (audio_stream != -1 && audioManager != null) {
+			return audioManager.getStreamVolume(audio_stream);
+		}
+
+		if (ringer_mode && audioManager != null) {
+			return audioManager.getRingerMode();
+		}
+
+		if (interruption_filter && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			return notificationManager.getCurrentInterruptionFilter();
+		}
+
+		return -1;
 	}
 }

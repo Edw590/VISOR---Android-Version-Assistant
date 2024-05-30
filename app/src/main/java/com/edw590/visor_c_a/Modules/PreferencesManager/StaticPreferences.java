@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalUtils.GL_CONSTS;
+import com.edw590.visor_c_a.GlobalUtils.GPath;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsFilesDirs;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
@@ -78,8 +79,9 @@ public final class StaticPreferences {
 		// Won't be null. It's not a big file and the data is always processed well (must always be).
 		assert encrypted_bytes != null;
 
-		return UtilsShell.noErr(UtilsFilesDirs.writeFile(TEMP_PREFS_FILE_PATH, encrypted_bytes)) &&
-				UtilsShell.noErr(UtilsFilesDirs.movePath(TEMP_PREFS_FILE_PATH, PREFS_FILE_PATH));
+		return UtilsShell.noErr(UtilsFilesDirs.writeFile(new GPath(false, TEMP_PREFS_FILE_PATH), encrypted_bytes)) &&
+				UtilsShell.noErr(UtilsFilesDirs.movePath(new GPath(false, TEMP_PREFS_FILE_PATH),
+						new GPath(false, PREFS_FILE_PATH)));
 	}
 
 	/**
@@ -89,7 +91,7 @@ public final class StaticPreferences {
 	 */
 	@Nullable
 	static synchronized String readPrefsFile() {
-		final byte[] file_bytes = UtilsFilesDirs.readFileBytes(PREFS_FILE_PATH);
+		final byte[] file_bytes = UtilsFilesDirs.readFileBytes(new GPath(false, PREFS_FILE_PATH));
 		if (null == file_bytes) {
 			return null;
 		}

@@ -53,7 +53,7 @@ import java.io.IOException;
  */
 public final class AudioRecorder implements IModuleInst {
 
-	private final int element_index = ModulesList.getElementIndex(this.getClass());
+	private final int element_index = ModulesList.getElementIndex(getClass());
 	private final HandlerThread main_handlerThread = new HandlerThread((String) ModulesList.getElementValue(element_index,
 			ModulesList.ELEMENT_NAME));
 	private final Handler main_handler;

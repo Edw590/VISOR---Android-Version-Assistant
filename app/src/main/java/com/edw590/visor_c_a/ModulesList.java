@@ -38,9 +38,11 @@ import com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
+import com.edw590.visor_c_a.Modules.TasksExecutor.TasksExecutor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
+import com.edw590.visor_c_a.Modules.UserLocator.UserLocator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -105,6 +107,8 @@ public final class ModulesList {
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true),
 			new ElementsObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, true),
+			new ElementsObj(UserLocator.class, "User Locator", TYPE1_INSTANCE, true),
+			new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),
 			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, true),
 

@@ -61,28 +61,28 @@ public final class UtilsMedia {
 	 */
 	@NonNull
 	public static File getOutputMediaFile(final int media_type){
-		String file_path = GL_CONSTS.VISOR_EXT_FOLDER_PATH;
+		final GPath file_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
 		final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 				.format(System.currentTimeMillis());
 		switch (media_type) {
 			case (AUDIO): {
-				file_path += "Audio recordings/AUD_" + time_stamp + ".aac";
+				file_path.add2(false, "Audio recordings", "AUD_" + time_stamp + ".aac");
 				break;
 			}
 			case (PHOTO): {
-				file_path += "Photos/PIC_" + time_stamp + ".jpg";
+				file_path.add2(false, "Photos", "PIC_" + time_stamp + ".jpg");
 				break;
 			}
 			case (VIDEO): {
-				file_path += "Video recordings/VID_" + time_stamp + ".mp4";
+				file_path.add2(false, "Video recordings", "VID_" + time_stamp + ".mp4");
 				break;
 			}
 			case (SCREENSHOT): {
-				file_path += "Screenshots/SCR_" + time_stamp + ".jpg";
+				file_path.add2(false, "Screenshots", "SCR_" + time_stamp + ".jpg");
 				break;
 			}
 		}
 
-		return new File(file_path);
+		return new File(file_path.toString());
 	}
 }

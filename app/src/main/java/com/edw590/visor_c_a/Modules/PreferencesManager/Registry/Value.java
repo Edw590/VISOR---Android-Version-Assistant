@@ -112,15 +112,10 @@ public final class Value {
 	// Leave it package-private! That way, the only possible way is through ValuesStorage's setValue(), which broadcasts
 	// the new value, and this function doesn't (as it shouldn't).
 	synchronized void setDataInternal(@NonNull final Object data_param) {
-		if (data != data_param) {
-			if (null != data) {
-				// Update the previous value if the new one is different than the current one and it's not the first time
-				// setting the value.
-				prev_data = data;
-				time_updated_prev = System.currentTimeMillis();
-			}
-			data = data_param;
-		}
+		prev_data = data;
+		time_updated_prev = time_updated;
+
+		data = data_param;
 		time_updated = System.currentTimeMillis();
 	}
 

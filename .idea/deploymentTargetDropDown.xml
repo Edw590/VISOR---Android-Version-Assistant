@@ -10,12 +10,12 @@
               <deviceKey>
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\Edw590\.android\avd\ZTE_Blade_L3_API_15_IceCreamSandwich_.avd" />
+                  <value value="C:\Users\Edw590\.android\avd\Pixel_2_API_33.avd" />
                 </Key>
               </deviceKey>
             </Target>
           </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2023-12-09T09:05:59.654781600Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-03-25T19:44:50.168022900Z" />
         </State>
       </entry>
     </value>
