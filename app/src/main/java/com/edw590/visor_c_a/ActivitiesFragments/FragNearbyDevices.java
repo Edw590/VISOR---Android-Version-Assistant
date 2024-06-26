@@ -36,8 +36,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsTimeDate;
-import com.edw590.visor_c_a.Modules.DeviceLocator.DeviceLocator;
-import com.edw590.visor_c_a.Modules.DeviceLocator.ExtDeviceObj;
+import com.edw590.visor_c_a.Modules.SystemChecker.BluetoothChecker;
+import com.edw590.visor_c_a.Modules.SystemChecker.ExtDevice;
+import com.edw590.visor_c_a.Modules.SystemChecker.WifiChecker;
 import com.edw590.visor_c_a.R;
 
 import java.util.List;
@@ -77,9 +78,9 @@ public final class FragNearbyDevices extends Fragment {
 		textView1.setText("Type (0, Bluetooth; 1, Wi-Fi)\nAddress\nLast detection (ms)\nRounded distance (m)\nName\nGiven name\nIs linked/saved network");
 		linearLayout.addView(textView1);
 
-		final List<ExtDeviceObj>[] lists = new List[]{DeviceLocator.nearby_devices_bt, DeviceLocator.nearby_aps_wifi};
-		for (final List<ExtDeviceObj> list : lists) {
-			for (final ExtDeviceObj device : list) { // Add a TextView for each value.
+		final List<ExtDevice>[] lists = new List[]{BluetoothChecker.nearby_devices_bt, WifiChecker.nearby_aps_wifi};
+		for (final List<ExtDevice> list : lists) {
+			for (final ExtDevice device : list) { // Add a TextView for each value.
 				final TextView textView = new TextView(requireContext());
 				textView.setLayoutParams(layoutParams);
 				textView.setPadding(padding_px, padding_px, padding_px, padding_px);
@@ -88,7 +89,7 @@ public final class FragNearbyDevices extends Fragment {
 
 				final long last_detection = device.last_detection;
 				final String text = device.type + "\n" + device.address + "\n" + UtilsTimeDate.getTimeDateStr(last_detection) +
-						"\n" + device.distance + "\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
+						"\n" + device.rssi + "\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
 				textView.setText(text);
 
 				linearLayout.addView(textView);

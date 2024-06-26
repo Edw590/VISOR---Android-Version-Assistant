@@ -31,13 +31,12 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
 import com.edw590.visor_c_a.Modules.AudioRecorder.AudioRecorder;
 import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsExecutor;
-import com.edw590.visor_c_a.Modules.DeviceLocator.DeviceLocator;
 import com.edw590.visor_c_a.Modules.ModulesManager.ModulesManager;
-import com.edw590.visor_c_a.Modules.PowerProcessor.PowerProcessor;
 import com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
+import com.edw590.visor_c_a.Modules.SystemChecker.SystemChecker;
 import com.edw590.visor_c_a.Modules.TasksExecutor.TasksExecutor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
@@ -101,12 +100,11 @@ public final class ModulesList {
 			//new ElementsObj(PreferencesManager.class, "Preferences Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			//new ElementObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
-			new ElementsObj(PowerProcessor.class, "Power Processor", TYPE1_INSTANCE, true),
+			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true),
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true),
-			new ElementsObj(DeviceLocator.class, "Device Locator", TYPE1_INSTANCE, true),
 			new ElementsObj(UserLocator.class, "User Locator", TYPE1_INSTANCE, true),
 			new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),

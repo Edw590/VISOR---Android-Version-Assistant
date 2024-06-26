@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 DADi590
+ * Copyright 2023-2024 Edw590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,21 +19,7 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.Modules.PowerProcessor;
-
 /**
- * <p>Constants related to the Power Processor module.</p>
+ * <p>Everything directly related to the System Checker module.</p>
  */
-public final class CONSTS {
-
-	// These 2 below appeared in a StackOverflow answer. Maybe it's the same explanation as the POWERON one. Keep it.
-	static final String ACTION_HTC_QCK_POFF = "com.htc.intent.action.QUICKBOOT_POWEROFF";
-	static final String ACTION_ANDR_QCK_POFF = "android.intent.action.QUICKBOOT_POWEROFF";
-
-
-	/**
-	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
-	 */
-	private CONSTS() {
-	}
-}
+package com.edw590.visor_c_a.Modules.SystemChecker;

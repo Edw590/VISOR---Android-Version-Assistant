@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.Modules.DeviceLocator;
+package com.edw590.visor_c_a.Modules.SystemChecker;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -28,7 +28,7 @@ import androidx.annotation.NonNull;
 /**
  * <p>The class to instantiate for each detected device (external devices).</p>
  */
-public final class ExtDeviceObj {
+public final class ExtDevice {
 	public static final int TYPE_BLUETOOTH = 0;
 	public static final int TYPE_WIFI = 1;
 
@@ -39,8 +39,8 @@ public final class ExtDeviceObj {
 
 	/** Milliseconds at the time of detection. */
 	public long last_detection;
-	/** Distance to the device. */
-	public int distance;
+	/** RSSI value of the device (like the Bluetooth RSSI or the WiFi RSSI). */
+	public int rssi;
 	/** Name of the device (like the Bluetooth device name or the WiFi network SSID). */
 	@NonNull public String name;
 	/** In case of Bluetooth, return value of {@link BluetoothDevice#getAlias()}, in other cases where this doesn't
@@ -55,17 +55,17 @@ public final class ExtDeviceObj {
 	 * @param type {@link #type}
 	 * @param address {@link #address}
 	 * @param last_detection {@link #last_detection}
-	 * @param distance {@link #distance}
+	 * @param rssi {@link #distance}
 	 * @param name {@link #name}
 	 * @param given_name {@link #given_name}
 	 * @param is_linked {@link #is_linked}
 	 */
-	ExtDeviceObj(final int type, @NonNull final String address, final long last_detection, final int distance,
-				 @NonNull final String name, @NonNull final String given_name, final boolean is_linked) {
+	ExtDevice(final int type, @NonNull final String address, final long last_detection, final int rssi,
+			  @NonNull final String name, @NonNull final String given_name, final boolean is_linked) {
 		this.type = type;
 		this.address = address;
 		this.last_detection = last_detection;
-		this.distance = distance;
+		this.rssi = rssi;
 		this.name = name;
 		this.given_name = given_name;
 		this.is_linked = is_linked;

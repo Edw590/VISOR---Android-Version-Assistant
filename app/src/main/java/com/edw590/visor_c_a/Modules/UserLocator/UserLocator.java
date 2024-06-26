@@ -25,11 +25,11 @@ import androidx.annotation.NonNull;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
-import com.edw590.visor_c_a.Modules.DeviceLocator.DeviceLocator;
-import com.edw590.visor_c_a.Modules.DeviceLocator.ExtDeviceObj;
 import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.Value;
 import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Modules.SystemChecker.ExtDevice;
+import com.edw590.visor_c_a.Modules.SystemChecker.WifiChecker;
 
 import kotlin.jvm.functions.Function0;
 
@@ -94,7 +94,7 @@ public class UserLocator implements IModuleInst {
 			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, true, 0L, ValuesRegistry.Keys.IS_USER_SLEEPING, true),
 			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, false, 0, ValuesRegistry.Keys.IS_USER_SLEEPING, false),
 			new Condition((Function0<Boolean>) () -> {
-				for (final ExtDeviceObj wifi_ap : DeviceLocator.nearby_aps_wifi) {
+				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("eduroam".equals(wifi_ap.name)) {
 						return true;
 					}
@@ -102,7 +102,7 @@ public class UserLocator implements IModuleInst {
 				return false;
 			}, true, 0L, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_SCHOOL),
 			new Condition((Function0<Boolean>) () -> {
-				for (final ExtDeviceObj wifi_ap : DeviceLocator.nearby_aps_wifi) {
+				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("Vodafone-A18391".equals(wifi_ap.name) || "Vodafone-3052B4".equals(wifi_ap.name) ||
 							"NOS-3440".equals(wifi_ap.name)) {
 						return true;
@@ -112,7 +112,7 @@ public class UserLocator implements IModuleInst {
 			}, true, 0L, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_HOME),
 			// Else condition below
 			new Condition((Function0<Boolean>) () -> {
-				for (final ExtDeviceObj wifi_ap : DeviceLocator.nearby_aps_wifi) {
+				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("eduroam".equals(wifi_ap.name) || "Vodafone-A18391".equals(wifi_ap.name) ||
 							"Vodafone-3052B4".equals(wifi_ap.name) || "NOS-3440".equals(wifi_ap.name)) {
 						return false;
