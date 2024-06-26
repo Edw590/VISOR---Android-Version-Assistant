@@ -43,6 +43,8 @@ import com.edw590.visor_c_a.R;
 
 import java.util.List;
 
+import UtilsSWA.UtilsSWA;
+
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
@@ -89,7 +91,8 @@ public final class FragNearbyDevices extends Fragment {
 
 				final long last_detection = device.last_detection;
 				final String text = device.type + "\n" + device.address + "\n" + UtilsTimeDate.getTimeDateStr(last_detection) +
-						"\n" + device.rssi + "\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
+						"\n" + UtilsSWA.getRealDistanceRSSILOCRELATIVE(device.rssi, UtilsSWA.DEFAULT_TX_POWER) +
+						"\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
 				textView.setText(text);
 
 				linearLayout.addView(textView);

@@ -47,7 +47,7 @@ public class BluetoothChecker {
 	@Nullable BluetoothLeScanner bluetoothLeScanner = null;
 	@Nullable BluetoothAdapter.LeScanCallback leScanCallback = null;
 
-	@Nullable BluetoothHeadset bluetoothHeadset = null; // todo PUT THIS IN A SEPARATE MODULE!!! (ConnectivityManager?)
+	@Nullable BluetoothHeadset bluetoothHeadset = null;
 	@Nullable BluetoothA2dp bluetoothA2dp = null;
 	ArrayList<Object> bluetooth_profiles = new ArrayList<>(BluetoothProfile.MAX_PROFILE_ID);
 
