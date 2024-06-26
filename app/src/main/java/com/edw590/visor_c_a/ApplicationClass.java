@@ -36,8 +36,7 @@ import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 
 import ACD.ACD;
-import OIG.OIG;
-import GPT.GPT;
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>The Application class of the app, which I'm extending to start the Main Service while android:persistent flag is
@@ -102,8 +101,8 @@ public final class ApplicationClass extends Application {
 		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 
 		// Give VISOR's website information to the libraries that need it
-		OIG.setWebsiteInfo(PERSONAL_CONSTS_EOG.WEBSITE_URL, PERSONAL_CONSTS_EOG.WEBSITE_PW);
-		GPT.setWebsiteInfo(PERSONAL_CONSTS_EOG.WEBSITE_URL, PERSONAL_CONSTS_EOG.WEBSITE_PW);
+		UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_URL,
+				PERSONAL_CONSTS_EOG.WEBSITE_PW);
 
 		UtilsMainSrvc.startMainService();
 
