@@ -72,6 +72,8 @@ public class SystemChecker implements IModuleInst {
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
 	public static final long CHECK_TIME_MIN = 30_000L;
 
+	long last_time_used = 0;
+
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
 	private boolean is_module_destroyed = false;
@@ -135,7 +137,7 @@ public class SystemChecker implements IModuleInst {
 					bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
 					bluetooth_devices.append("\u0000");
 				}
-				DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis()/1000, 0,
+				DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis()/1000, last_time_used,
 						UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 						UtilsAndroidConnectivity.getWifiEnabled(),
 						UtilsAndroidConnectivity.getBluetoothEnabled(),
@@ -219,6 +221,9 @@ public class SystemChecker implements IModuleInst {
 			intentFilter.addAction(Intent.ACTION_REBOOT);
 			intentFilter.addAction(ACTION_HTC_QCK_POFF);
 			intentFilter.addAction(ACTION_ANDR_QCK_POFF);
+
+			// Screen on (API 15-)/interactive device (API 16+)
+			intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 
 			UtilsContext.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
@@ -376,6 +381,14 @@ public class SystemChecker implements IModuleInst {
 						wifi_checker.powerSaverChanged(power_saver_enabled);
 						bluetooth_checker.powerSaverChanged(power_saver_enabled);
 					}
+
+					break;
+				}
+
+				/////////////////////////////////////
+				// Screen on
+				case (Intent.ACTION_SCREEN_ON): {
+					last_time_used = System.currentTimeMillis()/1000;
 
 					break;
 				}
