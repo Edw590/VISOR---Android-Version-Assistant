@@ -115,13 +115,13 @@ public final class UtilsShell {
 		try {
 			final byte[] cmd_output = UtilsSWA.execCmdSHELL(attempt_su, String.join("\n", commands_list));
 
-			exit_code = UtilsSWA.getExitCodeSHELL(cmd_output);
+			exit_code = (int) UtilsSWA.getExitCodeSHELL(cmd_output);
 			output_stream = UtilsSWA.getStdoutSHELL(cmd_output);
 			error_stream = UtilsSWA.getStderrSHELL(cmd_output);
 		} catch (final Exception e) {
 			e.printStackTrace();
 
-			exit_code = UtilsSWA.GENERIC_ERR;
+			exit_code = (int) UtilsSWA.GENERIC_ERR;
 		}
 
 		return new CmdOutput(exit_code, output_stream, error_stream);

@@ -121,7 +121,7 @@ public final class UtilsSpeech2 {
 		// A while true to create random utterance IDs and ensure they have not been already used on the lists
 		while (true) {
 			utterance_id_to_use = utterance_id_prefix +
-					UtilsSWA.generateRandomStringGENERAL(CONSTS_Speech.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
+					UtilsSWA.randStringGENERAL(CONSTS_Speech.LENGTH_UTTERANCE_ID - utterance_id_prefix.length());
 
 			boolean match_found = false;
 			for (final Iterable<SpeechObj> speech_objs : Speech2.arrays_speech_objs) {

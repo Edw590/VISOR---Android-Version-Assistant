@@ -45,7 +45,7 @@ public final class UtilsRoot {
      * @param warn_root_available true to warn if root access is available, false to only warn when there's no access
      */
     public static void checkWarnRootAccess(final boolean warn_root_available) {
-        if (UtilsSWA.isRootAvailable()) {
+        if (UtilsSWA.isRootAvailableROOT()) {
             if (warn_root_available) {
                 final String speak = "Root access available on the device.";
                 UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
