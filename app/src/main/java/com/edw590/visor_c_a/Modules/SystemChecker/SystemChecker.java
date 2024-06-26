@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
+import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidPower;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
@@ -72,7 +73,7 @@ public class SystemChecker implements IModuleInst {
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
 	public static final long CHECK_TIME_MIN = 30_000L;
 
-	long last_time_used = 0;
+	final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -122,6 +123,10 @@ public class SystemChecker implements IModuleInst {
 	private final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
+			assert power_manager != null; // It exists - it's the ---Power--- Manager
+			long last_time_used = 0;
+			boolean is_interactive = false;
+
 			while (true) {
 				StringBuilder wifi_networks = new StringBuilder();
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
@@ -137,13 +142,20 @@ public class SystemChecker implements IModuleInst {
 					bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
 					bluetooth_devices.append("\u0000");
 				}
-				DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis()/1000, last_time_used,
+				if (power_manager.isScreenOn()) {
+					last_time_used = System.currentTimeMillis() / 1000;
+					is_interactive = true;
+				} else {
+					is_interactive = false;
+				}
+				DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis() / 1000, last_time_used,
 						UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 						UtilsAndroidConnectivity.getWifiEnabled(),
 						UtilsAndroidConnectivity.getBluetoothEnabled(),
 						UtilsRegistry.getValue(ValuesRegistry.Keys.POWER_CONNECTED).getData(false),
 						UtilsRegistry.getValue(ValuesRegistry.Keys.BATTERY_PERCENT).getData(-1).longValue(),
-						-1, wifi_networks.toString(), bluetooth_devices.toString());
+						is_interactive, UtilsAndroidPower.getScreenBrightness(),
+						wifi_networks.toString(), bluetooth_devices.toString());
 
 				try {
 					device_info.sendInfo();
@@ -221,9 +233,6 @@ public class SystemChecker implements IModuleInst {
 			intentFilter.addAction(Intent.ACTION_REBOOT);
 			intentFilter.addAction(ACTION_HTC_QCK_POFF);
 			intentFilter.addAction(ACTION_ANDR_QCK_POFF);
-
-			// Screen on (API 15-)/interactive device (API 16+)
-			intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 
 			UtilsContext.getContext().registerReceiver(broadcastReceiver, intentFilter, null, main_handler);
 		} catch (final IllegalArgumentException ignored) {
@@ -381,14 +390,6 @@ public class SystemChecker implements IModuleInst {
 						wifi_checker.powerSaverChanged(power_saver_enabled);
 						bluetooth_checker.powerSaverChanged(power_saver_enabled);
 					}
-
-					break;
-				}
-
-				/////////////////////////////////////
-				// Screen on
-				case (Intent.ACTION_SCREEN_ON): {
-					last_time_used = System.currentTimeMillis()/1000;
 
 					break;
 				}

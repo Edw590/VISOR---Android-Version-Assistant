@@ -22,6 +22,7 @@
 package com.edw590.visor_c_a.GlobalUtils.AndroidSystem;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -313,5 +314,22 @@ public final class UtilsAndroidPower {
 	public static boolean turnScreenOff_TEST_THIS() {
 		// todo To be tested
 		return UtilsShell.noErr(UtilsShell.executeShellCmd(true, "input keyevent 26").exit_code);
+	}
+
+	/**
+	 * <p>Set the screen brightness.</p>
+	 *
+	 * @return the screen brightness percentage
+	 */
+	public static int getScreenBrightness() {
+		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
+
+		int brightness_mode = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
+		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
+				Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+		int brightness = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, -1);
+		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, brightness_mode);
+
+		return brightness * 100 / 255;
 	}
 }
