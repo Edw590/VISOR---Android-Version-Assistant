@@ -90,25 +90,19 @@ public final class FragDevelopment extends Fragment {
 
 				final Context context = UtilsContext.getContext();
 
-				//UtilsLocationRelative.startIndRelDistance();
+				try {
+					GPT.sendText(txt_to_send.getText().toString());
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
 
-				final long curr_time = System.currentTimeMillis();
-				GPT.sendText(txt_to_send.getText().toString());
-
-				// Wait at most 10 seconds
-				while (System.currentTimeMillis() - curr_time < 60*1000) {
-					final String entry = GPT.getEntry(-1);
-					if (GPT.getTimeFromEntry(entry) >= curr_time) {
-						final String speak = GPT.getTextFromEntry(entry);
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
-
+				while (true) {
+					final String speak = GPT.getNextSpeechSentence();
+					if (speak.equals(GPT.END_ENTRY)) {
 						break;
 					}
 
-					try {
-						Thread.sleep(1000);
-					} catch (final InterruptedException ignored) {
-					}
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 				}
 
 				//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
@@ -256,6 +250,7 @@ public final class FragDevelopment extends Fragment {
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
+				//speech3.speak(speak, SpeechQueue.PRIORITY_LOW, SpeechQueue.MODE_DEFAULT, 0);
 			}
 		});
 		requireView().findViewById(R.id.btn_send_text).setOnClickListener(new View.OnClickListener() {
