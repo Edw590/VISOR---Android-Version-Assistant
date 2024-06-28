@@ -47,8 +47,8 @@ import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -187,13 +187,13 @@ public final class PhoneCallsProcessor implements IModuleInst {
 		// todo This only works when Precise Call States are not being used.... Don't forget that.
 
 		// Update the Values Storage
-		UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_PHONE_CALL_TIME, System.currentTimeMillis());
+		UtilsRegistry.setData(ValuesRegistry.K_LAST_PHONE_CALL_TIME, System.currentTimeMillis(), false);
 
 		boolean number_active = false;
 		for (final ArrayList<String> call : calls_state) {
 			if (BETTER_CALL_STATE_ACTIVE.equals(call.get(1))) {
 				// Update the Values Storage
-				UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, call.get(0));
+				UtilsRegistry.setData(ValuesRegistry.K_CURR_PHONE_CALL_NUMBER, call.get(0), false);
 
 				number_active = true;
 
@@ -202,7 +202,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 		}
 		if (!number_active) {
 			// Update the Values Storage
-			UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER, "");
+			UtilsRegistry.setData(ValuesRegistry.K_CURR_PHONE_CALL_NUMBER, "", false);
 		}
 	}
 

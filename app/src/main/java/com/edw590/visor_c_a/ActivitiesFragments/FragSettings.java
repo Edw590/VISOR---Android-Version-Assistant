@@ -21,36 +21,14 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments;
 
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.text.InputType;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
-
-import com.edw590.visor_c_a.R;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.SettingsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.Value;
-import com.ms.square.android.expandabletextview.ExpandableTextView;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
 public final class FragSettings extends Fragment {
 
-	static final Value[] SETTINGS_ARRAY_CLONE = SettingsRegistry.getArray();
+	/*static final Value[] SETTINGS_ARRAY_CLONE = SettingsRegistry.getArray();
 	static final int SETTINGS_ARRAY_LENGTH = SettingsRegistry.getArray().length;
 
 	View frag_view;
@@ -140,5 +118,5 @@ public final class FragSettings extends Fragment {
 				}
 			}
 		}
-	};
+	};*/
 }

@@ -98,7 +98,6 @@ public final class ModulesList {
 	private static final ElementsObj[] ELEMENTS_LIST = {
 			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, true),
 			//new ElementsObj(PreferencesManager.class, "Preferences Manager", TYPE1_INSTANCE, TYPE2_MODULE),
-			//new ElementObj(SomeValuesUpdater.class, "Some Values Updater", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
 			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true),
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),

@@ -25,11 +25,10 @@ import androidx.annotation.NonNull;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.Value;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.SystemChecker.ExtDevice;
 import com.edw590.visor_c_a.Modules.SystemChecker.WifiChecker;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import kotlin.jvm.functions.Function0;
 
@@ -91,8 +90,8 @@ public class UserLocator implements IModuleInst {
 	}
 
 	Condition[] conditions = {
-			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, true, 0, ValuesRegistry.Keys.IS_USER_SLEEPING, true),
-			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, false, 0, ValuesRegistry.Keys.IS_USER_SLEEPING, false),
+			new Condition(ValuesRegistry.K_AIRPLANE_MODE_ON, true, 0, ValuesRegistry.K_IS_USER_SLEEPING, true),
+			new Condition(ValuesRegistry.K_AIRPLANE_MODE_ON, false, 0, ValuesRegistry.K_IS_USER_SLEEPING, false),
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("eduroam".equals(wifi_ap.name)) {
@@ -100,7 +99,7 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return false;
-			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_SCHOOL),
+			}, true, 0, ValuesRegistry.K_CURR_USER_LOCATION, USER_LOCATION_SCHOOL),
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("Vodafone-A18391".equals(wifi_ap.name) || "Vodafone-3052B4".equals(wifi_ap.name) ||
@@ -109,7 +108,7 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return false;
-			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_HOME),
+			}, true, 0, ValuesRegistry.K_CURR_USER_LOCATION, USER_LOCATION_HOME),
 			// Else condition below
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
@@ -119,25 +118,26 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return true;
-			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_UNKNOWN),
+			}, true, 0, ValuesRegistry.K_CURR_USER_LOCATION, USER_LOCATION_UNKNOWN),
 	};
 
 	private final Thread infinity_thread = new Thread(() -> {
 		while (true) {
 			for (final Condition condition : conditions) {
 				if (condition.to_check instanceof String) {
-					final Value value = UtilsRegistry.getValue((String) condition.to_check);
-					final long time_between_changes = System.currentTimeMillis() - value.getTime();
-					if (condition.value.equals(value.getData()) && time_between_changes >= condition.duration * 1000) {
-						UtilsRegistry.setValue(condition.key_to_update, condition.value_to_update);
+					Object curr_data = UtilsRegistry.getData((String) condition.to_check, true);
+					Registry.Value value = Registry.Registry.getValue((String) condition.to_check);
+					long time_between_changes = System.currentTimeMillis() - value.getTimeUpdated(true);
+					if (condition.value.equals(curr_data) && time_between_changes >= condition.duration * 1000) {
+						UtilsRegistry.setData(condition.key_to_update, condition.value_to_update, true);
 					}
 				} else if (condition.to_check instanceof Function0) {
-					final Function0<Boolean> function = (Function0<Boolean>) condition.to_check;
+					Function0<Boolean> function = (Function0<Boolean>) condition.to_check;
 					if (function.invoke() == condition.value) {
-						final Value value = UtilsRegistry.getValue(condition.key_to_update);
-						final long time_between_changes = System.currentTimeMillis() - value.getTime();
+						Registry.Value value = Registry.Registry.getValue(condition.key_to_update);
+						long time_between_changes = System.currentTimeMillis() - value.getTimeUpdated(true);
 						if (time_between_changes >= condition.duration * 1000) {
-							UtilsRegistry.setValue(condition.key_to_update, condition.value_to_update);
+							UtilsRegistry.setData(condition.key_to_update, condition.value_to_update, true);
 						}
 					}
 				}

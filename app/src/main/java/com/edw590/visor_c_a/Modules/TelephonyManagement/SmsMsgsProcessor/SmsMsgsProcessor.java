@@ -44,8 +44,8 @@ import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 
 /**
@@ -127,15 +127,15 @@ public final class SmsMsgsProcessor implements IModuleInst {
 			System.out.println("&&&&&&&&&&&&&&&&&");
 
 			// Update the Values Storage
-			UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_TIME, System.currentTimeMillis());
+			UtilsRegistry.setData(ValuesRegistry.K_LAST_SMS_MSG_TIME, System.currentTimeMillis(), false);
 
 			final String speak;
 			if (UtilsTelephony.isPrivateNumber(sender)) {
 				speak = "Sir, attention! New message from a private number!";
-				UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_NUMBER, "[Private number]");
+				UtilsRegistry.setData(ValuesRegistry.K_LAST_SMS_MSG_NUMBER, "[Private number]", false);
 			} else {
 				speak = "Sir, new message from " + UtilsTelephony.getWhatToSayAboutNumber(sender) + ".";
-				UtilsRegistry.setValue(ValuesRegistry.Keys.LAST_SMS_MSG_NUMBER, sender);
+				UtilsRegistry.setData(ValuesRegistry.K_LAST_SMS_MSG_NUMBER, sender, false);
 			}
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
 		}

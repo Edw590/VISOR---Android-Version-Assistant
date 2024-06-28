@@ -51,8 +51,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
@@ -974,7 +974,7 @@ public final class Speech2 implements IModuleInst {
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
 		if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-			if (UtilsRegistry.getValue(ValuesRegistry.Keys.IS_USER_SLEEPING).getData(false)) {
+			if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_IS_USER_SLEEPING, true)) {
 				skip_speaking = true;
 			}
 		} else {

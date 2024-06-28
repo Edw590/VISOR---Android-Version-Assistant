@@ -34,6 +34,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
+import com.edw590.visor_c_a.Registry.SettingsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import ACD.ACD;
 import UtilsSWA.UtilsSWA;
@@ -103,6 +105,10 @@ public final class ApplicationClass extends Application {
 		// Give VISOR's website information to the libraries that need it
 		UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_URL,
 				PERSONAL_CONSTS_EOG.WEBSITE_PW);
+
+		// Register keys in the Registry
+		ValuesRegistry.registerRegistryKeys();
+		SettingsRegistry.registerRegistryKeys();
 
 		UtilsMainSrvc.startMainService();
 

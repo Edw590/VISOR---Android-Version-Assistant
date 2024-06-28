@@ -35,8 +35,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,9 +86,9 @@ public class WifiChecker {
 	}
 
 	void rssiChanged(final Intent intent) {
-		UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, UtilsSWA.
+		UtilsRegistry.setData(ValuesRegistry.K_DIST_ROUTER, UtilsSWA.
 				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
-						UtilsSWA.DEFAULT_TX_POWER));
+						UtilsSWA.DEFAULT_TX_POWER), true);
 	}
 
 	void wifiStateChanged(final Intent intent) {
@@ -102,7 +102,7 @@ public class WifiChecker {
 			}
 		} else if (wifi_state == WifiManager.WIFI_STATE_DISABLING ||
 				wifi_state == WifiManager.WIFI_STATE_DISABLED) {
-			UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, "-1");
+			UtilsRegistry.setData(ValuesRegistry.K_DIST_ROUTER, "-1", false);
 			enabled_by_visor_wifi = false;
 		}
 	}

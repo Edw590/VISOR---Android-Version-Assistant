@@ -26,8 +26,8 @@ import android.os.Build;
 
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 
@@ -59,7 +59,7 @@ public class PowerChecker {
 	 */
 	void processBatteryPwrChg(final boolean power_connected) {
 		// Update the Values Storage
-		UtilsRegistry.setValue(ValuesRegistry.Keys.POWER_CONNECTED, power_connected);
+		UtilsRegistry.setData(ValuesRegistry.K_POWER_CONNECTED, power_connected, false);
 
 		if ((last_detected_percent == -1) ||
 				// Only warn if the power state is new (can't warn every percentage increase... - only on power changes)
@@ -101,7 +101,7 @@ public class PowerChecker {
 		bat_info.battery_percentage = battery_lvl * 100 / battery_lvl_scale;
 
 		// Update the Values Storage
-		UtilsRegistry.setValue(ValuesRegistry.Keys.BATTERY_PERCENT, bat_info.battery_percentage);
+		UtilsRegistry.setData(ValuesRegistry.K_BATTERY_PERCENT, bat_info.battery_percentage, false);
 
 		// If the EXTRA_PRESENT can be wrong, check if the battery level is different than 0 and 100, depending on the
 		// device version, as documented here: https://source.android.com/docs/core/power/batteryless.
@@ -115,11 +115,11 @@ public class PowerChecker {
 		if (better_battery_present) {
 			// Update the Values Storage
 			bat_info.battery_present = true;
-			UtilsRegistry.setValue(ValuesRegistry.Keys.BATTERY_PRESENT, true);
+			UtilsRegistry.setData(ValuesRegistry.K_BATTERY_PRESENT, true, false);
 		} else if (battery_present != null) {
 			// Update the Values Storage
 			bat_info.battery_present = battery_present;
-			UtilsRegistry.setValue(ValuesRegistry.Keys.BATTERY_PRESENT, battery_present);
+			UtilsRegistry.setData(ValuesRegistry.K_BATTERY_PRESENT, battery_present, false);
 		}
 
 		// The ACTION_POWER_CONNECTED and _DISCONNECTED may not be broadcast on the device (happens on miTab Advance),
@@ -176,7 +176,7 @@ public class PowerChecker {
 			if (power_connected_not_ready != null) {
 				// Update the Values Storage
 				bat_info.power_connected = power_connected_not_ready;
-				UtilsRegistry.setValue(ValuesRegistry.Keys.POWER_CONNECTED, power_connected_not_ready);
+				UtilsRegistry.setData(ValuesRegistry.K_POWER_CONNECTED, power_connected_not_ready, false);
 				processBatteryPwrChg(power_connected_not_ready);
 			}
 		}
@@ -191,8 +191,8 @@ public class PowerChecker {
 		// functions will warn based on them only --> then compare the values and be done with it.
 		// Still, use the power_connected status, but only if it's different than null, just to be sure no weird devices
 		// increase the percentage by mistake without being charging. This would warn in that case - now it won't.
-		final Boolean power_connected = UtilsRegistry.getValue(ValuesRegistry.Keys.POWER_CONNECTED).getData();
-		if (power_connected == null || power_connected) {
+		final boolean power_connected = (boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true);
+		if (power_connected) {
 			// Don't do anything if by chance, another broadcast is sent without the battery level having changed.
 			if (bat_info.battery_percentage > last_detected_percent) {
 				warnCharging(bat_info.battery_percentage);

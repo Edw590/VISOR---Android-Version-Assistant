@@ -29,11 +29,10 @@ import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsAudio;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.Value;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import java.util.Calendar;
 
@@ -96,13 +95,13 @@ public class TasksExecutor implements IModuleInst {
 
 	private int prev_ringer_mode = 0;
 	Task[] tasks = {
-			new Task(ValuesRegistry.Keys.IS_USER_SLEEPING, null, true, () -> {
+			new Task(ValuesRegistry.K_IS_USER_SLEEPING, null, true, () -> {
 				prev_ringer_mode = UtilsAudio.getAudioModes(-1, true, false);
 				UtilsAudio.setAudioModes(-1, -1, AudioManager.RINGER_MODE_VIBRATE, -1);
 
 				UtilsSpeech2BC.speak("Sleep well sir.", Speech2.PRIORITY_MEDIUM, Speech2.MODE_DEFAULT, null);
 			}),
-			new Task(ValuesRegistry.Keys.IS_USER_SLEEPING, null, false, () -> {
+			new Task(ValuesRegistry.K_IS_USER_SLEEPING, null, false, () -> {
 				final int speech_priority = Speech2.PRIORITY_MEDIUM;
 				UtilsAudio.setAudioModes(-1, -1, prev_ringer_mode, -1);
 
@@ -145,28 +144,30 @@ public class TasksExecutor implements IModuleInst {
 
 		while (true) {
 			for (final Task task : tasks) {
-				final Value value = UtilsRegistry.getValue(task.key_to_check);
+				final Object curr_data = UtilsRegistry.getData(task.key_to_check, true);
+				final Object prev_data = UtilsRegistry.getData(task.key_to_check, false);
 
 				if (task.curr_value == null && task.prev_value == null) {
 					continue;
 				}
 
 				if (task.curr_value == null) {
-					if (!task.prev_value.equals(value.getPrevData())) {
+					if (!task.prev_value.equals(prev_data)) {
 						continue;
 					}
 				} else if (task.prev_value == null) {
-					if (!task.curr_value.equals(value.getData())) {
+					if (!task.curr_value.equals(curr_data)) {
 						continue;
 					}
 				} else {
-					if (!task.curr_value.equals(value.getData()) || !task.prev_value.equals(value.getPrevData())) {
+					if (!task.curr_value.equals(curr_data) || !task.prev_value.equals(prev_data)) {
 						continue;
 					}
 				}
 
 				// Only if the value was just updated
-				if (System.currentTimeMillis() - value.getTime() <= CHECK_TIME) {
+				Registry.Value value = Registry.Registry.getValue(task.key_to_check);
+				if (System.currentTimeMillis() - value.getTimeUpdated(true) <= CHECK_TIME) {
 					task.to_do.run();
 				}
 			}

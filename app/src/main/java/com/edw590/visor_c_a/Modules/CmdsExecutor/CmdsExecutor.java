@@ -51,8 +51,8 @@ import com.edw590.visor_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -534,7 +534,7 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_SPEAKERS): {
 					final String speak;
-					if (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_PHONE_CALL_NUMBER).getData("").isEmpty()) {
+					if (((String) UtilsRegistry.getData(ValuesRegistry.K_CURR_PHONE_CALL_NUMBER, true)).isEmpty()) {
 						speak = "The device not in a phone call.";
 					} else {
 						if (UtilsAndroidTelephony.setCallSpeakerphoneEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
@@ -590,9 +590,9 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_ASK_BATTERY_PERCENT): {
 					if (!only_returning) {
-						final Boolean battery_present = UtilsRegistry.
-								getValue(ValuesRegistry.Keys.BATTERY_PRESENT).getData();
-						if (battery_present != null && !battery_present) {
+						final boolean battery_present = (boolean) UtilsRegistry.
+								getData(ValuesRegistry.K_BATTERY_PRESENT, true);
+						if (!battery_present) {
 							final String speak = "There is no battery present on the device.";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, null);
 						}
@@ -601,14 +601,8 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					final Integer battery_percentage = UtilsRegistry
-							.getValue(ValuesRegistry.Keys.BATTERY_PERCENT).getData();
-					final String speak;
-					if (battery_percentage == null) {
-						speak = "Battery percentage not available yet.";
-					} else {
-						speak = "Battery percentage: " + battery_percentage + "%.";
-					}
+					final int battery_percentage = (int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true);
+					final String speak = "Battery percentage: " + battery_percentage + "%.";
 					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, null);
 
 					previous_cmd = new Command(command, "ask battery percentage", null);
@@ -1013,11 +1007,11 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
+					if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
 						final String speak = "Background hot-word recognition already stopped.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, null);
 					} else {
-						UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP, true);
+						UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true, false);
 						UtilsSpeechRecognizersBC.stopRecognition(null);
 
 						final String speak = "Background hot-word recognition stopped.";
@@ -1031,8 +1025,8 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
-						UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP, false);
+					if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
+						UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, false, false);
 						// We could wait for the controller to restart it, but this way it's faster.
 						UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 
@@ -1052,7 +1046,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
-					if (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) == -1) {
+					if ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
@@ -1096,7 +1090,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
-					if (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) == -1) {
+					if ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}

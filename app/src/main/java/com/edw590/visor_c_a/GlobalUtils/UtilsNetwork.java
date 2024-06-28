@@ -29,8 +29,8 @@ import android.net.wifi.WifiManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import org.spongycastle.util.Arrays;
 
@@ -136,7 +136,7 @@ public final class UtilsNetwork {
 	 */
 	public static boolean waitForNetwork(final long timeout) {
 		final long start_time = System.currentTimeMillis();
-		while (UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) == -1) {
+		while ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
 			if (System.currentTimeMillis() - start_time >= timeout * 1000) {
 				break;
 			}
@@ -148,6 +148,6 @@ public final class UtilsNetwork {
 			}
 		}
 
-		return UtilsRegistry.getValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE).getData(-1) != -1;
+		return (int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) != -1;
 	}
 }

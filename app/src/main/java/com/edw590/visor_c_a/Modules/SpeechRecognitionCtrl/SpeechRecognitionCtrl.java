@@ -38,8 +38,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
@@ -104,7 +104,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		final boolean commands_recog_available = UtilsSpeechRecognizers.isCmdsRecogAppAvailable();
 
 		// Update the Values Storage
-		UtilsRegistry.setValue(ValuesRegistry.Keys.COMMANDS_RECOG_AVAILABLE, commands_recog_available);
+		UtilsRegistry.setData(ValuesRegistry.K_COMMANDS_RECOG_AVAILABLE, commands_recog_available, false);
 
 		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions) &&
 				UtilsCheckHardwareFeatures.isMicrophoneSupported() && commands_recog_available;
@@ -165,7 +165,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 					if (current_recognizer == NO_RECOGNIZER) {
 						if (cmds_recog_requested_when == 0) {
-							if (!UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false) ||
+							if (!(boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true) ||
 									PocketSphinxRecognition.getAudioSource() == MediaRecorder.AudioSource.HOTWORD) {
 								// todo Falta no executor esta linha acima, ligar o PocketSphinx se for HOTWORD e tiver sido pedido para parar.
 								// todo 		Além disso "visor come back" para o reiniciar (só disponível para HOTWORD) e falta
@@ -248,7 +248,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 					if (cmds_recog_is_listening) {
 						UtilsSpeechRecognizers.stopCommandsRecognizer();
 					}
-					if (!UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
+					if (!(boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
 						// Still stop. Just don't restart PocketSphinx.
 						UtilsSpeechRecognizers.startPocketSphinxRecognition();
 					}

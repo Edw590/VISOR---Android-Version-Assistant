@@ -44,8 +44,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
@@ -112,8 +112,8 @@ public class SystemChecker implements IModuleInst {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 
-		UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
-		UtilsRegistry.setValue(ValuesRegistry.Keys.AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled());
+		UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
+		UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
 
 		bluetooth_checker.startBluetooth();
 
@@ -154,8 +154,8 @@ public class SystemChecker implements IModuleInst {
 						UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 						UtilsAndroidConnectivity.getWifiEnabled(),
 						UtilsAndroidConnectivity.getBluetoothEnabled(),
-						UtilsRegistry.getValue(ValuesRegistry.Keys.POWER_CONNECTED).getData(false),
-						UtilsRegistry.getValue(ValuesRegistry.Keys.BATTERY_PERCENT).getData(-1).longValue(),
+						(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
+						(long) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true),
 						is_interactive, UtilsAndroidPower.getScreenBrightness(),
 						wifi_networks.toString(), bluetooth_devices.toString());
 
@@ -170,7 +170,7 @@ public class SystemChecker implements IModuleInst {
 				// That way it's not tempered with by VISOR enabling and disabling Wi-Fi, because the network type is
 				// checked before any of that happens (and there's a delay, so the previous iteration won't impact here).
 				// Or there are also no broadcast delays if the function call is right here.
-				UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
+				UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
 
 
 				// Bluetooth
@@ -368,7 +368,8 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Network type
 				case (ConnectivityManager.CONNECTIVITY_ACTION): {
-					UtilsRegistry.setValue(ValuesRegistry.Keys.CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType());
+					UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(),
+							false);
 
 					break;
 				}
@@ -376,7 +377,8 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Airplane mode
 				case (Intent.ACTION_AIRPLANE_MODE_CHANGED): {
-					UtilsRegistry.setValue(ValuesRegistry.Keys.AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled());
+					UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON,
+							UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
 
 					break;
 				}

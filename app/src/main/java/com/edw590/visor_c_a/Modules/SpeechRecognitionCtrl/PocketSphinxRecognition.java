@@ -32,8 +32,8 @@ import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsAudio;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
@@ -266,7 +266,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			final String[][] options;
 			// If it's to stop listening in the background, don't stop completely to be able to listen when to start
 			// listening again. If it's not to stop, listen to the hot-words.
-			if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
+			if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
 				options = new String[][]{
 						{"visor", "come", "back"},
 						{"visor", "listen", "again"},
@@ -316,8 +316,8 @@ public final class PocketSphinxRecognition implements IModuleInst {
 				return;
 			}
 
-			if (UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false)) {
-				UtilsRegistry.setValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP, false);
+			if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
+				UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, false, false);
 				UtilsSpeech2BC.speak("Listening in the background again...", Speech2.PRIORITY_USER_ACTION,
 						Speech2.MODE2_BYPASS_NO_SND, null);
 			}

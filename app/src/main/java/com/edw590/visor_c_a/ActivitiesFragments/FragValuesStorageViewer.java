@@ -22,7 +22,6 @@
 package com.edw590.visor_c_a.ActivitiesFragments;
 
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -35,11 +34,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.edw590.visor_c_a.GlobalUtils.UtilsTimeDate;
 import com.edw590.visor_c_a.R;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.Value;
-import com.edw590.visor_c_a.Modules.PreferencesManager.Registry.ValuesRegistry;
-import com.ms.square.android.expandabletextview.ExpandableTextView;
+
+import Registry.Registry;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
@@ -68,7 +65,7 @@ public final class FragValuesStorageViewer extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
 				resources.getDisplayMetrics());
 
-		int i = 0;
+		/*int i = 0;
 		for (final Value value : ValuesRegistry.getArray()) { // Add a TextView for each value.
 			final TextView textView = new TextView(requireContext());
 			textView.setId(i); // Set the ID to be the index of the value in the list
@@ -89,10 +86,10 @@ public final class FragValuesStorageViewer extends Fragment {
 			linearLayout.addView(expandableTextView);
 
 			++i;
-		}
-	}
+		}*/
 
-	private static String getTimeDateStr(final long time) {
-		return time == Value.DEFAULT_TIME ? "never" : UtilsTimeDate.getTimeDateStr(time);
+		TextView textView = new TextView(requireContext());
+		textView.setText(Registry.getRegistryText());
+		linearLayout.addView(textView);
 	}
 }
