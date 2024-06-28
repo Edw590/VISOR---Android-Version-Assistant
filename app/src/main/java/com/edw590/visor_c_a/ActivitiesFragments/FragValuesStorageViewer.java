@@ -93,6 +93,6 @@ public final class FragValuesStorageViewer extends Fragment {
 	}
 
 	private static String getTimeDateStr(final long time) {
-		return Value.DEFAULT_TIME == time ? "never" : UtilsTimeDate.getTimeDateStr(time);
+		return time == Value.DEFAULT_TIME ? "never" : UtilsTimeDate.getTimeDateStr(time);
 	}
 }

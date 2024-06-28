@@ -155,7 +155,7 @@ public final class UtilsTelephony {
 			// If the conversion works, then check if the number is greater or equal to 0 ("Private numbers are sent to
 			// the phone as -1 or -2.", according to a StackOverflow user), and in that case, it's not a private number.
 			try {
-				if (Long.parseLong(number) >= 0L) {
+				if (Long.parseLong(number) >= 0) {
 					return false;
 				}
 			} catch (final NumberFormatException ignored) {
@@ -279,7 +279,7 @@ public final class UtilsTelephony {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.
 					getSystemService(Context.TELEPHONY_SERVICE);
-			if (null == telephonyManager) {
+			if (telephonyManager == null) {
 				return false;
 			}
 
@@ -302,7 +302,7 @@ public final class UtilsTelephony {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.
 					getSystemService(Context.TELEPHONY_SERVICE);
-			if (null == telephonyManager) {
+			if (telephonyManager == null) {
 				return false;
 			}
 

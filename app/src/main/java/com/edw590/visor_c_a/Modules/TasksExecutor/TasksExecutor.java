@@ -39,7 +39,7 @@ import java.util.Calendar;
 
 public class TasksExecutor implements IModuleInst {
 
-	private static final long CHECK_TIME = 1000L;
+	private static final long CHECK_TIME = 1000;
 
 
 	///////////////////////////////////////////////////////////////

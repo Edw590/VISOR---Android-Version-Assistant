@@ -77,7 +77,7 @@ public final class UtilsAndroidTelephony {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
 					UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
-				if (null == telecomManager) {
+				if (telecomManager == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -91,7 +91,7 @@ public final class UtilsAndroidTelephony {
 		} else {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final IBinder iBinder = UtilsContext.getService(Context.TELEPHONY_SERVICE);
-				if (null == iBinder) {
+				if (iBinder == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -135,7 +135,7 @@ public final class UtilsAndroidTelephony {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)) {
 				final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
-				if (null == telecomManager) {
+				if (telecomManager == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -147,7 +147,7 @@ public final class UtilsAndroidTelephony {
 		} else {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CALL_PHONE)) {
 				final IBinder iBinder = UtilsContext.getService(Context.TELEPHONY_SERVICE);
-				if (null == iBinder) {
+				if (iBinder == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -187,7 +187,7 @@ public final class UtilsAndroidTelephony {
 	 */
 	public static boolean setCallSpeakerphoneEnabled(final boolean enabled) {
 		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
-		if (null == audioManager) {
+		if (audioManager == null) {
 			return false;
 		}
 

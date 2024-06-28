@@ -179,7 +179,7 @@ public final class UtilsApp {
 	public static boolean isDeviceAdmin() {
 		final Context context = UtilsContext.getContext();
 		final DevicePolicyManager mDPM = (DevicePolicyManager) UtilsContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-		if (null == mDPM) {
+		if (mDPM == null) {
 			return false;
 		}
 

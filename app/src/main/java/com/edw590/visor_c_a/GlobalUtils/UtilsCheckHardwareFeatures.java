@@ -65,13 +65,13 @@ public final class UtilsCheckHardwareFeatures {
 				UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 			// TelecomManager.getAllPhoneAccounts() needs MODIFY_PHONE_STATE (by experience).
 			final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
-			if (null == telecomManager) {
+			if (telecomManager == null) {
 				return false;
 			}
 
 			final List<PhoneAccount> phoneAccount_list = telecomManager.getAllPhoneAccounts();
 			for (final PhoneAccount phoneAccount : phoneAccount_list) {
-				if (0 == (phoneAccount.getCapabilities() & PhoneAccount.CAPABILITY_PLACE_EMERGENCY_CALLS)) {
+				if ((phoneAccount.getCapabilities() & PhoneAccount.CAPABILITY_PLACE_EMERGENCY_CALLS) == 0) {
 					// If it can place emergency calls, it can make at least that type of call. So start the
 					// module, as any call type counts.
 					// Though, as CAPABILITY_PLACE_EMERGENCY_CALLS's documentation says, phone accounts BY
@@ -127,7 +127,7 @@ public final class UtilsCheckHardwareFeatures {
 		// speaker) do have this feature. But when I connected a Bluetooth headset to the MOTO 360, it still
 		// don't have this feature, this confused me." --> https://stackoverflow.com/a/32903108/8228163.
 		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
-		if (null == audioManager) {
+		if (audioManager == null) {
 			return false;
 		}
 
@@ -135,7 +135,7 @@ public final class UtilsCheckHardwareFeatures {
 				audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn() ||
 				audioManager.isSpeakerphoneOn();
 
-		if (null == has_audio_output_feature) {
+		if (has_audio_output_feature == null) {
 			// Assume there's always a speaker below Lollipop. I have a tablet with KitKat which does have
 			// speakers and can have headphones, but with wired headphones connected or not, nothing works, so
 			// whatever.
@@ -236,7 +236,7 @@ public final class UtilsCheckHardwareFeatures {
 	public static boolean isMobileDataSupported() {
 		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (null == connectivityManager) {
+		if (connectivityManager == null) {
 			return false;
 		}
 
@@ -255,7 +255,7 @@ public final class UtilsCheckHardwareFeatures {
 	public static boolean isAnyDataNetworkSupported() {
 		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (null == connectivityManager) {
+		if (connectivityManager == null) {
 			return false;
 		}
 

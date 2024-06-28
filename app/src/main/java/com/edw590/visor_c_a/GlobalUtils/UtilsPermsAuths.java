@@ -81,7 +81,7 @@ public final class UtilsPermsAuths {
 	 * @param warn_success true to warn if all authorizations have been successfully granted, false otherwise
 	 */
 	public static void warnAuthorizations(final int auths_left, final boolean warn_success) {
-		if (0 == auths_left) {
+		if (auths_left == 0) {
 			if (warn_success) {
 				final String speak = "No authorizations left to grant.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
@@ -143,7 +143,7 @@ public final class UtilsPermsAuths {
 							if (force_permissions) {
 								UtilsShell.executeShellCmd(true, partial_command + perm_name);
 
-								if (!checkSelfPermission(perm_name) && (0 == permission_list)) {
+								if (!checkSelfPermission(perm_name) && (permission_list == 0)) {
 									// Don't add the permission to the number of not granted permissions if it's not
 									// a runtime ("dangerous") permission. Development permissions can be granted with
 									// ADB or root, but not with a confirmation UI, so the user can't be warned about
@@ -175,7 +175,7 @@ public final class UtilsPermsAuths {
 
 					// If the permission exists on the device API level...
 					if (Build.VERSION.SDK_INT >= Integer.parseInt(permission[1])) {
-						if (!checkSelfPermission(perm_name) && (0 == permission_list)) {
+						if (!checkSelfPermission(perm_name) && (permission_list == 0)) {
 							// Same reason as for the other ++num_not_granted_perms line.
 							++num_not_granted_perms;
 						}
@@ -214,7 +214,7 @@ public final class UtilsPermsAuths {
 
 		// todo Remove this when you make a way to request VISOR to stop requesting specific permissions
 		// Also I can't test stuff with this thing forcing all auths and perms to be granted...
-		if (ALSO_FORCE == what_to_do) {
+		if (what_to_do == ALSO_FORCE) {
 			what_to_do = CHECK_ONLY;
 		}
 
@@ -223,12 +223,12 @@ public final class UtilsPermsAuths {
 			final String assist_package = Settings.Secure.getString(context.getContentResolver(),
 					Settings.Secure.ASSISTANT);
 			if (!package_name.equals(assist_package)) {
-				if (ALSO_FORCE == what_to_do) {
+				if (what_to_do == ALSO_FORCE) {
 					// todo Missing forcing the authorization here
 				} else {
 					++missing_authorizations;
 
-					if (ALSO_REQUEST == what_to_do) {
+					if (what_to_do == ALSO_REQUEST) {
 						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
 							UtilsContext.startActivity(new Intent(Intent.ACTION_ASSIST));
 							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
@@ -250,7 +250,7 @@ public final class UtilsPermsAuths {
 			// screen for the user to grant it.
 			final NotificationManager mNotificationManager = (NotificationManager) UtilsContext.getNotificationManager();
 			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
-				if (ALSO_FORCE == what_to_do) {
+				if (what_to_do == ALSO_FORCE) {
 					final String command = "cmd notification allow_dnd " + package_name;
 					UtilsShell.executeShellCmd(true, command);
 
@@ -258,7 +258,7 @@ public final class UtilsPermsAuths {
 				} else {
 					++missing_authorizations;
 
-					if (ALSO_REQUEST == what_to_do) {
+					if (what_to_do == ALSO_REQUEST) {
 						final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						UtilsContext.startActivity(intent);
@@ -268,7 +268,7 @@ public final class UtilsPermsAuths {
 
 			// Check if the app can draw system overlays and open the settings screen if not
 			if (!Settings.canDrawOverlays(context)) {
-				if (ALSO_FORCE == what_to_do) {
+				if (what_to_do == ALSO_FORCE) {
 					final String command = "appops set " + package_name + " " + AppOpsManager.OP_SYSTEM_ALERT_WINDOW +
 							" allow";
 					UtilsShell.executeShellCmd(true, command);
@@ -277,7 +277,7 @@ public final class UtilsPermsAuths {
 				} else {
 					++missing_authorizations;
 
-					if (ALSO_REQUEST == what_to_do) {
+					if (what_to_do == ALSO_REQUEST) {
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -289,7 +289,7 @@ public final class UtilsPermsAuths {
 			// Check if the app can bypass battery optimizations and request it if not
 			final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 			if (null != powerManager && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
-				if (ALSO_FORCE == what_to_do) {
+				if (what_to_do == ALSO_FORCE) {
 					final String command = "dumpsys deviceidle whitelist +" + package_name;
 					UtilsShell.executeShellCmd(true, command);
 
@@ -297,7 +297,7 @@ public final class UtilsPermsAuths {
 				} else {
 					++missing_authorizations;
 
-					if (ALSO_REQUEST == what_to_do) {
+					if (what_to_do == ALSO_REQUEST) {
 						final Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
 								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -308,7 +308,7 @@ public final class UtilsPermsAuths {
 
 			// Check if the app has the WRITE_SETTINGS permission and request it if not
 			if (!Settings.System.canWrite(context)) {
-				if (ALSO_FORCE == what_to_do) {
+				if (what_to_do == ALSO_FORCE) {
 					final String command = "appops set " + package_name + " " + AppOpsManager.OP_WRITE_SETTINGS +
 							" allow";
 					UtilsShell.executeShellCmd(true, command);
@@ -317,7 +317,7 @@ public final class UtilsPermsAuths {
 				} else {
 					++missing_authorizations;
 
-					if (ALSO_REQUEST == what_to_do) {
+					if (what_to_do == ALSO_REQUEST) {
 						final Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
 								Uri.parse("package:" + package_name));
 						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -328,14 +328,14 @@ public final class UtilsPermsAuths {
 		}
 
 		if (!UtilsApp.isDeviceAdmin()) {
-			if (ALSO_FORCE == what_to_do) {
+			if (what_to_do == ALSO_FORCE) {
 				forceDeviceAdmin();
 
 				missing_authorizations += UtilsApp.isDeviceAdmin() ? 0 : 1;
 			} else {
 				++missing_authorizations;
 
-				if (ALSO_REQUEST == what_to_do) {
+				if (what_to_do == ALSO_REQUEST) {
 					final Intent intent = new Intent();
 					intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -384,7 +384,7 @@ public final class UtilsPermsAuths {
 								file_end_tag;
 				final byte[] file_bytes = UtilsFilesDirs.readFileBytes(device_policies_file_path);
 				String file_data;
-				if (null == file_bytes) {
+				if (file_bytes == null) {
 					file_data = "";
 				} else {
 					file_data = UtilsDataConv.bytesToPrintable(file_bytes, false);
@@ -401,7 +401,7 @@ public final class UtilsPermsAuths {
 				}
 				final String file_new_data = file_data.replace(file_end_tag, string_to_add);
 				UtilsFilesDirs.writeSmallFile(device_policies_file_path, file_new_data.getBytes(Charset.defaultCharset()));
-				if (null == file_bytes) {
+				if (file_bytes == null) {
 					// If there was no file present, after creating a new one, set its permissions to what
 					// they're supposed to be (600, checked on Android 4.4.2).
 					UtilsFilesDirs.chmod(device_policies_file_path, 600, false);

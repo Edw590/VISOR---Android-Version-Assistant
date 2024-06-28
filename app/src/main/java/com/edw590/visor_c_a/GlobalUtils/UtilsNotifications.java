@@ -112,7 +112,7 @@ public final class UtilsNotifications {
 	@RequiresApi(Build.VERSION_CODES.O)
 	public static void createNotifChannel(@NonNull final String id, @Nullable final String name,
 										  @Nullable final String description, @NonNull final Integer importance) {
-		if (null == name || null == description) {
+		if (name == null || description == null) {
 			return;
 		}
 

@@ -276,7 +276,7 @@ public final class AudioRecorder implements IModuleInst {
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			if (null == intent || null == intent.getAction()) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 

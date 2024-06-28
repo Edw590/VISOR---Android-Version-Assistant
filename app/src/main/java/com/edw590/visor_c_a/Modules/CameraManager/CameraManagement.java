@@ -231,9 +231,9 @@ public final class CameraManagement implements IModuleInst {
 			return CAMERA_DISABLED_ADMIN;
 		}
 
-		if (USAGE_FLASHLIGHT_ON == usage || USAGE_FLASHLIGHT_OFF == usage) {
+		if (usage == USAGE_FLASHLIGHT_ON || usage == USAGE_FLASHLIGHT_OFF) {
 			if (UtilsCheckHardwareFeatures.isCameraFlashSupported()) {
-				final boolean turn_on_flashlight = FLASHLIGHT_SET_ON == usage;
+				final boolean turn_on_flashlight = usage == FLASHLIGHT_SET_ON;
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 					return flashlightNew(turn_on_flashlight);
 				} else {
@@ -241,10 +241,10 @@ public final class CameraManagement implements IModuleInst {
 					// deprecation warning - it's because of being running on that its complaining, but that's the
 					// official way).
 					if (turn_on_flashlight) {
-						if (null == camera_old) {
+						if (camera_old == null) {
 							// Request the back camera, as that's the one that has the flashlight on it.
 							camera_old = UtilsCameraManager.openCamera(true);
-							if (null == camera_old) {
+							if (camera_old == null) {
 								final String speak = "Error - Camera already in use.";
 								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 
@@ -267,9 +267,9 @@ public final class CameraManagement implements IModuleInst {
 			case USAGE_TAKE_REAR_PHOTO:
 			case USAGE_TAKE_FRONTAL_PHOTO: {
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-					if (null == takePictureOld && null == camera_old) {
+					if (takePictureOld == null && camera_old == null) {
 						first_pic_of_two = true;
-						takePictureOld = new TakePictureOld(USAGE_TAKE_REAR_PHOTO == usage, TakePictureOld.FLASH_MODE_OFF_ON, 100);
+						takePictureOld = new TakePictureOld(usage == USAGE_TAKE_REAR_PHOTO, TakePictureOld.FLASH_MODE_OFF_ON, 100);
 
 						System.out.println("################################");
 					} else {
@@ -334,8 +334,8 @@ public final class CameraManagement implements IModuleInst {
 	 * @return one of the constants if it's to toggle the state, all can be returned
 	 */
 	private int flashlightOld(final int function) {
-		if (null == camera_old) {
-			if (FUNCTION_CHECK_STATE == function) {
+		if (camera_old == null) {
+			if (function == FUNCTION_CHECK_STATE) {
 				// If it's to check if it was turned on, if it's null, then it's not turned on.
 				return FLASHLIGHT_STATE_OFF;
 			} else {
@@ -358,10 +358,10 @@ public final class CameraManagement implements IModuleInst {
 			}
 		}
 
-		if (FUNCTION_CHECK_STATE == function) {
+		if (function == FUNCTION_CHECK_STATE) {
 			return parameters.getFlashMode().equals(mode_to_use) ? FLASHLIGHT_STATE_ON : FLASHLIGHT_STATE_OFF;
 		} else {
-			if (FUNCTION_SET_ON == function) {
+			if (function == FUNCTION_SET_ON) {
 				if (parameters.getFlashMode().equals(mode_to_use)) {
 					return FLASHLIGHT_ALREADY_ON;
 				}
@@ -450,7 +450,7 @@ public final class CameraManagement implements IModuleInst {
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			if (null == intent || null == intent.getAction()) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 

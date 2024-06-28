@@ -92,7 +92,7 @@ public final class StaticPreferences {
 	@Nullable
 	static synchronized String readPrefsFile() {
 		final byte[] file_bytes = UtilsFilesDirs.readFileBytes(new GPath(false, PREFS_FILE_PATH));
-		if (null == file_bytes) {
+		if (file_bytes == null) {
 			return null;
 		}
 

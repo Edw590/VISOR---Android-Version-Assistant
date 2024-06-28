@@ -86,7 +86,7 @@ public final class CmdsList {
 		// ONLY update this AFTER you update ALL the return IDs to match the maximum number of sub-commands.
 		// This is checked every time the app starts to see if it matches the ACD constant (sort of like a static
 		// assertion) - see the ApplicationClass.
-		public static final long LOCAL_MAX_SUB_CMDS = 100_000L; // DO NOT CHANGE WITHOUT READING THE ABOVE
+		public static final long LOCAL_MAX_SUB_CMDS = 100_000; // DO NOT CHANGE WITHOUT READING THE ABOVE
 
 		public static final String RET_ON = ".00001";
 		public static final String RET_OFF = ".00002";

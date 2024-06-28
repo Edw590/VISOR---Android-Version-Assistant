@@ -136,7 +136,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 					// 250 MB seems a good value. Below than that, take 55 MB out might be too much. Also go for the
 					// original model (the smallest of the 3) if the device reports it's running on low memory.
 					//.setAcousticModel(new File(assetsDir, UtilsGeneral.isDeviceLowOnMemory() ? "en-us-ptm" :
-					//		UtilsGeneral.getAvailableRAM() > 250L ? "en-us-5.2" : "en-us-ptm-5.2"))
+					//		UtilsGeneral.getAvailableRAM() > 250 ? "en-us-5.2" : "en-us-ptm-5.2"))
 					// EDIT: changed to the maximum quality one. Easier. No need to reload from time to time.
 					.setAcousticModel(new File(assetsDir, "en-us-5.2"))
 					.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
@@ -186,7 +186,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	}
 
 	static synchronized int getAudioSource() {
-		if (null == recognizer) {
+		if (recognizer == null) {
 			return MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
 		}
 
@@ -201,7 +201,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	 * ordered to stop before calling this function) and you just need to call this function again
 	 */
 	static synchronized boolean startListening() {
-		if (null == recognizer) {
+		if (recognizer == null) {
 			return false;
 		} else if (is_listening) {
 			return true;
@@ -249,7 +249,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 		 */
 		@Override
 		public void onPartialResult(@NonNull final Hypothesis hypothesis) {
-			// null == recognizer to be sure it doesn't use other results after supposedly shutting down. This is a
+			// recognizer == null to be sure it doesn't use other results after supposedly shutting down. This is a
 			// replacement to terminating the PID, which might make the controller restart this recognition.
 			// Also !is_listening to be sure it doesn't try to analyze more results after stopListening() is called.
 			if (!is_listening) {

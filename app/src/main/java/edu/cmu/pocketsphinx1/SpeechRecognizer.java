@@ -158,9 +158,9 @@ public class SpeechRecognizer {
 	 * started (try again)
 	 */
 	public boolean startListening(String searchName) {
-		if (1 == thread_state) {
+		if (thread_state == 1) {
 			return true;
-		} else if (2 == thread_state) {
+		} else if (thread_state == 2) {
 			return false;
 		}
 
@@ -181,9 +181,9 @@ public class SpeechRecognizer {
 	 * started (try again)
 	 */
 	public boolean startListening(String searchName, int timeout) {
-		if (1 == thread_state) {
+		if (thread_state == 1) {
 			return true;
-		} else if (2 == thread_state) {
+		} else if (thread_state == 2) {
 			return false;
 		}
 

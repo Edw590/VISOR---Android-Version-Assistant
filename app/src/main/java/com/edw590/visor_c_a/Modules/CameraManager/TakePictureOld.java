@@ -168,7 +168,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 	 */
 	void takeImage() {
 		final Camera camera = UtilsCameraManager.openCamera(rear_picture_requested);
-		if (null == camera) {
+		if (camera == null) {
 			final Intent broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_ERR_CANT_OPEN_CAM);
 			UtilsApp.sendInternalBroadcast(broadcast_intent);
 

@@ -63,7 +63,7 @@ public final class UtilsShell {
 	 * @return true if it's 0, false otherwise
 	 */
 	public static boolean noErr(final int error_code) {
-		return UtilsShell.ErrCodes.NO_ERR == error_code;
+		return error_code == ErrCodes.NO_ERR;
 	}
 
 	/**

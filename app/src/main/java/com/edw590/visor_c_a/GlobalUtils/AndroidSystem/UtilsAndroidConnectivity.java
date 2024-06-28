@@ -87,7 +87,7 @@ public final class UtilsAndroidConnectivity {
 	public static int setWifiEnabled(final boolean enabled) {
 		final WifiManager wifiManager = UtilsNetwork.getWifiManager();
 
-		if (null == wifiManager) {
+		if (wifiManager == null) {
 			return UtilsAndroid.NOT_AVAILABLE;
 		}
 
@@ -269,13 +269,13 @@ public final class UtilsAndroidConnectivity {
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			if (null == telephonyManager) {
+			if (telephonyManager == null) {
 				return false;
 			}
 
 			return telephonyManager.isDataEnabled();
 		} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (null == connectivityManager) {
+			if (connectivityManager == null) {
 				return false;
 			}
 
@@ -285,7 +285,7 @@ public final class UtilsAndroidConnectivity {
 			// The return won't be null either
 			return (boolean) UtilsReflection.invokeMethod(method, connectivityManager).ret_var;
 		} else { // L <= SDK_INT < O
-			if (null == telephonyManager) {
+			if (telephonyManager == null) {
 				return false;
 			}
 
@@ -322,7 +322,7 @@ public final class UtilsAndroidConnectivity {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				// Ignore the API warning. The function exists since Lollipop on @hide.
 				final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.getSystemService(Context.TELEPHONY_SERVICE);
-				if (null == telephonyManager) {
+				if (telephonyManager == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -336,7 +336,7 @@ public final class UtilsAndroidConnectivity {
 				assert null != method; // Will never happen
 				final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 						getSystemService(Context.CONNECTIVITY_SERVICE);
-				if (null == connectivityManager) {
+				if (connectivityManager == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 

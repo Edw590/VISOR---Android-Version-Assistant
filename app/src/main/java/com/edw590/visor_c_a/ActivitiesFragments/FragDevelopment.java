@@ -129,7 +129,7 @@ public final class FragDevelopment extends Fragment {
 				//UtilsCmdsExecutorBC.processTask("tell me the weather and the news", false, false, false);
 
 				//System.out.println("HHHHHHHHHHHHHHHHHH");
-				//System.out.println(UtilsStaticStorage.getValue(ValuesStorage.last_phone_call_time, 0L));
+				//System.out.println(UtilsStaticStorage.getValue(ValuesStorage.last_phone_call_time, 0));
 				//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
 
 				/*System.out.println("HHHHHHHHHHHHHHHHHH");

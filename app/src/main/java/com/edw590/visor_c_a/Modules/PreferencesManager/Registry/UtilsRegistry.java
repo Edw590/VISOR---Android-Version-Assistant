@@ -68,7 +68,7 @@ public final class UtilsRegistry {
 	 */
 	public static void setValue(final int list, @NonNull final String key, @NonNull final Object new_value) {
 		final Value[] list_to_use;
-		if (LIST_VALUES == list) {
+		if (list == LIST_VALUES) {
 			list_to_use = ValuesRegistry.VALUES_LIST;
 		} else {
 			list_to_use = SettingsRegistry.SETTINGS_LIST;

@@ -250,7 +250,7 @@ public final class UtilsFilesDirs {
 			return UtilsShell.executeShellCmd(true, command).exit_code;
 		} else {
 			final byte[] src_bytes = readFileBytes(src_path);
-			if (null == src_bytes) {
+			if (src_bytes == null) {
 				return -1;
 			}
 

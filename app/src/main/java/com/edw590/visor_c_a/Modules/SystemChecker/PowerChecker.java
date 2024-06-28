@@ -192,7 +192,7 @@ public class PowerChecker {
 		// Still, use the power_connected status, but only if it's different than null, just to be sure no weird devices
 		// increase the percentage by mistake without being charging. This would warn in that case - now it won't.
 		final Boolean power_connected = UtilsRegistry.getValue(ValuesRegistry.Keys.POWER_CONNECTED).getData();
-		if (null == power_connected || power_connected) {
+		if (power_connected == null || power_connected) {
 			// Don't do anything if by chance, another broadcast is sent without the battery level having changed.
 			if (bat_info.battery_percentage > last_detected_percent) {
 				warnCharging(bat_info.battery_percentage);

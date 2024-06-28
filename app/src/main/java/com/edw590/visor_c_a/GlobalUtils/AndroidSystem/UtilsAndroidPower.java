@@ -83,7 +83,7 @@ public final class UtilsAndroidPower {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 				final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
-				if (null == powerManager) {
+				if (powerManager == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -95,7 +95,7 @@ public final class UtilsAndroidPower {
 				}
 			} else {
 				final IBinder iBinder = UtilsContext.getService(Context.POWER_SERVICE);
-				if (null == iBinder) {
+				if (iBinder == null) {
 					return UtilsAndroid.NOT_AVAILABLE;
 				}
 
@@ -197,7 +197,7 @@ public final class UtilsAndroidPower {
 
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.REBOOT)) {
 			final IBinder iBinder = UtilsContext.getService(Context.POWER_SERVICE);
-			if (null == iBinder) {
+			if (iBinder == null) {
 				return UtilsAndroid.NOT_AVAILABLE;
 			}
 
@@ -277,7 +277,7 @@ public final class UtilsAndroidPower {
 	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 	public static boolean getBatterySaverEnabled() {
 		final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
-		if (null == powerManager) {
+		if (powerManager == null) {
 			return false;
 		}
 
@@ -291,7 +291,7 @@ public final class UtilsAndroidPower {
 	 */
 	public static boolean turnScreenOn() {
 		final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
-		if (null == powerManager) {
+		if (powerManager == null) {
 			return false;
 		}
 

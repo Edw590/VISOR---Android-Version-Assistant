@@ -52,12 +52,12 @@ public class WifiChecker {
 	static final long SCAN_WIFI_EACH = (long) (2.5 * 60000.0); // 2.5 minutes
 	static final long SCAN_WIFI_EACH_PS = SCAN_WIFI_EACH << 2; // 2.5 * 4 = 10 minutes
 	long waiting_time_wifi = SCAN_WIFI_EACH;
-	long last_check_when_wifi = 0L;
+	long last_check_when_wifi = 0;
 
 	public static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
 
 	void setWifiEnabled(final boolean enable) {
-		if (UtilsShell.ErrCodes.NO_ERR == UtilsAndroidConnectivity.setWifiEnabled(enable)) {
+		if (UtilsAndroidConnectivity.setWifiEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor_wifi = enable;
 		}
 	}
@@ -96,12 +96,12 @@ public class WifiChecker {
 
 
 		int wifi_state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-		if (WifiManager.WIFI_STATE_ENABLED == wifi_state) {
+		if (wifi_state == WifiManager.WIFI_STATE_ENABLED) {
 			if (!wifi_manager.startScan() && enabled_by_visor_wifi) {
 				setWifiEnabled(false);
 			}
-		} else if (WifiManager.WIFI_STATE_DISABLING == wifi_state ||
-				WifiManager.WIFI_STATE_DISABLED == wifi_state) {
+		} else if (wifi_state == WifiManager.WIFI_STATE_DISABLING ||
+				wifi_state == WifiManager.WIFI_STATE_DISABLED) {
 			UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, "-1");
 			enabled_by_visor_wifi = false;
 		}
@@ -162,7 +162,7 @@ public class WifiChecker {
 
 		NetworkInfo.State state = ((NetworkInfo) intent.
 				getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)).getState();
-		if (NetworkInfo.State.CONNECTING == state || NetworkInfo.State.CONNECTED == state) {
+		if (state == NetworkInfo.State.CONNECTING || state == NetworkInfo.State.CONNECTED) {
 			if (enabled_by_visor_wifi) {
 				if (!wifi_manager.disconnect()) {
 					setWifiEnabled(false);

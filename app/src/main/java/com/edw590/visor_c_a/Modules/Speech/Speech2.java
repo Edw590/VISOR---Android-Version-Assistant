@@ -123,12 +123,12 @@ public final class Speech2 implements IModuleInst {
 
 	private boolean speeches_on_lists = false;
 
-	// For slow devices, maybe 250L is good?
+	// For slow devices, maybe 250 is good?
 	// EDIT: I think if we reset and set the volume too quickly, Android will mess up somewhere and one of the changes
 	// won't be detected (put a LOW and a CRITICAL one in row and that might happen). The detected change may happen
 	// about 500ms after the volume was set. More specifically, in a test, it gave 530ms. For slower devices, I've put
 	// 750ms at most. I think this time it should be enough...
-	private static final long VOLUME_CHANGE_INTERVAL = 750L;
+	private static final long VOLUME_CHANGE_INTERVAL = 750;
 
 	private static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndObj.DEFAULT_VALUE; // Both must be different
 	private int stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
@@ -257,6 +257,8 @@ public final class Speech2 implements IModuleInst {
 					System.out.println("1111111111111111111111111111111111");
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
+					tts.setSpeechRate(0.75f);
+
 					if (!isTtsAvailable()) {
 						if (from_constructor || tts_working) {
 							// This won't speak - will show a notification instead, so no problem in calling
@@ -379,7 +381,7 @@ public final class Speech2 implements IModuleInst {
 		speech_notif_speeches.add(txt_to_speak);
 
 		final int notif_speeches_size = speech_notif_speeches.size();
-		if (1 == notif_speeches_size) {
+		if (notif_speeches_size == 1) {
 			speeches_notif_builder.setStyle(null);
 			speeches_notif_builder.setContentText(speech_notif_speeches.get(0));
 		} else {
@@ -403,11 +405,11 @@ public final class Speech2 implements IModuleInst {
 	boolean isTtsAvailable() {
 		 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final Set<Voice> voices = tts.getVoices();
-			if (null == voices || voices.isEmpty() || null == tts.getVoice() || null == tts.getVoice().getLocale()) {
+			if (voices == null || voices.isEmpty() || tts.getVoice() == null || tts.getVoice().getLocale() == null) {
 				return false;
 			}
 		} else {
-			if (null == tts.getLanguage()) {
+			if (tts.getLanguage() == null) {
 				return false;
 			}
 		}
@@ -534,7 +536,7 @@ public final class Speech2 implements IModuleInst {
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
-		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported() && 0 == (mode & MODE1_NO_NOTIF)) {
+		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported() && (mode & MODE1_NO_NOTIF) == 0) {
 			// If there's no audio output support, just put a notification and that's it.
 			addSpeechToNotif(txt_to_speak);
 
@@ -590,7 +592,7 @@ public final class Speech2 implements IModuleInst {
 			if (tts_error_code != TextToSpeech.SUCCESS) {
 				initializeTts(false); // Restart the TTS instance if it's not working.
 
-				if (0 == (current_speech_obj.mode & MODE1_NO_NOTIF)) {
+				if ((current_speech_obj.mode & MODE1_NO_NOTIF) == 0) {
 					// In case some error occurred (for example, the engine was uninstalled), notify the speech, "call
 					// skipCurrentSpeech()", and reinitialize the TTS object.
 					addSpeechToNotif(current_speech_obj.txt_to_speak);
@@ -670,7 +672,7 @@ public final class Speech2 implements IModuleInst {
 	private void checkReloadTts() {
 		boolean reload_tts = false;
 		final String current_engine = tts.getCurrentEngine();
-		if (null == current_engine) {
+		if (current_engine == null) {
 			reload_tts = true;
 		} else {
 			reload_tts = !current_engine.equals(tts.getDefaultEngine());
@@ -678,12 +680,12 @@ public final class Speech2 implements IModuleInst {
 		if (!reload_tts) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				final Voice voice = tts.getVoice();
-				if (null == voice || !voice.equals(tts.getDefaultVoice())) {
+				if (voice == null || !voice.equals(tts.getDefaultVoice())) {
 					reload_tts = true;
 				}
 			} else {
 				final Locale language = tts.getLanguage();
-				if (null == language || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
+				if (language == null || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
 								!language.equals(tts.getDefaultLanguage()))) {
 					reload_tts = true;
 				}
@@ -731,7 +733,7 @@ public final class Speech2 implements IModuleInst {
 	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
 	private void setToSpeakChanges() {
-		if (PRIORITY_CRITICAL == UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id)) {
+		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) == PRIORITY_CRITICAL) {
 			audioFocus(true);
 
 			// Set Do Not Disturb to ALARMS (emergency speech)
@@ -769,7 +771,7 @@ public final class Speech2 implements IModuleInst {
 				}
 			}
 
-			if (AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode()) {
+			if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
 				audioFocus(true);
 
 				// Set the volume
@@ -951,13 +953,13 @@ public final class Speech2 implements IModuleInst {
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode()) {
+		if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
 			if (UtilsRegistry.getValue(ValuesRegistry.Keys.IS_USER_SLEEPING).getData(false)) {
 				skip_speaking = true;
 			}
 		} else {
 			skip_speaking = (PRIORITY_CRITICAL != UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) &&
-					0 == (current_speech_obj.mode & MODE2_BYPASS_NO_SND));
+					(current_speech_obj.mode & MODE2_BYPASS_NO_SND) == 0);
 		}
 
 		if (skip_speaking) {
@@ -968,7 +970,7 @@ public final class Speech2 implements IModuleInst {
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
 					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, current_speech_obj.utterance_id));
 
-			if (0 == (current_speech_obj.mode & MODE1_NO_NOTIF)) {
+			if ((current_speech_obj.mode & MODE1_NO_NOTIF) == 0) {
 				// Notify the speech before skipping it (don't skip the notification).
 				addSpeechToNotif(current_speech_obj.txt_to_speak);
 			}
@@ -1292,7 +1294,7 @@ public final class Speech2 implements IModuleInst {
 					break;
 				}
 				case (CONSTS_BC_Speech.ACTION_SAY_AGAIN): {
-					if (last_speech.registered_when > System.currentTimeMillis() + 120L*1000L) {
+					if (last_speech.registered_when > System.currentTimeMillis() + 120*1000) {
 						// 1.5 minutes at most until he forgets what he said (seems a good number)
 						speak("I haven't said anything.", PRIORITY_USER_ACTION, MODE2_BYPASS_NO_SND);
 					} else {

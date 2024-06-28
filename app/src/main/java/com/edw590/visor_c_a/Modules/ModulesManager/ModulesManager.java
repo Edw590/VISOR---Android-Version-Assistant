@@ -35,7 +35,7 @@ import java.util.List;
  */
 public final class ModulesManager implements IModuleInst {
 
-	public static final long CHECK_INTERVAL = 10_000L;
+	public static final long CHECK_INTERVAL = 10_000;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff

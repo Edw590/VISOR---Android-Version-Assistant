@@ -55,12 +55,12 @@ public class BluetoothChecker {
 	static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes
 	static final long DISCOVER_BT_EACH_PS = DISCOVER_BT_EACH << 2; // 5 * 4 = 20 minutes
 	long waiting_time_bt = DISCOVER_BT_EACH;
-	long last_check_when_bt = 0L;
+	long last_check_when_bt = 0;
 
 	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
 	void setBluetoothEnabled(final boolean enable) {
-		if (UtilsShell.ErrCodes.NO_ERR == UtilsAndroidConnectivity.setBluetoothEnabled(enable)) {
+		if (UtilsAndroidConnectivity.setBluetoothEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor_bt = enable;
 		}
 	}
@@ -146,7 +146,7 @@ public class BluetoothChecker {
 				(int) rssi,
 				bluetoothDevice.getName(),
 				bluetoothDevice.getAlias(),
-				BluetoothDevice.BOND_BONDED == bluetoothDevice.getBondState())
+				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED)
 		);
 	}
 
@@ -155,7 +155,7 @@ public class BluetoothChecker {
 
 		int bluetooth_state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
 
-		if (BluetoothAdapter.STATE_ON == bluetooth_state) {
+		if (bluetooth_state == BluetoothAdapter.STATE_ON) {
 			// I spent an entire day going through BluetoothDevice, BluetoothAdapter, BluetoothHeadset,
 			// BluetoothA2dp, BluetoothManager, IBluetooth, IBluetoothHeadset, IBluetoothA2dp, and
 			// IBluetoothManager. Found only a function that can stop a device from auto-connecting
@@ -182,8 +182,8 @@ public class BluetoothChecker {
 			if (bluetooth_adapter.startDiscovery()) {
 				last_check_when_bt = System.currentTimeMillis();
 			}
-		} else if (BluetoothAdapter.STATE_TURNING_OFF == bluetooth_state ||
-				BluetoothAdapter.STATE_OFF == bluetooth_state) {
+		} else if (bluetooth_state == BluetoothAdapter.STATE_TURNING_OFF ||
+				bluetooth_state == BluetoothAdapter.STATE_OFF) {
 			enabled_by_visor_bt = false;
 		}
 	}
@@ -193,7 +193,7 @@ public class BluetoothChecker {
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
 		BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-		if (BluetoothAdapter.STATE_CONNECTING == state || BluetoothAdapter.STATE_CONNECTED == state) {
+		if (state == BluetoothAdapter.STATE_CONNECTING || state == BluetoothAdapter.STATE_CONNECTED) {
 			if (enabled_by_visor_bt) {
 				// If a device is at minimum attempting to connect, turn the adapter off instantly.
 				// Reason why I don't "just" disconnect the device or stop it from even trying to

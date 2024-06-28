@@ -91,7 +91,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 	//String last_processed_speech = "";
 	//int partial_results_last_index = 0;
-	//long partial_results_last_time = 0L;
+	//long partial_results_last_time = 0;
 	//String process_speech_string = "";
 	//String total_processed_speech = "";
 
@@ -100,7 +100,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	private static final int ON_BEGINNING_OF_SPEECH_STR = 2;
 	private static final int ON_END_OF_SPEECH_STR = 3;
 	int last_method_called = -1;
-	long last_method_called_when = 0L;
+	long last_method_called_when = 0;
 	static final Map<Integer, Long> last_methods_called_map = new LinkedHashMap<Integer, Long>() {
 		private static final long serialVersionUID = 2268708824566655410L;
 		@NonNull
@@ -143,9 +143,9 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		speech_recognizer_intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L);
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000);
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
 		//speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 	}
@@ -193,7 +193,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		if (intent != null) {
 			if (intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
 				// Must have been called 1 second ago at most - else it was the system restarting it or something.
-				stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0L) + 1000L < System.currentTimeMillis();
+				stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0) + 1000 < System.currentTimeMillis();
 			}
 			partial_results = intent.getBooleanExtra(CONSTS_SpeechRecog.EXTRA_PARTIAL_RESULTS, false);
 		}
@@ -242,12 +242,12 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	boolean startListening() {
 		System.out.println("TTTTTTTTTTTTTT");
 		last_method_called = -1;
-		last_method_called_when = 0L;
+		last_method_called_when = 0;
 
 		// This must be done before starting the thread.
 		last_method_called = ON_START_COMMAND_STR;
 
-		if (null == recognizer) {
+		if (recognizer == null) {
 			recognizer = SpeechRecognizer.createSpeechRecognizer(UtilsContext.getContext());
 			recognizer.setRecognitionListener(new SpeechRecognitionListener());
 		}
@@ -303,7 +303,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		@Override
 		public void run() {
 			last_method_called = -1;
-			last_method_called_when = 0L;
+			last_method_called_when = 0;
 			if (null != recognizer) {
 				recognizer.cancel();
 				recognizer.destroy();
@@ -354,7 +354,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					}
 				}
 			}
-			final long time_vibrate = 300L;
+			final long time_vibrate = 300;
 			boolean vibrated = UtilsGeneral.vibrateDeviceOnce(time_vibrate);
 			if (battery_saver_was_enabled &&
 					Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // Linter is wtf and needs this here
@@ -538,7 +538,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		@Override
 		public void run() {
 			while (last_method_called != -1) {
-				if (0L == last_method_called_when) {
+				if (last_method_called_when == 0) {
 					continue;
 				}
 
@@ -565,7 +565,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			if (null == intent || null == intent.getAction()) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 

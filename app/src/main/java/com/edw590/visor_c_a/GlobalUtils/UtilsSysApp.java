@@ -112,7 +112,7 @@ public final class UtilsSysApp {
 	public static boolean mainFunction(@Nullable final String package_name, final int types_to_check) {
 		final Context context = UtilsContext.getContext();
 		final String package_name_to_use;
-		if (null == package_name) {
+		if (package_name == null) {
 			package_name_to_use = context.getPackageName();
 		} else {
 			package_name_to_use = package_name;

@@ -118,13 +118,13 @@ public final class UtilsNetwork {
 	public static int getCurrentNetworkType() {
 		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 				getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (null == connectivityManager) {
+		if (connectivityManager == null) {
 			return ConnectivityManager.TYPE_NONE;
 		}
 
 		final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-		return null == networkInfo ? ConnectivityManager.TYPE_NONE : networkInfo.getType();
+		return networkInfo == null ? ConnectivityManager.TYPE_NONE : networkInfo.getType();
 	}
 
 	/**

@@ -50,9 +50,9 @@ public final class PreferencesManager implements IModuleInst {
 			ModulesList.ELEMENT_NAME));
 	private final Handler main_handler;
 
-	private static final long WAIT_TIME = 30_000L;
+	private static final long WAIT_TIME = 30_000;
 
-	long last_save_time = 0L;
+	long last_save_time = 0;
 	boolean save_failed = false;
 
 	///////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ public final class PreferencesManager implements IModuleInst {
 					}
 				}
 
-				if (null == StaticPreferences.getPreferences()) {
+				if (StaticPreferences.getPreferences() == null) {
 					final String preferences = StaticPreferences.readPrefsFile();
 					if (null != preferences) {
 						StaticPreferences.updatePreferences(preferences);

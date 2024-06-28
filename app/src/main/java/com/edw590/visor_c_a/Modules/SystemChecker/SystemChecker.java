@@ -71,7 +71,7 @@ public class SystemChecker implements IModuleInst {
 	// The minimum check time of all check times (for the thread wait time)
 	// EDIT: 30 seconds, so that if the Power Saver is disabled, after 30 seconds it will be noticed and the devices
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
-	public static final long CHECK_TIME_MIN = 30_000L;
+	public static final long CHECK_TIME_MIN = 30_000;
 
 	final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 

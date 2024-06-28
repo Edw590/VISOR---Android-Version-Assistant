@@ -80,7 +80,7 @@ public final class UtilsGeneral {
 	 */
 	public static boolean areExtSpeakersOn() {
 		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
-		if (null == audioManager) {
+		if (audioManager == null) {
 			return false;
 		}
 
@@ -112,7 +112,7 @@ public final class UtilsGeneral {
 	public static boolean isDeviceRunningOnLowMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
 		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
-		if (null == activityManager) {
+		if (activityManager == null) {
 			return false;
 		}
 
@@ -130,7 +130,7 @@ public final class UtilsGeneral {
 	 */
 	public static boolean vibrateDeviceOnce(final long duration) {
 		final Vibrator vibrator = (Vibrator) UtilsContext.getSystemService(Context.VIBRATOR_SERVICE);
-		if (null == vibrator) {
+		if (vibrator == null) {
 			return false;
 		}
 
@@ -185,7 +185,7 @@ public final class UtilsGeneral {
 	public static long getAvailableRAM() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
 		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
-		if (null == activityManager) {
+		if (activityManager == null) {
 			return Long.MAX_VALUE;
 		}
 
@@ -202,7 +202,7 @@ public final class UtilsGeneral {
 	public static boolean isDeviceLowOnMemory() {
 		final ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
 		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
-		if (null == activityManager) {
+		if (activityManager == null) {
 			return false;
 		}
 
@@ -218,7 +218,7 @@ public final class UtilsGeneral {
 	 */
 	public static boolean isThreadWorking(@NonNull final Thread thread) {
 		final Thread.State thread_state = thread.getState();
-		return !((Thread.State.NEW == thread_state) || (Thread.State.TERMINATED == thread_state));
+		return !((thread_state == Thread.State.NEW) || (thread_state == Thread.State.TERMINATED));
 	}
 
 	/**
@@ -246,7 +246,7 @@ public final class UtilsGeneral {
 	public static String getDefaultAppForIntent(@NonNull final Intent intent) {
 		final PackageManager packageManager = UtilsContext.getContext().getPackageManager();
 		final ResolveInfo resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-		if (null == resolveInfo) {
+		if (resolveInfo == null) {
 			return "";
 		}
 

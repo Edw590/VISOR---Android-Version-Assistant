@@ -111,7 +111,7 @@ public final class PrefsFileFormat {
 	}
 
 	static synchronized void updatePreferences() {
-		if (null == preferences) {
+		if (preferences == null) {
 			return;
 		}
 
@@ -123,7 +123,7 @@ public final class PrefsFileFormat {
 		final int lists_length = lists.length;
 
 		for (int i = 0; i < lists_length; ++i) {
-			if (null == lists[i]) {
+			if (lists[i] == null) {
 				continue;
 			}
 

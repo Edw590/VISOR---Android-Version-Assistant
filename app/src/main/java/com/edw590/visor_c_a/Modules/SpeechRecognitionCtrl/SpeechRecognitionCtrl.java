@@ -59,10 +59,10 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 
 	@Nullable Class<?> current_recognizer = NO_RECOGNIZER;
 
-	long cmds_recog_requested_when = 0L;
+	long cmds_recog_requested_when = 0;
 	boolean cmds_recog_is_listening = false;
 
-	private static final long DEFAULT_WAIT_TIME = 5_000L;
+	private static final long DEFAULT_WAIT_TIME = 5_000;
 	long wait_time = DEFAULT_WAIT_TIME;
 
 	private final int element_index = ModulesList.getElementIndex(this.getClass());
@@ -149,24 +149,24 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				//}
 
 				if (!stop_speech_recognition) {
-					if (COMMANDS_RECOGNIZER == current_recognizer) {
+					if (current_recognizer == COMMANDS_RECOGNIZER) {
 						if (!ModulesList.isElementFullyWorking(cmds_recog_module_index)) {
-							cmds_recog_requested_when = 0L;
+							cmds_recog_requested_when = 0;
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
-					} else if (POCKETSPHINX_RECOGNIZER == current_recognizer) {
+					} else if (current_recognizer == POCKETSPHINX_RECOGNIZER) {
 						if (!PocketSphinxRecognition.isListening()) {
-							cmds_recog_requested_when = 0L;
+							cmds_recog_requested_when = 0;
 							current_recognizer = NO_RECOGNIZER;
 							wait_time = DEFAULT_WAIT_TIME;
 						}
 					}
 
-					if (NO_RECOGNIZER == current_recognizer) {
-						if (0L == cmds_recog_requested_when) {
+					if (current_recognizer == NO_RECOGNIZER) {
+						if (cmds_recog_requested_when == 0) {
 							if (!UtilsRegistry.getValue(ValuesRegistry.Keys.POCKETSPHINX_REQUEST_STOP).getData(false) ||
-									MediaRecorder.AudioSource.HOTWORD == PocketSphinxRecognition.getAudioSource()) {
+									PocketSphinxRecognition.getAudioSource() == MediaRecorder.AudioSource.HOTWORD) {
 								// todo Falta no executor esta linha acima, ligar o PocketSphinx se for HOTWORD e tiver sido pedido para parar.
 								// todo 		Além disso "visor come back" para o reiniciar (só disponível para HOTWORD) e falta
 								// todo 		metê-lo a ouvir "visor" duas vezes em 7 segundos e metê-lo a dizer que foi pedido para parar
@@ -185,7 +185,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 									wait_time = DEFAULT_WAIT_TIME;
 								}
 							}
-						} else if (System.currentTimeMillis() > cmds_recog_requested_when + 2000L) {
+						} else if (System.currentTimeMillis() > cmds_recog_requested_when + 2000) {
 							// If the cmds recognizer was requested but could not be started for some reason (probably
 							// some error starting the service, who knows), keep trying to start it.
 							UtilsSpeechRecognizers.stopPocketSphinxRecognition();
@@ -206,7 +206,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
-			if (null == intent || null == intent.getAction()) {
+			if (intent == null || intent.getAction() == null) {
 				return;
 			}
 
@@ -220,12 +220,12 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				case (CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING): {
 					cmds_recog_is_listening = true;
 					current_recognizer = COMMANDS_RECOGNIZER;
-					wait_time = 500L;
+					wait_time = 500;
 
 					break;
 				}
 				case (CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED): {
-					cmds_recog_requested_when = 0L;
+					cmds_recog_requested_when = 0;
 					cmds_recog_is_listening = false;
 					current_recognizer = NO_RECOGNIZER;
 					wait_time = DEFAULT_WAIT_TIME;
@@ -253,14 +253,14 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 						UtilsSpeechRecognizers.startPocketSphinxRecognition();
 					}
 
-					cmds_recog_requested_when = 0L;
+					cmds_recog_requested_when = 0;
 					stop_speech_recognition = false;
 					wait_time = DEFAULT_WAIT_TIME;
 
 					break;
 				}
 				case (CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION): {
-					cmds_recog_requested_when = 0L;
+					cmds_recog_requested_when = 0;
 					stop_speech_recognition = true;
 					wait_time = DEFAULT_WAIT_TIME;
 					cmds_recog_is_listening = false;
@@ -274,7 +274,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				}
 				case (CONSTS_BC_SpeechRecog.ACTION_TERMINATE_RECOGNIZERS): {
 					//stop_speech_recognition = false; - this doesn't change with this call
-					cmds_recog_requested_when = 0L;
+					cmds_recog_requested_when = 0;
 					wait_time = DEFAULT_WAIT_TIME;
 					cmds_recog_is_listening = false;
 

@@ -60,7 +60,7 @@ public final class UtilsAudio {
 			return false;
 		}
 
-		final boolean initialized = AudioRecord.STATE_INITIALIZED == audioRecord.getState();
+		final boolean initialized = audioRecord.getState() == AudioRecord.STATE_INITIALIZED;
 
 		boolean success_recording = false;
 		if (initialized) {
@@ -90,7 +90,7 @@ public final class UtilsAudio {
 	 * @param gain the gain to apply to the data
 	 */
 	public static void adjustGainBuffer(@NonNull final short[] audio_bytes, final float gain) {
-		if (0 == Float.compare(1.0f, gain)) {
+		if (Float.compare(1.0f, gain) == 0) {
 			return;
 		}
 

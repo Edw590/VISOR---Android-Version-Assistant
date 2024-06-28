@@ -73,7 +73,7 @@ public final class UtilsServices {
 		}
 
 		final Context context = UtilsContext.getContext();
-		final Intent intent_to_use = null == intent ? new Intent(context, service_class) : intent;
+		final Intent intent_to_use = intent == null ? new Intent(context, service_class) : intent;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && foreground) {
 			context.startForegroundService(intent_to_use);
@@ -101,7 +101,7 @@ public final class UtilsServices {
 		// it using too much CPU time. Must be as fast as possible.
 
 		final ActivityManager activityManager = (ActivityManager) UtilsContext.getSystemService(Context.ACTIVITY_SERVICE);
-		if (null == activityManager) {
+		if (activityManager == null) {
 			return false;
 		}
 

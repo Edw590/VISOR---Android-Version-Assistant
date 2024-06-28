@@ -65,11 +65,11 @@ public final class UtilsSpeech2 {
 	 */
 	public static boolean mightSpeak() {
 		final AudioManager audioManager = (AudioManager) UtilsContext.getSystemService(Context.AUDIO_SERVICE);
-		if (null == audioManager) {
+		if (audioManager == null) {
 			return false;
 		}
 
-		return AudioManager.RINGER_MODE_NORMAL == audioManager.getRingerMode();
+		return audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL;
 	}
 
 	/**

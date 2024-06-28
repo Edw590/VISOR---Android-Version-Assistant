@@ -129,7 +129,7 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 					// method for Lollipop and older doesn't seem to be working when I call it on Oreo 8.1 for some reason.
 					final KeyguardManager keyguardManager = (KeyguardManager) UtilsContext.
 							getSystemService(Context.KEYGUARD_SERVICE);
-					if (null == keyguardManager) {
+					if (keyguardManager == null) {
 						device_is_secured = false;
 					} else {
 						device_is_secured = keyguardManager.isDeviceSecure();

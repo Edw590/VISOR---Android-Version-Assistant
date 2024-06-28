@@ -54,7 +54,7 @@ public final class UtilsTimeDate {
 		final SimpleDateFormat time = new SimpleDateFormat(CURRENT_TIME_FORMAT, Locale.getDefault());
 		time.setTimeZone(TimeZone.getDefault());
 
-		if (millis < 0L) {
+		if (millis < 0) {
 			return time.format(new Date());
 		} else {
 			return time.format(new Date(millis));
@@ -74,7 +74,7 @@ public final class UtilsTimeDate {
 		final SimpleDateFormat date = new SimpleDateFormat(CURRENT_DATE_FORMAT, Locale.US);
 		date.setTimeZone(TimeZone.getDefault());
 
-		if (millis < 0L) {
+		if (millis < 0) {
 			return date.format(new Date());
 		} else {
 			return date.format(new Date(millis));

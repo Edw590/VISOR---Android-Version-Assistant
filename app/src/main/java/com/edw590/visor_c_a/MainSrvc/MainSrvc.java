@@ -64,7 +64,7 @@ public final class MainSrvc extends Service {
 
 		final NotificationManager notificationManager = (NotificationManager) UtilsContext.
 				getSystemService(Context.NOTIFICATION_SERVICE);
-		if (null == notificationManager) {
+		if (notificationManager == null) {
 			throw new RuntimeException("No notification service on the device - the app will not proceed");
 		}
 

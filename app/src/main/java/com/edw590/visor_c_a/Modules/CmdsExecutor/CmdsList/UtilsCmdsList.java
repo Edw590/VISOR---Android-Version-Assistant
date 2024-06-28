@@ -45,7 +45,7 @@ public final class UtilsCmdsList {
 	 */
 	public static void updateMakeCallCmdContacts() {
 		final String[][] contacts_list = TelephonyManagement.getContactsList();
-		if (0 == contacts_list.length) {
+		if (contacts_list.length == 0) {
 			return;
 		}
 

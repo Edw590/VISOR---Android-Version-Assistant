@@ -79,9 +79,9 @@ public final class CmdsExecutor implements IModuleInst {
 	boolean ask_anything_else = true;
 
 	private String last_it = "";
-	private long last_it_when = 0L;
+	private long last_it_when = 0;
 	private String last_and = "";
-	private long last_and_when = 0L;
+	private long last_and_when = 0;
 
 	private final class Command {
 		/** The command code that comes out of the ACD. */
@@ -100,7 +100,7 @@ public final class CmdsExecutor implements IModuleInst {
 			command_code = "";
 			cmd_spoken_action = "";
 			task_id = -1;
-			detection_when = 0L;
+			detection_when = 0;
 		}
 
 		/**
@@ -114,7 +114,7 @@ public final class CmdsExecutor implements IModuleInst {
 				@Nullable final Runnable what_to_do) {
 			this.command_code = command_code;
 			this.cmd_spoken_action = cmd_spoken_action;
-			if (null == what_to_do) {
+			if (what_to_do == null) {
 				task_id = -1;
 			} else {
 				task_id = TasksList.addTask(what_to_do);
@@ -215,10 +215,10 @@ public final class CmdsExecutor implements IModuleInst {
 		some_cmd_detected = false;
 		ask_anything_else = true;
 
-		if (System.currentTimeMillis() > last_it_when + 60L * 1000L) {
+		if (System.currentTimeMillis() > last_it_when + 60*1000) {
 			last_it = "";
 		}
-		if (System.currentTimeMillis() > last_and_when + 60L * 1000L) {
+		if (System.currentTimeMillis() > last_and_when + 60*1000) {
 			last_and = "";
 		}
 
@@ -266,7 +266,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 		for (final String command : detected_cmds) {
 			final int dot_index = command.indexOf((int) '.');
-			if (-1 == dot_index) {
+			if (dot_index == -1) {
 				// No command.
 				continue;
 			}
@@ -604,7 +604,7 @@ public final class CmdsExecutor implements IModuleInst {
 					final Integer battery_percentage = UtilsRegistry
 							.getValue(ValuesRegistry.Keys.BATTERY_PERCENT).getData();
 					final String speak;
-					if (null == battery_percentage) {
+					if (battery_percentage == null) {
 						speak = "Battery percentage not available yet.";
 					} else {
 						speak = "Battery percentage: " + battery_percentage + "%.";
@@ -924,7 +924,7 @@ public final class CmdsExecutor implements IModuleInst {
 						some_cmd_detected = true;
 						if (only_returning) continue;
 
-						if (null == audioManager) {
+						if (audioManager == null) {
 							UtilsSpeech2BC.speak("No audio available on the device.", speech_priority, speech_mode2, null);
 
 							break;
@@ -992,7 +992,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					if (previous_cmd.task_id < 0 ||
-							(previous_cmd.detection_when > (System.currentTimeMillis() + 60_000L))) {
+							(previous_cmd.detection_when > (System.currentTimeMillis() + 60_000))) {
 						// No runnable to execute (no command needing confirmation then) or the previous command was
 						// more than a minute ago.
 						final String speak = "There is nothing to confirm or reject, sir.";

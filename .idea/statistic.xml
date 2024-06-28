@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Statistic">
-    <option name="fileTypes" value="*" />
-    <option name="fileTypesIncluded" value="java;xml;kt;c;cpp;cxx;c++;h;hpp;hxx;h++" />
-    <option name="separateTabsFileTypes" value="" />
-    <option name="excludeDotArtifactDirectory" value="true" />
-  </component>
-</project>

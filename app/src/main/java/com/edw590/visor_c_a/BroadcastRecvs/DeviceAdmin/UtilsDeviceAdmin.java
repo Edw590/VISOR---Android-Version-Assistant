@@ -47,7 +47,7 @@ public final class UtilsDeviceAdmin {
 	public static boolean lockDevice() {
 		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsContext.
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
-		if (null == devicePolicyManager) {
+		if (devicePolicyManager == null) {
 			return false;
 		}
 

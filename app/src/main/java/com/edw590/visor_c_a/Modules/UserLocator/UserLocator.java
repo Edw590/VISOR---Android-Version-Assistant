@@ -91,7 +91,7 @@ public class UserLocator implements IModuleInst {
 	}
 
 	Condition[] conditions = {
-			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, true, 0L, ValuesRegistry.Keys.IS_USER_SLEEPING, true),
+			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, true, 0, ValuesRegistry.Keys.IS_USER_SLEEPING, true),
 			new Condition(ValuesRegistry.Keys.AIRPLANE_MODE_ON, false, 0, ValuesRegistry.Keys.IS_USER_SLEEPING, false),
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
@@ -100,7 +100,7 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return false;
-			}, true, 0L, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_SCHOOL),
+			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_SCHOOL),
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 					if ("Vodafone-A18391".equals(wifi_ap.name) || "Vodafone-3052B4".equals(wifi_ap.name) ||
@@ -109,7 +109,7 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return false;
-			}, true, 0L, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_HOME),
+			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_HOME),
 			// Else condition below
 			new Condition((Function0<Boolean>) () -> {
 				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
@@ -119,7 +119,7 @@ public class UserLocator implements IModuleInst {
 					}
 				}
 				return true;
-			}, true, 0L, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_UNKNOWN),
+			}, true, 0, ValuesRegistry.Keys.CURR_USER_LOCATION, USER_LOCATION_UNKNOWN),
 	};
 
 	private final Thread infinity_thread = new Thread(() -> {
