@@ -62,6 +62,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+import GPT.GPT;
+
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
  * speeches instead of on {@link TextToSpeech}'s internal queue.</p>
@@ -233,7 +235,25 @@ public final class Speech2 implements IModuleInst {
 		// By the way, this must ALWAYS be called here. The entire module expects the tts object to never be null after
 		// the constructor is called.
 		initializeTts(true);
+
+		infinity_thread.start();
 	}
+
+	private final Thread infinity_thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			GPT.setTimeBegin(System.currentTimeMillis());
+			while (true) {
+				// Keep getting the next sentence to speak from the server
+				String speak = GPT.getNextSpeechSentence();
+				if (GPT.END_ENTRY.equals(speak)) {
+					continue;
+				}
+
+				speak(speak, PRIORITY_USER_ACTION, MODE1_ALWAYS_NOTIFY);
+			}
+		}
+	});
 
 	/**
 	 * <p>Initializes the {@link TextToSpeech} object.</p>

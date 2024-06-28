@@ -87,7 +87,7 @@ public class WifiChecker {
 
 	void rssiChanged(final Intent intent) {
 		UtilsRegistry.setValue(ValuesRegistry.Keys.DIST_ROUTER, UtilsSWA.
-				getRealDistanceRSSILOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
+				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 						UtilsSWA.DEFAULT_TX_POWER));
 	}
 

@@ -96,15 +96,6 @@ public final class FragDevelopment extends Fragment {
 					e.printStackTrace();
 				}
 
-				while (true) {
-					final String speak = GPT.getNextSpeechSentence();
-					if (speak.equals(GPT.END_ENTRY)) {
-						break;
-					}
-
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
-				}
-
 				//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);
 

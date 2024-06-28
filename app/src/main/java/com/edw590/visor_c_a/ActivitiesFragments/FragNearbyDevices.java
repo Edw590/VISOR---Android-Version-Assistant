@@ -91,7 +91,7 @@ public final class FragNearbyDevices extends Fragment {
 
 				final long last_detection = device.last_detection;
 				final String text = device.type + "\n" + device.address + "\n" + UtilsTimeDate.getTimeDateStr(last_detection) +
-						"\n" + UtilsSWA.getRealDistanceRSSILOCRELATIVE(device.rssi, UtilsSWA.DEFAULT_TX_POWER) +
+						"\n" + UtilsSWA.getRealDistanceRssiLOCRELATIVE(device.rssi, UtilsSWA.DEFAULT_TX_POWER) +
 						"\n" + device.name + "\n" + device.given_name + "\n" + device.is_linked;
 				textView.setText(text);
 
