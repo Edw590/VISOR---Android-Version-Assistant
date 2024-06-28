@@ -71,7 +71,9 @@ public class SystemChecker implements IModuleInst {
 	// The minimum check time of all check times (for the thread wait time)
 	// EDIT: 30 seconds, so that if the Power Saver is disabled, after 30 seconds it will be noticed and the devices
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
-	public static final long CHECK_TIME_MIN = 30_000;
+	// EDIT 2: not sure what this above is about. 5 seconds now because of DeviceInfo.sendInfo() needing at most 5 secs
+	// of delay between each info sent.
+	public static final long CHECK_TIME = 5_000;
 
 	final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
@@ -178,7 +180,7 @@ public class SystemChecker implements IModuleInst {
 				wifi_checker.checkWifi();
 
 				try {
-					Thread.sleep(CHECK_TIME_MIN);
+					Thread.sleep(CHECK_TIME);
 				} catch (final InterruptedException ignored) {
 					return;
 				}
