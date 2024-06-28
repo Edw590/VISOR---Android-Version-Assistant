@@ -84,7 +84,7 @@ public final class PRNGFixes {
 			final Method method = Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
 					.getMethod("RAND_load_file", String.class, long.class);
 			final Integer bytesRead = (Integer) method.invoke(null, "/dev/urandom", 1024);
-			assert null != bytesRead;
+			assert bytesRead != null;
 			if (bytesRead != 1024) {
 				throw new IOException(
 						"Unexpected number of bytes read from Linux PRNG: "

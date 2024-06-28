@@ -144,7 +144,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 				UtilsServices.startService(CommandsRecognition.class, null, false, true);
 				//final PocketSphinxRecognition instance = (PocketSphinxRecognition) ModulesList.getElementValue(
 				//		pocket_sphinx_module_index, ModulesList.ELEMENT_INSTANCE);
-				//if (null != instance) {
+				//if (instance != null) {
 				//	instance.prepareRecognizer();
 				//}
 

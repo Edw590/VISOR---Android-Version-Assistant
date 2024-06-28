@@ -69,7 +69,7 @@ public final class UtilsSpeechRecognizersBC {
 	 */
 	public static void stopRecognition(@Nullable final Runnable runnable) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_SpeechRecog.ACTION_STOP_RECOGNITION);
-		if (null != runnable) {
+		if (runnable != null) {
 			broadcast_intent.putExtra(CONSTS_BC_SpeechRecog.EXTRA_STOP_RECOGNITION_1, TasksList.addTask(runnable));
 		}
 

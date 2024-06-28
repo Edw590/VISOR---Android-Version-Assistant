@@ -178,7 +178,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 			while (locked && !has_focus) {
 				// The onWindowFocusChanged is not fast enough to detect expansion of the status bar. So plan B...
 				// Always collapsing it, no matter what.
-				if (null != statusBarManager) {
+				if (statusBarManager != null) {
 					statusBarManager.collapsePanels();
 				}
 
@@ -237,7 +237,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 				// Collapse the status bar immediately (doesn't work well calling it here only, since it will only close
 				// it once and in the beginning. If the user hold the status bar open for some time, it won't close it.
 				// That's the reason for the "collapse_infinity" thread.
-				if (null != statusBarManager) {
+				if (statusBarManager != null) {
 					statusBarManager.collapsePanels();
 				}
 
@@ -344,7 +344,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 			layoutParams.format = PixelFormat.TRANSPARENT;
 
 			final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
-			if (null != windowManager) {
+			if (windowManager != null) {
 				view = new customViewGroup(UtilsContext.getContext());
 				windowManager.addView(view, layoutParams);
 			}

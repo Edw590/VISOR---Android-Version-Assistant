@@ -195,7 +195,7 @@ public class SpeechRecognizer {
 	}
 
 	private boolean stopRecognizerThread() {
-		if (1 != thread_state) {
+		if (thread_state != 1) {
 			return false;
 		}
 
@@ -416,7 +416,7 @@ public class SpeechRecognizer {
 						remainingSamples = timeoutSamples;
 
 					final Hypothesis hypothesis = decoder.hyp();
-					if (null != hypothesis) {
+					if (hypothesis != null) {
 						final String hypothesis_str = hypothesis.getHypstr();
 						if (!last_hypothesis_str.equals(hypothesis_str)) {
 

@@ -288,7 +288,7 @@ public final class UtilsPermsAuths {
 
 			// Check if the app can bypass battery optimizations and request it if not
 			final PowerManager powerManager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
-			if (null != powerManager && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
+			if (powerManager != null && !powerManager.isIgnoringBatteryOptimizations(package_name)) {
 				if (what_to_do == ALSO_FORCE) {
 					final String command = "dumpsys deviceidle whitelist +" + package_name;
 					UtilsShell.executeShellCmd(true, command);
@@ -375,7 +375,7 @@ public final class UtilsPermsAuths {
 			/*final String device_policies_file_path = "/data/system/device_policies.xml";
 
 			// If we can mess with the file, continue, else don't do anything.
-			if (UtilsShell.PERM_DENIED != UtilsFilesDirs.checkPathExists(device_policies_file_path)) {
+			if (UtilsFilesDirs.checkPathExists(device_policies_file_path) != UtilsShell.PERM_DENIED) {
 				final String file_end_tag = "</policies>";
 				final String string_to_add =
 						"<admin name=\"" + full_device_admin_recv_name + "\">\n" +

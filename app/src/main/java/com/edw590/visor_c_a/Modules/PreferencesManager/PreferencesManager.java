@@ -111,7 +111,7 @@ public final class PreferencesManager implements IModuleInst {
 			while (true) {
 				if (save_failed) {
 					final String to_write = StaticPreferences.getPreferences();
-					if (null != to_write) {
+					if (to_write != null) {
 						if (StaticPreferences.writePrefsFile(to_write)) {
 							last_save_time = System.currentTimeMillis();
 							final String speak = "The preferences file has now been saved successfully.";
@@ -123,7 +123,7 @@ public final class PreferencesManager implements IModuleInst {
 
 				if (StaticPreferences.getPreferences() == null) {
 					final String preferences = StaticPreferences.readPrefsFile();
-					if (null != preferences) {
+					if (preferences != null) {
 						StaticPreferences.updatePreferences(preferences);
 					} else {
 						if (!UtilsShell.noErr(UtilsFilesDirs.checkPathExists(
@@ -162,7 +162,7 @@ public final class PreferencesManager implements IModuleInst {
 					}
 
 					final String to_write = StaticPreferences.getPreferences();
-					if (null != to_write) {
+					if (to_write != null) {
 						if (StaticPreferences.writePrefsFile(to_write)) {
 							last_save_time = System.currentTimeMillis();
 							save_failed = false;

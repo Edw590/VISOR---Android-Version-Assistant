@@ -66,7 +66,7 @@ public final class UtilsAndroidConnectivity {
 	public static boolean getWifiEnabled() {
 		final WifiManager wifiManager = UtilsNetwork.getWifiManager();
 
-		return null != wifiManager && wifiManager.isWifiEnabled();
+		return wifiManager != null && wifiManager.isWifiEnabled();
 	}
 
 	/**
@@ -115,7 +115,7 @@ public final class UtilsAndroidConnectivity {
 	public static boolean getBluetoothEnabled() {
 		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-		return null != bluetoothAdapter && bluetoothAdapter.isEnabled();
+		return bluetoothAdapter != null && bluetoothAdapter.isEnabled();
 	}
 
 	/**
@@ -202,7 +202,7 @@ public final class UtilsAndroidConnectivity {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.CONNECTIVITY_INTERNAL)) {
 				final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 						getSystemService(Context.CONNECTIVITY_SERVICE);
-				if (null != connectivityManager) {
+				if (connectivityManager != null) {
 					connectivityManager.setAirplaneMode(enabled);
 
 					return UtilsShell.ErrCodes.NO_ERR;
@@ -281,7 +281,7 @@ public final class UtilsAndroidConnectivity {
 
 			// Deprecated as of Lollipop 5.0
 			final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "getMobileDataEnabled");
-			assert null != method; // Will never happen.
+			assert method != null; // Will never happen.
 			// The return won't be null either
 			return (boolean) UtilsReflection.invokeMethod(method, connectivityManager).ret_var;
 		} else { // L <= SDK_INT < O
@@ -333,7 +333,7 @@ public final class UtilsAndroidConnectivity {
 				// Deprecated as of Lollipop 5.0.
 				final Method method = UtilsReflection.getMethod(ConnectivityManager.class, "setMobileDataEnabled",
 						boolean.class);
-				assert null != method; // Will never happen
+				assert method != null; // Will never happen
 				final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
 						getSystemService(Context.CONNECTIVITY_SERVICE);
 				if (connectivityManager == null) {

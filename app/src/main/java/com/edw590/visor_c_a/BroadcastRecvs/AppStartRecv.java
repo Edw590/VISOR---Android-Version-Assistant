@@ -51,7 +51,7 @@ public final class AppStartRecv extends BroadcastReceiver {
 		UtilsMainSrvc.startMainService();
 
 		// Disabled to stop spam on the logs
-		//System.out.println("PPPPPPPPPPPPPPPPPP-AppStartRecv - " + (null != intent ? intent.getAction() : null));
+		//System.out.println("PPPPPPPPPPPPPPPPPP-AppStartRecv - " + (intent != null ? intent.getAction() : null));
 
 		// Do NOT enable this!!! I'm ignoring safety measures (see the Manifest where I'm ignoring possible spoofing of
 		// SMS) with this receiver since ANY intent (null or not) received is supposed to get the app to start the main

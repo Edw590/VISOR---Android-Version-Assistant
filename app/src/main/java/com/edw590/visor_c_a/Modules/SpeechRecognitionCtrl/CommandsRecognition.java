@@ -254,7 +254,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		// Start the recognition frozen methods checker (which means if any of the recognition methods froze and now the
 		// service won't stop because it's frozen, the thread will take care of that and kill the service.)
-		if (null != frozen_methods_checker) {
+		if (frozen_methods_checker != null) {
 			// In case the previous one wasn't interrupted.
 			frozen_methods_checker.interrupt();
 		}
@@ -304,7 +304,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		public void run() {
 			last_method_called = -1;
 			last_method_called_when = 0;
-			if (null != recognizer) {
+			if (recognizer != null) {
 				recognizer.cancel();
 				recognizer.destroy();
 				recognizer = null;
@@ -370,7 +370,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			}
 			//final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE); API 16-
 			//final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE); API 17+
-			//if (null != powerManager && powerManager.screen.displaUtilsRoot.isRootAvailable()) {
+			//if (powerManager != null && powerManager.screen.displaUtilsRoot.isRootAvailable()) {
 			//	UtilsAndroidPower.turnScreenOnTemp();
 			//	UtilsAndroidPower.turnScreenOff();
 			//}
@@ -547,7 +547,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 				System.out.println(System.currentTimeMillis());
 				System.out.println(last_method_called_when + last_methods_called_map.get(last_method_called));
 				System.out.println(System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called));
-				if (Long.MAX_VALUE != last_methods_called_map.get(last_method_called) &&
+				if (last_methods_called_map.get(last_method_called) != Long.MAX_VALUE &&
 						System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
 					// If the recognizer got frozen, stop listening.
 					// Also don't check the time if the method has no wait time (MAX_VALUE).

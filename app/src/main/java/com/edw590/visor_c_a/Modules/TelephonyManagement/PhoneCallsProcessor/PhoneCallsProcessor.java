@@ -178,7 +178,7 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				return;
 			}
 			for (final NumAndPhase sub_ret : ret) {
-				if (null != sub_ret) {
+				if (sub_ret != null) {
 					whatToDo(sub_ret);
 				}
 			}

@@ -103,7 +103,7 @@ public final class UtilsAndroidPower {
 
 				final Method method = UtilsReflection.getMethod(IPowerManager.class, "shutdown", boolean.class,
 						boolean.class);
-				assert null != method; // Will never happen.
+				assert method != null; // Will never happen.
 				// The return won't be null either
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, false, false).ret_var;
 
@@ -213,7 +213,7 @@ public final class UtilsAndroidPower {
 				}
 			} else {
 				final Method method = UtilsReflection.getMethod(IPowerManager.class, "reboot", String.class);
-				assert null != method; // Will never happen.
+				assert method != null; // Will never happen.
 				// The return won't be null either.
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iPowerManager, reason).ret_var;
 

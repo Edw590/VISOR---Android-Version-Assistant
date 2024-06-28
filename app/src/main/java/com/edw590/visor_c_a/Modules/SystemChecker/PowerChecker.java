@@ -63,7 +63,7 @@ public class PowerChecker {
 
 		if ((last_detected_percent == -1) ||
 				// Only warn if the power state is new (can't warn every percentage increase... - only on power changes)
-				(null != last_detected_power_connected && power_connected == last_detected_power_connected)) {
+				(last_detected_power_connected != null && power_connected == last_detected_power_connected)) {
 			return;
 		}
 
@@ -106,9 +106,9 @@ public class PowerChecker {
 		// If the EXTRA_PRESENT can be wrong, check if the battery level is different than 0 and 100, depending on the
 		// device version, as documented here: https://source.android.com/docs/core/power/batteryless.
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-			better_battery_present = 100 != bat_info.battery_percentage;
+			better_battery_present = bat_info.battery_percentage != 100;
 		} else {
-			better_battery_present = 0 != bat_info.battery_percentage;
+			better_battery_present = bat_info.battery_percentage != 0;
 		}
 		// If better_battery_present is false, no conclusion can be taken, so in that specific case, trust
 		// battery_present - unless battery_present is null, and in that case, nothing at all is known.
@@ -116,7 +116,7 @@ public class PowerChecker {
 			// Update the Values Storage
 			bat_info.battery_present = true;
 			UtilsRegistry.setValue(ValuesRegistry.Keys.BATTERY_PRESENT, true);
-		} else if (null != battery_present) {
+		} else if (battery_present != null) {
 			// Update the Values Storage
 			bat_info.battery_present = battery_present;
 			UtilsRegistry.setValue(ValuesRegistry.Keys.BATTERY_PRESENT, battery_present);
@@ -173,7 +173,7 @@ public class PowerChecker {
 				}
 			}
 
-			if (null != power_connected_not_ready) {
+			if (power_connected_not_ready != null) {
 				// Update the Values Storage
 				bat_info.power_connected = power_connected_not_ready;
 				UtilsRegistry.setValue(ValuesRegistry.Keys.POWER_CONNECTED, power_connected_not_ready);

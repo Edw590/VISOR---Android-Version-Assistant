@@ -592,7 +592,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (!only_returning) {
 						final Boolean battery_present = UtilsRegistry.
 								getValue(ValuesRegistry.Keys.BATTERY_PRESENT).getData();
-						if (null != battery_present && !battery_present) {
+						if (battery_present != null && !battery_present) {
 							final String speak = "There is no battery present on the device.";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, null);
 						}

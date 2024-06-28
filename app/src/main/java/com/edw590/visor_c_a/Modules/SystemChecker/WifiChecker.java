@@ -63,7 +63,7 @@ public class WifiChecker {
 	}
 
 	void checkWifi() {
-		if (System.currentTimeMillis() >= last_check_when_wifi + waiting_time_wifi && null != wifi_manager) {
+		if (System.currentTimeMillis() >= last_check_when_wifi + waiting_time_wifi && wifi_manager != null) {
 			if (wifi_manager.isWifiEnabled()) {
 				enabled_by_visor_wifi = false;
 				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -92,7 +92,7 @@ public class WifiChecker {
 	}
 
 	void wifiStateChanged(final Intent intent) {
-		assert null != wifi_manager; // Change in Wi-Fi connection, so it's not null.
+		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 
 		int wifi_state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
@@ -108,7 +108,7 @@ public class WifiChecker {
 	}
 
 	void scanResultsAvailable(final Intent intent) {
-		assert null != wifi_manager; // Change in Wi-Fi connection, so it's not null.
+		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		System.out.println("YYYYYYYYYYYYYYYYYYYYYYYY1");
 		System.out.println(enabled_by_visor_wifi);
@@ -158,7 +158,7 @@ public class WifiChecker {
 	}
 
 	void networkStateChanged(final Intent intent) {
-		assert null != wifi_manager; // Change in Wi-Fi connection, so it's not null.
+		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		NetworkInfo.State state = ((NetworkInfo) intent.
 				getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)).getState();

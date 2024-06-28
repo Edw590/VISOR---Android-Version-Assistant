@@ -90,7 +90,7 @@ public final class PrefsFileFormat {
 	 * @return true if they've been set, false otherwise
 	 */
 	static synchronized boolean arePrefsReady() {
-		return null != preferences;
+		return preferences != null;
 	}
 
 	/**
@@ -150,7 +150,7 @@ public final class PrefsFileFormat {
 	 */
 	@Nullable
 	static synchronized String getPreferences() {
-		if (null != preferences) {
+		if (preferences != null) {
 			return preferences.toString();
 		}
 

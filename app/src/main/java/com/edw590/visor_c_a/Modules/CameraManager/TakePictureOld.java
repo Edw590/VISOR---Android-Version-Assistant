@@ -123,7 +123,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 		flash_off_on = FLASH_MODE_OFF_ON.equals(chosen_flash_mode);
 
 		final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
-		assert null != windowManager; // Module supported
+		assert windowManager != null; // Module supported
 
 		final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -255,7 +255,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 			camera.release();
 
 			final Intent broadcast_intent;
-			if (null != focus_success && !focus_success) { // Why these checks? Docstring of the variable.
+			if (focus_success != null && !focus_success) { // Why these checks? Docstring of the variable.
 				// So warn only that there was no focus if auto focus is even possible.
 				broadcast_intent = new Intent(CONSTS_BC_CameraManag.ACTION_PICTURE_TAKEN_NO_FOCUS);
 			} else {
@@ -377,7 +377,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 		camera_parameters.setPictureFormat(ImageFormat.JPEG);
 
 		final WindowManager windowManager = (WindowManager) UtilsContext.getSystemService(Context.WINDOW_SERVICE);
-		assert null != windowManager; // If the camera is available and this is how it's used, then this is also available
+		assert windowManager != null; // If the camera is available and this is how it's used, then this is also available
 
 		final int display_rotation = windowManager.getDefaultDisplay().getRotation();
 		final int[][] rotation_to_degrees = {{Surface.ROTATION_0, 0}, {Surface.ROTATION_90, 90},

@@ -273,7 +273,7 @@ public final class ModulesList {
 				return UtilsServices.isServiceRunning((Class<?>) getElementValue(element_index, ELEMENT_CLASS));
 			}
 			case (TYPE1_INSTANCE): {
-				return null != getElementValue(element_index, ELEMENT_INSTANCE);
+				return getElementValue(element_index, ELEMENT_INSTANCE) != null;
 			}
 			default: {
 				return false;
@@ -431,7 +431,7 @@ public final class ModulesList {
 			System.out.println(element_class);
 		}
 		// It's never null when it gets here, unless I was dumb and forgot to put the method in some class.
-		assert null != method;
+		assert method != null;
 		// No need to check for errors invoking the method - there will be none. It's always declared and
 		// implemented the same for all modules, so if it works with one, it works with the rest.
 		return (boolean) UtilsReflection.invokeMethod(method, null).ret_var;

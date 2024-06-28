@@ -101,7 +101,7 @@ public final class UtilsAndroidTelephony {
 
 				// Deprecated and removed as of Android 10, and returns "void".
 				final Method method = UtilsReflection.getMethod(ITelephony.class, "answerRingingCall");
-				assert null != method; // Will never happen.
+				assert method != null; // Will never happen.
 				// The method will execute always.
 				UtilsReflection.invokeMethod(method, iTelephony);
 
@@ -157,7 +157,7 @@ public final class UtilsAndroidTelephony {
 
 				// Deprecated and removed as of Android 10 (returns a boolean).
 				final Method method = UtilsReflection.getMethod(ITelephony.class, "endCall");
-				assert null != method; // Will never happen.
+				assert method != null; // Will never happen.
 				// The return won't be null either.
 				final boolean ret_method = (boolean) UtilsReflection.invokeMethod(method, iTelephony).ret_var;
 

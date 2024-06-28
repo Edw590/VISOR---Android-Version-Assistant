@@ -200,7 +200,7 @@ public class EnrollmentUtil {
 			return soundModel.uuid;
 		} else {
 			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "uuid");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -212,7 +212,7 @@ public class EnrollmentUtil {
 			return soundModel.vendorUuid;
 		} else {
 			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "vendorUuid");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -224,7 +224,7 @@ public class EnrollmentUtil {
 			return soundModel.data;
 		} else {
 			final byte[] value = (byte[]) UtilsReflection.getFieldValue(soundModel, "data");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -236,7 +236,7 @@ public class EnrollmentUtil {
 			return soundModel.keyphrases;
 		} else {
 			final Keyphrase[] value = (Keyphrase[]) UtilsReflection.getFieldValue(soundModel, "keyphrases");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -247,7 +247,7 @@ public class EnrollmentUtil {
 			return keyphrase.id;
 		} else {
 			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "id");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -258,7 +258,7 @@ public class EnrollmentUtil {
 			return keyphrase.recognitionModes;
 		} else {
 			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "recognitionModes");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -272,7 +272,7 @@ public class EnrollmentUtil {
 			return keyphrase.locale;
 		} else {
 			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "locale");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			//return Locale.forLanguageTag(value);
 			return value;
@@ -285,7 +285,7 @@ public class EnrollmentUtil {
 			return keyphrase.text;
 		} else {
 			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "text");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value;
 		}
@@ -297,7 +297,7 @@ public class EnrollmentUtil {
 			return keyphrase.users.clone();
 		} else {
 			final int[] value = (int[]) UtilsReflection.getFieldValue(keyphrase, "users");
-			assert null != value; // Will never be null
+			assert value != null; // Will never be null
 
 			return value.clone();
 		}

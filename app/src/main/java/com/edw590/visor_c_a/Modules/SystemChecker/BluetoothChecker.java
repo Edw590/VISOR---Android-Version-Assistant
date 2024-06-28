@@ -66,7 +66,7 @@ public class BluetoothChecker {
 	}
 
 	void startBluetooth() {
-		if (null != bluetooth_adapter) {
+		if (bluetooth_adapter != null) {
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.A2DP);
 
@@ -84,7 +84,7 @@ public class BluetoothChecker {
 	}
 
 	void checkBluetooth() {
-		if (System.currentTimeMillis() >= last_check_when_bt + waiting_time_bt && null != bluetooth_adapter) {
+		if (System.currentTimeMillis() >= last_check_when_bt + waiting_time_bt && bluetooth_adapter != null) {
 			if (bluetooth_adapter.isEnabled()) {
 				enabled_by_visor_bt = false;
 				bluetooth_adapter.startDiscovery();
@@ -112,7 +112,7 @@ public class BluetoothChecker {
 	}
 
 	void discoveryFinished() {
-		assert null != bluetooth_adapter; // Won't be null if the *adapter's* state changed...
+		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
 		// start the countdown as soon as the discovery started, and should be as soon as it finishes.
@@ -151,7 +151,7 @@ public class BluetoothChecker {
 	}
 
 	void bluetoothStateChanged(final Intent intent) {
-		assert null != bluetooth_adapter; // Won't be null if the *adapter's* state changed...
+		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int bluetooth_state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
 
@@ -189,7 +189,7 @@ public class BluetoothChecker {
 	}
 
 	void connectionStateChanged(final Intent intent) {
-		assert null != bluetooth_adapter; // Won't be null if the *adapter's* state changed...
+		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
 		BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);

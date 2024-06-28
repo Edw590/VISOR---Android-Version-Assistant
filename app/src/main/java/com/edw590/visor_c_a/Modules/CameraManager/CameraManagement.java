@@ -147,7 +147,7 @@ public final class CameraManagement implements IModuleInst {
 		// app.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			final CameraManager camera_new = (CameraManager) UtilsContext.getSystemService(Context.CAMERA_SERVICE);
-			assert null != camera_new; // Module supported
+			assert camera_new != null; // Module supported
 
 			try {
 				main_camera_id = camera_new.getCameraIdList()[0];
@@ -159,7 +159,7 @@ public final class CameraManagement implements IModuleInst {
 			final Handler handler =  new Handler(Looper.getMainLooper());
 
 			final CameraManager mCameraManager = (CameraManager) UtilsContext.getSystemService(Context.CAMERA_SERVICE);
-			assert null != mCameraManager; // Module supported
+			assert mCameraManager != null; // Module supported
 
 			torchCallback = new CameraManager.TorchCallback() {
 				@Override
@@ -224,7 +224,7 @@ public final class CameraManagement implements IModuleInst {
 	int useCamera(final int usage) {
 		final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) UtilsContext.
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
-		if (null != devicePolicyManager && devicePolicyManager.getCameraDisabled(null)) {
+		if (devicePolicyManager != null && devicePolicyManager.getCameraDisabled(null)) {
 			final String speak = "Error - Cameras disabled by a Device Administrator.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
 
@@ -409,7 +409,7 @@ public final class CameraManagement implements IModuleInst {
 	private int flashlightNew(final boolean set_enabled) {
 		// The API warnings here are wrong, I think - I believe the condition is correct. Either API >= 21 or 23.
 		final CameraManager camera_new = (CameraManager) UtilsContext.getSystemService(Context.CAMERA_SERVICE);
-		assert null != camera_new; // Module supported
+		assert camera_new != null; // Module supported
 
 		try {
 			main_camera_id = camera_new.getCameraIdList()[0];

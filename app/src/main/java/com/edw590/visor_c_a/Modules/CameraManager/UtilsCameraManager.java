@@ -90,7 +90,7 @@ final class UtilsCameraManager {
 		}
 
 		// It's never null - read the documentation of getSupportedPictureSizes()
-		assert null != result;
+		assert result != null;
 		return result;
 	}
 

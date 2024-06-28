@@ -241,9 +241,9 @@ public final class UtilsCheckHardwareFeatures {
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			return null != connectivityManager.getNetworkInfo(new Network(ConnectivityManager.TYPE_MOBILE));
+			return connectivityManager.getNetworkInfo(new Network(ConnectivityManager.TYPE_MOBILE)) != null;
 		} else {
-			return null != connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE) != null;
 		}
 	}
 
@@ -260,9 +260,9 @@ public final class UtilsCheckHardwareFeatures {
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			return 0 != connectivityManager.getAllNetworks().length;
+			return connectivityManager.getAllNetworks().length != 0;
 		} else {
-			return 0 != connectivityManager.getAllNetworkInfo().length;
+			return connectivityManager.getAllNetworkInfo().length != 0;
 		}
 	}
 }

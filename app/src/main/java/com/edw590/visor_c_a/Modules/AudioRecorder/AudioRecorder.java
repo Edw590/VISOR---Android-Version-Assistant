@@ -260,7 +260,7 @@ public final class AudioRecorder implements IModuleInst {
 	 * <p>Stops an ongoing audio recording.</p>
 	 */
 	private void stopRecording() {
-		if (null != recorder) {
+		if (recorder != null) {
 			try {
 				recorder.stop();
 			} catch (final IllegalStateException ignored) {

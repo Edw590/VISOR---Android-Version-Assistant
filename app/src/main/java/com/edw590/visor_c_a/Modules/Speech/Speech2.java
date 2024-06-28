@@ -177,7 +177,7 @@ public final class Speech2 implements IModuleInst {
 
 		arrays_speech_objs.clear();
 
-		if (null != tts) {
+		if (tts != null) {
 			tts.stop();
 			tts.shutdown();
 			tts = null;
@@ -262,7 +262,7 @@ public final class Speech2 implements IModuleInst {
 	 *                         way the function can execute tasks that can only be done in the module initialization
 	 */
 	void initializeTts(final boolean from_constructor) {
-		if (null != tts) {
+		if (tts != null) {
 			tts.stop();
 			tts.shutdown();
 			tts = null;
@@ -776,7 +776,7 @@ public final class Speech2 implements IModuleInst {
 			audioManager.setStreamVolume(current_speech_obj.audio_stream, new_volume,
 					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 		} else {
-			if (0 != (current_speech_obj.mode & MODE2_BYPASS_NO_SND)) {
+			if ((current_speech_obj.mode & MODE2_BYPASS_NO_SND) != 0) {
 				volumeDndObj.old_ringer_mode = audioManager.getRingerMode();
 				audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
@@ -835,7 +835,7 @@ public final class Speech2 implements IModuleInst {
 		setResetWillChangeVolume(false);
 
 		// Reset the volume
-		if (VolumeDndObj.DEFAULT_VALUE != volumeDndObj.old_volume) {
+		if (volumeDndObj.old_volume != VolumeDndObj.DEFAULT_VALUE) {
 			boolean carry_on = false;
 			if (stream_active_before_begin_all_speeches == volumeDndObj.audio_stream) {
 				stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
@@ -866,7 +866,7 @@ public final class Speech2 implements IModuleInst {
 		}
 
 		// Reset the ringer mode
-		if (VolumeDndObj.DEFAULT_VALUE != volumeDndObj.old_ringer_mode) {
+		if (volumeDndObj.old_ringer_mode != VolumeDndObj.DEFAULT_VALUE) {
 			audioManager.setRingerMode(volumeDndObj.old_ringer_mode);
 		}
 
@@ -978,7 +978,7 @@ public final class Speech2 implements IModuleInst {
 				skip_speaking = true;
 			}
 		} else {
-			skip_speaking = (PRIORITY_CRITICAL != UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) &&
+			skip_speaking = (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL &&
 					(current_speech_obj.mode & MODE2_BYPASS_NO_SND) == 0);
 		}
 
@@ -1007,7 +1007,7 @@ public final class Speech2 implements IModuleInst {
 				}
 			}
 
-			if (0 != (current_speech_obj.mode & MODE1_ALWAYS_NOTIFY)) {
+			if ((current_speech_obj.mode & MODE1_ALWAYS_NOTIFY) != 0) {
 				addSpeechToNotif(current_speech_obj.txt_to_speak);
 			}
 

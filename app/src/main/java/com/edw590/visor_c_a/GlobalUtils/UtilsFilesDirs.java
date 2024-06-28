@@ -149,7 +149,7 @@ public final class UtilsFilesDirs {
 		final String command = "ls -l '" + file_path + "'";
 		final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(true, command);
 
-		if (0 != cmdOutput.exit_code) {
+		if (cmdOutput.exit_code != 0) {
 			return -1L;
 		}
 

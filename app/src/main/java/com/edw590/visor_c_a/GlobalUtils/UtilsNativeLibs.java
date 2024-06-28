@@ -75,7 +75,7 @@ public final class UtilsNativeLibs {
 
 		final String[] available_libs = new File(native_libs_path).list();
 
-		if (null != available_libs) {
+		if (available_libs != null) {
 			for (final String lib : available_libs) {
 				if (lib_name.equals(lib)) {
 					return true;

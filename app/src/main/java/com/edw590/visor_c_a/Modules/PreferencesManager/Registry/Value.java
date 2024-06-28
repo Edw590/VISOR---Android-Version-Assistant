@@ -130,7 +130,7 @@ public final class Value {
 	public synchronized <T> T getData(@Nullable final T def_data) {
 		// Keep it using def_data's type. If value's type is int and there's null as default value, then the output
 		// must not be an int - instead, an Object (which then will be cast to an Integer).
-		return null != data ? (T) data : def_data;
+		return data != null ? (T) data : def_data;
 	}
 	/** {@link #getData(Object)} with {@link #DEFAULT_DATA} as parameter. */
 	// Do NOT put as @Nullable! If the 2nd constructor is used, this will never return null!
@@ -147,7 +147,7 @@ public final class Value {
 	 * @return same as in {@link #getData(Object)} but for {@link #prev_data}
 	 */
 	public synchronized <T> T getPrevData(@Nullable final T def_data) {
-		return null != prev_data ? (T) prev_data : def_data;
+		return prev_data != null ? (T) prev_data : def_data;
 	}
 	/** {@link #getPrevData(Object)} with {@link #DEFAULT_DATA} as parameter. */
 	public synchronized <T> T getPrevData() {

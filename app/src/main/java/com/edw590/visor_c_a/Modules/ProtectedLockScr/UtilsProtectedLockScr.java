@@ -122,7 +122,7 @@ public final class UtilsProtectedLockScr {
 
 		final LockPatternUtils lockPatternUtils = new LockPatternUtils(UtilsContext.getContext());
 		final Method method = UtilsReflection.getMethod(LockPatternUtils.class, "isLockScreenDisabled");
-		if (null != method) {
+		if (method != null) {
 			try {
 
 				return !Boolean.parseBoolean(String.valueOf(method.invoke(lockPatternUtils)));

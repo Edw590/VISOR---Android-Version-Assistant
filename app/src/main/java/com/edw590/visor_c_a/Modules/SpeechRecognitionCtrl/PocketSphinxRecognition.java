@@ -78,7 +78,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 		}
 
 		// The recognizer must be working. If it's not, at least must be being prepared. Not any? Problem happening.
-		return (null != recognizer || !preparing) && UtilsGeneral.isThreadWorking(main_handlerThread);
+		return (recognizer != null || !preparing) && UtilsGeneral.isThreadWorking(main_handlerThread);
 	}
 	@Override
 	public void destroy() {
@@ -119,7 +119,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	 * @return true if the recognizer is ready to work, false if an error occurred
 	 */
 	boolean prepareRecognizer() {
-		if (null != recognizer) {
+		if (recognizer != null) {
 			return true;
 		}
 
@@ -170,7 +170,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 	private static void shutdownRecognizer() {
 		is_listening = false;
 
-		if (null != recognizer) {
+		if (recognizer != null) {
 			recognizer.shutdown();
 			recognizer = null;
 		}

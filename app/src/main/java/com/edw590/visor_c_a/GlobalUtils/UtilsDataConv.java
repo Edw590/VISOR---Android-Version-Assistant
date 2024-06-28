@@ -67,7 +67,7 @@ public final class UtilsDataConv {
 		dest_array = new byte[src_array_size]; // Possible OutOfMemoryError here
 		for (int j = 0; j < src_array_size; ++j) {
 			final Byte b = src_array.get(j);
-			if (null != b) {
+			if (b != null) {
 				dest_array[j] = b;
 			}
 		}

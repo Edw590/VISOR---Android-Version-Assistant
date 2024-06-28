@@ -175,7 +175,7 @@ public class Assets {
 		List<String> lines = new ArrayList<String>();
 		BufferedReader br = new BufferedReader(new InputStreamReader(source));
 		String line;
-		while (null != (line = br.readLine()))
+		while ((line = br.readLine()) != null)
 			lines.add(line);
 		return lines;
 	}
