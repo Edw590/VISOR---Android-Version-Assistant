@@ -250,7 +250,7 @@ public final class Speech2 implements IModuleInst {
 					continue;
 				}
 
-				speak(speak, PRIORITY_USER_ACTION, MODE1_ALWAYS_NOTIFY);
+				speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT);
 			}
 		}
 	});
