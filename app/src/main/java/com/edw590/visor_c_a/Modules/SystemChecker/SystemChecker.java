@@ -129,40 +129,47 @@ public class SystemChecker implements IModuleInst {
 			long last_time_used = 0;
 			boolean is_interactive = false;
 
-			while (true) {
-				StringBuilder wifi_networks = new StringBuilder();
-				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
-					wifi_networks.append(wifi_ap.name).append("\u0001");
-					wifi_networks.append(wifi_ap.address).append("\u0001");
-					wifi_networks.append(wifi_ap.rssi).append("\u0001");
-					wifi_networks.append("\u0000");
-				}
-				StringBuilder bluetooth_devices = new StringBuilder();
-				for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
-					bluetooth_devices.append(bluetooth_device.name).append("\u0001");
-					bluetooth_devices.append(bluetooth_device.address).append("\u0001");
-					bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
-					bluetooth_devices.append("\u0000");
-				}
-				if (power_manager.isScreenOn()) {
-					last_time_used = System.currentTimeMillis() / 1000;
-					is_interactive = true;
-				} else {
-					is_interactive = false;
-				}
-				DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis() / 1000, last_time_used,
-						UtilsAndroidConnectivity.getAirplaneModeEnabled(),
-						UtilsAndroidConnectivity.getWifiEnabled(),
-						UtilsAndroidConnectivity.getBluetoothEnabled(),
-						(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
-						Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true)),
-						is_interactive, UtilsAndroidPower.getScreenBrightness(),
-						wifi_networks.toString(), bluetooth_devices.toString());
+			int first_3_times = 0;
 
-				try {
-					device_info.sendInfo();
-				} catch (final Exception ignored) {
-					// Ignore no network connection
+			while (true) {
+				if (first_3_times < 3) {
+					first_3_times++;
+				} else {
+					// Only send the info after the first 3 times (3 because yes), so that the devices are checked first.
+					StringBuilder wifi_networks = new StringBuilder();
+					for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
+						wifi_networks.append(wifi_ap.name).append("\u0001");
+						wifi_networks.append(wifi_ap.address).append("\u0001");
+						wifi_networks.append(wifi_ap.rssi).append("\u0001");
+						wifi_networks.append("\u0000");
+					}
+					StringBuilder bluetooth_devices = new StringBuilder();
+					for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
+						bluetooth_devices.append(bluetooth_device.name).append("\u0001");
+						bluetooth_devices.append(bluetooth_device.address).append("\u0001");
+						bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
+						bluetooth_devices.append("\u0000");
+					}
+					if (power_manager.isScreenOn()) {
+						last_time_used = System.currentTimeMillis() / 1000;
+						is_interactive = true;
+					} else {
+						is_interactive = false;
+					}
+					DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis() / 1000, last_time_used,
+							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
+							UtilsAndroidConnectivity.getWifiEnabled(),
+							UtilsAndroidConnectivity.getBluetoothEnabled(),
+							(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
+							Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true)),
+							is_interactive, UtilsAndroidPower.getScreenBrightness(),
+							wifi_networks.toString(), bluetooth_devices.toString());
+
+					try {
+						device_info.sendInfo();
+					} catch (final Exception ignored) {
+						// Ignore no network connection
+					}
 				}
 
 				// Network type
