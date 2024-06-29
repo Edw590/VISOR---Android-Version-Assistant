@@ -64,7 +64,7 @@ public final class PreferencesManager implements IModuleInst {
 			return false;
 		}
 
-		return UtilsGeneral.isThreadWorking(main_handlerThread);
+		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public void destroy() {

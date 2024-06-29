@@ -51,17 +51,19 @@ public class BluetoothChecker {
 	@Nullable BluetoothA2dp bluetoothA2dp = null;
 	ArrayList<Object> bluetooth_profiles = new ArrayList<>(BluetoothProfile.MAX_PROFILE_ID);
 
-	boolean enabled_by_visor_bt = false;
+	boolean enabled_by_visor = false;
 	static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes
 	static final long DISCOVER_BT_EACH_PS = DISCOVER_BT_EACH << 2; // 5 * 4 = 20 minutes
-	long waiting_time_bt = DISCOVER_BT_EACH;
-	long last_check_when_bt = 0;
+	long waiting_time = DISCOVER_BT_EACH;
+	long last_check_when = 0;
+
+	int attempts = 0;
 
 	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
 	void setBluetoothEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setBluetoothEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
-			enabled_by_visor_bt = enable;
+			enabled_by_visor = enable;
 		}
 	}
 
@@ -84,9 +86,9 @@ public class BluetoothChecker {
 	}
 
 	void checkBluetooth() {
-		if (System.currentTimeMillis() >= last_check_when_bt + waiting_time_bt && bluetooth_adapter != null) {
+		if (System.currentTimeMillis() >= last_check_when + waiting_time && bluetooth_adapter != null) {
 			if (bluetooth_adapter.isEnabled()) {
-				enabled_by_visor_bt = false;
+				enabled_by_visor = false;
 				bluetooth_adapter.startDiscovery();
 			} else {
 				setBluetoothEnabled(true);
@@ -96,9 +98,9 @@ public class BluetoothChecker {
 
 	void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
-			waiting_time_bt = DISCOVER_BT_EACH_PS;
+			waiting_time = DISCOVER_BT_EACH_PS;
 		} else {
-			waiting_time_bt = DISCOVER_BT_EACH;
+			waiting_time = DISCOVER_BT_EACH;
 		}
 	}
 
@@ -106,7 +108,7 @@ public class BluetoothChecker {
 		// Don't forget other apps can start the discovery...
 		// In that case, use that advantage and don't start it for another period of time. Just listen to
 		// the broadcasts.
-		last_check_when_bt = System.currentTimeMillis();
+		last_check_when = System.currentTimeMillis();
 
 		nearby_devices_bt.clear();
 	}
@@ -116,9 +118,9 @@ public class BluetoothChecker {
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
 		// start the countdown as soon as the discovery started, and should be as soon as it finishes.
-		last_check_when_bt = System.currentTimeMillis();
+		last_check_when = System.currentTimeMillis();
 
-		if (enabled_by_visor_bt) {
+		if (enabled_by_visor) {
 			// If Bluetooth was not enabled when the discovery started, disable it again.
 			setBluetoothEnabled(false);
 		}
@@ -143,7 +145,7 @@ public class BluetoothChecker {
 				ExtDevice.TYPE_BLUETOOTH,
 				address,
 				time_detection,
-				(int) rssi,
+				rssi,
 				bluetoothDevice.getName(),
 				bluetoothDevice.getAlias(),
 				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED)
@@ -180,11 +182,11 @@ public class BluetoothChecker {
 			//}
 
 			if (bluetooth_adapter.startDiscovery()) {
-				last_check_when_bt = System.currentTimeMillis();
+				last_check_when = System.currentTimeMillis();
 			}
 		} else if (bluetooth_state == BluetoothAdapter.STATE_TURNING_OFF ||
 				bluetooth_state == BluetoothAdapter.STATE_OFF) {
-			enabled_by_visor_bt = false;
+			enabled_by_visor = false;
 		}
 	}
 
@@ -194,7 +196,7 @@ public class BluetoothChecker {
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
 		BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 		if (state == BluetoothAdapter.STATE_CONNECTING || state == BluetoothAdapter.STATE_CONNECTED) {
-			if (enabled_by_visor_bt) {
+			if (enabled_by_visor) {
 				// If a device is at minimum attempting to connect, turn the adapter off instantly.
 				// Reason why I don't "just" disconnect the device or stop it from even trying to
 				// connect in the first place explained in ACTION_STATE_CHANGED's case.

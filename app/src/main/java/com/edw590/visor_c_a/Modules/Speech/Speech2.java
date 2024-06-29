@@ -165,7 +165,7 @@ public final class Speech2 implements IModuleInst {
 		// communication, and it's this module that takes care of it).
 		// EDIT: and there will be no restarts --> as long as the module is correctly programmed. But it must be on a
 		// thread... Can't be all in the same thread! Especially all this stuff to process the speeches.
-		return UtilsGeneral.isThreadWorking(main_handlerThread);
+		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public void destroy() {

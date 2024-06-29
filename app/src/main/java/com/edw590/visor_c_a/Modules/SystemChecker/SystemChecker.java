@@ -86,7 +86,7 @@ public class SystemChecker implements IModuleInst {
 			return false;
 		}
 
-		return UtilsGeneral.isThreadWorking(main_handlerThread);
+		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
 	}
 	@Override
 	public void destroy() {
@@ -155,7 +155,7 @@ public class SystemChecker implements IModuleInst {
 						UtilsAndroidConnectivity.getWifiEnabled(),
 						UtilsAndroidConnectivity.getBluetoothEnabled(),
 						(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
-						(long) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true),
+						Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true)),
 						is_interactive, UtilsAndroidPower.getScreenBrightness(),
 						wifi_networks.toString(), bluetooth_devices.toString());
 
