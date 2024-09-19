@@ -97,7 +97,7 @@ Note 2: all this is listed inside the app.
 --> I don't/reject/disapprove (reject action instead)
 ```
 
-## Current features (modules and submodules)
+## Current modules
 Here's a list of the modules the assistant currently have and what they do (module names are in bold for ease of read):
 | Name | Description |
 |-|-|
