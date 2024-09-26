@@ -465,6 +465,10 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			stopListening(true);
 
 			final List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+			if (matches == null || matches.isEmpty()) {
+				return;
+			}
+
 			final String first_match = matches.get(0).toLowerCase(Locale.ENGLISH);
 
 			System.out.println("--------------------------");
