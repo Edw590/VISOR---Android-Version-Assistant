@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.speech.SpeechRecognizer;
 
 import androidx.annotation.Nullable;
 
@@ -106,7 +107,8 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		// Update the Values Storage
 		UtilsRegistry.setData(ValuesRegistry.K_COMMANDS_RECOG_AVAILABLE, commands_recog_available, false);
 
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions) &&
+		return SpeechRecognizer.isRecognitionAvailable(UtilsContext.getContext()) &&
+				UtilsPermsAuths.checkSelfPermissions(min_required_permissions) &&
 				UtilsCheckHardwareFeatures.isMicrophoneSupported() && commands_recog_available;
 	}
 	// IModuleInst stuff
