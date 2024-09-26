@@ -61,13 +61,13 @@ public class BluetoothChecker {
 
 	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
-	void setBluetoothEnabled(final boolean enable) {
+	final void setBluetoothEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setBluetoothEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
-	void startBluetooth() {
+	final void startBluetooth() {
 		if (bluetooth_adapter != null) {
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.A2DP);
@@ -85,7 +85,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	void checkBluetooth() {
+	final void checkBluetooth() {
 		if (System.currentTimeMillis() >= last_check_when + waiting_time && bluetooth_adapter != null) {
 			if (bluetooth_adapter.isEnabled()) {
 				enabled_by_visor = false;
@@ -96,7 +96,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	void powerSaverChanged(final boolean enabled) {
+	final void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
 			waiting_time = DISCOVER_BT_EACH_PS;
 		} else {
@@ -104,7 +104,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	void discoveryStarted() {
+	final void discoveryStarted() {
 		// Don't forget other apps can start the discovery...
 		// In that case, use that advantage and don't start it for another period of time. Just listen to
 		// the broadcasts.
@@ -113,7 +113,7 @@ public class BluetoothChecker {
 		nearby_devices_bt.clear();
 	}
 
-	void discoveryFinished() {
+	final void discoveryFinished() {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
@@ -126,7 +126,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	void deviceFound(final Intent intent) {
+	static void deviceFound(final Intent intent) {
 		long time_detection = System.currentTimeMillis();
 		BluetoothDevice bluetoothDevice =	intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 		short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MAX_VALUE);
@@ -152,7 +152,7 @@ public class BluetoothChecker {
 		);
 	}
 
-	void bluetoothStateChanged(final Intent intent) {
+	final void bluetoothStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int bluetooth_state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
@@ -190,7 +190,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	void connectionStateChanged(final Intent intent) {
+	final void connectionStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);

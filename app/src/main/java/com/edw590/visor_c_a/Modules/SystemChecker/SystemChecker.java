@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
@@ -75,7 +76,7 @@ public class SystemChecker implements IModuleInst {
 	// of delay between each info sent.
 	public static final long CHECK_TIME = 5_000;
 
-	final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
+	@NonNull final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -323,7 +324,7 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Wi-Fi
 				case (WifiManager.RSSI_CHANGED_ACTION): {
-					wifi_checker.rssiChanged(intent);
+					WifiChecker.rssiChanged(intent);
 
 					break;
 				}
@@ -352,7 +353,7 @@ public class SystemChecker implements IModuleInst {
 					break;
 				}
 				case (BluetoothDevice.ACTION_FOUND): {
-					bluetooth_checker.deviceFound(intent);
+					BluetoothChecker.deviceFound(intent);
 
 					break;
 				}

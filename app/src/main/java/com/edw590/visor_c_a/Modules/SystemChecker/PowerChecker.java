@@ -57,7 +57,7 @@ public class PowerChecker {
 	 *
 	 * @param power_connected true if external power was connected, false otherwise
 	 */
-	void processBatteryPwrChg(final boolean power_connected) {
+	final void processBatteryPwrChg(final boolean power_connected) {
 		// Update the Values Storage
 		UtilsRegistry.setData(ValuesRegistry.K_POWER_CONNECTED, power_connected, false);
 
@@ -90,8 +90,8 @@ public class PowerChecker {
 	 * @param battery_lvl_scale the value from {@link BatteryManager#EXTRA_SCALE}
 	 * @param battery_present the value from {@link BatteryManager#EXTRA_STATUS}
 	 */
-	void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
-									 @Nullable final Boolean battery_present) {
+	final void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
+									@Nullable final Boolean battery_present) {
 		// Don't if the EXTRA_STATUS is -1, in case it's wrong (can be - checked on miTab Advance).
 		if (battery_lvl == -1 || battery_lvl_scale == -1) {
 			return;

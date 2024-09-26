@@ -58,13 +58,13 @@ public class WifiChecker {
 
 	public static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
 
-	void setWifiEnabled(final boolean enable) {
+	final void setWifiEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setWifiEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
-	void checkWifi() {
+	final void checkWifi() {
 		System.out.println(System.currentTimeMillis() >= last_check_when + waiting_time);
 		if (System.currentTimeMillis() >= last_check_when + waiting_time && wifi_manager != null) {
 			if (wifi_manager.isWifiEnabled()) {
@@ -80,7 +80,7 @@ public class WifiChecker {
 		}
 	}
 
-	void powerSaverChanged(final boolean enabled) {
+	final void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
 			waiting_time = SCAN_WIFI_EACH_PS;
 		} else {
@@ -88,13 +88,13 @@ public class WifiChecker {
 		}
 	}
 
-	void rssiChanged(final Intent intent) {
+	static void rssiChanged(final Intent intent) {
 		UtilsRegistry.setData(ValuesRegistry.K_DIST_ROUTER, UtilsSWA.
 				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 						UtilsSWA.DEFAULT_TX_POWER), true);
 	}
 
-	void wifiStateChanged(final Intent intent) {
+	final void wifiStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 
@@ -110,7 +110,7 @@ public class WifiChecker {
 		}
 	}
 
-	void scanResultsAvailable(final Intent intent) {
+	final void scanResultsAvailable(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		if (!intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, true)) {
@@ -149,8 +149,8 @@ public class WifiChecker {
 				);
 			}
 
-			if (nearby_aps_wifi.isEmpty() && attempts < 3) {
-				// In case we didn't get any results, try at most 3 times to be sure it wasn't an internal error or
+			if (nearby_aps_wifi.isEmpty() && attempts < 5) {
+				// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
 				// something (has happened. Networks in range and nothing returned).
 				System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR1");
 				attempts++;
@@ -170,7 +170,7 @@ public class WifiChecker {
 		}
 	}
 
-	void networkStateChanged(final Intent intent) {
+	final void networkStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		NetworkInfo.State state = ((NetworkInfo) intent.
