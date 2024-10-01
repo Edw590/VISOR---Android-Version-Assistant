@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -45,11 +46,11 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import ULComm.DeviceInfo;
 import ULComm.ULComm;
@@ -157,17 +158,25 @@ public class SystemChecker implements IModuleInst {
 					} else {
 						is_interactive = false;
 					}
-					DeviceInfo device_info = ULComm.createDeviceInfo(System.currentTimeMillis() / 1000, last_time_used,
+					AudioManager audioManager = (AudioManager) UtilsContext.getContext().getSystemService(Context.AUDIO_SERVICE);
+					DeviceInfo device_info = ULComm.createDeviceInfo(
+							System.currentTimeMillis() / 1000,
+							last_time_used,
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 							UtilsAndroidConnectivity.getWifiEnabled(),
 							UtilsAndroidConnectivity.getBluetoothEnabled(),
 							(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
 							Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true)),
-							is_interactive, UtilsAndroidPower.getScreenBrightness(),
-							wifi_networks.toString(), bluetooth_devices.toString());
+							is_interactive,
+							UtilsAndroidPower.getScreenBrightness(),
+							wifi_networks.toString(),
+							bluetooth_devices.toString(),
+							audioManager.getStreamVolume(AudioManager.STREAM_RING),
+							audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL
+					);
 
 					try {
-						device_info.sendInfo();
+						//device_info.sendInfo();
 					} catch (final Exception ignored) {
 						// Ignore no network connection
 					}

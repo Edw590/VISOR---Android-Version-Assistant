@@ -38,10 +38,9 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
-import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.ModulesList;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.TasksList;
 
 /**
@@ -143,7 +142,6 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		public void run() {
 			final int cmds_recog_module_index = ModulesList.getElementIndex(COMMANDS_RECOGNIZER);
 			while (true) {
-				UtilsServices.startService(CommandsRecognition.class, null, false, true);
 				//final PocketSphinxRecognition instance = (PocketSphinxRecognition) ModulesList.getElementValue(
 				//		pocket_sphinx_module_index, ModulesList.ELEMENT_INSTANCE);
 				//if (instance != null) {

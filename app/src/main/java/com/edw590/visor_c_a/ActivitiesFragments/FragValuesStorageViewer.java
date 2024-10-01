@@ -36,7 +36,7 @@ import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
 
-import Registry.Registry;
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
@@ -89,7 +89,7 @@ public final class FragValuesStorageViewer extends Fragment {
 		}*/
 
 		TextView textView = new TextView(requireContext());
-		textView.setText(Registry.getRegistryText());
+		textView.setText(UtilsSWA.getRegistryTextREGISTRY());
 		linearLayout.addView(textView);
 	}
 }

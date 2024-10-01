@@ -47,7 +47,7 @@ import com.edw590.visor_c_a.R;
 
 import java.util.Locale;
 
-import GPT.GPT;
+import GPTComm.GPTComm;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -90,11 +90,7 @@ public final class FragDevelopment extends Fragment {
 
 				final Context context = UtilsContext.getContext();
 
-				try {
-					GPT.sendText(txt_to_send.getText().toString());
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
+				GPTComm.sendText(txt_to_send.getText().toString());
 
 				//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);

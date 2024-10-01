@@ -21,7 +21,7 @@
 
 package com.edw590.visor_c_a.Registry;
 
-import Registry.Registry;
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>The static storage of all app global values.</p>
@@ -93,53 +93,53 @@ public final class ValuesRegistry {
 	 */
 	public static void registerRegistryKeys() {
 		// System Checker
-		Registry.registerValue(K_BATTERY_PRESENT, "Power - Battery Present",
-				"Is the battery present?", Registry.TYPE_BOOL);
-		Registry.registerValue(K_BATTERY_PERCENT, "Power - Battery Percentage",
-				"The battery percentage", Registry.TYPE_INT);
-		Registry.registerValue(K_POWER_CONNECTED, "Power - Power Connected",
-				"Is the device connected to power?", Registry.TYPE_BOOL);
-		Registry.registerValue(K_DIST_ROUTER, "Location - Distance to Wi-Fi router (m)",
-				"Distance in meters from the device to the Wi-Fi router of the current network", Registry.TYPE_INT);
-		Registry.registerValue(K_PUBLIC_IP, "Location - Public IP",
-				"The public IP address from the current network connection", Registry.TYPE_STRING);
-		Registry.registerValue(K_CURR_NETWORK_TYPE, "Location - Current network type",
-				"The current network type", Registry.TYPE_INT);
-		Registry.registerValue(K_AIRPLANE_MODE_ON, "Location - Airplane mode On",
-				"If the airplane mode is On", Registry.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_BATTERY_PRESENT, "Power - Battery Present",
+				"Is the battery present?", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_BATTERY_PERCENT, "Power - Battery Percentage",
+				"The battery percentage", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_POWER_CONNECTED, "Power - Power Connected",
+				"Is the device connected to power?", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_DIST_ROUTER, "Location - Distance to Wi-Fi router (m)",
+				"Distance in meters from the device to the Wi-Fi router of the current network", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_PUBLIC_IP, "Location - Public IP",
+				"The public IP address from the current network connection", UtilsSWA.TYPE_STRING);
+		UtilsSWA.registerValueREGISTRY(K_CURR_NETWORK_TYPE, "Location - Current network type",
+				"The current network type", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_AIRPLANE_MODE_ON, "Location - Airplane mode On",
+				"If the airplane mode is On", UtilsSWA.TYPE_INT);
 
 		// User Locator
-		Registry.registerValue(K_CURR_USER_LOCATION, "User Locator - Current user location",
-				"The current user location", Registry.TYPE_INT);
-		Registry.registerValue(K_IS_USER_SLEEPING, "User Locator - Is user sleeping",
-				"Is the user sleeping?", Registry.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_CURR_USER_LOCATION, "User Locator - Current user location",
+				"The current user location", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_IS_USER_SLEEPING, "User Locator - Is user sleeping",
+				"Is the user sleeping?", UtilsSWA.TYPE_BOOL);
 
 		// Telephony - Phone calls
-		Registry.registerValue(K_LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)",
-				"Timestamp of the last phone call (in milliseconds)", Registry.TYPE_LONG);
-		Registry.registerValue(K_CURR_PHONE_CALL_NUMBER, "Telephony - Number of current call",
-				"Number of the last phone call", Registry.TYPE_STRING);
+		UtilsSWA.registerValueREGISTRY(K_LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)",
+				"Timestamp of the last phone call (in milliseconds)", UtilsSWA.TYPE_LONG);
+		UtilsSWA.registerValueREGISTRY(K_CURR_PHONE_CALL_NUMBER, "Telephony - Number of current call",
+				"Number of the last phone call", UtilsSWA.TYPE_STRING);
 
 		// Telephony - SMS
-		Registry.registerValue(K_LAST_SMS_MSG_TIME, "Telephony - Last SMS msg when (ms)",
-				"Timestamp of the last SMS message (in milliseconds)", Registry.TYPE_LONG);
-		Registry.registerValue(K_LAST_SMS_MSG_NUMBER, "Telephony - Number of last SMS msg sender",
-				"Number of the last SMS message", Registry.TYPE_STRING);
+		UtilsSWA.registerValueREGISTRY(K_LAST_SMS_MSG_TIME, "Telephony - Last SMS msg when (ms)",
+				"Timestamp of the last SMS message (in milliseconds)", UtilsSWA.TYPE_LONG);
+		UtilsSWA.registerValueREGISTRY(K_LAST_SMS_MSG_NUMBER, "Telephony - Number of last SMS msg sender",
+				"Number of the last SMS message", UtilsSWA.TYPE_STRING);
 
 		// Audio Recorder
-		Registry.registerValue(K_IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally",
-				"Is VISOR recording audio internally?", Registry.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally",
+				"Is VISOR recording audio internally?", UtilsSWA.TYPE_BOOL);
 
 		// Flashlight
-		Registry.registerValue(K_MAIN_FLASHLIGHT_ENABLED, "Camera - Main flashlight enabled (Android 6+)",
-				"Is the main flashlight enabled? (Only available from Android Marshmallow onwards)", Registry.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_MAIN_FLASHLIGHT_ENABLED, "Camera - Main flashlight enabled (Android 6+)",
+				"Is the main flashlight enabled? (Only available from Android Marshmallow onwards)", UtilsSWA.TYPE_BOOL);
 
 		// Speech recognizers
-		Registry.registerValue(K_COMMANDS_RECOG_AVAILABLE, "Speech recognition - Commands available",
-				"Is the commands speech recognizer available?", Registry.TYPE_BOOL);
-		Registry.registerValue(K_POCKETSPHINX_RECOG_AVAILABLE, "Speech recognition - Hotword available",
-				"Is the hotword speech recognizer (PocketSphinx) available?", Registry.TYPE_BOOL);
-		Registry.registerValue(K_POCKETSPHINX_REQUEST_STOP, "Speech recognition - Hotword requested to stop",
-				"Was the hotword speech recognizer requested to stop?", Registry.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_COMMANDS_RECOG_AVAILABLE, "Speech recognition - Commands available",
+				"Is the commands speech recognizer available?", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_POCKETSPHINX_RECOG_AVAILABLE, "Speech recognition - Hotword available",
+				"Is the hotword speech recognizer (PocketSphinx) available?", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_POCKETSPHINX_REQUEST_STOP, "Speech recognition - Hotword requested to stop",
+				"Was the hotword speech recognizer requested to stop?", UtilsSWA.TYPE_BOOL);
 	}
 }

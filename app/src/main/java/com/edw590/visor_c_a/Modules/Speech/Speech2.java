@@ -62,7 +62,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
-import GPT.GPT;
+import GPTComm.GPTComm;
 
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
@@ -242,11 +242,11 @@ public final class Speech2 implements IModuleInst {
 	private final Thread infinity_thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-			GPT.setTimeBegin(System.currentTimeMillis());
+			GPTComm.setTimeBegin(System.currentTimeMillis());
 			while (true) {
 				// Keep getting the next sentence to speak from the server
-				String speak = GPT.getNextSpeechSentence();
-				if (GPT.END_ENTRY.equals(speak)) {
+				String speak = GPTComm.getNextSpeechSentence();
+				if (GPTComm.END_ENTRY.equals(speak)) {
 					continue;
 				}
 

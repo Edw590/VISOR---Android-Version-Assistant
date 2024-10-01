@@ -51,6 +51,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsAudio;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
+import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.edw590.visor_c_a.Modules.Speech.CONSTS_BC_Speech;
@@ -314,6 +315,9 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED));
 			is_listening = false;
 			is_working = false;
+
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 	};
 
@@ -462,6 +466,8 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onResults(final Bundle results) {
+			System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRR");
+
 			stopListening(true);
 
 			final List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);

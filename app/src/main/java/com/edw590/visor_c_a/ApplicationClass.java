@@ -31,6 +31,8 @@ import androidx.multidex.MultiDex;
 import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
+import com.edw590.visor_c_a.MainSrvc.MainSrvc;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
@@ -99,23 +101,46 @@ public final class ApplicationClass extends Application {
 			}
 		});
 
-		// Prepare the Advanced Commands Detection module commands array
-		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
-
-		// Give VISOR's website information to the libraries that need it
-		UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_URL,
-				PERSONAL_CONSTS_EOG.WEBSITE_PW);
-
+		// If this below is not here out of the if statement, the Commands Recognition service will crash on start. No
+		// idea why.
 		// Register keys in the Registry
 		ValuesRegistry.registerRegistryKeys();
 		SettingsRegistry.registerRegistryKeys();
 
-		UtilsMainSrvc.startMainService();
+		// Do these things on the main process only (which is on the one on which the Main Service has not started yet
+		// in the beginning of the app).
+		if (!UtilsServices.isServiceRunning(MainSrvc.class)) {
+			// Prepare the Advanced Commands Detection module commands array
+			ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 
-		if (!UtilsApp.isDeviceAdmin()) {
-			UtilsPermsAuths.forceDeviceAdmin();
+			// Give VISOR's website information to the libraries that need it
+			UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_DOMAIN,
+					PERSONAL_CONSTS_EOG.WEBSITE_PW);
+			UtilsSWA.initializeCommsChannels();
+			infinity_thread.start();
+
+			UtilsMainSrvc.startMainService();
+
+			if (!UtilsApp.isDeviceAdmin()) {
+				UtilsPermsAuths.forceDeviceAdmin();
+			}
 		}
 	}
+
+	Thread infinity_thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) {
+				UtilsSWA.startCommunicatorSERVER();
+
+				try {
+					Thread.sleep(1000);
+				} catch (final InterruptedException ignored) {
+					return;
+				}
+			}
+		}
+	});
 
 	@Override
 	protected void attachBaseContext(final Context base) {

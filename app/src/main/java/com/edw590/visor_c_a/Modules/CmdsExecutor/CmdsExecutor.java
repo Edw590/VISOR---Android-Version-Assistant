@@ -62,7 +62,7 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
 import ACD.ACD;
-import OIG.OIG;
+import OICComm.OICComm;
 
 /**
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
@@ -1051,7 +1051,7 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
 					if (UtilsNetwork.waitForNetwork(10)) {
-						final String weather_str = OIG.getWeather();
+						final String weather_str = OICComm.getWeather();
 						if (weather_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry sir, but I couldn't get the weather information.",
 									speech_priority, speech_mode2, null);
@@ -1095,7 +1095,7 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
 					if (UtilsNetwork.waitForNetwork(10)) {
-						final String news_str = OIG.getNews();
+						final String news_str = OICComm.getNews();
 						if (news_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry sir, but I couldn't get the news information.",
 									speech_priority, speech_mode2, null);

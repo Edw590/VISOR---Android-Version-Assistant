@@ -45,7 +45,7 @@ public final class UtilsRegistry {
 	 * @param update_if_same if the value should be updated even if it's the same as the current one
 	 */
 	public static void setData(@NonNull final String key, @NonNull final Object new_value, final boolean update_if_same) {
-		Registry.Value value = Registry.Registry.getValue(key);
+		UtilsSWA.Value value = UtilsSWA.UtilsSWA.getValueREGISTRY(key);
 		if (new_value instanceof Boolean) {
 			value.setBool((boolean) new_value, update_if_same);
 		} else if (new_value instanceof Integer) {
@@ -73,19 +73,19 @@ public final class UtilsRegistry {
 	 */
 	@NonNull
 	public static Object getData(@NonNull final String key, final boolean curr_data) {
-		Registry.Value value = Registry.Registry.getValue(key);
+		UtilsSWA.Value value = UtilsSWA.UtilsSWA.getValueREGISTRY(key);
 		switch (value.getType()) {
-			case Registry.Registry.TYPE_BOOL:
+			case UtilsSWA.UtilsSWA.TYPE_BOOL:
 				return value.getBool(curr_data);
-			case Registry.Registry.TYPE_INT:
+			case UtilsSWA.UtilsSWA.TYPE_INT:
 				return Math.toIntExact(value.getInt(curr_data));
-			case Registry.Registry.TYPE_STRING:
+			case UtilsSWA.UtilsSWA.TYPE_STRING:
 				return value.getString(curr_data);
-			case Registry.Registry.TYPE_LONG:
+			case UtilsSWA.UtilsSWA.TYPE_LONG:
 				return value.getLong(curr_data);
-			case Registry.Registry.TYPE_FLOAT:
+			case UtilsSWA.UtilsSWA.TYPE_FLOAT:
 				return value.getFloat(curr_data);
-			case Registry.Registry.TYPE_DOUBLE:
+			case UtilsSWA.UtilsSWA.TYPE_DOUBLE:
 				return value.getDouble(curr_data);
 			default:
 				throw new IllegalArgumentException("The value type is not supported: " + value.getType());
