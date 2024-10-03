@@ -52,7 +52,6 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
-import ULComm.DeviceInfo;
 import ULComm.ULComm;
 
 public class SystemChecker implements IModuleInst {
@@ -75,7 +74,8 @@ public class SystemChecker implements IModuleInst {
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
 	// EDIT 2: not sure what this above is about. 5 seconds now because of DeviceInfo.sendInfo() needing at most 5 secs
 	// of delay between each info sent.
-	public static final long CHECK_TIME = 5_000;
+	// EDIT 3: no more need for the 5 seconds. Now it's 30 to reduce data usage.
+	public static final long CHECK_TIME = 30_000;
 
 	@NonNull final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
@@ -131,13 +131,12 @@ public class SystemChecker implements IModuleInst {
 			long last_time_used = 0;
 			boolean is_interactive = false;
 
-			int first_3_times = 0;
+			boolean first_time = true;
 
 			while (true) {
-				if (first_3_times < 3) {
-					first_3_times++;
-				} else {
-					// Only send the info after the first 3 times (3 because yes), so that the devices are checked first.
+				if (!first_time) {
+					// Only send the info after the first time (30 secs should be enough), so that the ExtDevices are
+					// checked first.
 					StringBuilder wifi_networks = new StringBuilder();
 					for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
 						wifi_networks.append(wifi_ap.name).append("\u0001");
@@ -159,9 +158,7 @@ public class SystemChecker implements IModuleInst {
 						is_interactive = false;
 					}
 					AudioManager audioManager = (AudioManager) UtilsContext.getContext().getSystemService(Context.AUDIO_SERVICE);
-					DeviceInfo device_info = ULComm.createDeviceInfo(
-							System.currentTimeMillis() / 1000,
-							last_time_used,
+					ModsFileInfo.DeviceInfo device_info = ULComm.createDeviceInfo(
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 							UtilsAndroidConnectivity.getWifiEnabled(),
 							UtilsAndroidConnectivity.getBluetoothEnabled(),
@@ -176,7 +173,7 @@ public class SystemChecker implements IModuleInst {
 					);
 
 					try {
-						//device_info.sendInfo();
+						ULComm.sendDeviceInfo(device_info, last_time_used);
 					} catch (final Exception ignored) {
 						// Ignore no network connection
 					}
@@ -195,6 +192,8 @@ public class SystemChecker implements IModuleInst {
 
 				// Wi-Fi
 				wifi_checker.checkWifi();
+
+				first_time = false;
 
 				try {
 					Thread.sleep(CHECK_TIME);

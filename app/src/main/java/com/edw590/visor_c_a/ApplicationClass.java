@@ -107,8 +107,8 @@ public final class ApplicationClass extends Application {
 		ValuesRegistry.registerRegistryKeys();
 		SettingsRegistry.registerRegistryKeys();
 
-		// Do these things on the main process only (which is on the one on which the Main Service has not started yet
-		// in the beginning of the app).
+		// Do these things on the main process only (the one on which the Main Service has not started yet in the
+		// beginning of the app).
 		if (!UtilsServices.isServiceRunning(MainSrvc.class)) {
 			// Prepare the Advanced Commands Detection module commands array
 			ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
@@ -117,6 +117,9 @@ public final class ApplicationClass extends Application {
 			UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_DOMAIN,
 					PERSONAL_CONSTS_EOG.WEBSITE_PW);
 			UtilsSWA.initializeCommsChannels();
+			// Start the server communicator in 2 different threads because the infinity_thread sometimes stops who
+			// knows why. Maybe this way the communicator remains working?
+			UtilsSWA.startCommunicatorForeverSERVER();
 			infinity_thread.start();
 
 			UtilsMainSrvc.startMainService();
@@ -136,7 +139,6 @@ public final class ApplicationClass extends Application {
 				try {
 					Thread.sleep(1000);
 				} catch (final InterruptedException ignored) {
-					return;
 				}
 			}
 		}
