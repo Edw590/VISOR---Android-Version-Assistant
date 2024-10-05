@@ -35,10 +35,7 @@ public final class UtilsRegistry {
 	}
 
 	/**
-	 * <p>Update the value of the given key - this is a general function, which searches the key in all lists.</p>
-	 * <p>Don't forget the key must already exist on the lists (must be hard-coded).</p>
-	 * <br>
-	 * <p>This function also broadcasts the new value through the app with an app-internal broadcast.</p>
+	 * <p>Update the value of the given key.</p>
 	 *
 	 * @param key the key
 	 * @param new_value the new value

@@ -31,8 +31,6 @@ import androidx.multidex.MultiDex;
 import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
-import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
-import com.edw590.visor_c_a.MainSrvc.MainSrvc;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
@@ -107,26 +105,22 @@ public final class ApplicationClass extends Application {
 		ValuesRegistry.registerRegistryKeys();
 		SettingsRegistry.registerRegistryKeys();
 
-		// Do these things on the main process only (the one on which the Main Service has not started yet in the
-		// beginning of the app).
-		if (!UtilsServices.isServiceRunning(MainSrvc.class)) {
-			// Prepare the Advanced Commands Detection module commands array
-			ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
+		// Prepare the Advanced Commands Detection module commands array
+		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
 
-			// Give VISOR's website information to the libraries that need it
-			UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_DOMAIN,
-					PERSONAL_CONSTS_EOG.WEBSITE_PW);
-			UtilsSWA.initializeCommsChannels();
-			// Start the server communicator in 2 different threads because the infinity_thread sometimes stops who
-			// knows why. Maybe this way the communicator remains working?
-			UtilsSWA.startCommunicatorForeverSERVER();
-			infinity_thread.start();
+		// Give VISOR's website information to the libraries that need it
+		UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_DOMAIN,
+				PERSONAL_CONSTS_EOG.WEBSITE_PW);
+		UtilsSWA.initializeCommsChannels();
+		// Start the server communicator in 2 different threads because the infinity_thread sometimes stops who
+		// knows why. Maybe this way the communicator remains working?
+		UtilsSWA.startCommunicatorForeverSERVER();
+		infinity_thread.start();
 
-			UtilsMainSrvc.startMainService();
+		UtilsMainSrvc.startMainService();
 
-			if (!UtilsApp.isDeviceAdmin()) {
-				UtilsPermsAuths.forceDeviceAdmin();
-			}
+		if (!UtilsApp.isDeviceAdmin()) {
+			UtilsPermsAuths.forceDeviceAdmin();
 		}
 	}
 
