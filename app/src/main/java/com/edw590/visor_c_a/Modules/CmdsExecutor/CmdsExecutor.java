@@ -601,7 +601,7 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					final int battery_percentage = (int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true);
+					final int battery_percentage = (int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_LEVEL, true);
 					final String speak = "Battery percentage: " + battery_percentage + "%.";
 					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, null);
 

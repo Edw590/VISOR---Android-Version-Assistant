@@ -91,7 +91,6 @@ android {
 		// I'm only testing on API 27 at most. I'm compiling with 29 because the internal/hidden APIs on 26 or 27 don't
 		// work.
 		compileSdk 29
-		//noinspection MinSdkTooLow
 		minSdkVersion 16
 		//noinspection ExpiredTargetSdkVersion
 		targetSdkVersion 23

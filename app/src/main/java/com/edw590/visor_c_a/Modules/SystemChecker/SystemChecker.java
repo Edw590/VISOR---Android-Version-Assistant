@@ -74,8 +74,8 @@ public class SystemChecker implements IModuleInst {
 	// will all be checked instead of possibly waiting the minimum time (2.5 min as of this writing).
 	// EDIT 2: not sure what this above is about. 5 seconds now because of DeviceInfo.sendInfo() needing at most 5 secs
 	// of delay between each info sent.
-	// EDIT 3: no more need for the 5 seconds. Now it's 30 to reduce data usage.
-	public static final long CHECK_TIME = 30_000;
+	// EDIT 3: no more need for the 5 seconds. But now it's just because I want it checking constantly.
+	public static final long CHECK_TIME = 5_000;
 
 	@NonNull final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
@@ -114,8 +114,8 @@ public class SystemChecker implements IModuleInst {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 
-		UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
-		UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
+		UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled(),
+				false);
 
 		bluetooth_checker.startBluetooth();
 
@@ -157,13 +157,24 @@ public class SystemChecker implements IModuleInst {
 					} else {
 						is_interactive = false;
 					}
-					AudioManager audioManager = (AudioManager) UtilsContext.getContext().getSystemService(Context.AUDIO_SERVICE);
+					UtilsRegistry.setData(ValuesRegistry.K_DEVICE_IN_USE, is_interactive, false);
+
+					UtilsRegistry.setData(ValuesRegistry.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
+							false);
+
+					AudioManager audioManager = (AudioManager) UtilsContext.getContext().
+							getSystemService(Context.AUDIO_SERVICE);
+					UtilsRegistry.setData(ValuesRegistry.K_SOUND_VOLUME,
+							audioManager.getStreamVolume(AudioManager.STREAM_RING), false);
+					UtilsRegistry.setData(ValuesRegistry.K_SOUND_MUTED,
+							audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
+
 					ModsFileInfo.DeviceInfo device_info = ULComm.createDeviceInfo(
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 							UtilsAndroidConnectivity.getWifiEnabled(),
 							UtilsAndroidConnectivity.getBluetoothEnabled(),
 							(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
-							Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_PERCENT, true)),
+							Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_LEVEL, true)),
 							is_interactive,
 							UtilsAndroidPower.getScreenBrightness(),
 							wifi_networks.toString(),

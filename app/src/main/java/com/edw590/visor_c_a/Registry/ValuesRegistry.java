@@ -42,7 +42,7 @@ public final class ValuesRegistry {
 	/** Type: boolean. */
 	public static final String K_BATTERY_PRESENT = PREFIX + "BATTERY_PRESENT";
 	/** Type: int. */
-	public static final String K_BATTERY_PERCENT = PREFIX + "BATTERY_PERCENT";
+	public static final String K_BATTERY_LEVEL = PREFIX + "BATTERY_LEVEL";
 	/** Type: boolean. */
 	public static final String K_POWER_CONNECTED = PREFIX + "POWER_CONNECTED";
 	/** Type: int. */
@@ -53,6 +53,14 @@ public final class ValuesRegistry {
 	public static final String K_CURR_NETWORK_TYPE = PREFIX + "CURR_NETWORK_TYPE";
 	/** Type: boolean. */
 	public static final String K_AIRPLANE_MODE_ON = PREFIX + "AIRPLANE_MODE_ON";
+	/** Type: int. */
+	public static final String K_SCREEN_BRIGHTNESS = PREFIX + "SCREEN_BRIGHTNESS";
+	/** Type: int. */
+	public static final String K_SOUND_VOLUME = PREFIX + "SOUND_VOLUME";
+	/** Type: boolean. */
+	public static final String K_SOUND_MUTED = PREFIX + "SOUND_MUTED";
+	/** Type: boolean. */
+	public static final String K_DEVICE_IN_USE = PREFIX + "DEVICE_IN_USE";
 
 	// User Locator
 	/** Type: int. */
@@ -93,20 +101,30 @@ public final class ValuesRegistry {
 	 */
 	public static void registerRegistryKeys() {
 		// System Checker
-		UtilsSWA.registerValueREGISTRY(K_BATTERY_PRESENT, "Power - Battery Present",
+		UtilsSWA.registerValueREGISTRY(K_BATTERY_PRESENT, "System Checker - Battery Present",
 				"Is the battery present?", UtilsSWA.TYPE_BOOL);
-		UtilsSWA.registerValueREGISTRY(K_BATTERY_PERCENT, "Power - Battery Percentage",
-				"The battery percentage", UtilsSWA.TYPE_INT);
-		UtilsSWA.registerValueREGISTRY(K_POWER_CONNECTED, "Power - Power Connected",
+		UtilsSWA.registerValueREGISTRY(K_BATTERY_LEVEL, "System Checker - Battery Level",
+				"The battery level", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_POWER_CONNECTED, "System Checker - Power Connected",
 				"Is the device connected to power?", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_AIRPLANE_MODE_ON, "System Checker - Airplane mode On",
+				"Whether the airplane mode is On", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_CURR_NETWORK_TYPE, "System Checker - Current network type",
+				"The current network type", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_SCREEN_BRIGHTNESS, "System Checker - Screen Brightness",
+				"The screen brightness", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_SOUND_VOLUME, "System Checker - Sound Volume",
+				"The sound volume", UtilsSWA.TYPE_INT);
+		UtilsSWA.registerValueREGISTRY(K_SOUND_MUTED, "System Checker - Sound Muted",
+				"Whether the sound is muted", UtilsSWA.TYPE_BOOL);
+		UtilsSWA.registerValueREGISTRY(K_DEVICE_IN_USE, "System Checker - Device In Use",
+				"Whether the device is being used", UtilsSWA.TYPE_BOOL);
+
+		// TODO: User Locator
 		UtilsSWA.registerValueREGISTRY(K_DIST_ROUTER, "Location - Distance to Wi-Fi router (m)",
 				"Distance in meters from the device to the Wi-Fi router of the current network", UtilsSWA.TYPE_INT);
 		UtilsSWA.registerValueREGISTRY(K_PUBLIC_IP, "Location - Public IP",
 				"The public IP address from the current network connection", UtilsSWA.TYPE_STRING);
-		UtilsSWA.registerValueREGISTRY(K_CURR_NETWORK_TYPE, "Location - Current network type",
-				"The current network type", UtilsSWA.TYPE_INT);
-		UtilsSWA.registerValueREGISTRY(K_AIRPLANE_MODE_ON, "Location - Airplane mode On",
-				"If the airplane mode is On", UtilsSWA.TYPE_INT);
 
 		// User Locator
 		UtilsSWA.registerValueREGISTRY(K_CURR_USER_LOCATION, "User Locator - Current user location",

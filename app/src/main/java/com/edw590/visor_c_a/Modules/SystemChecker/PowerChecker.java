@@ -101,7 +101,7 @@ public class PowerChecker {
 		bat_info.battery_percentage = battery_lvl * 100 / battery_lvl_scale;
 
 		// Update the Values Storage
-		UtilsRegistry.setData(ValuesRegistry.K_BATTERY_PERCENT, bat_info.battery_percentage, false);
+		UtilsRegistry.setData(ValuesRegistry.K_BATTERY_LEVEL, bat_info.battery_percentage, false);
 
 		// If the EXTRA_PRESENT can be wrong, check if the battery level is different than 0 and 100, depending on the
 		// device version, as documented here: https://source.android.com/docs/core/power/batteryless.
