@@ -34,67 +34,65 @@ public final class ValuesRegistry {
 	private ValuesRegistry() {
 	}
 
-	static final String PREFIX = "VALUES_";
-
 	// Note: if the value is not being updated, remove it from the list
 
 	// System Checker
 	/** Type: boolean. */
-	public static final String K_BATTERY_PRESENT = PREFIX + "BATTERY_PRESENT";
+	public static final String K_BATTERY_PRESENT = "BATTERY_PRESENT";
 	/** Type: int. */
-	public static final String K_BATTERY_LEVEL = PREFIX + "BATTERY_LEVEL";
+	public static final String K_BATTERY_LEVEL = "BATTERY_LEVEL";
 	/** Type: boolean. */
-	public static final String K_POWER_CONNECTED = PREFIX + "POWER_CONNECTED";
+	public static final String K_POWER_CONNECTED = "POWER_CONNECTED";
 	/** Type: int. */
-	public static final String K_DIST_ROUTER = PREFIX + "DIST_ROUTER";
+	public static final String K_DIST_ROUTER = "DIST_ROUTER";
 	/** Type: String. */
-	public static final String K_PUBLIC_IP = PREFIX + "PUBLIC_IP";
+	public static final String K_PUBLIC_IP = "PUBLIC_IP";
 	/** Type: int. */
-	public static final String K_CURR_NETWORK_TYPE = PREFIX + "CURR_NETWORK_TYPE";
+	public static final String K_CURR_NETWORK_TYPE = "CURR_NETWORK_TYPE";
 	/** Type: boolean. */
-	public static final String K_AIRPLANE_MODE_ON = PREFIX + "AIRPLANE_MODE_ON";
+	public static final String K_AIRPLANE_MODE_ON = "AIRPLANE_MODE_ON";
 	/** Type: int. */
-	public static final String K_SCREEN_BRIGHTNESS = PREFIX + "SCREEN_BRIGHTNESS";
+	public static final String K_SCREEN_BRIGHTNESS = "SCREEN_BRIGHTNESS";
 	/** Type: int. */
-	public static final String K_SOUND_VOLUME = PREFIX + "SOUND_VOLUME";
+	public static final String K_SOUND_VOLUME = "SOUND_VOLUME";
 	/** Type: boolean. */
-	public static final String K_SOUND_MUTED = PREFIX + "SOUND_MUTED";
+	public static final String K_SOUND_MUTED = "SOUND_MUTED";
 	/** Type: boolean. */
-	public static final String K_DEVICE_IN_USE = PREFIX + "DEVICE_IN_USE";
+	public static final String K_DEVICE_IN_USE = "DEVICE_IN_USE";
 
 	// User Locator
 	/** Type: int. */
-	public static final String K_CURR_USER_LOCATION = PREFIX + "CURR_USER_LOCATION";
+	public static final String K_CURR_USER_LOCATION = "CURR_USER_LOCATION";
 	/** Type: boolean. */
-	public static final String K_IS_USER_SLEEPING = PREFIX + "IS_USER_SLEEPING";
+	public static final String K_IS_USER_SLEEPING = "IS_USER_SLEEPING";
 
 	// Telephony - Phone calls
 	/** Type: long. */
-	public static final String K_LAST_PHONE_CALL_TIME = PREFIX + "LAST_PHONE_CALL_TIME";
+	public static final String K_LAST_PHONE_CALL_TIME = "LAST_PHONE_CALL_TIME";
 	/** Type: String. */
-	public static final String K_CURR_PHONE_CALL_NUMBER = PREFIX + "CURR_PHONE_CALL_NUMBER";
+	public static final String K_CURR_PHONE_CALL_NUMBER = "CURR_PHONE_CALL_NUMBER";
 
 	// Telephony - SMS
 	/** Type: long. */
-	public static final String K_LAST_SMS_MSG_TIME = PREFIX + "LAST_SMS_MSG_TIME";
+	public static final String K_LAST_SMS_MSG_TIME = "LAST_SMS_MSG_TIME";
 	/** Type: String. */
-	public static final String K_LAST_SMS_MSG_NUMBER = PREFIX + "LAST_SMS_MSG_NUMBER";
+	public static final String K_LAST_SMS_MSG_NUMBER = "LAST_SMS_MSG_NUMBER";
 
 	// Audio Recorder
 	/** Type: boolean. */
-	public static final String K_IS_RECORDING_AUDIO_INTERNALLY = PREFIX + "IS_RECORDING_AUDIO_INTERNALLY";
+	public static final String K_IS_RECORDING_AUDIO_INTERNALLY = "IS_RECORDING_AUDIO_INTERNALLY";
 
 	// Flashlight
 	/** Type: boolean. */
-	public static final String K_MAIN_FLASHLIGHT_ENABLED = PREFIX + "MAIN_FLASHLIGHT_ENABLED";
+	public static final String K_MAIN_FLASHLIGHT_ENABLED = "MAIN_FLASHLIGHT_ENABLED";
 
 	// Speech recognizers
 	/** Type: boolean. */
-	public static final String K_COMMANDS_RECOG_AVAILABLE = PREFIX + "COMMANDS_RECOG_AVAILABLE";
+	public static final String K_COMMANDS_RECOG_AVAILABLE = "COMMANDS_RECOG_AVAILABLE";
 	/** Type: boolean. */
-	public static final String K_POCKETSPHINX_RECOG_AVAILABLE = PREFIX + "POCKETSPHINX_RECOG_AVAILABLE";
+	public static final String K_POCKETSPHINX_RECOG_AVAILABLE = "POCKETSPHINX_RECOG_AVAILABLE";
 	/** Type: boolean. */
-	public static final String K_POCKETSPHINX_REQUEST_STOP = PREFIX + "POCKETSPHINX_RECOG_STOPPED";
+	public static final String K_POCKETSPHINX_REQUEST_STOP = "POCKETSPHINX_RECOG_STOPPED";
 
 	/**
 	 * <p>Registers all the keys in the registry.</p>
