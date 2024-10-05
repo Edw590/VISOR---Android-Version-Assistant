@@ -144,9 +144,10 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		speech_recognizer_intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
-		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000);
+		// THESE BELOW MUST BE LONGS EXPLICITLY!!! Or the recognizer will stop working who knows why.
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L);
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L);
+		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L);
 		speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
 		//speech_recognizer_intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 	}
@@ -200,8 +201,10 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		}
 		if (stop_now) {
 			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 
-			return START_STICKY;
+			return START_NOT_STICKY;
 		}
 
 		// DON'T WASTE TIME TRYING TO HAVE THIS AS AN INSTANTIATED MODULE
@@ -224,7 +227,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 				// Wait 1 second if the microphone is busy, to see if it stops being.
 				Thread.sleep(1000);
 			} catch (final InterruptedException ignored) {
-				return START_STICKY;
+				return START_NOT_STICKY;
 			}
 		}
 
@@ -235,9 +238,13 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// knows), so warn about it and don't do anything.
 			final String speak = "Resources are busy";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+
+			stopListening(true);
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	boolean startListening() {
@@ -315,9 +322,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STOPPED));
 			is_listening = false;
 			is_working = false;
-
-			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 	};
 
@@ -427,6 +431,8 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			System.out.println(error);
 
 			stopListening(true);
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 
 		@Override
@@ -496,6 +502,10 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			//		}
 			//	}
 			//}
+
+			stopListening(true);
+			stopSelf();
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 		}
 
 		@Override
@@ -562,6 +572,8 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					// If the recognizer got frozen, stop listening.
 					// Also don't check the time if the method has no wait time (MAX_VALUE).
 					stopListening(false);
+					stopSelf();
+					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 				}
 				try {
 					Thread.sleep(1_000);
