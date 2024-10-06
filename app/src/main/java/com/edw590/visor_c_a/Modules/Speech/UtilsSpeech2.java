@@ -56,7 +56,7 @@ public final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Use this right after calling {@link UtilsSpeech2BC#speak(String, int, int, Runnable)} to know if VISOR
+	 * <p>Use this right after calling {@link UtilsSpeech2BC#speak(String, int, int, boolean, Runnable)} to know if VISOR
 	 * <em>might</em> actually speak (means the ringer mode is in NORMAL - that's what is checked here).</p>
 	 * <p>"Might" because if he'll speak or not is checked right before the speech takes place, this is just an
 	 * approximation (and that's why it should be called right after the broadcast function - to give a bit of time).</p>

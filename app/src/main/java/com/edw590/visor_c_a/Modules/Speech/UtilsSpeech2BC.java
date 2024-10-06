@@ -22,12 +22,17 @@
 package com.edw590.visor_c_a.Modules.Speech;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.TasksList;
+
+import GPTComm.GPTComm;
 
 /**
  * <p>Functions to call to send information to {@link Speech2}, by using broadcasts.</p>
@@ -44,11 +49,19 @@ public final class UtilsSpeech2BC {
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_CALL_SPEAK}, but
 	 * {@code bypass_no_sound = true}.</p>
 	 *
-	 * @return the speech ID
+	 * @return the speech ID or an empty string if the device is connected to the internet and the text was sent to the
+	 * GPTComm library to be changed by Llama3
 	 */
 	@NonNull
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority,
-								final int mode, @Nullable final Runnable after_speaking) {
+							   final int mode, final boolean auto_gpt, @Nullable final Runnable after_speaking) {
+		if (false && auto_gpt && after_speaking == null && UtilsNetwork.getCurrentNetworkType() != ConnectivityManager.TYPE_NONE) {
+			GPTComm.sendText("From " + PERSONAL_CONSTS_EOG.DEVICE_DESCRIPTION + " " + PERSONAL_CONSTS_EOG.DEVICE_TYPE +
+					": write a concise sentence saying \"" + txt_to_speak + "\".");
+
+			return "";
+		}
+
 		final Intent broadcast_intent = new Intent(CONSTS_BC_Speech.ACTION_CALL_SPEAK);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1, txt_to_speak);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_2, mode);

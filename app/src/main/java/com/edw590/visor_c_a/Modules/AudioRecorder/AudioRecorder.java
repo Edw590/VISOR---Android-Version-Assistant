@@ -134,7 +134,7 @@ public final class AudioRecorder implements IModuleInst {
 		if (start) {
 			if (is_recording) {
 				final String speak = "Already on it sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 			} else {
 				final Runnable runnable = new Runnable() {
 					@Override
@@ -146,20 +146,20 @@ public final class AudioRecorder implements IModuleInst {
 					}
 				};
 				final String speak = "Starting now, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, runnable);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, runnable);
 			}
 		} else {
 			if (is_recording) {
 				stopRecording();
 				final String speak = "Stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 				if (restart_pocketsphinx) {
 					UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 				}
 			} else {
 				final String speak = "Already stopped, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 1 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 			return ERR_PERM_CAP_AUDIO;
 		}
@@ -210,7 +210,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 2 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 			return ERR_CREATE_FILE;
 		}
@@ -224,7 +224,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 3 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 			file.delete();
 
 			return ERR_PREP_RECORDING;
@@ -237,7 +237,7 @@ public final class AudioRecorder implements IModuleInst {
 			stopRecording();
 
 			final String speak = "Error 4 sir.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 			file.delete();
 
 			return ERR_PERM_CAP_AUDIO_OR_MIC_BUSY;

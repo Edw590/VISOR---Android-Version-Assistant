@@ -319,7 +319,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
 				UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, false, false);
 				UtilsSpeech2BC.speak("Listening in the background again...", Speech2.PRIORITY_USER_ACTION,
-						Speech2.MODE2_BYPASS_NO_SND, null);
+						Speech2.MODE2_BYPASS_NO_SND, true, null);
 			}
 
 			System.out.println("+++ Matched +++");

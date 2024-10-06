@@ -236,7 +236,7 @@ public final class FragDevelopment extends Fragment {
 			@Override
 			public void onClick(final View v) {
 				final String speak = txt_to_speech.getText().toString();
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
 				//speech3.speak(speak, SpeechQueue.PRIORITY_LOW, SpeechQueue.MODE_DEFAULT, 0);
 			}
 		});

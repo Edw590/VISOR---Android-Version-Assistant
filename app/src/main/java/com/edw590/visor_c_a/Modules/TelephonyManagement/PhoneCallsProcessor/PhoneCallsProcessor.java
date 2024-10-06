@@ -218,12 +218,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Incoming call from a private number! Incoming " +
 							"call from a private number!";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
 							number_name + ". Do you want to do anything?";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2.CALL_COMMANDS_RECOG);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, UtilsSpeech2.CALL_COMMANDS_RECOG);
 				}
 				break;
 			}
@@ -233,12 +233,12 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Sir, sir, attention! Call waiting from a private number! Call " +
 							"waiting from a private number!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, call waiting from " + number_name + ". Call waiting from " +
 							number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 				}
 				break;
 			}
@@ -247,11 +247,11 @@ public final class PhoneCallsProcessor implements IModuleInst {
 			case (CALL_PHASE_LOST_LATE): {
 				if (UtilsTelephony.isPrivateNumber(number)) {
 					final String speak = "Missed call from a private number.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Missed call from " + number_name + ".";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
 				}
 				break;
 			}

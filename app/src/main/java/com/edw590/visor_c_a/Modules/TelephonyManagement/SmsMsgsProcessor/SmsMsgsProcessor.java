@@ -137,7 +137,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 				speak = "Sir, new message from " + UtilsTelephony.getWhatToSayAboutNumber(sender) + ".";
 				UtilsRegistry.setData(ValuesRegistry.K_LAST_SMS_MSG_NUMBER, sender, false);
 			}
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, true, null);
 		}
 	}
 

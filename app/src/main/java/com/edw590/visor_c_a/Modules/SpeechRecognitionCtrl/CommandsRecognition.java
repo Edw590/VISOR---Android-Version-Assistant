@@ -237,7 +237,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// Else, if the microphone doesn't stop being busy, means it's in use elsewhere (recording, in a call, who
 			// knows), so warn about it and don't do anything.
 			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 
 			stopListening(true);
 			stopSelf();
@@ -276,7 +276,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		wait = true;
 		// Don't notify about the speech if there was no sound - there's already a notification.
 		listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION, Speech2.MODE1_NO_NOTIF,
-				null);
+				false, null);
 		visor_spoke = UtilsSpeech2.mightSpeak();
 
 		// Right before calling startListening() but also before the while true just in case it would get stuck.

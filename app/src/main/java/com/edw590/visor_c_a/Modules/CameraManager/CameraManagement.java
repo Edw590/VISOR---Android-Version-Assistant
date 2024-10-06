@@ -226,7 +226,7 @@ public final class CameraManagement implements IModuleInst {
 				getSystemService(Context.DEVICE_POLICY_SERVICE);
 		if (devicePolicyManager != null && devicePolicyManager.getCameraDisabled(null)) {
 			final String speak = "Error - Cameras disabled by a Device Administrator.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 			return CAMERA_DISABLED_ADMIN;
 		}
@@ -246,7 +246,7 @@ public final class CameraManagement implements IModuleInst {
 							camera_old = UtilsCameraManager.openCamera(true);
 							if (camera_old == null) {
 								final String speak = "Error - Camera already in use.";
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 								return CAMERA_IN_USAGE;
 							}
@@ -257,7 +257,7 @@ public final class CameraManagement implements IModuleInst {
 				}
 			} else {
 				final String speak = "Error - No camera flash available.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 				return NO_CAMERA_FLASH;
 			}
@@ -274,7 +274,7 @@ public final class CameraManagement implements IModuleInst {
 						System.out.println("################################");
 					} else {
 						final String speak = "Error - Camera already in use.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 						return CAMERA_IN_USAGE;
 					}
@@ -476,7 +476,7 @@ public final class CameraManagement implements IModuleInst {
 					if (CONSTS_BC_CameraManag.ACTION_PICTURE_TAKEN_NO_FOCUS.equals(intent_action)) {
 						final String speak = "Notice - It was not possible to focus the camera, but the picture was" +
 								"still take.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 					}
 
 					break;
@@ -485,7 +485,7 @@ public final class CameraManagement implements IModuleInst {
 					takePictureOld = null;
 
 					final String speak = "Error - The picture file has been deleted before it could start being written to.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 					break;
 				}
@@ -493,7 +493,7 @@ public final class CameraManagement implements IModuleInst {
 					takePictureOld = null;
 
 					final String speak = "Error - It was not possible to create a picture file.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 					break;
 				}
@@ -501,7 +501,7 @@ public final class CameraManagement implements IModuleInst {
 					takePictureOld = null;
 
 					final String speak = "Error - It was not possible to open the camera.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 					break;
 				}
@@ -509,7 +509,7 @@ public final class CameraManagement implements IModuleInst {
 					takePictureOld = null;
 
 					final String speak = "Error - An error occurred while writing to the picture file.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
 
 					break;
 				}
