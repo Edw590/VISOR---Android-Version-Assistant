@@ -246,7 +246,12 @@ public final class Speech2 implements IModuleInst {
 			while (true) {
 				// Keep getting the next sentence to speak from the server
 				String speak = GPTComm.getNextSpeechSentence();
-				if (GPTComm.END_ENTRY.equals(speak)) {
+				if (speak.isEmpty() || GPTComm.END_ENTRY.equals(speak)) {
+					try {
+						Thread.sleep(1000);
+					} catch (final InterruptedException ignored) {
+					}
+
 					continue;
 				}
 

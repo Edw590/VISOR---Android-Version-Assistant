@@ -115,7 +115,7 @@ public final class PreferencesManager implements IModuleInst {
 						if (StaticPreferences.writePrefsFile(to_write)) {
 							last_save_time = System.currentTimeMillis();
 							final String speak = "The preferences file has now been saved successfully.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 							save_failed = false;
 						}
 					}
@@ -169,7 +169,7 @@ public final class PreferencesManager implements IModuleInst {
 						} else {
 							save_failed = true;
 							final String speak = "Warning - the preferences file could not be saved!";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 						}
 					}
 

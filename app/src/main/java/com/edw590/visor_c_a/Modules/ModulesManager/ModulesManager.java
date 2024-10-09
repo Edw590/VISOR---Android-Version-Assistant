@@ -111,7 +111,7 @@ public final class ModulesManager implements IModuleInst {
 							if (!module_startup) {
 								final String speak = "Attention - Module restarted: " +
 										ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 							}
 						}
 					} else {
@@ -120,7 +120,7 @@ public final class ModulesManager implements IModuleInst {
 							final String speak = "Attention - The following module stopped being supported by " +
 									"hardware or application permissions changes: " +
 									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 						}
 
 						// If the user disabled some permission, or some hardware component was disconnected and

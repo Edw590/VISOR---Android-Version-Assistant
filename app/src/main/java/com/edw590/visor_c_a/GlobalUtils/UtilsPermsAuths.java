@@ -65,12 +65,12 @@ public final class UtilsPermsAuths {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "No permissions left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 		}
 	}
 
@@ -84,12 +84,12 @@ public final class UtilsPermsAuths {
 		if (auths_left == 0) {
 			if (warn_success) {
 				final String speak = "No authorizations left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
 			}
 		} else {
 			final String speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 					"authorizations left to grant: " + auths_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
 		}
 	}
 

@@ -52,8 +52,6 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
-import ULComm.ULComm;
-
 public class SystemChecker implements IModuleInst {
 
 	private final HandlerThread main_handlerThread =
@@ -169,7 +167,7 @@ public class SystemChecker implements IModuleInst {
 					UtilsRegistry.setData(ValuesRegistry.K_SOUND_MUTED,
 							audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
 
-					ModsFileInfo.DeviceInfo device_info = ULComm.createDeviceInfo(
+					/*TODO: ModsFileInfo.DeviceInfo device_info = ULComm.createDeviceInfo(
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 							UtilsAndroidConnectivity.getWifiEnabled(),
 							UtilsAndroidConnectivity.getBluetoothEnabled(),
@@ -187,7 +185,7 @@ public class SystemChecker implements IModuleInst {
 						ULComm.sendDeviceInfo(device_info, last_time_used);
 					} catch (final Exception ignored) {
 						// Ignore no network connection
-					}
+					}*/
 				}
 
 				// Network type

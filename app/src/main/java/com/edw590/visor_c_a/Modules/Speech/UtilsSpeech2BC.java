@@ -55,9 +55,9 @@ public final class UtilsSpeech2BC {
 	@NonNull
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority,
 							   final int mode, final boolean auto_gpt, @Nullable final Runnable after_speaking) {
-		if (false && auto_gpt && after_speaking == null && UtilsNetwork.getCurrentNetworkType() != ConnectivityManager.TYPE_NONE) {
-			GPTComm.sendText("From " + PERSONAL_CONSTS_EOG.DEVICE_DESCRIPTION + " " + PERSONAL_CONSTS_EOG.DEVICE_TYPE +
-					": write a concise sentence saying \"" + txt_to_speak + "\".");
+		if (auto_gpt && after_speaking == null && UtilsNetwork.getCurrentNetworkType() != ConnectivityManager.TYPE_NONE) {
+			GPTComm.sendText("Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise different " +
+					"sentence saying \"" + txt_to_speak + "\".");
 
 			return "";
 		}

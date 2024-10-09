@@ -198,7 +198,7 @@ public final class CmdsExecutor implements IModuleInst {
 		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
 					"detected.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
 
 			return APU_UNAVAILABLE;
 		}
@@ -258,7 +258,7 @@ public final class CmdsExecutor implements IModuleInst {
 			UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 			final String speak = "WARNING! There was a problem processing the commands sir. This needs a fix. " +
 					"The error was the following: " + cmds_info_str + ". You said: " + sentence_str;
-			UtilsSpeech2BC.speak(speak, speech_priority, Speech2.MODE1_ALWAYS_NOTIFY, true, null);
+			UtilsSpeech2BC.speak(speak, speech_priority, Speech2.MODE1_ALWAYS_NOTIFY, false, null);
 			System.out.println("EXECUTOR - ERR_PROC_CMDS");
 
 			return ERR_PROC_CMDS;
@@ -320,7 +320,8 @@ public final class CmdsExecutor implements IModuleInst {
 
 					switch (UtilsAndroidConnectivity.setWifiEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
-							final String speak = "Wi-Fi toggled.";
+							final String speak = "Wi-Fi turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+									"on." : "off.");
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 							break;
@@ -378,7 +379,8 @@ public final class CmdsExecutor implements IModuleInst {
 
 					switch (UtilsAndroidConnectivity.setMobileDataEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
-							final String speak = "Mobile Data connection toggled.";
+							final String speak = "Mobile Data connection turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+									"on." : "off.");
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 							break;
@@ -424,7 +426,8 @@ public final class CmdsExecutor implements IModuleInst {
 
 					switch (UtilsAndroidConnectivity.setBluetoothEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
-							final String speak = "Bluetooth toggled.";
+							final String speak = "Bluetooth turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+									"on." : "off.");
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 							break;
@@ -538,7 +541,8 @@ public final class CmdsExecutor implements IModuleInst {
 						speak = "The device not in a phone call.";
 					} else {
 						if (UtilsAndroidTelephony.setCallSpeakerphoneEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
-							speak = "Speakerphone toggled.";
+							speak = "Speakerphone turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+									"on." : "off.");
 						} else {
 							speak = "Audio service not available on the device.";
 						}
@@ -554,7 +558,8 @@ public final class CmdsExecutor implements IModuleInst {
 
 					switch (UtilsAndroidConnectivity.setAirplaneModeEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 						case (UtilsShell.ErrCodes.NO_ERR): {
-							final String speak = "Airplane Mode toggled.";
+							final String speak = "Airplane Mode turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+									"on." : "off.");
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 							break;
@@ -890,7 +895,8 @@ public final class CmdsExecutor implements IModuleInst {
 					} else {
 						switch (UtilsAndroidPower.setBatterySaverEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
 							case (UtilsShell.ErrCodes.NO_ERR): {
-								final String speak = "Battery Saver Mode toggled.";
+								final String speak = "Battery Saver Mode turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
+										"on." : "off.");
 								UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 								break;
@@ -1168,10 +1174,10 @@ public final class CmdsExecutor implements IModuleInst {
 		}*/
 
 		if (some_cmd_detected) {
-			if (ask_anything_else && !internal_usage) {
+			/*if (ask_anything_else && !internal_usage) {
 				final String speak = "Anything else sir?";
 				UtilsSpeech2BC.speak(speak, speech_priority, 0, true, UtilsSpeech2.CALL_COMMANDS_RECOG);
-			}
+			}*/
 
 			return SOMETHING_EXECUTED;
 		} else {
