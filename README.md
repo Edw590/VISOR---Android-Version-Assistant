@@ -13,6 +13,8 @@ They say "debug" at the end because they're debug type APKs, meaning you can use
 
 They're pre-releases because I don't have any settings yet. So everything is how I programmed it and can't be changed. When I have a settings page I might start releasing the versions as actual releases.
 
+**NOTE: ignore the "app created for old Android version" warning when installing! That enables me to use system features now locked on newer Android releases!**
+
 ## Test Android versions and devices (in order of use)
 - Oreo 8.1 on a Blackview BV9500 (most used to test - my current phone). This is also the Android version I'm making the app for (can't test it on newer than 8.1 anyway) - though I think most of the app (or everything) works on newer versions due to backwards compatibility, so feel free to install it on newer Android versions.
 - KitKat 4.4.2 on my Wolder miTab Advance tablet
@@ -108,7 +110,7 @@ Here's a list of the modules the assistant currently have and what they do (modu
 | **Speech Recognition** | This is a module which contains 2 different speech recognizers: the commands one and PocketSphinx from the CMUSphinx project. PocketSphinx is used for hotword recognition (to call the assistant by saying his name - it's not very accurate unfortunately, but there's really nothing I can do about it), which then calls the commands speech recognition (the default one of the device - like Google or Samsung's) to recognize normal speech (very good accuracy, and in which you can say commands, like "turn on the wifi and the bluetooth and what time is it"). You can also call the commands recognizer directly by pressing and holding the Power key while the screen is on, on Android versions up to Pie (Android 9) or by holding the Home button (if you set VISOR as the default) or still by holding the headset button (if you set VISOR as default). |
 | **Phone Calls Processor** | Processes any phone calls made by and to the phone and warns about incoming, waiting and lost calls, currently. For now, sometimes it may warn that a call was lost only after all calls have been terminated - that's a problem of the current implementation of the call state detection, which shall be improved some time (could take some time, as it's not a big deal to me). |
 | **SMS messages Processor** | Processes any messages received on the phone and warns who is sending the message (it won't say what the message is - if I implement that, I'll have to put that to a limited list or something. I won't put it to all contacts). |
-| **Speech module** | Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. |
+| **Speech** | Gets the assistant to speak. It can have customizable priorities (currently, Low, Medium, User Action, High and Critical) and can skip speeches. |
 | **System Checker** | Checks the state of the system (state of the Wi-Fi, Bluetooth, battery, screen, etc) and sends it to the server. Useful to be able to locate the device and possibly the user, in case the server decides the user has the device with them based on the device usage. It also warns about battery levels. |
 
 Note: not all the modules that appear on Modules Status are here. Some are just for internal management (like Modules Manager, which makes sure all the other modules are working perfectly - this is not really a "feature", so I didn't include it above) or any other minor things.
