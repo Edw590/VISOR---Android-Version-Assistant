@@ -282,8 +282,6 @@ public final class Speech2 implements IModuleInst {
 					System.out.println("1111111111111111111111111111111111");
 					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					tts.setSpeechRate(0.75f);
-
 					if (!isTtsAvailable()) {
 						if (from_constructor || tts_working) {
 							// This won't speak - will show a notification instead, so no problem in calling
