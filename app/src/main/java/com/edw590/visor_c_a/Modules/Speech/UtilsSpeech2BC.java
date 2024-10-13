@@ -57,7 +57,7 @@ public final class UtilsSpeech2BC {
 							   final int mode, final boolean auto_gpt, @Nullable final Runnable after_speaking) {
 		if (auto_gpt && after_speaking == null && UtilsNetwork.getCurrentNetworkType() != ConnectivityManager.TYPE_NONE) {
 			GPTComm.sendText("Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise different " +
-					"sentence saying \"" + txt_to_speak + "\".");
+					"sentence saying \"" + txt_to_speak + "\".", false);
 
 			return "";
 		}

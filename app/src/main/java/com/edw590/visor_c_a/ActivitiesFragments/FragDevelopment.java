@@ -90,7 +90,7 @@ public final class FragDevelopment extends Fragment {
 
 				final Context context = UtilsContext.getContext();
 
-				if (!GPTComm.sendText(txt_to_send.getText().toString())) {
+				if (!GPTComm.sendText(txt_to_send.getText().toString(), true)) {
 					UtilsSpeech2BC.speak("GPT busy. Text on hold.", Speech2.PRIORITY_USER_ACTION, 0, false, null);
 				}
 
