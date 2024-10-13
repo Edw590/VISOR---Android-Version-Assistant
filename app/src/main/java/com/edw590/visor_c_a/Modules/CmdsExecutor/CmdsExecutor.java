@@ -291,6 +291,14 @@ public final class CmdsExecutor implements IModuleInst {
 					UtilsCameraManagerBC.useCamera(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
 							CameraManagement.USAGE_FLASHLIGHT_ON : CameraManagement.USAGE_FLASHLIGHT_OFF);
 
+					if (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON)) {
+						final String speak = "Flashlight turned on.";
+						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+					} else {
+						final String speak = "Flashlight turned off.";
+						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+					}
+
 					previous_cmd = new Command(command, "toggle flashlight", null);
 					break;
 				}
@@ -722,8 +730,13 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					UtilsCameraManagerBC.useCamera(cmd_variant.equals(CmdsList.CmdRetIds.RET_15_REAR) ?
-							CameraManagement.USAGE_TAKE_REAR_PHOTO : CameraManagement.USAGE_TAKE_FRONTAL_PHOTO);
+					boolean rear_pic = cmd_variant.equals(CmdsList.CmdRetIds.RET_15_REAR);
+
+					UtilsCameraManagerBC.useCamera(rear_pic ? CameraManagement.USAGE_TAKE_REAR_PHOTO :
+							CameraManagement.USAGE_TAKE_FRONTAL_PHOTO);
+
+					String speak = "Taking a " + (rear_pic ? "rear" : "frontal") + " picture...";
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 					previous_cmd = new Command(command, "take photo", null);
 					break;
@@ -1050,6 +1063,9 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
+					String speak = "Obtaining the weather...";
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
 					if ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
@@ -1068,7 +1084,7 @@ public final class CmdsExecutor implements IModuleInst {
 						final String[] weather_by_loc = weather_str.split("\n");
 						for (final String weather : weather_by_loc) {
 							final String[] weather_data = weather.split(" \\|\\|\\| ");
-							final String speak = "The weather in " + weather_data[0] + " is " + weather_data[5] +
+							speak = "The weather in " + weather_data[0] + " is " + weather_data[5] +
 									" with " + weather_data[1] + " degrees, a maximum of " + weather_data[6] +
 									" degrees and a minimum of " + weather_data[7] + " degrees. The precipitation is of " +
 									weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
@@ -1076,7 +1092,7 @@ public final class CmdsExecutor implements IModuleInst {
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 						}
 					} else {
-						final String speak = "No network connection available to get the weather.";
+						speak = "No network connection available to get the weather.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 					}
 
@@ -1093,6 +1109,9 @@ public final class CmdsExecutor implements IModuleInst {
 				case (CmdsList.CmdIds.CMD_TELL_NEWS): {
 					some_cmd_detected = true;
 					if (only_returning) continue;
+
+					String speak = "Obtaining the latest news...";
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
@@ -1117,7 +1136,7 @@ public final class CmdsExecutor implements IModuleInst {
 								continue;
 							}
 
-							String speak = "News in " + news[0] + ". ";
+							speak = "News in " + news[0] + ". ";
 
 							final int news_len = news.length;
 							for (int i = 1; i < news_len; ++i) {
@@ -1133,7 +1152,7 @@ public final class CmdsExecutor implements IModuleInst {
 							UtilsAndroidConnectivity.setWifiEnabled(false);
 						}
 					} else {
-						final String speak = "No network connection available to get the news.";
+						speak = "No network connection available to get the news.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 					}
 
