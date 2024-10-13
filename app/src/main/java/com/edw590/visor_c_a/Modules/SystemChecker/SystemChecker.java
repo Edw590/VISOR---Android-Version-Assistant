@@ -126,67 +126,19 @@ public class SystemChecker implements IModuleInst {
 		@Override
 		public void run() {
 			assert power_manager != null; // It exists - it's the ---Power--- Manager
-			long last_time_used = 0;
-			boolean is_interactive = false;
-
-			boolean first_time = true;
 
 			while (true) {
-				if (!first_time) {
-					// Only send the info after the first time (30 secs should be enough), so that the ExtDevices are
-					// checked first.
-					StringBuilder wifi_networks = new StringBuilder();
-					for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
-						wifi_networks.append(wifi_ap.name).append("\u0001");
-						wifi_networks.append(wifi_ap.address).append("\u0001");
-						wifi_networks.append(wifi_ap.rssi).append("\u0001");
-						wifi_networks.append("\u0000");
-					}
-					StringBuilder bluetooth_devices = new StringBuilder();
-					for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
-						bluetooth_devices.append(bluetooth_device.name).append("\u0001");
-						bluetooth_devices.append(bluetooth_device.address).append("\u0001");
-						bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
-						bluetooth_devices.append("\u0000");
-					}
-					if (power_manager.isScreenOn()) {
-						last_time_used = System.currentTimeMillis() / 1000;
-						is_interactive = true;
-					} else {
-						is_interactive = false;
-					}
-					UtilsRegistry.setData(ValuesRegistry.K_DEVICE_IN_USE, is_interactive, false);
+				UtilsRegistry.setData(ValuesRegistry.K_DEVICE_IN_USE, power_manager.isScreenOn(), false);
 
-					UtilsRegistry.setData(ValuesRegistry.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
-							false);
+				UtilsRegistry.setData(ValuesRegistry.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
+						false);
 
-					AudioManager audioManager = (AudioManager) UtilsContext.getContext().
-							getSystemService(Context.AUDIO_SERVICE);
-					UtilsRegistry.setData(ValuesRegistry.K_SOUND_VOLUME,
-							audioManager.getStreamVolume(AudioManager.STREAM_RING), false);
-					UtilsRegistry.setData(ValuesRegistry.K_SOUND_MUTED,
-							audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
-
-					/*TODO: ModsFileInfo.DeviceInfo device_info = ULComm.createDeviceInfo(
-							UtilsAndroidConnectivity.getAirplaneModeEnabled(),
-							UtilsAndroidConnectivity.getWifiEnabled(),
-							UtilsAndroidConnectivity.getBluetoothEnabled(),
-							(boolean) UtilsRegistry.getData(ValuesRegistry.K_POWER_CONNECTED, true),
-							Long.valueOf((int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_LEVEL, true)),
-							is_interactive,
-							UtilsAndroidPower.getScreenBrightness(),
-							wifi_networks.toString(),
-							bluetooth_devices.toString(),
-							audioManager.getStreamVolume(AudioManager.STREAM_RING),
-							audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL
-					);
-
-					try {
-						ULComm.sendDeviceInfo(device_info, last_time_used);
-					} catch (final Exception ignored) {
-						// Ignore no network connection
-					}*/
-				}
+				AudioManager audioManager = (AudioManager) UtilsContext.getContext().
+						getSystemService(Context.AUDIO_SERVICE);
+				UtilsRegistry.setData(ValuesRegistry.K_SOUND_VOLUME,
+						audioManager.getStreamVolume(AudioManager.STREAM_RING), false);
+				UtilsRegistry.setData(ValuesRegistry.K_SOUND_MUTED,
+						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
 
 				// Network type
 				// Keep this check here!!!
@@ -201,8 +153,6 @@ public class SystemChecker implements IModuleInst {
 
 				// Wi-Fi
 				wifi_checker.checkWifi();
-
-				first_time = false;
 
 				try {
 					Thread.sleep(CHECK_TIME);
