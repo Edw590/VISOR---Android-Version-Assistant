@@ -58,7 +58,7 @@ public final class UtilsSpeech2BC {
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
 							   final boolean auto_gpt, @Nullable final Runnable after_speaking) {
 		if (auto_gpt && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
-				UtilsSWA.isCommunicatorConnectedSERVER()) {
+				UtilsSWA.isCommunicatorConnectedSERVER() && GPTComm.sendText("", false)) {
 			String text = "Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise sentence saying \"" +
 					txt_to_speak + "\".";
 			GPTComm.sendText(text, false);
