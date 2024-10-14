@@ -266,7 +266,21 @@ public final class CmdsExecutor implements IModuleInst {
 			return ERR_PROC_CMDS;
 		}
 
+		boolean send_to_GPT = false;
 		if (detected_cmds.length == 0 && !partial_results) {
+			send_to_GPT = true;
+		} else {
+			send_to_GPT = true;
+			for (final String command : detected_cmds) {
+				float num = Float.parseFloat(command);
+				if (num >= 1) {
+					send_to_GPT = false;
+
+					break;
+				}
+			}
+		}
+		if (send_to_GPT) {
 			if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
 				String speak = "GPT unavailable. Communicator not connected.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
