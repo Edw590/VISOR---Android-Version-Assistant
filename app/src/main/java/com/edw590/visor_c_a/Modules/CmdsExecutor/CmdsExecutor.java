@@ -363,7 +363,7 @@ public final class CmdsExecutor implements IModuleInst {
 						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Wi-Fi turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
 									"on." : "off.");
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 
 							break;
 						}
@@ -422,7 +422,7 @@ public final class CmdsExecutor implements IModuleInst {
 						case (UtilsShell.ErrCodes.NO_ERR): {
 							final String speak = "Mobile Data connection turned " + (cmd_variant.equals(CmdsList.CmdRetIds.RET_ON) ?
 									"on." : "off.");
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 
 							break;
 						}
