@@ -200,7 +200,7 @@ public final class CmdsExecutor implements IModuleInst {
 		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
 			final String speak = "ATTENTION - Commands detection is not available. APU's correct library file was not " +
 					"detected.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 
 			return APU_UNAVAILABLE;
 		}

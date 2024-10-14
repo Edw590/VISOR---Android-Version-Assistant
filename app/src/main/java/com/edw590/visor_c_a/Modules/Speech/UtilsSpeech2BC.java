@@ -48,13 +48,17 @@ public final class UtilsSpeech2BC {
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_CALL_SPEAK}, but
 	 * {@code bypass_no_sound = true}.</p>
 	 *
+	 * @param auto_gpt true to send the text to the GPTComm library in case the speech priority is less than or equal to
+	 * {@link Speech2#PRIORITY_USER_ACTION}, {@code after_speaking} is null and the VISOR's communicator is connected
+	 *
 	 * @return the speech ID or an empty string if the VISOR's communicator is connected and the text was sent to the
 	 * GPTComm library to be changed by LLaMA
 	 */
 	@NonNull
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
 							   final boolean auto_gpt, @Nullable final Runnable after_speaking) {
-		if (auto_gpt && after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER()) {
+		if (auto_gpt && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
+				UtilsSWA.isCommunicatorConnectedSERVER()) {
 			String text = "Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise sentence saying \"" +
 					txt_to_speak + "\".";
 			GPTComm.sendText(text, false);

@@ -70,7 +70,7 @@ public final class UtilsPermsAuths {
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 		}
 	}
 
