@@ -199,7 +199,7 @@ public final class CmdsList {
 	static final String[][] CMDS_LIST = {
 			{CmdIds.CMD_TOGGLE_FLASHLIGHT, ACD.CMDi_TYPE_TURN_ONFF, "", "", "flashlight/lantern"},                                                          // 1
 			{CmdIds.CMD_ASK_TIME, ACD.CMDi_TYPE_ASK, "", "", "time"},                                                                                       // 2
-			{CmdIds.CMD_ASK_DATE, ACD.CMDi_TYPE_ASK, "", "", "date"},                                                                                       // 3
+			{CmdIds.CMD_ASK_DATE, ACD.CMDi_TYPE_ASK, "", "", "date/day/month/year"},                                                                        // 3
 			{CmdIds.CMD_TOGGLE_WIFI, ACD.CMDi_TYPE_TURN_ONFF, "", "", "wifi"},                                                                              // 4
 			{CmdIds.CMD_TOGGLE_MOBILE_DATA, ACD.CMDi_TYPE_TURN_ONFF, "", "", "mobile data"},                                                                // 5
 			{CmdIds.CMD_TOGGLE_BLUETOOTH, ACD.CMDi_TYPE_TURN_ONFF, "", "", "bluetooth"},                                                                    // 6
@@ -207,7 +207,7 @@ public final class CmdsList {
 			{CmdIds.CMD_END_CALL, ACD.CMDi_TYPE_STOP, "", "", "call"},                                                                                      // 9
 			{CmdIds.CMD_TOGGLE_SPEAKERS, ACD.CMDi_TYPE_TURN_ONFF, "", "", "speakerphone/speaker/speakers"},                                                 // 10
 			{CmdIds.CMD_TOGGLE_AIRPLANE_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "airplane mode"},                                                            // 11
-			{CmdIds.CMD_ASK_BATTERY_PERCENT, ACD.CMDi_TYPE_ASK, "", "", "battery percentage/status/level"},                                                 // 12
+			{CmdIds.CMD_ASK_BATTERY_PERCENT, ACD.CMDi_TYPE_ASK, "", "", "battery percentage/status/level/levels"},                                          // 12
 			{CmdIds.CMD_POWER_SHUT_DOWN, ACD.CMDi_TYPE_SHUT_DOWN, "", "", "device/phone"},                                                                  // 13
 			{CmdIds.CMD_POWER_REBOOT, ACD.CMDi_TYPE_REBOOT, "fast", "fast|"+ACD.ANY_MAIN_WORD+" -fast", "reboot/restart device/phone|device/phone|device/phone recovery|device/phone safe mode|device/phone bootloader"},  // 14
 			{CmdIds.CMD_TAKE_PHOTO, ACD.CMDi_TYPE_NONE, "take", "", "picture/photo|frontal picture/photo"},                                                 // 15
