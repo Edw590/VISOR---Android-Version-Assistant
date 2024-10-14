@@ -47,7 +47,6 @@ import com.edw590.visor_c_a.R;
 
 import java.util.Locale;
 
-import GPTComm.GPTComm;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -89,10 +88,6 @@ public final class FragDevelopment extends Fragment {
 				// BUTTON FOR TESTING
 
 				final Context context = UtilsContext.getContext();
-
-				if (!GPTComm.sendText(txt_to_send.getText().toString(), true)) {
-					UtilsSpeech2BC.speak("GPT busy. Text on hold.", Speech2.PRIORITY_USER_ACTION, 0, false, null);
-				}
 
 				//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
 				//startActivity(intent);

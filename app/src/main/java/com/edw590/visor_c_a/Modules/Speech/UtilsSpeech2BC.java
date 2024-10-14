@@ -22,17 +22,16 @@
 package com.edw590.visor_c_a.Modules.Speech;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
-import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.TasksList;
 
 import GPTComm.GPTComm;
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>Functions to call to send information to {@link Speech2}, by using broadcasts.</p>
@@ -49,19 +48,25 @@ public final class UtilsSpeech2BC {
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_CALL_SPEAK}, but
 	 * {@code bypass_no_sound = true}.</p>
 	 *
-	 * @return the speech ID or an empty string if the device is connected to the internet and the text was sent to the
-	 * GPTComm library to be changed by Llama3
+	 * @return the speech ID or an empty string if the VISOR's communicator is connected and the text was sent to the
+	 * GPTComm library to be changed by LLaMA
 	 */
 	@NonNull
-	public static String speak(@NonNull final String txt_to_speak, final int speech_priority,
-							   final int mode, final boolean auto_gpt, @Nullable final Runnable after_speaking) {
-		if (auto_gpt && after_speaking == null && UtilsNetwork.getCurrentNetworkType() != ConnectivityManager.TYPE_NONE) {
-			GPTComm.sendText("Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise different " +
-					"sentence saying \"" + txt_to_speak + "\".", false);
+	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
+							   final boolean auto_gpt, @Nullable final Runnable after_speaking) {
+		if (auto_gpt && after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER()) {
+			String text = "Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise sentence saying \"" +
+					txt_to_speak + "\".";
+			GPTComm.sendText(text, false);
 
 			return "";
 		}
 
+		return speakInternal(txt_to_speak, speech_priority, mode, after_speaking);
+	}
+
+	private static String speakInternal(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
+										@Nullable final Runnable after_speaking) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_Speech.ACTION_CALL_SPEAK);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1, txt_to_speak);
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_2, mode);

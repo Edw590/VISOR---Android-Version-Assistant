@@ -62,7 +62,9 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
 import ACD.ACD;
+import GPTComm.GPTComm;
 import OICComm.OICComm;
+import UtilsSWA.UtilsSWA;
 
 /**
  * The module that processes and executes all commands told to it (from the speech recognition or by text).
@@ -262,6 +264,23 @@ public final class CmdsExecutor implements IModuleInst {
 			System.out.println("EXECUTOR - ERR_PROC_CMDS");
 
 			return ERR_PROC_CMDS;
+		}
+
+		if (detected_cmds.length == 0 && !partial_results) {
+			if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
+				String speak = "GPT unavailable. Communicator not connected.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
+
+				return NOTHING_EXECUTED;
+			}
+
+
+			if (!GPTComm.sendText(sentence_str, true)) {
+				String speak = "Sorry, the GPT is busy at the moment. Text on hold.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
+			}
+
+			return NOTHING_EXECUTED;
 		}
 
 		for (final String command : detected_cmds) {
@@ -1009,13 +1028,13 @@ public final class CmdsExecutor implements IModuleInst {
 						// No runnable to execute (no command needing confirmation then) or the previous command was
 						// more than a minute ago.
 						final String speak = "There is nothing to confirm or reject, sir.";
-						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 					} else {
 						if (cmd_id.equals(CmdsList.CmdIds.CMD_CONFIRM)) {
 							new Thread(TasksList.removeTask(previous_cmd.task_id).runnable).start();
 						} else {
 							UtilsSpeech2BC.speak(previous_cmd.cmd_spoken_action + " rejected, sir.", speech_priority,
-									speech_mode2, true, null);
+									speech_mode2, false, null);
 						}
 					}
 
