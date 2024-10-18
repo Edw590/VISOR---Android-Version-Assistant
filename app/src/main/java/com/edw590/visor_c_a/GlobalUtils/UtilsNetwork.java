@@ -29,9 +29,6 @@ import android.net.wifi.WifiManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
-
 import org.spongycastle.util.Arrays;
 
 import java.io.BufferedReader;
@@ -43,6 +40,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+
+import UtilsSWA.UtilsSWA;
 
 /**
  * <p>Utilities related to network functions.</p>
@@ -128,16 +127,16 @@ public final class UtilsNetwork {
 	}
 
 	/**
-	 * <p>Wait for the network to be available.</p>
+	 * <p>Wait for the network to be available by checking the status of the server communicator.</p>
 	 *
-	 * @param timeout the timeout in seconds
+	 * @param timeout_s the timeout in seconds
 	 *
 	 * @return true if the network is available, false if the timeout was reached
 	 */
-	public static boolean waitForNetwork(final long timeout) {
+	public static boolean waitForNetwork(final long timeout_s) {
 		final long start_time = System.currentTimeMillis();
-		while ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
-			if (System.currentTimeMillis() - start_time >= timeout * 1000) {
+		while (!UtilsSWA.isCommunicatorConnectedSERVER()) {
+			if (System.currentTimeMillis() - start_time >= timeout_s * 1000) {
 				break;
 			}
 
@@ -148,6 +147,6 @@ public final class UtilsNetwork {
 			}
 		}
 
-		return (int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) != -1;
+		return UtilsSWA.isCommunicatorConnectedSERVER();
 	}
 }

@@ -1097,7 +1097,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					String speak = "Obtaining the weather...";
-					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
@@ -1108,7 +1108,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (UtilsNetwork.waitForNetwork(10)) {
 						final String weather_str = OICComm.getWeather();
 						if (weather_str.isEmpty()) {
-							UtilsSpeech2BC.speak("I'm sorry sir, but I couldn't get the weather information.",
+							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
 									speech_priority, speech_mode2, true, null);
 
 							break;
@@ -1144,7 +1144,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (only_returning) continue;
 
 					String speak = "Obtaining the latest news...";
-					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
@@ -1155,7 +1155,7 @@ public final class CmdsExecutor implements IModuleInst {
 					if (UtilsNetwork.waitForNetwork(10)) {
 						final String news_str = OICComm.getNews();
 						if (news_str.isEmpty()) {
-							UtilsSpeech2BC.speak("I'm sorry sir, but I couldn't get the news information.",
+							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
 									speech_priority, speech_mode2, true, null);
 
 							break;
@@ -1165,17 +1165,13 @@ public final class CmdsExecutor implements IModuleInst {
 						for (final String news_data : news_by_loc) {
 							final String[] news = news_data.split(" \\|\\|\\| ");
 
-							if ("Portugal".equals(news[0])) {
-								continue;
-							}
-
 							speak = "News in " + news[0] + ". ";
 
 							final int news_len = news.length;
 							for (int i = 1; i < news_len; ++i) {
 								speak += news[i] + ". ";
 							}
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 						}
 
 						if (!data_was_enabled) {
