@@ -59,8 +59,8 @@ public final class UtilsSpeech2BC {
 							   final boolean auto_gpt, @Nullable final Runnable after_speaking) {
 		if (auto_gpt && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
 				UtilsSWA.isCommunicatorConnectedSERVER() && GPTComm.sendText("", false)) {
-			String text = "Sent from my " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ": write ONE concise sentence saying \"" +
-					txt_to_speak + "\".";
+			String text = "Rephrase the following to maintain its meaning but change its wording: \"" +	txt_to_speak +
+					"\". Current device: user's " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ".";
 			GPTComm.sendText(text, false);
 
 			return "";
