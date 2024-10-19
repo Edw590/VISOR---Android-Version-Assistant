@@ -43,7 +43,6 @@ import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidTelephony;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNativeLibs;
-import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.GlobalUtils.UtilsTimeDate;
 import com.edw590.visor_c_a.Modules.AudioRecorder.AudioRecorder;
@@ -51,14 +50,14 @@ import com.edw590.visor_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.ModulesList;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.TasksList;
 
 import ACD.ACD;
@@ -229,8 +228,10 @@ public final class CmdsExecutor implements IModuleInst {
 		System.out.println(sentence_str);
 		System.out.println(cmds_info_str);
 		final String[] cmds_info = cmds_info_str.split(ACD.INFO_CMDS_SEPARATOR);
+		boolean send_to_GPT = false;
 		if (cmds_info.length < 2) {
-			// No commands detected.
+			sendToGPT(sentence_str);
+
 			return NOTHING_EXECUTED;
 		}
 		final String[] prev_cmd_info = cmds_info[0].split("\\" + ACD.PREV_CMD_INFO_SEPARATOR);
@@ -266,33 +267,23 @@ public final class CmdsExecutor implements IModuleInst {
 			return ERR_PROC_CMDS;
 		}
 
-		boolean send_to_GPT = false;
-		if (detected_cmds.length == 0 && !partial_results) {
-			send_to_GPT = true;
-		} else {
-			send_to_GPT = true;
-			for (final String command : detected_cmds) {
-				float num = Float.parseFloat(command);
-				if (num >= 1) {
-					send_to_GPT = false;
+		if (!partial_results) {
+			if (detected_cmds.length == 0) {
+				send_to_GPT = true;
+			} else {
+				send_to_GPT = true;
+				for (final String command : detected_cmds) {
+					float num = Float.parseFloat(command);
+					if (num >= 1) {
+						send_to_GPT = false;
 
-					break;
+						break;
+					}
 				}
 			}
 		}
 		if (send_to_GPT) {
-			if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
-				String speak = "GPT unavailable. Communicator not connected.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
-
-				return NOTHING_EXECUTED;
-			}
-
-
-			if (!GPTComm.sendText(sentence_str, true)) {
-				String speak = "Sorry, the GPT is busy at the moment. Text on hold.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
-			}
+			sendToGPT(sentence_str);
 
 			return NOTHING_EXECUTED;
 		}
@@ -1105,7 +1096,7 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
-					if (UtilsNetwork.waitForNetwork(10)) {
+					if (UtilsSWA.waitForNetwork(10)) {
 						final String weather_str = OICComm.getWeather();
 						if (weather_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
@@ -1152,7 +1143,7 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
-					if (UtilsNetwork.waitForNetwork(10)) {
+					if (UtilsSWA.waitForNetwork(10)) {
 						final String news_str = OICComm.getNews();
 						if (news_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
@@ -1244,6 +1235,21 @@ public final class CmdsExecutor implements IModuleInst {
 
 		final String speak = "Do you confirm to " + action + "?";
 		UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, mode, true, UtilsSpeech2.CALL_COMMANDS_RECOG);
+	}
+
+	private void sendToGPT(final String sentence_str) {
+		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
+			String speak = "GPT unavailable. Communicator not connected.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
+
+			return;
+		}
+
+
+		if (!GPTComm.sendText(sentence_str, true)) {
+			String speak = "Sorry, the GPT is busy at the moment. Text on hold.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
+		}
 	}
 
 
