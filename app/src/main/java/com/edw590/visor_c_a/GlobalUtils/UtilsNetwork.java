@@ -41,8 +41,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
-import UtilsSWA.UtilsSWA;
-
 /**
  * <p>Utilities related to network functions.</p>
  */
@@ -124,29 +122,5 @@ public final class UtilsNetwork {
 		final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
 		return networkInfo == null ? ConnectivityManager.TYPE_NONE : networkInfo.getType();
-	}
-
-	/**
-	 * <p>Wait for the network to be available by checking the status of the server communicator.</p>
-	 *
-	 * @param timeout_s the timeout in seconds
-	 *
-	 * @return true if the network is available, false if the timeout was reached
-	 */
-	public static boolean waitForNetwork(final long timeout_s) {
-		final long start_time = System.currentTimeMillis();
-		while (!UtilsSWA.isCommunicatorConnectedSERVER()) {
-			if (System.currentTimeMillis() - start_time >= timeout_s * 1000) {
-				break;
-			}
-
-			try {
-				Thread.sleep(1000);
-			} catch (final InterruptedException ignored) {
-				break;
-			}
-		}
-
-		return UtilsSWA.isCommunicatorConnectedSERVER();
 	}
 }
