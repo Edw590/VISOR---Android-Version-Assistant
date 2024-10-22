@@ -98,6 +98,7 @@ public final class ModulesList {
 			//new ElementsObj(PreferencesManager.class, "Preferences Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
 			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true),
+			//new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true),
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),

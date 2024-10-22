@@ -21,11 +21,12 @@
 
 package com.edw590.visor_c_a.Modules.TasksExecutor;
 
-import android.Manifest;
-
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
-import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
-import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
+import com.edw590.visor_c_a.Modules.Speech.Speech2;
+import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
+
+import TEHelper.TEHelper;
 
 public class TasksExecutor implements IModuleInst {
 
@@ -42,6 +43,8 @@ public class TasksExecutor implements IModuleInst {
 	}
 	@Override
 	public void destroy() {
+		TEHelper.stopChecker();
+
 		is_module_destroyed = true;
 	}
 	@Override
@@ -49,16 +52,38 @@ public class TasksExecutor implements IModuleInst {
 	/**.
 	 * @return read all here {@link IModuleInst#wrongIsSupported()} */
 	public static boolean isSupported() {
-		final String[] min_required_permissions = {
-				Manifest.permission.RECORD_AUDIO,
-				Manifest.permission.WRITE_EXTERNAL_STORAGE,
-		};
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)
-				&& UtilsCheckHardwareFeatures.isMicrophoneSupported();
+		return true;
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
 
+	/**
+	 * <p>Main class constructor.</p>
+	 */
 	public TasksExecutor() {
+		infinity_thread.start();
 	}
+
+	final Thread infinity_thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while (true) {
+				ModsFileInfo.Task task = TEHelper.checkDueTasks();
+				if (task == null) {
+					return;
+				}
+
+				System.out.println("Task! --> " + task.getId());
+
+				if (!task.getMessage().isEmpty()) {
+					UtilsSpeech2BC.speak(task.getMessage(), Speech2.PRIORITY_MEDIUM, Speech2.MODE1_ALWAYS_NOTIFY, false,
+							null);
+				}
+
+				if (!task.getCommand().isEmpty()) {
+					UtilsCmdsExecutorBC.processTask(task.getCommand(), false, false, true);
+				}
+			}
+		}
+	});
 }
