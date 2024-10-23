@@ -37,6 +37,7 @@ import com.edw590.visor_c_a.R;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
 
@@ -70,7 +71,7 @@ public class TestEnrollmentActivity extends Activity {
 	public void onEnrollButtonClicked(View v) {
 		Keyphrase kp;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES, BCP47_LOCALE/*Locale.forLanguageTag(BCP47_LOCALE)*/, TEXT,
+			kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES, Locale.forLanguageTag(BCP47_LOCALE), TEXT,
 					new int[] { UserManager.get(this).getUserHandle() /* current user */});
 		} else {
 			try {

@@ -49,7 +49,6 @@ public class BluetoothChecker {
 
 	@Nullable BluetoothHeadset bluetoothHeadset = null;
 	@Nullable BluetoothA2dp bluetoothA2dp = null;
-	ArrayList<Object> bluetooth_profiles = new ArrayList<>(BluetoothProfile.MAX_PROFILE_ID);
 
 	boolean enabled_by_visor = false;
 	static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes

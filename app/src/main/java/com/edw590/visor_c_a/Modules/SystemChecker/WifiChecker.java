@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 
 import androidx.annotation.Nullable;
 
@@ -34,6 +33,7 @@ import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
 import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsReflection;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.ValuesRegistry;
@@ -138,6 +138,10 @@ public class WifiChecker {
 						break;
 					}
 				}
+				Boolean untrusted = (Boolean) UtilsReflection.getFieldValue(scanResult, "untrusted");
+				if (untrusted == null) {
+					untrusted = false;
+				}
 				nearby_aps_wifi.add(new ExtDevice(
 						ExtDevice.TYPE_WIFI,
 						address,
@@ -145,7 +149,7 @@ public class WifiChecker {
 						scanResult.level,
 						scanResult.SSID,
 						scanResult.SSID,
-						Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? !scanResult.untrusted : false)
+						!untrusted)
 				);
 			}
 

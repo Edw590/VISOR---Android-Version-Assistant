@@ -289,29 +289,6 @@ public final class UtilsTelephony {
 		}
 	}
 
-	/**
-	 * <p>Checks if a phone number is a potential an emergency number (what the Phone app uses to decide to let other
-	 * apps call or just dial numbers).</p>
-	 * <p>See more on {@link TelephonyManager#isPotentialEmergencyNumber(String)}.</p>
-	 *
-	 * @param phone_number the phone number to check
-	 *
-	 * @return true if it's an emergency number, false otherwise
-	 */
-	public static boolean isPotentialEmergencyNumber(@NonNull final String phone_number) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final TelephonyManager telephonyManager = (TelephonyManager) UtilsContext.
-					getSystemService(Context.TELEPHONY_SERVICE);
-			if (telephonyManager == null) {
-				return false;
-			}
-
-			return telephonyManager.isPotentialEmergencyNumber(phone_number);
-		} else {
-			return PhoneNumberUtils.isPotentialEmergencyNumber(phone_number);
-		}
-	}
-
 	public static final int ALL_CONTACTS = 0;
 	public static final int CONTACTS_SIM = 1;
 	/**

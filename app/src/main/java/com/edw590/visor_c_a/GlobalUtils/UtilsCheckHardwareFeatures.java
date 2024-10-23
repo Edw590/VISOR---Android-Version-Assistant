@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.Uri;
 import android.os.Build;
 import android.telecom.PhoneAccount;
@@ -229,28 +228,9 @@ public final class UtilsCheckHardwareFeatures {
 	}
 
 	/**
-	 * <p>Checks if the device has microphone support.</p>
+	 * <p>Checks if the device has data network support.</p>
 	 *
-	 * @return true if microphone is supported, false otherwise
-	 */
-	public static boolean isMobileDataSupported() {
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
-				getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (connectivityManager == null) {
-			return false;
-		}
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			return connectivityManager.getNetworkInfo(new Network(ConnectivityManager.TYPE_MOBILE)) != null;
-		} else {
-			return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE) != null;
-		}
-	}
-
-	/**
-	 * <p>Checks if the device has microphone support.</p>
-	 *
-	 * @return true if microphone is supported, false otherwise
+	 * @return true if data network is supported, false otherwise
 	 */
 	public static boolean isAnyDataNetworkSupported() {
 		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.

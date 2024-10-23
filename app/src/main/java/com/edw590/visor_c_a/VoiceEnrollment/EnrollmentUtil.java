@@ -36,10 +36,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
-import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsReflection;
 
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -217,8 +216,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static UUID getUuid(@NonNull final KeyphraseSoundModel soundModel) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return soundModel.getUuid();
-			return soundModel.uuid;
+			return soundModel.getUuid();
 		} else {
 			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "uuid");
 			assert value != null; // Will never be null
@@ -229,8 +227,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static UUID getVendorUuid(@NonNull final KeyphraseSoundModel soundModel) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return soundModel.getVendorUuid();
-			return soundModel.vendorUuid;
+			return soundModel.getVendorUuid();
 		} else {
 			final UUID value = (UUID) UtilsReflection.getFieldValue(soundModel, "vendorUuid");
 			assert value != null; // Will never be null
@@ -241,8 +238,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static byte[] getData(@NonNull final KeyphraseSoundModel soundModel) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return soundModel.getData();
-			return soundModel.data;
+			return soundModel.getData();
 		} else {
 			final byte[] value = (byte[]) UtilsReflection.getFieldValue(soundModel, "data");
 			assert value != null; // Will never be null
@@ -253,8 +249,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static Keyphrase[] getKeyphrases(@NonNull final KeyphraseSoundModel soundModel) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return soundModel.getKeyphrases();
-			return soundModel.keyphrases;
+			return soundModel.getKeyphrases();
 		} else {
 			final Keyphrase[] value = (Keyphrase[]) UtilsReflection.getFieldValue(soundModel, "keyphrases");
 			assert value != null; // Will never be null
@@ -264,8 +259,7 @@ public class EnrollmentUtil {
 	}
 	static int getId(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return keyphrase.getId();
-			return keyphrase.id;
+			return keyphrase.getId();
 		} else {
 			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "id");
 			assert value != null; // Will never be null
@@ -275,8 +269,7 @@ public class EnrollmentUtil {
 	}
 	static int getRecognitionModes(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return keyphrase.getRecognitionModes();
-			return keyphrase.recognitionModes;
+			return keyphrase.getRecognitionModes();
 		} else {
 			final Integer value = (Integer) UtilsReflection.getFieldValue(keyphrase, "recognitionModes");
 			assert value != null; // Will never be null
@@ -285,25 +278,20 @@ public class EnrollmentUtil {
 		}
 	}
 	@Nullable
-	static String getLocale(@NonNull final Keyphrase keyphrase) {
+	static Locale getLocale(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			// It was returning a String too, aside from the commented line (when I switched from API 29 to 30)
-			//return keyphrase.getLocale();
-			// It was returning a Locale too, aside from the commented line (when I switched from API 32 back to 29)
-			return keyphrase.locale;
+			return keyphrase.getLocale();
 		} else {
 			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "locale");
 			assert value != null; // Will never be null
 
-			//return Locale.forLanguageTag(value);
-			return value;
+			return Locale.forLanguageTag(value);
 		}
 	}
 	@Nullable
 	static String getText(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return keyphrase.getText();
-			return keyphrase.text;
+			return keyphrase.getText();
 		} else {
 			final String value = (String) UtilsReflection.getFieldValue(keyphrase, "text");
 			assert value != null; // Will never be null
@@ -314,8 +302,7 @@ public class EnrollmentUtil {
 	@Nullable
 	static int[] getUsers(@NonNull final Keyphrase keyphrase) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			//return keyphrase.getUsers();
-			return keyphrase.users.clone();
+			return keyphrase.getUsers();
 		} else {
 			final int[] value = (int[]) UtilsReflection.getFieldValue(keyphrase, "users");
 			assert value != null; // Will never be null

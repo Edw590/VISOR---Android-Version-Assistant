@@ -217,7 +217,7 @@ public final class UtilsAndroidTelephony {
 		// On 2023-02-01, Android Developers says ACTION_DIAL can be used for emergency numbers (so at least until
 		// Android 12 it's like this).
 		final String action_dial_emergency = Intent.ACTION_DIAL;
-		final boolean is_potentially_emergency_number = UtilsTelephony.isPotentialEmergencyNumber(phone_number);
+		final boolean is_potentially_emergency_number = UtilsTelephony.isEmergencyNumber(phone_number);
 
 		final String action;
 		int return_code;
