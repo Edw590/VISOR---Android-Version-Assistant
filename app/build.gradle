@@ -145,7 +145,8 @@ dependencies {
 	// Maven //
 
 	// Android
-	implementation "androidx.appcompat:appcompat:1.6.1"
+	// appcompat can be up to 1.6.1 for mindSdkVersion of <21 and only if compileSdk is >=33
+	implementation "androidx.appcompat:appcompat:1.4.2"
 	implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 	implementation "androidx.multidex:multidex:2.0.1"
 	implementation "androidx.preference:preference:1.2.0"
