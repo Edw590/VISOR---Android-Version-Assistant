@@ -88,14 +88,12 @@ android {
 
 	defaultConfig {
 		applicationId "com.edw590.visor_c_a"
-		// I'm only testing on API 27 at most. I'm compiling with 29 because the internal/hidden APIs on 26 or 27 don't
-		// work.
-		compileSdk 35
+		compileSdk 31
 		minSdkVersion 16
 		//noinspection ExpiredTargetSdkVersion
 		targetSdkVersion 23
 		versionCode 1
-		versionName "for development" // "version for development" will appear in Settings xD (at least in English...)
+		versionName "for development"
 
 		multiDexEnabled true // Enable only if really necessary - slower builds, sometimes:
 		// https://developer.android.com/studio/build/multidex#dev-build
