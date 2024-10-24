@@ -28,16 +28,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.multidex.MultiDex;
 
-import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsSettings;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.edw590.visor_c_a.Registry.SettingsRegistry;
 import com.edw590.visor_c_a.Registry.ValuesRegistry;
 
 import ACD.ACD;
+import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -99,23 +99,31 @@ public final class ApplicationClass extends Application {
 			}
 		});
 
-		// If this below is not here out of the if statement, the Commands Recognition service will crash on start. No
-		// idea why.
+		/////////////////////////////////////////////////////////////
+
+		if (!SettingsSync.loadDeviceSettings(UtilsSettings.readJsonDeviceSettings())) {
+			System.out.println("Failed to load device settings. Using empty ones...");
+		}
+
+		// TODO: load Gen Settings synchronously here
+
+		try {
+			SettingsSync.loadUserSettings(UtilsSettings.readJsonUserSettings());
+		} catch (final Exception e) {
+			System.out.println("Failed to load user settings. Using empty ones...");
+			e.printStackTrace();
+		}
+
+		infinity_thread.start();
+
+		UtilsSWA.initializeCommsChannels();
+
+		UtilsSWA.startCommunicatorForeverSERVER();
+		SettingsSync.syncUserSettings();
+
 		// Register keys in the Registry
 		ValuesRegistry.registerRegistryKeys();
 		SettingsRegistry.registerRegistryKeys();
-
-		// Prepare the Advanced Commands Detection module commands array
-		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
-
-		// Give VISOR's website information to the libraries that need it
-		UtilsSWA.initPersonalConsts(PERSONAL_CONSTS_EOG.DEVICE_ID, PERSONAL_CONSTS_EOG.WEBSITE_DOMAIN,
-				PERSONAL_CONSTS_EOG.WEBSITE_PW);
-		UtilsSWA.initializeCommsChannels();
-		// Start the server communicator in 2 different threads because the infinity_thread sometimes stops who
-		// knows why. Maybe this way the communicator remains working?
-		UtilsSWA.startCommunicatorForeverSERVER();
-		infinity_thread.start();
 
 		UtilsMainSrvc.startMainService();
 
@@ -124,16 +132,20 @@ public final class ApplicationClass extends Application {
 		}
 	}
 
-	Thread infinity_thread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			while (true) {
-				UtilsSWA.startCommunicatorSERVER();
+	Thread infinity_thread = new Thread(() -> {
+		while (true) {
+			// Save user settings and reload device settings every 5 seconds
 
-				try {
-					Thread.sleep(1000);
-				} catch (final InterruptedException ignored) {
-				}
+			SettingsSync.loadDeviceSettings(UtilsSettings.readJsonDeviceSettings());
+
+			UtilsSettings.writeUserSettings(SettingsSync.getJsonUserSettings());
+
+			// TODO: write Gen Settings here
+
+			try {
+				Thread.sleep(5000);
+			} catch (final InterruptedException ignored) {
+				return;
 			}
 		}
 	});

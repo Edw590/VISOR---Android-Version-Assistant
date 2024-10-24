@@ -22,13 +22,13 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
-	app:startDestination="@id/frag_development">
+	app:startDestination="@id/frag_main">
 
 	<fragment
 		android:id="@+id/frag_main"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragMain"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragHome"
 		android:label="@string/fragMain_title_ACA"
-		tools:layout="@layout/frag_main" />
+		tools:layout="@layout/frag_home" />
 	<fragment
 		android:id="@+id/frag_development"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragDevelopment"

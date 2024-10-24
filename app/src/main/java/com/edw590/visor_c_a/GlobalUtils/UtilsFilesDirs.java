@@ -184,7 +184,7 @@ public final class UtilsFilesDirs {
 	/**
 	 * <p>Writes the given files bytes to a file (replaces all file contents).</p>
 	 * <p>ATTENTION: try not to give too big files to this function without checking write permissions, because the
-	 * function that uses shell commands is (notice the name) {@link #writeSmallFile(String, byte[])}.</p>
+	 * function that uses shell commands is (notice the name) {@link #writeSmallFile(GPath, byte[])}.</p>
 	 *
 	 * @param file_path the path to the file
 	 * @param file_bytes the bytes to write
@@ -203,7 +203,7 @@ public final class UtilsFilesDirs {
 	}
 
 	/**
-	 * <p>Same as {@link #writeFile(String, byte[])}, but only uses a shell command.</p>
+	 * <p>Same as {@link #writeFile(GPath, byte[])}, but only uses a shell command.</p>
 	 * <p>ONLY with small files!!! <strong>This function allocates 4-5 times the file size into memory!</strong></p>
 	 * <p>Allocates 4 times more on KitKat+, and 5 times MORE below that.</p>
 	 */
@@ -227,7 +227,7 @@ public final class UtilsFilesDirs {
 	/**
 	 * <p>Copies the source path to the destination path (file, directory, whatever).</p>
 	 * <p>ATTENTION: try not to give too big files to this function without checking write permissions and SDK version,
-	 * because... read this: {@link #writeFile(String, byte[])} - can only happen below Android KitKat.</p>
+	 * because... read this: {@link #writeFile(GPath, byte[])} - can only happen below Android KitKat.</p>
 	 *
 	 * @param src_path the source file path
 	 * @param dest_path the destination file path

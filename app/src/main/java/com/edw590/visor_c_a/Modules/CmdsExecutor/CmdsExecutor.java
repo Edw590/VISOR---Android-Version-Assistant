@@ -50,6 +50,7 @@ import com.edw590.visor_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
+import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -162,6 +163,9 @@ public final class CmdsExecutor implements IModuleInst {
 	 * <p>Main class constructor.</p>
 	 */
 	public CmdsExecutor() {
+		// Prepare the Advanced Commands Detection module commands array
+		ACD.reloadCmdsArray(UtilsCmdsList.prepareCommandsString());
+
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 

@@ -47,6 +47,7 @@ import com.edw590.visor_c_a.R;
 
 import java.util.Locale;
 
+import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -199,6 +200,12 @@ public final class FragDevelopment extends Fragment {
 				System.out.println("android.permission.CAPTURE_AUDIO_HOTWORD: " + UtilsPermsAuths.checkSelfPermission("android.permission.CAPTURE_AUDIO_HOTWORD"));
 				System.out.println("android.permission.MANAGE_VOICE_KEYPHRASES: " + UtilsPermsAuths.checkSelfPermission("android.permission.MANAGE_VOICE_KEYPHRASES"));
 				System.out.println("------------------------");
+
+				System.out.println(SettingsSync.getJsonUserSettings());
+				System.out.println("------------------------");
+				System.out.println(SettingsSync.getJsonDeviceSettings());
+				System.out.println("------------------------");
+
 
 				//KeyphraseEnrollmentInfo keyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(UtilsContext.getContext().getPackageManager());
 				//System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
