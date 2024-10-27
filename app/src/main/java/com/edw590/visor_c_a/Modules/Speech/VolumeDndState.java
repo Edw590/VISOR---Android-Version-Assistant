@@ -27,7 +27,7 @@ import android.media.AudioManager;
 /**
  * <p>Class to instantiate to keep the values of the volume and Do Not Disturb interruption filter.</p>
  */
-final class VolumeDndObj {
+final class VolumeDndState {
 
 	/**
 	 * <p>Default value for all the attributes of the object.</p>
@@ -62,7 +62,7 @@ final class VolumeDndObj {
 	/**
 	 * <p>Main class constructor - calls {@link #setDefaultValues()}.</p>
 	 */
-	VolumeDndObj() {
+	VolumeDndState() {
 		setDefaultValues();
 	}
 

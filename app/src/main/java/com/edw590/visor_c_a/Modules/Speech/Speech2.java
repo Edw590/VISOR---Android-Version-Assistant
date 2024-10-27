@@ -51,8 +51,6 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.TasksList;
 
@@ -63,6 +61,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import GPTComm.GPTComm;
+import SpeechQueue.Speech;
 
 /**
  * <p>The 2nd speech module of the assistant (Speech API v2), now based on an instance-internal queue of to-speak
@@ -121,7 +120,7 @@ public final class Speech2 implements IModuleInst {
 	SpeechObj current_speech_obj = new SpeechObj();
 	SpeechObj last_speech = new SpeechObj();
 	@Nullable private AudioFocusRequest audioFocusRequest = null;
-	private final VolumeDndObj volumeDndObj = new VolumeDndObj();
+	private final VolumeDndState volumeDndState = new VolumeDndState();
 
 	private boolean speeches_on_lists = false;
 
@@ -132,7 +131,7 @@ public final class Speech2 implements IModuleInst {
 	// 750ms at most. I think this time it should be enough...
 	private static final long VOLUME_CHANGE_INTERVAL = 750;
 
-	private static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndObj.DEFAULT_VALUE; // Both must be different
+	private static final int OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE = -VolumeDndState.DEFAULT_VALUE; // Both must be different
 	private int stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
 	private long assist_changed_volume_time = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
 	private boolean assist_will_change_volume = false;
@@ -359,7 +358,7 @@ public final class Speech2 implements IModuleInst {
 			// If the assistant is speaking, check the audio stream always. Though...
 			if (assist_will_change_volume) {
 				if (System.currentTimeMillis() <= assist_changed_volume_time + VOLUME_CHANGE_INTERVAL) {
-					if ((volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && audio_stream == volumeDndObj.audio_stream)
+					if ((volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && audio_stream == volumeDndState.audio_stream)
 							|| (audio_stream == current_speech_obj.audio_stream)) {
 						// ... if the assistant will change the volume and it's detected here a volume change before
 						// the maximum allowed waiting time for the assistant to change the volume, and the audio stream
@@ -384,7 +383,7 @@ public final class Speech2 implements IModuleInst {
 		}
 
 		if (carry_on) {
-			if ((volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && audio_stream == volumeDndObj.audio_stream)
+			if ((volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && audio_stream == volumeDndState.audio_stream)
 					|| (audio_stream == current_speech_obj.audio_stream)) {
 				// As soon as a user volume change is detected, set the variable to true to indicate the user changed
 				// the volume.
@@ -546,7 +545,7 @@ public final class Speech2 implements IModuleInst {
 	 * in the lists, or null if it's not already in the lists
 	 * @param task_id same as in {@link TasksList#removeTask(int)}
 	 */
-	private int speakInternal(final String txt_to_speak, final int speech_priority, final int mode,
+	int speakInternal(final String txt_to_speak, final int speech_priority, final int mode,
 							  @Nullable final String utterance_id, final int task_id) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
@@ -762,16 +761,16 @@ public final class Speech2 implements IModuleInst {
 			// Set Do Not Disturb to ALARMS (emergency speech)
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALARMS) {
-					volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
-					volumeDndObj.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALARMS;
+					volumeDndState.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
+					volumeDndState.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALARMS;
 
-					notificationManager.setInterruptionFilter(volumeDndObj.new_interruption_filter);
+					notificationManager.setInterruptionFilter(volumeDndState.new_interruption_filter);
 				}
 			}
 
 			// Set the volume
-			volumeDndObj.audio_stream = current_speech_obj.audio_stream;
-			volumeDndObj.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
+			volumeDndState.audio_stream = current_speech_obj.audio_stream;
+			volumeDndState.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
 			final int new_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
 
 			setResetWillChangeVolume(true);
@@ -780,16 +779,16 @@ public final class Speech2 implements IModuleInst {
 					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 		} else {
 			if ((current_speech_obj.mode & MODE2_BYPASS_NO_SND) != 0) {
-				volumeDndObj.old_ringer_mode = audioManager.getRingerMode();
+				volumeDndState.old_ringer_mode = audioManager.getRingerMode();
 				audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
 				// Set Do Not Disturb to ALL (normal speech)
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 					if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALL) {
-						volumeDndObj.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
-						volumeDndObj.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALL;
+						volumeDndState.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
+						volumeDndState.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALL;
 
-						notificationManager.setInterruptionFilter(volumeDndObj.new_interruption_filter);
+						notificationManager.setInterruptionFilter(volumeDndState.new_interruption_filter);
 					}
 				}
 			}
@@ -804,8 +803,8 @@ public final class Speech2 implements IModuleInst {
 				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
 				final int new_volume = max_volume / 2;
 				if (current_volume < new_volume) {
-					volumeDndObj.audio_stream = current_speech_obj.audio_stream;
-					volumeDndObj.old_volume = current_volume;
+					volumeDndState.audio_stream = current_speech_obj.audio_stream;
+					volumeDndState.old_volume = current_volume;
 
 					setResetWillChangeVolume(true);
 
@@ -838,9 +837,9 @@ public final class Speech2 implements IModuleInst {
 		setResetWillChangeVolume(false);
 
 		// Reset the volume
-		if (volumeDndObj.old_volume != VolumeDndObj.DEFAULT_VALUE) {
+		if (volumeDndState.old_volume != VolumeDndState.DEFAULT_VALUE) {
 			boolean carry_on = false;
-			if (stream_active_before_begin_all_speeches == volumeDndObj.audio_stream) {
+			if (stream_active_before_begin_all_speeches == volumeDndState.audio_stream) {
 				stream_active_before_begin_all_speeches = OPPOSITE_VOL_DND_OBJ_DEFAULT_VALUE;
 				// If the user changed the volume user while the assistant was speaking, reset only if the stream
 				// was already being used before the assistant started to speak (the user raises the volume because it
@@ -854,14 +853,14 @@ public final class Speech2 implements IModuleInst {
 				}
 			}
 			if (carry_on) {
-				if (audioManager.getStreamVolume(volumeDndObj.audio_stream) != volumeDndObj.old_volume) {
+				if (audioManager.getStreamVolume(volumeDndState.audio_stream) != volumeDndState.old_volume) {
 					try {
-						audioManager.setStreamVolume(volumeDndObj.audio_stream, volumeDndObj.old_volume,
+						audioManager.setStreamVolume(volumeDndState.audio_stream, volumeDndState.old_volume,
 								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 					} catch (final SecurityException ignored) {
 						// Toggles DND, so I guess that would be because the volume is 0, maybe. If I'm right, then
 						// I just need to increase 1 to put it one level above, which would be out of DND.
-						audioManager.setStreamVolume(volumeDndObj.audio_stream, volumeDndObj.old_volume + 1,
+						audioManager.setStreamVolume(volumeDndState.audio_stream, volumeDndState.old_volume + 1,
 								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 					}
 				}
@@ -869,17 +868,17 @@ public final class Speech2 implements IModuleInst {
 		}
 
 		// Reset the ringer mode
-		if (volumeDndObj.old_ringer_mode != VolumeDndObj.DEFAULT_VALUE) {
-			audioManager.setRingerMode(volumeDndObj.old_ringer_mode);
+		if (volumeDndState.old_ringer_mode != VolumeDndState.DEFAULT_VALUE) {
+			audioManager.setRingerMode(volumeDndState.old_ringer_mode);
 		}
 
 		// Reset Do Not Disturb
-		if (volumeDndObj.old_interruption_filter != VolumeDndObj.DEFAULT_VALUE) {
+		if (volumeDndState.old_interruption_filter != VolumeDndState.DEFAULT_VALUE) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 				if (notificationManager.isNotificationPolicyAccessGranted()) {
 					// Only reset if the interruption mode was not changed while the assistant was speaking.
-					if (notificationManager.getCurrentInterruptionFilter() == volumeDndObj.new_interruption_filter) {
-						notificationManager.setInterruptionFilter(volumeDndObj.old_interruption_filter);
+					if (notificationManager.getCurrentInterruptionFilter() == volumeDndState.new_interruption_filter) {
+						notificationManager.setInterruptionFilter(volumeDndState.old_interruption_filter);
 					}
 				}
 			}
@@ -888,7 +887,7 @@ public final class Speech2 implements IModuleInst {
 		// Reset the audio focus
 		audioFocus(false);
 
-		volumeDndObj.setDefaultValues();
+		volumeDndState.setDefaultValues();
 
 		focus_volume_dnd_done = false;
 	}
@@ -976,11 +975,7 @@ public final class Speech2 implements IModuleInst {
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-			if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_IS_USER_SLEEPING, true)) {
-				skip_speaking = true;
-			}
-		} else {
+		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
 			skip_speaking = (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL &&
 					(current_speech_obj.mode & MODE2_BYPASS_NO_SND) == 0);
 		}
@@ -1005,7 +1000,7 @@ public final class Speech2 implements IModuleInst {
 				setToSpeakChanges();
 				if (!speeches_on_lists) {
 					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
-						stream_active_before_begin_all_speeches = volumeDndObj.audio_stream;
+						stream_active_before_begin_all_speeches = volumeDndState.audio_stream;
 					}
 				}
 			}
@@ -1174,7 +1169,7 @@ public final class Speech2 implements IModuleInst {
 				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
 				// Also, check if the assistant changed the volume at all. If it didn't, don't reset anything (that's
 				// checked by verifying if the audio stream is the DEFAULT_VALUE or not).
-				if (volumeDndObj.audio_stream != VolumeDndObj.DEFAULT_VALUE && volumeDndObj.audio_stream != audio_stream) {
+				if (volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && volumeDndState.audio_stream != audio_stream) {
 					if (focus_volume_dnd_done) {
 						resetToSpeakChanges();
 					}
