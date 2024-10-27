@@ -590,8 +590,11 @@ public final class Speech2 implements IModuleInst {
 
 			return TextToSpeech.SUCCESS;
 		}
-		// Else, if it's supported, let it check by itself if the TTS is ready or not. If it's not, the next speech will
-		// use it after it's restarted.
+		// Else, if it's supported, let it check by itself if the TTS is ready or not. If it's not... (just below).
+
+		// Reload the TTS instance in case the default voice and/or engine have changed (also if it was uninstalled or
+		// disabled or something else that would prevent VISOR from speaking).
+		checkReloadTts();
 
 		String utterance_id_to_use = "";
 		if (utterance_id != null) {
@@ -1139,11 +1142,6 @@ public final class Speech2 implements IModuleInst {
 	 */
 	void speechTreatment(@NonNull final String utteranceId) {
 		// Main note: everything that calls this function empties current_speech_obj first.
-
-		// Reload the TTS instance in case the default voice and/or engine have changed (also if it was uninstalled or
-		// disabled or something else that would prevent VISOR from speaking).
-		// Do it only here because it's after every speech finishes, and not before it starts (delaying the start).
-		checkReloadTts();
 
 		// Why is this check here and not just the removal? Refer to the custom onStop().
 		if (!utteranceId.isEmpty()) {
