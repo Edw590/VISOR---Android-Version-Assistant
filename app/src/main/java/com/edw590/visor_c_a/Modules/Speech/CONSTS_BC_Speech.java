@@ -23,8 +23,6 @@ package com.edw590.visor_c_a.Modules.Speech;
 
 import com.edw590.visor_c_a.TasksList;
 
-import java.util.ArrayList;
-
 /**
  * <p>Actions, extras, and classes to use to send a broadcast to this module.</p>
  * <br>
@@ -59,22 +57,16 @@ public final class CONSTS_BC_Speech {
 	static final String ACTION_SKIP_SPEECH = "Speech_ACTION_SKIP_SPEECH";
 
 	/**
-	 * <p>Explanation: removes a speech from the lists based on its speech string. More info on
-	 * {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)} and
-	 * {@link UtilsSpeech2#removeSpeechById(String, ArrayList)}.</p>
-	 * <p>Main executed function: {@link UtilsSpeech2#getSpeechIdBySpeech(String, int, boolean, ArrayList)}.</p>
+	 * <p>Explanation: removes a speech from the lists based on its ID.</p>
+	 * <p>Main executed function: {@link SpeechQueue.SpeechQueue#removeSpeech(String)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsSpeech2BC}.</p>
 	 * <p>To be received only by the class(es): {@link Speech2}.</p>
 	 * <p>Extras (ordered parameters):</p>
 	 * <p>- {@link #EXTRA_REMOVE_SPEECH_1}: mandatory</p>
-	 * <p>- {@link #EXTRA_REMOVE_SPEECH_2}: mandatory</p>
-	 * <p>- {@link #EXTRA_REMOVE_SPEECH_3}: mandatory</p>
 	 * <p>- Not required</p>
 	 */
 	static final String ACTION_REMOVE_SPEECH = "Speech_ACTION_REMOVE_SPEECH";
 	static final String EXTRA_REMOVE_SPEECH_1 = "Speech_EXTRA_REMOVE_SPEECH_1";
-	static final String EXTRA_REMOVE_SPEECH_2 = "Speech_EXTRA_REMOVE_SPEECH_2";
-	static final String EXTRA_REMOVE_SPEECH_3 = "Speech_EXTRA_REMOVE_SPEECH_3";
 
 	/**
 	 * <p>Executed function: {@link Speech2#speak(String, int, int)}.</p>

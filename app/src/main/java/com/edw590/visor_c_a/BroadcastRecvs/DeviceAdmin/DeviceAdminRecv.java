@@ -52,7 +52,8 @@ public final class DeviceAdminRecv extends DeviceAdminReceiver {
 			devicePolicyManager.setUninstallBlocked(mAdminName, UtilsGeneral.getContext().getPackageName(), true);
 		}*/
 
-		// Not used to have this here if the app is to force the authorization from time to time.
+		// Not useful to have this here if the app is to force the authorization from time to time.
+		// If you enable this, enable the commented thing on onDisabled().
 		//UtilsSpeech2BC.speak(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, null);
 
 		UtilsMainSrvc.startMainService();
@@ -89,7 +90,8 @@ public final class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		// This below is in case the administrator mode was enabled, but was disabled right after. The assistant
 		// would still say the administrator mode is enabled after saying it was disabled --> wtf. This fixes that.
-		UtilsSpeech2BC.removeSpeechByStr(CONSTS.SPEAK_ENABLED, PRIORITY_ADMIN_ENABLED, true);
+		// EDIT: commented out because the corresponding speech is too
+		//UtilsSpeech2BC.removeSpeechByStr(CONSTS.SPEAK_ENABLED);
 
 		UtilsMainSrvc.startMainService();
 	}

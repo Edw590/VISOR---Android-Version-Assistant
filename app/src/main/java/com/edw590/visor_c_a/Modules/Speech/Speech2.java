@@ -59,7 +59,6 @@ import com.edw590.visor_c_a.TasksList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 
 import GPTComm.GPTComm;
@@ -117,10 +116,8 @@ public final class Speech2 implements IModuleInst {
 	static final ArrayList<String> speech_notif_speeches = new ArrayList<>(10);
 
 	TextToSpeech tts = null;
-	// If more priorities are ever needed, well, here's a 10 in case I forget to update the number (possible).
-	static final ArrayList<ArrayList<SpeechObj>> arrays_speech_objs = new ArrayList<>(10);
-	SpeechObj current_speech_obj = new SpeechObj();
-	SpeechObj last_speech = new SpeechObj();
+	SpeechQueue.Speech current_speech_obj = new SpeechQueue.Speech();
+	SpeechQueue.Speech last_speech = new SpeechQueue.Speech();
 	@Nullable private AudioFocusRequest audioFocusRequest = null;
 	private final VolumeDndState volumeDndState = new VolumeDndState();
 
@@ -140,6 +137,33 @@ public final class Speech2 implements IModuleInst {
 	private boolean user_changed_volume = false;
 	private boolean is_speaking = false;
 	private boolean focus_volume_dnd_done = false;
+
+	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
+	// SYSTEM_ENFORCED so we can't the change the volume: "Yeah, it will always play at max volume since this stream is
+	// intended mainly for camera shutter sounds in markets where they have legal requirements saying that
+	// people shouldn't be able to mute/attenuate the shutter sound and go around taking photos of other people
+	// without their knowledge." - StackOverflow
+	// EDIT: Or not... At least with Lollipop 5.1 and Oreo 8.1. Maybe only in Japanese phones which is where the
+	// above is applied (said in another comment).
+	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
+	// system-dependent, and ALARM seems to always have high priority, possibly.
+	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_NOTIFICATION;
+	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_NOTIFICATION;
+	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
+	// Also don't change to MUSIC, for the same reason.
+	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
+	// Just let everything on ALARM (except with connected headphones).
+	// Easier and always works (alarms have top priority even over Do Not Disturb, at least on Oreo 8.1).
+	// EDIT: It's now on RING for us to be able to change the volume easily, as opposite to ALARM (which I will leave
+	// with CRITICAL, since it's to be spoken at full volume always.
+	// Leave on RING since this way the volume can be set independently of the music playing. On headphones such thing
+	// can't be done independently though. Pity.
+	// EDIT 2: Changed to NOTIFICATION because of tablets. They might not use RING (miTab Advance doesn't). I can't
+	// change it manually, but the app still speaks. With NOTIFICATION, I guess it should work everywhere (there are
+	// always notifications). Alarms exist too anyways and the music stream too, of course. So all cool, I think.
+	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
+	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
+	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.
 
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
@@ -176,7 +200,7 @@ public final class Speech2 implements IModuleInst {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
 
-		arrays_speech_objs.clear();
+		SpeechQueue.SpeechQueue.clearQueue();
 
 		if (tts != null) {
 			tts.stop();
@@ -224,11 +248,6 @@ public final class Speech2 implements IModuleInst {
 
 		///////////////////////////////////
 		// TTS
-
-		// Even if audio is not supported, prepare everything anyway. Some external device that can output audio
-		// (microphone or camera with microphone or whatever) can be connected and then audio output is available - this
-		// module should be ready for that already, and this way it is.
-		UtilsSpeech2.readyArrayLists(arrays_speech_objs);
 
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
@@ -361,7 +380,7 @@ public final class Speech2 implements IModuleInst {
 			if (assist_will_change_volume) {
 				if (System.currentTimeMillis() <= assist_changed_volume_time + VOLUME_CHANGE_INTERVAL) {
 					if ((volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && audio_stream == volumeDndState.audio_stream)
-							|| (audio_stream == current_speech_obj.audio_stream)) {
+							|| (audio_stream == current_speech_obj.getAudioStream())) {
 						// ... if the assistant will change the volume and it's detected here a volume change before
 						// the maximum allowed waiting time for the assistant to change the volume, and the audio stream
 						// of that change is the audio stream currently being used, reset the will change volume variables.
@@ -386,7 +405,7 @@ public final class Speech2 implements IModuleInst {
 
 		if (carry_on) {
 			if ((volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && audio_stream == volumeDndState.audio_stream)
-					|| (audio_stream == current_speech_obj.audio_stream)) {
+					|| (audio_stream == current_speech_obj.getAudioStream())) {
 				// As soon as a user volume change is detected, set the variable to true to indicate the user changed
 				// the volume.
 				// Also reset only if the stream is the correct one, because the system broadcasts multiple streams at
@@ -458,11 +477,11 @@ public final class Speech2 implements IModuleInst {
 	public static final int CUR_SPEECH_NOT_STOPPED = 3234_2;
 	// To add a new priority, create one here, update the doc below, and update the constant NUMBER_OF_PRIORITIES.
 	// If you get to 10 or above, see if replacing X by 2 characters works.
-	public static final int PRIORITY_LOW = 0;
-	public static final int PRIORITY_MEDIUM = 1;
-	public static final int PRIORITY_USER_ACTION = 2;
-	public static final int PRIORITY_HIGH = 3;
-	public static final int PRIORITY_CRITICAL = 4;
+	public static final int PRIORITY_LOW = SpeechQueue.SpeechQueue.PRIORITY_LOW;
+	public static final int PRIORITY_MEDIUM = SpeechQueue.SpeechQueue.PRIORITY_MEDIUM;
+	public static final int PRIORITY_USER_ACTION = SpeechQueue.SpeechQueue.PRIORITY_USER_ACTION;
+	public static final int PRIORITY_HIGH = SpeechQueue.SpeechQueue.PRIORITY_HIGH;
+	public static final int PRIORITY_CRITICAL = SpeechQueue.SpeechQueue.PRIORITY_CRITICAL;
 	// NEVER TEST IF A VARIABLE HAS THE MODEx_DEFAULT BITS SET!!! That way we can set 0 as the all-default instead of
 	// having to put MODE1_DEFAULT | MODE2_DEFAULT.
 	public static final int MODE_DEFAULT = 0;
@@ -574,57 +593,45 @@ public final class Speech2 implements IModuleInst {
 		// Else, if it's supported, let it check by itself if the TTS is ready or not. If it's not, the next speech will
 		// use it after it's restarted.
 
-		final String utterance_id_to_use;
-		if (utterance_id == null) {
-			utterance_id_to_use = UtilsSpeech2.generateUtteranceId(speech_priority);
-		} else {
+		String utterance_id_to_use = "";
+		if (utterance_id != null) {
 			utterance_id_to_use = utterance_id;
 		}
-		boolean is_new_speech = true;
-		double_for: for (final ArrayList<SpeechObj> speechObjs : arrays_speech_objs) {
-			for (final SpeechObj speechObj : speechObjs) {
-				if (utterance_id_to_use.equals(speechObj.utterance_id)) {
-					is_new_speech = false;
-
-					break double_for;
+		if (SpeechQueue.SpeechQueue.getSpeech(utterance_id_to_use) == null) {
+			// If it's a new speech, add to the lists.
+			final int audio_stream;
+			if (speech_priority == Speech2.PRIORITY_CRITICAL) {
+				audio_stream = AUD_STREAM_PRIORITY_CRITICAL;
+			} else if (speech_priority == Speech2.PRIORITY_HIGH) {
+				audio_stream = AUD_STREAM_PRIORITY_HIGH;
+			} else {
+				if (UtilsGeneral.areExtSpeakersOn()) {
+					audio_stream = AUD_STREAM_HEADPHONES;
+				} else {
+					audio_stream = AUD_STREAM_PRIORITY_OTHERS_SPEAKERS;
 				}
 			}
-		}
-		SpeechObj new_speech_obj = null;
-		if (is_new_speech) {
-			// If it's a new speech, add to the lists.
-			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, actual_mode,
-					System.currentTimeMillis(), task_id);
-			arrays_speech_objs.get(speech_priority).add(new_speech_obj);
+			utterance_id_to_use = SpeechQueue.SpeechQueue.addSpeech(txt_to_speak, utterance_id_to_use,
+					System.currentTimeMillis(), speech_priority, actual_mode, audio_stream, task_id);
 		}
 
-		if (current_speech_obj.utterance_id.isEmpty()) {
+		if (current_speech_obj.getID().isEmpty()) {
 			// The function only gets here if there was no speech already taking place.
 
 			// Set the current_speech_obj to the speech getting ready to be spoken immediately, so that if any other
 			// speech is requested goes at the same time, goes directly to the lists (race condition, and this is
 			// supposed to fix it).
-			if (new_speech_obj == null) {
-				// If it's null above, then the speech was already on the lists. So go look for it.
-				// Below will never been null if the implementation of Speech2 is correct (it's just to get the warning
-				// away).
-				current_speech_obj = Objects.requireNonNull(
-						UtilsSpeech2.getSpeechObjFromId(utterance_id_to_use, arrays_speech_objs));
-			} else {
-				// If it's not null, then a new speech was just created and we can use that object instead of going
-				// looking for it (optimized).
-				current_speech_obj = new_speech_obj;
-			}
+			current_speech_obj = SpeechQueue.SpeechQueue.getSpeech(utterance_id_to_use);
 
-			final int tts_error_code = sendTtsSpeak(current_speech_obj.txt_to_speak, current_speech_obj.utterance_id,
-					current_speech_obj.audio_stream);
+			final int tts_error_code = sendTtsSpeak(current_speech_obj.getText(), current_speech_obj.getID(),
+					current_speech_obj.getAudioStream());
 			if (tts_error_code != TextToSpeech.SUCCESS) {
 				initializeTts(false); // Restart the TTS instance if it's not working.
 
-				if ((current_speech_obj.mode & MODE1_NO_NOTIF) == 0) {
+				if ((current_speech_obj.getMode() & MODE1_NO_NOTIF) == 0) {
 					// In case some error occurred (for example, the engine was uninstalled), notify the speech, "call
 					// skipCurrentSpeech()", and reinitialize the TTS object.
-					addSpeechToNotif(current_speech_obj.txt_to_speak);
+					addSpeechToNotif(current_speech_obj.getText());
 				}
 
 				// Custom implementation of skipCurrentSpeech(). The difference here is that as tts.stop() will return
@@ -632,7 +639,7 @@ public final class Speech2 implements IModuleInst {
 				// in this case it's because TTS is not even working properly, which cannot be predicted with just
 				// ERROR and hence here must be a difference implementation knowing that here specifically ERROR means
 				// TTS not working and not failure in stopping a speaking speech).
-				current_speech_obj = new SpeechObj();
+				current_speech_obj = new SpeechQueue.Speech();
 				onStop(utterance_id_to_use, true);
 			}
 
@@ -644,7 +651,7 @@ public final class Speech2 implements IModuleInst {
 			// stops, it will take care of starting the next ones on the queues).
 			// Except if the new speech has a higher priority than the current one. In that case, the current one
 			// stops temporarily to give place to the new one.
-			if (speech_priority > UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id)) {
+			if (speech_priority > current_speech_obj.getPriority()) {
 				if (ttsStop(false) == TextToSpeech.SUCCESS) {
 					return CUR_SPEECH_STOPPED;
 				} else {
@@ -740,15 +747,15 @@ public final class Speech2 implements IModuleInst {
 		// separately. This is a way for onDone to do nothing, since the custom onStop will - which will also make the
 		// the program flow continue to be only one (onDone() is called in another thread but nothing is done, so we
 		// continue here to onStop()). Read also above the if statement on onDone().
-		final SpeechObj old_speech_obj = current_speech_obj;
-		current_speech_obj = new SpeechObj();
+		final SpeechQueue.Speech old_speech_obj = current_speech_obj;
+		current_speech_obj = new SpeechQueue.Speech();
 		if (tts.stop() == TextToSpeech.ERROR) {
 			current_speech_obj = old_speech_obj;
 
 			return TextToSpeech.ERROR;
 		}
 
-		onStop(old_speech_obj.utterance_id, skip_speech);
+		onStop(old_speech_obj.getID(), skip_speech);
 
 		return TextToSpeech.SUCCESS;
 	}
@@ -762,7 +769,7 @@ public final class Speech2 implements IModuleInst {
 	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
 	private void setToSpeakChanges() {
-		if (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) == PRIORITY_CRITICAL) {
+		if (current_speech_obj.getPriority() == PRIORITY_CRITICAL) {
 			audioFocus(true);
 
 			// Set Do Not Disturb to ALARMS (emergency speech)
@@ -776,18 +783,21 @@ public final class Speech2 implements IModuleInst {
 			}
 
 			// Set the volume
-			volumeDndState.audio_stream = current_speech_obj.audio_stream;
-			volumeDndState.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
+			final int current_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
 			int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_CRITICAL_VOL, true);
-			int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+			int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.getAudioStream());
 			int actual_new_volume = new_volume * max_volume / 100;
+			if (current_volume < actual_new_volume) {
+				volumeDndState.audio_stream = current_speech_obj.getAudioStream();
+				volumeDndState.old_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
 
-			setResetWillChangeVolume(true);
+				setResetWillChangeVolume(true);
 
-			audioManager.setStreamVolume(current_speech_obj.audio_stream, actual_new_volume,
-					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+				audioManager.setStreamVolume(current_speech_obj.getAudioStream(), actual_new_volume,
+						AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+			}
 		} else {
-			if ((current_speech_obj.mode & MODE2_BYPASS_NO_SND) != 0) {
+			if ((current_speech_obj.getMode() & MODE2_BYPASS_NO_SND) != 0) {
 				volumeDndState.old_ringer_mode = audioManager.getRingerMode();
 				audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
@@ -808,17 +818,17 @@ public final class Speech2 implements IModuleInst {
 				// Set the volume
 				// Put the volume in medium before speaking in case the ringer is NORMAL and the stream is not
 				// RING or NOTIFICATION (for example with STREAM_MUSIC).
-				final int current_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
-				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+				final int current_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
+				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.getAudioStream());
 				final int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_NORMAL_VOL, true);
 				int actual_new_volume = new_volume * max_volume / 100;
 				if (current_volume < actual_new_volume) {
-					volumeDndState.audio_stream = current_speech_obj.audio_stream;
+					volumeDndState.audio_stream = current_speech_obj.getAudioStream();
 					volumeDndState.old_volume = current_volume;
 
 					setResetWillChangeVolume(true);
 
-					audioManager.setStreamVolume(current_speech_obj.audio_stream, actual_new_volume,
+					audioManager.setStreamVolume(current_speech_obj.getAudioStream(), actual_new_volume,
 							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 				}
 			}
@@ -910,10 +920,9 @@ public final class Speech2 implements IModuleInst {
 	 * @param request true to request the audio focus, false to abandon the audio focus
 	 */
 	void audioFocus(final boolean request) {
-		final int priority = UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id);
 		if (request) {
 			final int duration_hint;
-			if (priority == PRIORITY_CRITICAL) {
+			if (current_speech_obj.getPriority() == PRIORITY_CRITICAL) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 					// todo Test this here! The comment in the 2nd else statement below
 					duration_hint = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
@@ -933,7 +942,7 @@ public final class Speech2 implements IModuleInst {
 						.build();
 				audioManager.requestAudioFocus(audioFocusRequest);
 			} else {
-				audioManager.requestAudioFocus(onAudioFocusChangeListener, current_speech_obj.audio_stream,
+				audioManager.requestAudioFocus(onAudioFocusChangeListener, current_speech_obj.getAudioStream(),
 						duration_hint);
 			}
 		} else {
@@ -986,21 +995,21 @@ public final class Speech2 implements IModuleInst {
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
 		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-			skip_speaking = (UtilsSpeech2.getSpeechPriority(current_speech_obj.utterance_id) != PRIORITY_CRITICAL &&
-					(current_speech_obj.mode & MODE2_BYPASS_NO_SND) == 0);
+			skip_speaking = (current_speech_obj.getPriority() != PRIORITY_CRITICAL &&
+					(current_speech_obj.getMode() & MODE2_BYPASS_NO_SND) == 0);
 		}
 
 		if (skip_speaking) {
 			System.out.println("+++++++++++++++++++++++++++++++++++++++");
-			System.out.println(current_speech_obj.utterance_id);
-			System.out.println(current_speech_obj.task_id);
-			new Thread(TasksList.removeTask(current_speech_obj.task_id).runnable).start();
+			System.out.println(current_speech_obj.getID());
+			System.out.println(current_speech_obj.getTaskID());
+			new Thread(TasksList.removeTask(current_speech_obj.getTaskID()).runnable).start();
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
-					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, current_speech_obj.utterance_id));
+					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, current_speech_obj.getID()));
 
-			if ((current_speech_obj.mode & MODE1_NO_NOTIF) == 0) {
+			if ((current_speech_obj.getMode() & MODE1_NO_NOTIF) == 0) {
 				// Notify the speech before skipping it (don't skip the notification).
-				addSpeechToNotif(current_speech_obj.txt_to_speak);
+				addSpeechToNotif(current_speech_obj.getText());
 			}
 
 			skipCurrentSpeech();
@@ -1009,14 +1018,14 @@ public final class Speech2 implements IModuleInst {
 			if (!focus_volume_dnd_done) {
 				setToSpeakChanges();
 				if (!speeches_on_lists) {
-					if (AudioSystem.isStreamActive(current_speech_obj.audio_stream, 0)) { // 0 == Now
+					if (AudioSystem.isStreamActive(current_speech_obj.getAudioStream(), 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndState.audio_stream;
 					}
 				}
 			}
 
-			if ((current_speech_obj.mode & MODE1_ALWAYS_NOTIFY) != 0) {
-				addSpeechToNotif(current_speech_obj.txt_to_speak);
+			if ((current_speech_obj.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
+				addSpeechToNotif(current_speech_obj.getText());
 			}
 
 			is_speaking = true;
@@ -1038,7 +1047,6 @@ public final class Speech2 implements IModuleInst {
 		@Override
 		public void onDone(final String utteranceId) {
 			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-			System.out.println(arrays_speech_objs);
 			System.out.println(utteranceId);
 			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
@@ -1048,8 +1056,8 @@ public final class Speech2 implements IModuleInst {
 			// called first, it will put empty the utterance ID of the current speech and tell onDone that what was to
 			// be done, was already done by onStop(). This in case onDone is called. If it's not, no matter - onStop()
 			// already did onDone()'s job as a failsafe measure.
-			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj();
+			if (!current_speech_obj.getID().isEmpty()) {
+				current_speech_obj = new SpeechQueue.Speech();
 				speechTreatment(utteranceId);
 			}
 		}
@@ -1058,7 +1066,6 @@ public final class Speech2 implements IModuleInst {
 		@Override
 		public void onError(final String utteranceId) {
 			System.out.println("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-			System.out.println(arrays_speech_objs);
 			System.out.println(utteranceId);
 			System.out.println("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
 
@@ -1066,8 +1073,8 @@ public final class Speech2 implements IModuleInst {
 			// precaution, since I don't know when there's an error, which of onDone and onError will be called, and if
 			// both are called, which one is called first. So in any case, the first to be called will stop the other
 			// one from being called this way.
-			if (!current_speech_obj.utterance_id.isEmpty()) {
-				current_speech_obj = new SpeechObj();
+			if (!current_speech_obj.getID().isEmpty()) {
+				current_speech_obj = new SpeechQueue.Speech();
 				speechTreatment(utteranceId);
 			}
 		}
@@ -1102,7 +1109,6 @@ public final class Speech2 implements IModuleInst {
 	 */
 	private void onStop(@NonNull final String utteranceId, final boolean skip_speech) {
 		System.out.println("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
-		System.out.println(arrays_speech_objs);
 		System.out.println(utteranceId);
 		System.out.println("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
 
@@ -1114,7 +1120,7 @@ public final class Speech2 implements IModuleInst {
 			// TextToSpeech list except the current speech, and all speeches are always on the Speech2 lists).
 			speechTreatment(utteranceId);
 		} else {
-			UtilsSpeech2.reSayRephraseSpeech(utteranceId, arrays_speech_objs);
+			SpeechQueue.SpeechQueue.getSpeech(utteranceId).rephraseInterrSpeech();
 			// In this case, the speech is not to be removed from the list. Only stopped temporarily.
 			speechTreatment("");
 		}
@@ -1144,7 +1150,7 @@ public final class Speech2 implements IModuleInst {
 			System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
 			System.out.println(utteranceId);
 			// Won't happen, except from the custom onStop() - or the speech wouldn't have taken place.
-			last_speech = Objects.requireNonNull(UtilsSpeech2.removeSpeechById(utteranceId, arrays_speech_objs));
+			last_speech = SpeechQueue.SpeechQueue.removeSpeech(utteranceId);
 			// todo It's getting null here on API 15 and 19 at least.... (on Oreo it doesn't)
 			//  EDIT: not on 15 anymore... hmm...
 			//  Synchronize the class... ('synchronize' keyword)
@@ -1156,63 +1162,55 @@ public final class Speech2 implements IModuleInst {
 			// todo Remake this module from scratch.... And organize it this time
 
 			// If there's an ID of a Task to run after the speech is finished, run it in a new thread.
-			new Thread(TasksList.removeTask(last_speech.task_id).runnable).start();
+			new Thread(TasksList.removeTask(last_speech.getTaskID()).runnable).start();
 
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
-					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, last_speech.utterance_id));
+					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, last_speech.getID()));
 		}
 
 		// From back to beginning since high priority has greater value than low priority and the first speeches to be
 		// put back on track are the higher priority ones.
-		for (int priority = arrays_speech_objs.size() - 1; priority >= 0; priority--) {
-			if (!arrays_speech_objs.get(priority).isEmpty()) {
-				final SpeechObj correct_speech_obj = arrays_speech_objs.get(priority).get(0);
-
-				final int speech_priority = UtilsSpeech2.getSpeechPriority(correct_speech_obj.utterance_id);
-				final String utterance_id = correct_speech_obj.utterance_id;
-				final String speech = correct_speech_obj.txt_to_speak;
-				final int audio_stream = correct_speech_obj.audio_stream;
-				final int mode = correct_speech_obj.mode;
-				final int task_id = correct_speech_obj.task_id;
-
-				// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
-				// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
-				// Also, check if the assistant changed the volume at all. If it didn't, don't reset anything (that's
-				// checked by verifying if the audio stream is the DEFAULT_VALUE or not).
-				if (volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE && volumeDndState.audio_stream != audio_stream) {
-					if (focus_volume_dnd_done) {
-						resetToSpeakChanges();
-					}
-					if (assist_will_change_volume) {
-						// Just to be sure, in case there was an error and the assistant didn't change the volume after
-						// saying it would, or in case the volume changed broadcast was not detected - it would still
-						// be waiting to detect it. With this here, not anymore.
-						setResetWillChangeVolume(false);
-					}
-					// The audio stream is changing, so if the user had changed the previous stream's volume, they
-					// didn't change the new one's.
-					user_changed_volume = false;
+		SpeechQueue.Speech next_speech = SpeechQueue.SpeechQueue.getNextSpeech(-1);
+		if (next_speech != null) {
+			// If there are more speeches and they use the same audio stream, don't reset the volume and abandon
+			// the audio focus. Do that only if the stream to be used next is different (reset the previous one).
+			// Also, check if the assistant changed the volume at all. If it didn't, don't reset anything (that's
+			// checked by verifying if the audio stream is the DEFAULT_VALUE or not).
+			if (volumeDndState.audio_stream != VolumeDndState.DEFAULT_VALUE &&
+					volumeDndState.audio_stream != next_speech.getAudioStream()) {
+				if (focus_volume_dnd_done) {
+					resetToSpeakChanges();
 				}
-
-				speakInternal(speech, speech_priority, mode, utterance_id, task_id);
-
-				try {
-					// This being here won't cause any stop in the assistant once this module is a Service in a separate
-					// process. It's a break between speeches so they're not all at once without a small break in
-					// between (which is awkward, and doesn't help the brain process when one ends and the other one
-					// starts). 500 milliseconds should suffice, I guess.
-
-					// Also, do NOT remove this from here. It's here in purpose. Supposed the assistant is saying
-					// something when the device is restarted. It must warn at once about that without a small break.
-					// Like it must do if it's saying something and a higher priority thing must be said. No one makes
-					// a break for that. Instead, stops the speech and says for example, "Attention sir, that task is over.
-					// Now carrying on what I was saying, (...)".
-					Thread.sleep(500);
-				} catch (final InterruptedException ignored) {
+				if (assist_will_change_volume) {
+					// Just to be sure, in case there was an error and the assistant didn't change the volume after
+					// saying it would, or in case the volume changed broadcast was not detected - it would still
+					// be waiting to detect it. With this here, not anymore.
+					setResetWillChangeVolume(false);
 				}
-
-				return;
+				// The audio stream is changing, so if the user had changed the previous stream's volume, they
+				// didn't change the new one's.
+				user_changed_volume = false;
 			}
+
+			speakInternal(next_speech.getText(), next_speech.getPriority(), next_speech.getMode(), next_speech.getID(),
+					next_speech.getTaskID());
+
+			try {
+				// This being here won't cause any stop in the assistant once this module is a Service in a separate
+				// process. It's a break between speeches so they're not all at once without a small break in
+				// between (which is awkward, and doesn't help the brain process when one ends and the other one
+				// starts). 500 milliseconds should suffice, I guess.
+
+				// Also, do NOT remove this from here. It's here in purpose. Supposed the assistant is saying
+				// something when the device is restarted. It must warn at once about that without a small break.
+				// Like it must do if it's saying something and a higher priority thing must be said. No one makes
+				// a break for that. Instead, stops the speech and says for example, "Attention sir, that task is over.
+				// Now carrying on what I was saying, (...)".
+				Thread.sleep(500);
+			} catch (final InterruptedException ignored) {
+			}
+
+			return;
 		}
 
 		allSpeechesFinished();
@@ -1309,20 +1307,14 @@ public final class Speech2 implements IModuleInst {
 					break;
 				}
 				case (CONSTS_BC_Speech.ACTION_REMOVE_SPEECH): {
-					final String speech = intent.getStringExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1);
-					final int speech_priority = intent.getIntExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_2, -1);
-					final boolean low_to_high = intent.getBooleanExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_3, true);
+					final String speech_id = intent.getStringExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_1);
 
-					final String speech_id = UtilsSpeech2.getSpeechIdBySpeech(speech, speech_priority, low_to_high,
-							arrays_speech_objs);
-					if (speech_id != null) {
-						UtilsSpeech2.removeSpeechById(speech_id, arrays_speech_objs);
-					}
+					SpeechQueue.SpeechQueue.removeSpeech(speech_id);
 
 					break;
 				}
 				case (CONSTS_BC_Speech.ACTION_SAY_AGAIN): {
-					if (last_speech.registered_when > System.currentTimeMillis() + 120*1000) {
+					if (last_speech.getTime() > System.currentTimeMillis() + 120*1000) {
 						// 1.5 minutes at most until he forgets what he said (seems a good number)
 						speak("I haven't said anything.", PRIORITY_USER_ACTION, MODE2_BYPASS_NO_SND);
 					} else {

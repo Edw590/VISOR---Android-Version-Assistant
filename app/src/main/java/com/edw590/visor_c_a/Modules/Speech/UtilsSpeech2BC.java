@@ -31,6 +31,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.TasksList;
 
 import GPTComm.GPTComm;
+import SpeechQueue.SpeechQueue;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -78,7 +79,7 @@ public final class UtilsSpeech2BC {
 		if (after_speaking != null) {
 			broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_4, TasksList.addTask(after_speaking));
 		}
-		final String speech_id = UtilsSpeech2.generateUtteranceId(speech_priority);
+		final String speech_id = SpeechQueue.generateSpeechID();
 		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_CALL_SPEAK_5, speech_id);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
@@ -98,16 +99,11 @@ public final class UtilsSpeech2BC {
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_REMOVE_SPEECH}.</p>
 	 *
-	 * @param speech read the action's documentation
-	 * @param speech_priority read the action's documentation
-	 * @param low_to_high read the action's documentation
+	 * @param speech_id read the action's documentation
 	 */
-	public static void removeSpeechByStr(@NonNull final String speech, final int speech_priority,
-										 final boolean low_to_high) {
+	public static void removeSpeechById(@NonNull final String speech_id) {
 		final Intent broadcast_intent = new Intent(CONSTS_BC_Speech.ACTION_REMOVE_SPEECH);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_REMOVE_SPEECH_1, speech);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_REMOVE_SPEECH_2, speech_priority);
-		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_REMOVE_SPEECH_3, low_to_high);
+		broadcast_intent.putExtra(CONSTS_BC_Speech.EXTRA_REMOVE_SPEECH_1, speech_id);
 
 		UtilsApp.sendInternalBroadcast(broadcast_intent);
 	}

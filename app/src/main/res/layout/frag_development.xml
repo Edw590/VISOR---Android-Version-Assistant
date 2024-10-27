@@ -63,6 +63,18 @@
 			android:text="Speak (min priority)" />
 
 		<androidx.appcompat.widget.AppCompatButton
+			android:id="@+id/btn_speak_high"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Speak (high priority)" />
+
+		<androidx.appcompat.widget.AppCompatButton
+			android:id="@+id/btn_speak_critical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Speak (critical priority)" />
+
+		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_skip_speech"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
