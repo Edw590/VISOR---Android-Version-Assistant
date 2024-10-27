@@ -47,7 +47,7 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import java.util.List;
 
@@ -168,7 +168,7 @@ public final class CameraManagement implements IModuleInst {
 
 					if (!main_camera_id.isEmpty() && main_camera_id.equals(cameraId)) {
 						// Update the Values Storage
-						UtilsRegistry.setData(ValuesRegistry.K_MAIN_FLASHLIGHT_ENABLED, enabled, false);
+						UtilsRegistry.setData(RegistryKeys.K_MAIN_FLASHLIGHT_ENABLED, enabled, false);
 					}
 				}
 			};
@@ -421,7 +421,7 @@ public final class CameraManagement implements IModuleInst {
 			return ERROR_ACCESSING_CAMERA;
 		}
 
-		final boolean flashlight_new_on = (boolean) UtilsRegistry.getData(ValuesRegistry.K_MAIN_FLASHLIGHT_ENABLED, true);
+		final boolean flashlight_new_on = (boolean) UtilsRegistry.getData(RegistryKeys.K_MAIN_FLASHLIGHT_ENABLED, true);
 		// Even if the state was unknown (value is null), set it as false so that VISOR will try anyway even if it
 		// doesn't know the state.
 		if (set_enabled) {

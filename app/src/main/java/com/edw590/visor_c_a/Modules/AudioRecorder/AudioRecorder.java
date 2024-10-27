@@ -39,7 +39,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsMedia;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
@@ -106,7 +106,7 @@ public final class AudioRecorder implements IModuleInst {
 		main_handler = new Handler(main_handlerThread.getLooper());
 
 		// Update the Values Storage
-		UtilsRegistry.setData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, false, false);
+		UtilsRegistry.setData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, false, false);
 
 		try {
 			final IntentFilter intentFilter = new IntentFilter();
@@ -129,7 +129,7 @@ public final class AudioRecorder implements IModuleInst {
 	 *                             pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	void recordAudio(final boolean start, final int audio_source, final boolean restart_pocketsphinx) {
-		final boolean is_recording = (boolean) UtilsRegistry.getData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, true);
+		final boolean is_recording = (boolean) UtilsRegistry.getData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, true);
 
 		if (start) {
 			if (is_recording) {
@@ -250,7 +250,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		UtilsRegistry.setData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, true, false);
+		UtilsRegistry.setData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, true, false);
 
 		return NO_ERRORS;
 	}
@@ -269,7 +269,7 @@ public final class AudioRecorder implements IModuleInst {
 		}
 
 		// Update the Values Storage
-		UtilsRegistry.setData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, false, false);
+		UtilsRegistry.setData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, false, false);
 	}
 
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

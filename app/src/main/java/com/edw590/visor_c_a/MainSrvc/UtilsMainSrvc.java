@@ -33,7 +33,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
 import com.edw590.visor_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.edw590.visor_c_a.R;
 
@@ -86,7 +86,7 @@ public final class UtilsMainSrvc {
 			@Override
 			public void onCloseSystemDialogs(final String reason) {
 				if ("globalactions".equals(reason)) { // "globalactions" == Power menu
-					if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, true)) {
+					if ((boolean) UtilsRegistry.getData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, true)) {
 						// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 						UtilsAudioRecorderBC.recordAudio(false, -1, true);
 					} else {

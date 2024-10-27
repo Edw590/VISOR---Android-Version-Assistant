@@ -26,15 +26,18 @@ import UtilsSWA.UtilsSWA;
 /**
  * <p>The static storage of all app global values.</p>
  */
-public final class ValuesRegistry {
+public final class RegistryKeys {
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
-	private ValuesRegistry() {
+	private RegistryKeys() {
 	}
 
-	// Note: if the value is not being updated, remove it from the list
+	private static final String SETTINGS_PREFIX = "MANUAL_";
+
+	/////////////////////////////////////////////////////////////////////////////
+	// Automatic values
 
 	// System Checker
 	/** Type: boolean. */
@@ -94,68 +97,108 @@ public final class ValuesRegistry {
 	/** Type: boolean. */
 	public static final String K_POCKETSPHINX_REQUEST_STOP = "POCKETSPHINX_RECOG_STOPPED";
 
+	/////////////////////////////////////////////////////////////////////////////
+	// Manual values
+
+	// Telephony
+	/** Type: boolean. */
+	public static final String K_CONTACTS_1ST_MATCH = SETTINGS_PREFIX + "CONTACTS_1ST_MATCH";
+	/** Type: boolean. */
+	public static final String K_CONTACTS_SIM_ONLY = SETTINGS_PREFIX + "CONTACTS_SIM_ONLY";
+
+	// Speech
+	/** Type: int. */
+	public static final String K_SPEECH_NORMAL_VOL = SETTINGS_PREFIX + "SPEECH_NORMAL_VOL";
+	/** Type: int. */
+	public static final String K_SPEECH_CRITICAL_VOL = SETTINGS_PREFIX + "SPEECH_CRITICAL_VOL";
+	/** Type: boolean. */
+	public static final String K_SPEECH_ALWAYS_NOTIFY = SETTINGS_PREFIX + "SPEECH_ALWAYS_NOTIFY";
+
+	// Note: if the value is not being updated, remove it from the list
+
 	/**
 	 * <p>Registers all the keys in the registry.</p>
 	 */
-	public static void registerRegistryKeys() {
+	public static void registerValues() {
+		/////////////////////////////////////////////
+		// Automatic values
+
 		// System Checker
 		UtilsSWA.registerValueREGISTRY(K_BATTERY_PRESENT, "System Checker - Battery Present",
-				"Is the battery present?", UtilsSWA.TYPE_BOOL);
+				"Is the battery present?", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_BATTERY_LEVEL, "System Checker - Battery Level",
-				"The battery level", UtilsSWA.TYPE_INT);
+				"The battery level", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_POWER_CONNECTED, "System Checker - Power Connected",
-				"Is the device connected to power?", UtilsSWA.TYPE_BOOL);
+				"Is the device connected to power?", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_AIRPLANE_MODE_ON, "System Checker - Airplane mode On",
-				"Whether the airplane mode is On", UtilsSWA.TYPE_INT);
+				"Whether the airplane mode is On", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_CURR_NETWORK_TYPE, "System Checker - Current network type",
-				"The current network type", UtilsSWA.TYPE_INT);
+				"The current network type", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_SCREEN_BRIGHTNESS, "System Checker - Screen Brightness",
-				"The screen brightness", UtilsSWA.TYPE_INT);
+				"The screen brightness", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_SOUND_VOLUME, "System Checker - Sound Volume",
-				"The sound volume", UtilsSWA.TYPE_INT);
+				"The sound volume", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_SOUND_MUTED, "System Checker - Sound Muted",
-				"Whether the sound is muted", UtilsSWA.TYPE_BOOL);
+				"Whether the sound is muted", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_DEVICE_IN_USE, "System Checker - Device In Use",
-				"Whether the device is being used", UtilsSWA.TYPE_BOOL);
+				"Whether the device is being used", UtilsSWA.TYPE_BOOL, "", true);
 
 		// TODO: User Locator
 		UtilsSWA.registerValueREGISTRY(K_DIST_ROUTER, "Location - Distance to Wi-Fi router (m)",
-				"Distance in meters from the device to the Wi-Fi router of the current network", UtilsSWA.TYPE_INT);
+				"Distance in meters from the device to the Wi-Fi router of the current network", UtilsSWA.TYPE_INT, "",
+				true);
 		UtilsSWA.registerValueREGISTRY(K_PUBLIC_IP, "Location - Public IP",
-				"The public IP address from the current network connection", UtilsSWA.TYPE_STRING);
+				"The public IP address from the current network connection", UtilsSWA.TYPE_STRING, "", true);
 
 		// User Locator
 		UtilsSWA.registerValueREGISTRY(K_CURR_USER_LOCATION, "User Locator - Current user location",
-				"The current user location", UtilsSWA.TYPE_INT);
+				"The current user location", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_IS_USER_SLEEPING, "User Locator - Is user sleeping",
-				"Is the user sleeping?", UtilsSWA.TYPE_BOOL);
+				"Is the user sleeping?", UtilsSWA.TYPE_BOOL, "", true);
 
 		// Telephony - Phone calls
 		UtilsSWA.registerValueREGISTRY(K_LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)",
-				"Timestamp of the last phone call (in milliseconds)", UtilsSWA.TYPE_LONG);
+				"Timestamp of the last phone call (in milliseconds)", UtilsSWA.TYPE_LONG, "", true);
 		UtilsSWA.registerValueREGISTRY(K_CURR_PHONE_CALL_NUMBER, "Telephony - Number of current call",
-				"Number of the last phone call", UtilsSWA.TYPE_STRING);
+				"Number of the last phone call", UtilsSWA.TYPE_STRING, "", true);
 
 		// Telephony - SMS
 		UtilsSWA.registerValueREGISTRY(K_LAST_SMS_MSG_TIME, "Telephony - Last SMS msg when (ms)",
-				"Timestamp of the last SMS message (in milliseconds)", UtilsSWA.TYPE_LONG);
+				"Timestamp of the last SMS message (in milliseconds)", UtilsSWA.TYPE_LONG, "", true);
 		UtilsSWA.registerValueREGISTRY(K_LAST_SMS_MSG_NUMBER, "Telephony - Number of last SMS msg sender",
-				"Number of the last SMS message", UtilsSWA.TYPE_STRING);
+				"Number of the last SMS message", UtilsSWA.TYPE_STRING, "", true);
 
 		// Audio Recorder
 		UtilsSWA.registerValueREGISTRY(K_IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally",
-				"Is VISOR recording audio internally?", UtilsSWA.TYPE_BOOL);
+				"Is VISOR recording audio internally?", UtilsSWA.TYPE_BOOL, "", true);
 
 		// Flashlight
 		UtilsSWA.registerValueREGISTRY(K_MAIN_FLASHLIGHT_ENABLED, "Camera - Main flashlight enabled (Android 6+)",
-				"Is the main flashlight enabled? (Only available from Android Marshmallow onwards)", UtilsSWA.TYPE_BOOL);
+				"Is the main flashlight enabled? (Only available from Android Marshmallow onwards)", UtilsSWA.TYPE_BOOL,
+				"", true);
 
 		// Speech recognizers
 		UtilsSWA.registerValueREGISTRY(K_COMMANDS_RECOG_AVAILABLE, "Speech recognition - Commands available",
-				"Is the commands speech recognizer available?", UtilsSWA.TYPE_BOOL);
+				"Is the commands speech recognizer available?", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_POCKETSPHINX_RECOG_AVAILABLE, "Speech recognition - Hotword available",
-				"Is the hotword speech recognizer (PocketSphinx) available?", UtilsSWA.TYPE_BOOL);
+				"Is the hotword speech recognizer (PocketSphinx) available?", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_POCKETSPHINX_REQUEST_STOP, "Speech recognition - Hotword requested to stop",
-				"Was the hotword speech recognizer requested to stop?", UtilsSWA.TYPE_BOOL);
+				"Was the hotword speech recognizer requested to stop?", UtilsSWA.TYPE_BOOL, "", true);
+
+		/////////////////////////////////////////////
+		// Manual values
+
+		// Telephony
+		UtilsSWA.registerValueREGISTRY(K_CONTACTS_1ST_MATCH, "Contacts - Use 1st name match",
+				"Use the 1st match on the contacts when getting the name from a phone number (or else warn about multiple matches)",
+				UtilsSWA.TYPE_BOOL, "true", false);
+		UtilsSWA.registerValueREGISTRY(K_CONTACTS_SIM_ONLY, "Contacts - Only use SIM contacts",
+				"Search only the SIM card contacts", UtilsSWA.TYPE_BOOL, "false", false);
+
+
+		/////////////////////////////////////////////
+		// Clean the registry
+
+		UtilsSWA.cleanRegistryREGISTRY();
 	}
 }

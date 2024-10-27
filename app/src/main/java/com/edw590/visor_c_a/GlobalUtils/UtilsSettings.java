@@ -54,6 +54,35 @@ public final class UtilsSettings {
 	}
 
 	/**
+	 * <p>Gets the Generated Settings in JSON format.</p>
+	 *
+	 * @return the Generated Settings in JSON format
+	 */
+	@NonNull
+	public static String readJsonGenSettings() {
+		GPath gen_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
+		gen_settings_path.add2(true, UtilsSWA.GEN_SETTINGS_FILE_CLIENT);
+
+		byte[] file_bytes = UtilsFilesDirs.readFileBytes(gen_settings_path);
+
+		return UtilsSWA.bytesToPrintableDATACONV(file_bytes, false);
+	}
+
+	/**
+	 * <p>Writes the Device Settings in JSON format.</p>
+	 *
+	 * @param json the Device Settings in JSON format
+	 *
+	 * @return true if the operation completed successfully, false otherwise
+	 */
+	public static boolean writeGenSettings(@NonNull final String json) {
+		GPath gen_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
+		gen_settings_path.add2(true, UtilsSWA.GEN_SETTINGS_FILE_CLIENT);
+
+		return UtilsFilesDirs.writeFile(gen_settings_path, json.getBytes(Charset.defaultCharset())) == 0;
+	}
+
+	/**
 	 * <p>Gets the Device Settings in JSON format.</p>
 	 *
 	 * @return the Device Settings in JSON format

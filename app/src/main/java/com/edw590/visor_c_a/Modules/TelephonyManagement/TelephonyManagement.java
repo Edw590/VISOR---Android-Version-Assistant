@@ -31,7 +31,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.edw590.visor_c_a.Modules.ModulesManager.ModulesManager;
-import com.edw590.visor_c_a.Registry.SettingsRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
@@ -97,7 +97,7 @@ public final class TelephonyManagement implements IModuleInst {
 							// name or whatever). Also if the READ_CONTACTS permissions was just granted, add the contacts from
 							// scratch.
 							final boolean only_sim = (boolean) UtilsRegistry.
-									getData(SettingsRegistry.Keys.K_CONTACTS_SIM_ONLY, true);
+									getData(RegistryKeys.K_CONTACTS_SIM_ONLY, true);
 							contacts_list = UtilsTelephony.getAllContacts(only_sim ?
 									UtilsTelephony.CONTACTS_SIM : UtilsTelephony.ALL_CONTACTS);
 							UtilsCmdsList.updateMakeCallCmdContacts();

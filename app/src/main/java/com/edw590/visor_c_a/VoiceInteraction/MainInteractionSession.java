@@ -34,7 +34,7 @@ import androidx.annotation.RequiresApi;
 
 import com.edw590.visor_c_a.Modules.AudioRecorder.UtilsAudioRecorderBC;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -83,7 +83,7 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 		closeSystemDialogs();
 		mStartIntent = args.getParcelable("intent");
 
-		if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_IS_RECORDING_AUDIO_INTERNALLY, true)) {
+		if ((boolean) UtilsRegistry.getData(RegistryKeys.K_IS_RECORDING_AUDIO_INTERNALLY, true)) {
 			// If it's recording audio, it must be stopped. So stop and start the hotword recognizer.
 			UtilsAudioRecorderBC.recordAudio(false, -1, true);
 		} else {

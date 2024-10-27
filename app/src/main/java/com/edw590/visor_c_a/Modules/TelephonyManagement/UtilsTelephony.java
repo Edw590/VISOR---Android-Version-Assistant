@@ -39,7 +39,7 @@ import androidx.annotation.RequiresPermission;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
-import com.edw590.visor_c_a.Registry.SettingsRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.ArrayList;
@@ -181,7 +181,7 @@ public final class UtilsTelephony {
 	public static String getWhatToSayAboutNumber(@NonNull final String number) {
 		final String ret;
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.READ_CONTACTS)) {
-			final boolean first_match = (boolean) UtilsRegistry.getData(SettingsRegistry.Keys.K_CONTACTS_1ST_MATCH, true);
+			final boolean first_match = (boolean) UtilsRegistry.getData(RegistryKeys.K_CONTACTS_1ST_MATCH, true);
 
 			ret = getNameFromNum(number, first_match);
 		} else {

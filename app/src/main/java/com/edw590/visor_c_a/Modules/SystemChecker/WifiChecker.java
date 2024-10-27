@@ -36,7 +36,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsReflection;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class WifiChecker {
 	}
 
 	static void rssiChanged(final Intent intent) {
-		UtilsRegistry.setData(ValuesRegistry.K_DIST_ROUTER, UtilsSWA.
+		UtilsRegistry.setData(RegistryKeys.K_DIST_ROUTER, UtilsSWA.
 				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 						UtilsSWA.DEFAULT_TX_POWER), true);
 	}
@@ -105,7 +105,7 @@ public class WifiChecker {
 			}
 		} else if (wifi_state == WifiManager.WIFI_STATE_DISABLING ||
 				wifi_state == WifiManager.WIFI_STATE_DISABLED) {
-			UtilsRegistry.setData(ValuesRegistry.K_DIST_ROUTER, "-1", false);
+			UtilsRegistry.setData(RegistryKeys.K_DIST_ROUTER, "-1", false);
 			enabled_by_visor = false;
 		}
 	}

@@ -33,8 +33,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsSettings;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.edw590.visor_c_a.Registry.SettingsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import ACD.ACD;
 import SettingsSync.SettingsSync;
@@ -105,7 +104,9 @@ public final class ApplicationClass extends Application {
 			System.out.println("Failed to load device settings. Using empty ones...");
 		}
 
-		// TODO: load Gen Settings synchronously here
+		if (!SettingsSync.loadGenSettings(UtilsSettings.readJsonGenSettings())) {
+			System.out.println("Failed to load generated settings. Using empty ones...");
+		}
 
 		try {
 			SettingsSync.loadUserSettings(UtilsSettings.readJsonUserSettings());
@@ -118,12 +119,11 @@ public final class ApplicationClass extends Application {
 
 		UtilsSWA.initializeCommsChannels();
 
-		UtilsSWA.startCommunicatorForeverSERVER();
+		UtilsSWA.startCommunicatorSERVER();
 		SettingsSync.syncUserSettings();
 
 		// Register keys in the Registry
-		ValuesRegistry.registerRegistryKeys();
-		SettingsRegistry.registerRegistryKeys();
+		RegistryKeys.registerValues();
 
 		UtilsMainSrvc.startMainService();
 
@@ -134,13 +134,13 @@ public final class ApplicationClass extends Application {
 
 	Thread infinity_thread = new Thread(() -> {
 		while (true) {
-			// Save user settings and reload device settings every 5 seconds
+			// Write user and gen settings and reload device settings every 5 seconds
 
 			SettingsSync.loadDeviceSettings(UtilsSettings.readJsonDeviceSettings());
 
 			UtilsSettings.writeUserSettings(SettingsSync.getJsonUserSettings());
 
-			// TODO: write Gen Settings here
+			UtilsSettings.writeGenSettings(SettingsSync.getJsonGenSettings());
 
 			try {
 				Thread.sleep(5000);

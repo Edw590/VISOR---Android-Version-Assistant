@@ -58,7 +58,7 @@ import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizers
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.TasksList;
 
 import ACD.ACD;
@@ -573,7 +573,7 @@ public final class CmdsExecutor implements IModuleInst {
 				}
 				case (CmdsList.CmdIds.CMD_TOGGLE_SPEAKERS): {
 					final String speak;
-					if (((String) UtilsRegistry.getData(ValuesRegistry.K_CURR_PHONE_CALL_NUMBER, true)).isEmpty()) {
+					if (((String) UtilsRegistry.getData(RegistryKeys.K_CURR_PHONE_CALL_NUMBER, true)).isEmpty()) {
 						speak = "The device not in a phone call.";
 					} else {
 						if (UtilsAndroidTelephony.setCallSpeakerphoneEnabled(cmd_variant.equals(CmdsList.CmdRetIds.RET_ON))) {
@@ -632,7 +632,7 @@ public final class CmdsExecutor implements IModuleInst {
 				case (CmdsList.CmdIds.CMD_ASK_BATTERY_PERCENT): {
 					if (!only_returning) {
 						final boolean battery_present = (boolean) UtilsRegistry.
-								getData(ValuesRegistry.K_BATTERY_PRESENT, true);
+								getData(RegistryKeys.K_BATTERY_PRESENT, true);
 						if (!battery_present) {
 							final String speak = "There is no battery present on the device.";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
@@ -642,7 +642,7 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					final int battery_percentage = (int) UtilsRegistry.getData(ValuesRegistry.K_BATTERY_LEVEL, true);
+					final int battery_percentage = (int) UtilsRegistry.getData(RegistryKeys.K_BATTERY_LEVEL, true);
 					final String speak = "Battery percentage: " + battery_percentage + "%.";
 					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
@@ -1054,11 +1054,11 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
+					if ((boolean) UtilsRegistry.getData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, true)) {
 						final String speak = "Background hot-word recognition already stopped.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 					} else {
-						UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true, false);
+						UtilsRegistry.setData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, true, false);
 						UtilsSpeechRecognizersBC.stopRecognition(null);
 
 						final String speak = "Background hot-word recognition stopped.";
@@ -1072,8 +1072,8 @@ public final class CmdsExecutor implements IModuleInst {
 					some_cmd_detected = true;
 					if (only_returning) continue;
 
-					if ((boolean) UtilsRegistry.getData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, true)) {
-						UtilsRegistry.setData(ValuesRegistry.K_POCKETSPHINX_REQUEST_STOP, false, false);
+					if ((boolean) UtilsRegistry.getData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, true)) {
+						UtilsRegistry.setData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, false, false);
 						// We could wait for the controller to restart it, but this way it's faster.
 						UtilsSpeechRecognizersBC.startPocketSphinxRecognition();
 
@@ -1096,7 +1096,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
-					if ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
+					if ((int) UtilsRegistry.getData(RegistryKeys.K_CURR_NETWORK_TYPE, true) == -1) {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
@@ -1143,7 +1143,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 					final boolean data_was_enabled = UtilsAndroidConnectivity.getMobileDataEnabled();
 					final boolean wifi_was_enabled = UtilsAndroidConnectivity.getWifiEnabled();
-					if ((int) UtilsRegistry.getData(ValuesRegistry.K_CURR_NETWORK_TYPE, true) == -1) {
+					if ((int) UtilsRegistry.getData(RegistryKeys.K_CURR_NETWORK_TYPE, true) == -1) {
 						UtilsAndroidConnectivity.setMobileDataEnabled(true);
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}

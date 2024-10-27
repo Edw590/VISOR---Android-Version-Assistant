@@ -50,7 +50,7 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.ValuesRegistry;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 public class SystemChecker implements IModuleInst {
 
@@ -112,7 +112,7 @@ public class SystemChecker implements IModuleInst {
 		main_handlerThread.start();
 		main_handler = new Handler(main_handlerThread.getLooper());
 
-		UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled(),
+		UtilsRegistry.setData(RegistryKeys.K_AIRPLANE_MODE_ON, UtilsAndroidConnectivity.getAirplaneModeEnabled(),
 				false);
 
 		bluetooth_checker.startBluetooth();
@@ -128,16 +128,16 @@ public class SystemChecker implements IModuleInst {
 			assert power_manager != null; // It exists - it's the ---Power--- Manager
 
 			while (true) {
-				UtilsRegistry.setData(ValuesRegistry.K_DEVICE_IN_USE, power_manager.isScreenOn(), false);
+				UtilsRegistry.setData(RegistryKeys.K_DEVICE_IN_USE, power_manager.isScreenOn(), false);
 
-				UtilsRegistry.setData(ValuesRegistry.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
+				UtilsRegistry.setData(RegistryKeys.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
 						false);
 
 				AudioManager audioManager = (AudioManager) UtilsContext.getContext().
 						getSystemService(Context.AUDIO_SERVICE);
-				UtilsRegistry.setData(ValuesRegistry.K_SOUND_VOLUME,
+				UtilsRegistry.setData(RegistryKeys.K_SOUND_VOLUME,
 						audioManager.getStreamVolume(AudioManager.STREAM_RING), false);
-				UtilsRegistry.setData(ValuesRegistry.K_SOUND_MUTED,
+				UtilsRegistry.setData(RegistryKeys.K_SOUND_MUTED,
 						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
 
 				// Network type
@@ -145,7 +145,7 @@ public class SystemChecker implements IModuleInst {
 				// That way it's not tempered with by VISOR enabling and disabling Wi-Fi, because the network type is
 				// checked before any of that happens (and there's a delay, so the previous iteration won't impact here).
 				// Or there are also no broadcast delays if the function call is right here.
-				UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
+				UtilsRegistry.setData(RegistryKeys.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
 
 
 				// Bluetooth
@@ -343,7 +343,7 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Network type
 				case (ConnectivityManager.CONNECTIVITY_ACTION): {
-					UtilsRegistry.setData(ValuesRegistry.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(),
+					UtilsRegistry.setData(RegistryKeys.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(),
 							false);
 
 					break;
@@ -352,7 +352,7 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Airplane mode
 				case (Intent.ACTION_AIRPLANE_MODE_CHANGED): {
-					UtilsRegistry.setData(ValuesRegistry.K_AIRPLANE_MODE_ON,
+					UtilsRegistry.setData(RegistryKeys.K_AIRPLANE_MODE_ON,
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
 
 					break;
