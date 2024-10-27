@@ -41,20 +41,22 @@ public final class UtilsRegistry {
 	 * @param new_value the new value
 	 * @param update_if_same if the value should be updated even if it's the same as the current one
 	 */
-	public static void setData(@NonNull final String key, @NonNull final Object new_value, final boolean update_if_same) {
+	public static boolean setData(@NonNull final String key, @NonNull final Object new_value, final boolean update_if_same) {
 		UtilsSWA.Value value = UtilsSWA.UtilsSWA.getValueREGISTRY(key);
 		if (new_value instanceof Boolean) {
-			value.setBool((boolean) new_value, update_if_same);
+			return value.setBool((boolean) new_value, update_if_same);
 		} else if (new_value instanceof Integer) {
-			value.setInt((int) new_value, update_if_same);
+			return value.setInt((int) new_value, update_if_same);
 		} else if (new_value instanceof String) {
-			value.setString((String) new_value, update_if_same);
+			// In case new_value is provided in String form with a number inside or boolean, just use setData() instead
+			// of setString() to force the update.
+			return value.setData((String) new_value, update_if_same);
 		} else if (new_value instanceof Long) {
-			value.setLong((long) new_value, update_if_same);
+			return value.setLong((long) new_value, update_if_same);
 		} else if (new_value instanceof Float) {
-			value.setFloat((float) new_value, update_if_same);
+			return value.setFloat((float) new_value, update_if_same);
 		} else if (new_value instanceof Double) {
-			value.setDouble((double) new_value, update_if_same);
+			return value.setDouble((double) new_value, update_if_same);
 		} else {
 			throw new IllegalArgumentException("The new value must be a boolean, int, String, long, float or double.");
 		}
@@ -87,5 +89,21 @@ public final class UtilsRegistry {
 			default:
 				throw new IllegalArgumentException("The value type is not supported: " + value.getType());
 		}
+	}
+
+	/**
+	 * <p>Get all the values from the Registry.</p>
+	 *
+	 * @return all the values from the Registry
+	 */
+	@NonNull
+	public static UtilsSWA.Value[] getValues() {
+		String[] keys = UtilsSWA.UtilsSWA.getKeysREGISTRY().split("\\|");
+		UtilsSWA.Value[] values = new UtilsSWA.Value[keys.length];
+		for (int i = 0; i < keys.length; ++i) {
+			values[i] = UtilsSWA.UtilsSWA.getValueREGISTRY(keys[i]);
+		}
+
+		return values;
 	}
 }

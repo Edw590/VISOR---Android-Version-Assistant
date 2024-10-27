@@ -21,22 +21,43 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments;
 
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.text.InputType;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
+
+import com.edw590.visor_c_a.R;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
+import com.ms.square.android.expandabletextview.ExpandableTextView;
+
+import java.util.Locale;
+
+import UtilsSWA.Value;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
 public final class FragSettings extends Fragment {
 
-	/*static final Value[] SETTINGS_ARRAY_CLONE = SettingsRegistry.getArray();
-	static final int SETTINGS_ARRAY_LENGTH = SettingsRegistry.getArray().length;
-
 	View frag_view;
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
-								   @Nullable final Bundle savedInstanceState) {
+							 @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.frag_settings, container, false);
 	}
 
@@ -45,78 +66,88 @@ public final class FragSettings extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		frag_view = view;
 
-		final Button button_save_settings = view.findViewById(R.id.button_save_settings);
-		button_save_settings.setOnClickListener(onClickListener);
+		LinearLayout linearLayout = view.findViewById(R.id.frag_settings_linear_layout);
+		LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
 
-		final LinearLayout linearLayout = view.findViewById(R.id.frag_settings_linear_layout);
-		final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
-
-		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
 		// 15 SP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
+		Resources resources = requireActivity().getResources();
+		int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
 				resources.getDisplayMetrics());
 
-		for (int i = 0; i < SETTINGS_ARRAY_LENGTH; ++i) {
-			final Value value = SETTINGS_ARRAY_CLONE[i]; // Add a TextView for each value.
+		UtilsSWA.Value[] registry = UtilsRegistry.getValues();
+		for (int i = 0; i < registry.length; ++i) {
+			Value value = registry[i];
+			if (value.getAuto_set()) {
+				continue;
+			}
 
-			final TextView textView = new TextView(requireContext());
+			TextView textView = new TextView(requireContext());
 			textView.setLayoutParams(layoutParams);
 			textView.setPadding(padding_px, padding_px, padding_px, 0);
 			textView.setTextColor(Color.BLACK);
 			textView.setTextIsSelectable(true);
-			final String text = "Name: " + value.pretty_name + "\nType: " + value.type;
+			String text = "Name: " + value.getPretty_name() +
+					"\nType: " + value.getType_().substring("TYPE_".length()).toLowerCase(Locale.ROOT);
 			textView.setText(text);
 			linearLayout.addView(textView);
 
-			final ExpandableTextView expandableTextView = (ExpandableTextView) layoutInflater
+			ExpandableTextView expandableTextView = (ExpandableTextView) layoutInflater
 					.inflate(R.layout.expandable_text_view, null);
-			expandableTextView.setText(value.description);
+			expandableTextView.setText(value.getDescription());
 			expandableTextView.setPadding(padding_px, 0, padding_px, padding_px);
 			linearLayout.addView(expandableTextView);
 
-			if (value.type.equals(Value.TYPE_BOOLEAN)) {
-				final SwitchCompat switchCompat = new SwitchCompat(requireContext());
-				switchCompat.setChecked(value.getData());
+			SwitchCompat switchCompat = null;
+			EditText editText = null;
+			if (value.getType_().equals(UtilsSWA.UtilsSWA.TYPE_BOOL)) {
+				switchCompat = new SwitchCompat(requireContext());
+				switchCompat.setChecked(value.getBool(true));
 				switchCompat.setId(i);
 				linearLayout.addView(switchCompat);
 			} else {
-				final EditText editText = new EditText(requireContext());
+				editText = new EditText(requireContext());
 				editText.setId(i);
-				switch (value.type) {
-					case (Value.TYPE_INTEGER):
-					case (Value.TYPE_LONG): {
+				editText.setText(value.getCurr_data());
+				switch (value.getType_()) {
+					case (UtilsSWA.UtilsSWA.TYPE_INT):
+					case (UtilsSWA.UtilsSWA.TYPE_LONG): {
 						editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
 
 						break;
 					}
-					case (Value.TYPE_DOUBLE): {
+					case (UtilsSWA.UtilsSWA.TYPE_FLOAT):
+					case (UtilsSWA.UtilsSWA.TYPE_DOUBLE): {
 						editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED |
 								InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 						break;
 					}
+					case (UtilsSWA.UtilsSWA.TYPE_STRING): {
+						editText.setInputType(InputType.TYPE_CLASS_TEXT);
+
+						break;
+					}
 				}
+
 				linearLayout.addView(editText);
 			}
+
+			// Add a save button for each setting
+			Button button_save_setting = new Button(requireContext());
+			button_save_setting.setText("Save");
+			final SwitchCompat finalSwitchCompat = switchCompat;
+			final EditText finalEditText = editText;
+			button_save_setting.setOnClickListener(v -> {
+				if (finalSwitchCompat != null) {
+					UtilsRegistry.setData(value.getKey(), finalSwitchCompat.isChecked(), false);
+				} else {
+					UtilsRegistry.setData(value.getKey(), finalEditText.getText().toString(), false);
+				}
+			});
+			linearLayout.addView(button_save_setting);
 		}
 	}
-
-	private final View.OnClickListener onClickListener = new View.OnClickListener() {
-		@Override
-		public void onClick(final View v) {
-			for (int i = 0; i < SETTINGS_ARRAY_LENGTH; ++i) {
-				final Value value = SettingsRegistry.getValueObj(i);
-				if (value.type.equals(Value.TYPE_BOOLEAN)) {
-					final SwitchCompat switchCompat = frag_view.findViewById(i);
-					UtilsRegistry.setValue(UtilsRegistry.LIST_SETTINGS, value.key, switchCompat.isChecked());
-				} else {
-					final EditText editText = frag_view.findViewById(i);
-					UtilsRegistry.setValue(UtilsRegistry.LIST_SETTINGS, value.key, editText.getText());
-				}
-			}
-		}
-	};*/
 }

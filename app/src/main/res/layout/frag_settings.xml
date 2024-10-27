@@ -42,11 +42,4 @@
 
 	</androidx.core.widget.NestedScrollView>
 
-	<Button
-		android:id="@+id/button_save_settings"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:text="Save settings"
-		app:layout_constraintBottom_toBottomOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
