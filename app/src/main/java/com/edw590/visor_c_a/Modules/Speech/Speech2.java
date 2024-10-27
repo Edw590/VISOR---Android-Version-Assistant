@@ -52,6 +52,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
 import com.edw590.visor_c_a.ModulesList;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.TasksList;
 
 import java.util.ArrayList;
@@ -558,7 +560,12 @@ public final class Speech2 implements IModuleInst {
 
 		// The utteranceIDs (their indexes in the array) are used by me to identify the corresponding Runnable and speech.
 
-		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported() && (mode & MODE1_NO_NOTIF) == 0) {
+		int actual_mode = mode;
+		if ((boolean) UtilsRegistry.getData(RegistryKeys.K_SPEECH_ALWAYS_NOTIFY, true)) {
+			actual_mode |= MODE1_ALWAYS_NOTIFY;
+		}
+
+		if (!UtilsCheckHardwareFeatures.isAudioOutputSupported() && (actual_mode & MODE1_NO_NOTIF) == 0) {
 			// If there's no audio output support, just put a notification and that's it.
 			addSpeechToNotif(txt_to_speak);
 
@@ -586,8 +593,8 @@ public final class Speech2 implements IModuleInst {
 		SpeechObj new_speech_obj = null;
 		if (is_new_speech) {
 			// If it's a new speech, add to the lists.
-			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, mode, System.currentTimeMillis(),
-					task_id);
+			new_speech_obj = new SpeechObj(utterance_id_to_use, txt_to_speak, false, actual_mode,
+					System.currentTimeMillis(), task_id);
 			arrays_speech_objs.get(speech_priority).add(new_speech_obj);
 		}
 
@@ -771,11 +778,13 @@ public final class Speech2 implements IModuleInst {
 			// Set the volume
 			volumeDndState.audio_stream = current_speech_obj.audio_stream;
 			volumeDndState.old_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
-			final int new_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+			int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_CRITICAL_VOL, true);
+			int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
+			int actual_new_volume = new_volume * max_volume / 100;
 
 			setResetWillChangeVolume(true);
 
-			audioManager.setStreamVolume(current_speech_obj.audio_stream, new_volume,
+			audioManager.setStreamVolume(current_speech_obj.audio_stream, actual_new_volume,
 					AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 		} else {
 			if ((current_speech_obj.mode & MODE2_BYPASS_NO_SND) != 0) {
@@ -801,14 +810,15 @@ public final class Speech2 implements IModuleInst {
 				// RING or NOTIFICATION (for example with STREAM_MUSIC).
 				final int current_volume = audioManager.getStreamVolume(current_speech_obj.audio_stream);
 				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.audio_stream);
-				final int new_volume = max_volume / 2;
-				if (current_volume < new_volume) {
+				final int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_NORMAL_VOL, true);
+				int actual_new_volume = new_volume * max_volume / 100;
+				if (current_volume < actual_new_volume) {
 					volumeDndState.audio_stream = current_speech_obj.audio_stream;
 					volumeDndState.old_volume = current_volume;
 
 					setResetWillChangeVolume(true);
 
-					audioManager.setStreamVolume(current_speech_obj.audio_stream, new_volume,
+					audioManager.setStreamVolume(current_speech_obj.audio_stream, actual_new_volume,
 							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 				}
 			}

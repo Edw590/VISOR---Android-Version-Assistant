@@ -195,6 +195,14 @@ public final class RegistryKeys {
 		UtilsSWA.registerValueREGISTRY(K_CONTACTS_SIM_ONLY, "Contacts - Only use SIM contacts",
 				"Search only the SIM card contacts", UtilsSWA.TYPE_BOOL, "false", false);
 
+		// Speech
+		UtilsSWA.registerValueREGISTRY(K_SPEECH_NORMAL_VOL, "Speech - Normal speech volume",
+				"The volume at which to speak non-critical speeches", UtilsSWA.TYPE_INT, "50", false);
+		UtilsSWA.registerValueREGISTRY(K_SPEECH_CRITICAL_VOL, "Speech - Critical speech volume",
+				"The volume at which to speak critical speeches", UtilsSWA.TYPE_INT, "100", false);
+		UtilsSWA.registerValueREGISTRY(K_SPEECH_ALWAYS_NOTIFY, "Speech - Always notify",
+				"Always notify speeches", UtilsSWA.TYPE_BOOL, "false", false);
+
 
 		/////////////////////////////////////////////
 		// Clean the registry
