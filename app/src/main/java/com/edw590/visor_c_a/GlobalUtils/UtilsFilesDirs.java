@@ -167,11 +167,13 @@ public final class UtilsFilesDirs {
 	 */
 	@Nullable
 	public static byte[] readFileBytes(@NonNull final GPath file_path) {
-		try {
-			return FileUtils.readFileToByteArray(new File(file_path.toString()));
-		} catch (final Exception ignored) {
-		} catch (final OutOfMemoryError ignored) {
-			return null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			try {
+				return Files.readAllBytes(new File(file_path.toString()).toPath());
+			} catch (final Exception ignored) {
+			} catch (final OutOfMemoryError ignored) {
+				return null;
+			}
 		}
 
 		final String command = "cat '" + file_path + "'";
