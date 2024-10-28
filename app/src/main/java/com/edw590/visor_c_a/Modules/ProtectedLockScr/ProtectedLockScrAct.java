@@ -192,13 +192,10 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 					count = 0;
 				}
 
-				System.out.println("KKKKKKKKKKK");
-
 				if (hasWindowFocus()) {
 					// If the activity is focused again, stop the thread in case onWindowFocusChanged() doesn't do it.
 					// Never mind. The less things here the better.
 					has_focus = true;
-					System.out.println("LLLLLLLLLL");
 				}
 
 				try {
@@ -254,7 +251,6 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 		} else if (hasFocus) {
 			// In case the activity has focus again, stop the thread.
 			has_focus = true;
-			System.out.println("JJJJJJJJJ");
 		}
 	}
 

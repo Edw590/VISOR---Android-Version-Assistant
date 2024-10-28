@@ -95,8 +95,6 @@ public final class UtilsTelephony {
 			final String phoneNo = contact[1];
 
 			if (PhoneNumberUtils.compareStrictly(number, phoneNo)) {
-				/*System.out.println("---Name: " + name);
-				System.out.println("---Number: " + phoneNo);*/
 				boolean already_found = false;
 				for (final String match : matches) {
 					// This excludes repeated contacts (same name and number, or maybe same name but number with and
@@ -114,11 +112,6 @@ public final class UtilsTelephony {
 				}
 			}
 		}
-
-        /*System.out.println("OOOOOOOOOOOOOOOOOOO");
-        System.out.println(num_matches);
-        System.out.println(last_name_found);
-        System.out.println("OOOOOOOOOOOOOOOOOOO");*/
 
 		final int num_matches = matches.size();
 		if (num_matches == 0) {
@@ -338,7 +331,6 @@ public final class UtilsTelephony {
 						}
 						final String id = cursor.getString(col1_idx);
 						final String name = cursor.getString(col2_idx);
-						//System.out.println("Name: " + name);
 
 						final int col3_idx = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
 						if (col3_idx >= 0 && cursor.getInt(col3_idx) > 0) {
@@ -355,7 +347,6 @@ public final class UtilsTelephony {
 										continue;
 									}
 									final String phoneNo = cursor1.getString(col4_idx);
-									//System.out.println("Number: " + phoneNo);
 
 									boolean not_in_list = true;
 									for (final String[] contact : contacts_found) {
@@ -389,8 +380,6 @@ public final class UtilsTelephony {
 						continue;
 					}
 					final String phoneNo = cursor.getString(col2_idx);
-					/*System.out.println("Name: " + name);
-					System.out.println("Phone Number: " + phoneNo);*/
 
 					boolean not_in_list = true;
 					for (final String[] contact : contacts_found) {

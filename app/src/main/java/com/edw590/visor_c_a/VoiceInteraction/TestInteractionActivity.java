@@ -46,8 +46,6 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        System.out.println("KKKKKKKKKKKKKKKKKKKK");
-
         if (!isVoiceInteraction()) {
             //Log.iw(TAG, "Not running as a voice interaction!");
             finish();

@@ -65,7 +65,6 @@ public class WifiChecker {
 	}
 
 	final void checkWifi() {
-		System.out.println(System.currentTimeMillis() >= last_check_when + waiting_time);
 		if (System.currentTimeMillis() >= last_check_when + waiting_time && wifi_manager != null) {
 			if (wifi_manager.isWifiEnabled()) {
 				enabled_by_visor = false;
@@ -122,8 +121,6 @@ public class WifiChecker {
 		// Checking again for the permission (aside from before calling startScan()) because the request may
 		// have been done externally in the meantime, and we just go on the ride and use the results.
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-			System.out.println("OOOOOOOOOOOOOOOOOOOO");
-			System.out.println(wifi_manager.getScanResults().size());
 			for (final ScanResult scanResult : wifi_manager.getScanResults()) {
 				long time_detection = System.currentTimeMillis();
 
@@ -156,14 +153,11 @@ public class WifiChecker {
 			if (nearby_aps_wifi.isEmpty() && attempts < 5) {
 				// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
 				// something (has happened. Networks in range and nothing returned).
-				System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR1");
 				attempts++;
 				wifi_manager.startScan();
 			} else {
 				attempts = 0;
 
-				System.out.println("YYYYYYYYYYYYYYYYYYYYYYYY1");
-				System.out.println(enabled_by_visor);
 				if (enabled_by_visor) {
 					setWifiEnabled(false);
 				}

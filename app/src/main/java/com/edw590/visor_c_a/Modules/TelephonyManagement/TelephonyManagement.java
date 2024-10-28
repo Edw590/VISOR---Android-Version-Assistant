@@ -101,9 +101,6 @@ public final class TelephonyManagement implements IModuleInst {
 							contacts_list = UtilsTelephony.getAllContacts(only_sim ?
 									UtilsTelephony.CONTACTS_SIM : UtilsTelephony.ALL_CONTACTS);
 							UtilsCmdsList.updateMakeCallCmdContacts();
-
-							System.out.println("~~~~~~~~~~~~~~~~~~");
-							System.out.println(contacts_list.length);
 						}
 					}
 				}

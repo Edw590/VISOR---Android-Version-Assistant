@@ -228,9 +228,6 @@ public final class CmdsExecutor implements IModuleInst {
 		}
 
 		final String cmds_info_str = ACD.main(sentence_str, false, true, last_it + "|" + last_and);
-		System.out.println("*****************************");
-		System.out.println(sentence_str);
-		System.out.println(cmds_info_str);
 		final String[] cmds_info = cmds_info_str.split(ACD.INFO_CMDS_SEPARATOR);
 		boolean send_to_GPT = false;
 		if (cmds_info.length < 2) {
@@ -241,10 +238,6 @@ public final class CmdsExecutor implements IModuleInst {
 		final String[] prev_cmd_info = cmds_info[0].split("\\" + ACD.PREV_CMD_INFO_SEPARATOR);
 		final String[] detected_cmds = cmds_info[1].split(ACD.CMDS_SEPARATOR);
 
-		System.out.println(last_it);
-		System.out.println(last_and);
-		System.out.println("***************");
-
 		if (!prev_cmd_info[0].isEmpty()) {
 			last_it = prev_cmd_info[0];
 			last_it_when = System.currentTimeMillis();
@@ -254,10 +247,6 @@ public final class CmdsExecutor implements IModuleInst {
 			last_and_when = System.currentTimeMillis();
 		}
 
-		System.out.println(last_it);
-		System.out.println(last_and);
-		System.out.println("*****************************");
-
 		if (cmds_info_str.startsWith(ACD.ERR_CMD_DETECT)) {
 			// PS: until he stops listening himself, the "You said" part is commented out, or he'll process what was
 			// said that generated the error --> infinite loop.
@@ -266,7 +255,6 @@ public final class CmdsExecutor implements IModuleInst {
 			final String speak = "WARNING! There was a problem processing the commands sir. This needs a fix. " +
 					"The error was the following: " + cmds_info_str + ". You said: " + sentence_str;
 			UtilsSpeech2BC.speak(speak, speech_priority, Speech2.MODE1_ALWAYS_NOTIFY, false, null);
-			System.out.println("EXECUTOR - ERR_PROC_CMDS");
 
 			return ERR_PROC_CMDS;
 		}
@@ -841,8 +829,6 @@ public final class CmdsExecutor implements IModuleInst {
 					final Runnable do_after_confirm = new Runnable() {
 						@Override
 						public void run() {
-							System.out.println("CALL NUMBER: " + contact_number);
-
 							final Runnable runnable = new Runnable() {
 								@Override
 								public void run() {
@@ -1198,8 +1184,6 @@ public final class CmdsExecutor implements IModuleInst {
 
 
 		/*if (detected_cmds.length == 0) {
-			System.out.println("EXECUTOR - NOTHING_EXECUTED");
-
 			return NOTHING_EXECUTED;
 		} else {
 			if (something_done) {
@@ -1210,8 +1194,6 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 				}
 			} else if (!something_said) {
-				System.out.println("EXECUTOR - NOTHING_EXECUTED");
-
 				return NOTHING_EXECUTED;
 			}
 		}*/

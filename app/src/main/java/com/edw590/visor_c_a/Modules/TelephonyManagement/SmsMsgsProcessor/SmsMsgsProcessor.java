@@ -120,11 +120,6 @@ public final class SmsMsgsProcessor implements IModuleInst {
 	static void processSmsMsgs(@NonNull final SmsMessage[] sms_messages) {
 		for (final SmsMessage sms_message : sms_messages) {
 			@Nullable final String sender = sms_message.getOriginatingAddress();
-			//String message = stringBuilder.toString();
-			System.out.println("&&&&&&&&&&&&&&&&&");
-			System.out.println(sender);
-			//System.out.println(message);
-			System.out.println("&&&&&&&&&&&&&&&&&");
 
 			// Update the Values Storage
 			UtilsRegistry.setData(RegistryKeys.K_LAST_SMS_MSG_TIME, System.currentTimeMillis(), false);

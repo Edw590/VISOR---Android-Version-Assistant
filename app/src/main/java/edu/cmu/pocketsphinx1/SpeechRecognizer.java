@@ -108,9 +108,6 @@ public class SpeechRecognizer {
 			audio_source = MediaRecorder.AudioSource.HOTWORD;
 		}
 
-		System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-		System.out.println(audio_source);
-
 		decoder = new Decoder(config);
 		sampleRate = (int) decoder.getConfig().getFloat("-samprate");
 		bufferSize = Math.round((float) sampleRate * BUFFER_SIZE_SECONDS);

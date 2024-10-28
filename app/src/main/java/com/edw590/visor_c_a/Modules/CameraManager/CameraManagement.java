@@ -270,8 +270,6 @@ public final class CameraManagement implements IModuleInst {
 					if (takePictureOld == null && camera_old == null) {
 						first_pic_of_two = true;
 						takePictureOld = new TakePictureOld(usage == USAGE_TAKE_REAR_PHOTO, TakePictureOld.FLASH_MODE_OFF_ON, 100);
-
-						System.out.println("################################");
 					} else {
 						final String speak = "Error - Camera already in use.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, true, null);

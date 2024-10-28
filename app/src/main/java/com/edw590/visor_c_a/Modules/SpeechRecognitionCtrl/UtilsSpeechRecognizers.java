@@ -88,8 +88,6 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Start the commands speech recognition asynchronously.</p>
 	 */
 	static void startCommandsRecognition() {
-		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-
 		// No need to check if the cmds recognition is supported or not because the Controller will only be activated if
 		// the recognition is available (checked on isSupported() every CHECK_TIME on the Manager).
 
@@ -110,8 +108,6 @@ public final class UtilsSpeechRecognizers {
 
 
 		/*final boolean started;
-
-		System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 
 		final boolean pocketsphinx_recog_available = isPocketSphinxLibAvailable();
 		if (pocketsphinx_recog_available) {
@@ -140,7 +136,6 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Stop both speech recognizers synchronously.</p>
 	 */
 	static void stopSpeechRecognizers() {
-		System.out.println("1YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY1");
 		stopPocketSphinxRecognition();
 		stopCommandsRecognizer();
 	}
@@ -149,7 +144,6 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Stop the commands speech recognizer synchronously.</p>
 	 */
 	static void stopCommandsRecognizer() {
-		System.out.println("2YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY2");
 		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(CommandsRecognition.class));
 		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND);
 	}
@@ -158,7 +152,6 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Stop PocketSphinx's speech recognizer synchronously.</p>
 	 */
 	static void stopPocketSphinxRecognition() {
-		System.out.println("3YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY3");
 		PocketSphinxRecognition.stopListening();
 	}
 }

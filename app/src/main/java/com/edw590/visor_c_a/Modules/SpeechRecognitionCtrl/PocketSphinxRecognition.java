@@ -258,8 +258,6 @@ public final class PocketSphinxRecognition implements IModuleInst {
 
 			// getBestScore() and getProb() both are always returning 0. Don't use them.
 			final String hypothesis_str = hypothesis.getHypstr();
-			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
-			System.out.println(hypothesis_str);
 			final String[] hypothesis_list = hypothesis_str.split(" {2}"); // The string is separated by 2 spaces
 
 
@@ -284,22 +282,15 @@ public final class PocketSphinxRecognition implements IModuleInst {
 				};
 			}
 
-			System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTT");
-			System.out.println("hypothesis_list: " + Arrays.toString(hypothesis_list));
-			System.out.println("options: " + Arrays.deepToString(options));
-
 			boolean match = false;
 			for_hypos: for (int i = 0; i < 2; ++i) { // Check on the 1st and 2nd hypothesis
 				if (hypothesis_list.length <= i) {
 					break;
 				}
 				for (final String[] option : options) {
-					System.out.println("option: " + Arrays.toString(option));
 					match = true;
 					for (final String word : option) {
-						System.out.println("word: " + word);
 						if (!hypothesis_list[i].contains(word)) {
-							System.out.println("word not found: " + word);
 							match = false;
 
 							break;
@@ -312,7 +303,6 @@ public final class PocketSphinxRecognition implements IModuleInst {
 				}
 			}
 			if (!match) {
-				System.out.println("--- No match ---");
 				return;
 			}
 
@@ -321,8 +311,6 @@ public final class PocketSphinxRecognition implements IModuleInst {
 				UtilsSpeech2BC.speak("Listening in the background again...", Speech2.PRIORITY_USER_ACTION,
 						Speech2.MODE2_BYPASS_NO_SND, true, null);
 			}
-
-			System.out.println("+++ Matched +++");
 
 			stopListening(); // To ensure this is not called multiple times in a row (happened)
 			UtilsSpeechRecognizersBC.startCommandsRecognition();

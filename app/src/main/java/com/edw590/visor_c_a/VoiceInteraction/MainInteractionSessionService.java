@@ -32,7 +32,6 @@ import androidx.annotation.RequiresApi;
 public class MainInteractionSessionService extends VoiceInteractionSessionService {
     @Override
     public VoiceInteractionSession onNewSession(Bundle args) {
-        System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRR");
         return new MainInteractionSession(this);
     }
 }

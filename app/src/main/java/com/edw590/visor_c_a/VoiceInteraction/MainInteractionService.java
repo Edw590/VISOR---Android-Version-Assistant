@@ -73,15 +73,12 @@ public class MainInteractionService extends VoiceInteractionService {
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-
 		return super.onBind(intent);
 	}
 
 	@Override
 	public void onReady() {
 		super.onReady();
-		System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNN");
 		//Log.ii(TAG, "Creating " + this);
 		//Log.ii(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
 		////Log.ii(TAG, "Keyphrase enrollment meta-data: " + getKeyphraseEnrollmentInfo().listKeyphraseMetadata().toArray().toString());
@@ -91,7 +88,6 @@ public class MainInteractionService extends VoiceInteractionService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		System.out.println("HHHHHHHHHHHHHHH");
 		Intent args = new Intent(this, TestInteractionActivity.class);
 		args.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(args);
@@ -100,8 +96,6 @@ public class MainInteractionService extends VoiceInteractionService {
 	}
 
 	private void hotwordAvailabilityChangeHelper(int availability) {
-		System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-		System.out.println(availability);
 		//Log.ii(TAG, "Hotword availability = " + availability);
 		switch (availability) {
 			case AlwaysOnHotwordDetector.STATE_HARDWARE_UNAVAILABLE:
@@ -118,10 +112,8 @@ public class MainInteractionService extends VoiceInteractionService {
 			case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
 				//Log.ii(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
 				if (mHotwordDetector.startRecognition(AlwaysOnHotwordDetector.RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS)) {
-					System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT1");
 					//Log.ii(TAG, "startRecognition succeeded");
 				} else {
-					System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT2");
 					//Log.ii(TAG, "startRecognition failed");
 				}
 				break;

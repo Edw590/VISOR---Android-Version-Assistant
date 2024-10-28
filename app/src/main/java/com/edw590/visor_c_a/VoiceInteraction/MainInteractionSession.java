@@ -66,13 +66,10 @@ public class MainInteractionSession extends VoiceInteractionSession implements V
 	@Override
 	public void onHandleAssist(final AssistState state) {
 		super.onHandleAssist(state);
-
-		System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
 	}
 
 	@Override
 	public void onCreate() {
-		System.out.println("PPPPPPPPPPPPPPPPPPPPPPP");
         /*super.onCreate(args);
         showWindow();
         mStartIntent = args.getParcelable("intent");*/

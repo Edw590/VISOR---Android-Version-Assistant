@@ -38,15 +38,8 @@ public class VoiceInteractionMain extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        System.out.println("------------------------");
-        System.out.println(getPackageManager().checkPermission("android.permission.PACKAGE_USAGE_STATS","com.edw590.visor_c_a.VoiceInteraction"));
-        System.out.println(getPackageManager().checkPermission("android.permission.RECORD_AUDIO","com.edw590.visor_c_a.VoiceInteraction"));
-        System.out.println(getPackageManager().checkPermission("android.permission.MANAGE_VOICE_KEYPHRASES","com.edw590.visor_c_a.VoiceInteraction"));
-        System.out.println("------------------------");
-
         // todo VÊ O RESULTADO DO isActiveService() do VoiceInteractionService de alguma forma!!!!!!!!
 
-        System.out.println("JJJJJJJJJJJJJJJJ");
         setContentView(R.layout.aohd_main);
         findViewById(R.id.start).setOnClickListener(mStartListener);
     }

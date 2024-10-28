@@ -200,7 +200,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			partial_results = intent.getBooleanExtra(CONSTS_SpeechRecog.EXTRA_PARTIAL_RESULTS, false);
 		}
 		if (stop_now) {
-			System.out.println("1GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG1");
 			stopSelf();
 			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 
@@ -213,10 +212,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		// separate process.
 
 		boolean wait_mic = !UtilsAudio.isAudioSourceAvailable(MediaRecorder.AudioSource.MIC);
-
-		System.out.println("2GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG2");
-		System.out.println(is_working);
-		System.out.println(wait_mic);
 
 		if (is_working) {
 			stopListening(true);
@@ -248,7 +243,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	}
 
 	boolean startListening() {
-		System.out.println("TTTTTTTTTTTTTT");
 		last_method_called = -1;
 		last_method_called_when = 0;
 
@@ -340,7 +334,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onReadyForSpeech(final Bundle params) {
-			System.out.println("QQQQQQQQQQQQQQQ");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_READY_FOR_SPEECH_STR;
 
@@ -373,7 +366,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 						return;
 					}
 				}
-				System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
 				UtilsAndroidPower.setBatterySaverEnabled(true);
 			}
 			//final PowerManager powerManager = (PowerManager) UtilsGeneral.getSystemService(Context.POWER_SERVICE); API 16-
@@ -386,7 +378,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onBeginningOfSpeech() {
-			System.out.println("UUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_BEGINNING_OF_SPEECH_STR;
 			is_listening = true;
@@ -399,7 +390,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onEndOfSpeech() {
-			System.out.println("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
 			last_method_called_when = System.currentTimeMillis();
 			last_method_called = ON_END_OF_SPEECH_STR;
 			is_listening = false; // Must be here or this will stay in loop for speech recognition in some cases...
@@ -427,9 +417,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			}
 			is_listening = false;
 
-			System.out.println("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
-			System.out.println(error);
-
 			stopListening(true);
 			stopSelf();
 			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
@@ -441,15 +428,10 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			//	ArrayList<String> matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 			//	final String match = matches.get(0).toLowerCase(Locale.ENGLISH);
 
-			//	System.out.println("++++++++++++++++++++++++++");
-			//	System.out.println(match);
-
 			//	if (!match.equals(last_processed_speech) && match.length() - 1 > partial_results_last_index) {
 			//		process_speech_string = match.substring(partial_results_last_index);
 			//		partial_results_last_time = System.currentTimeMillis();
-			//		System.out.println(process_speech_string);
 			//	}
-			//	System.out.println("++++++++++++++++++++++++++");
 
 			//	//Atualiza a Google App e o reconhecimento de voz e mete isto a funcionar decentemente.
 
@@ -472,8 +454,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 		@Override
 		public void onResults(final Bundle results) {
-			System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRR");
-
 			stopListening(true);
 
 			final List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -562,11 +542,6 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					continue;
 				}
 
-				System.out.println("---------");
-				System.out.println(last_method_called);
-				System.out.println(System.currentTimeMillis());
-				System.out.println(last_method_called_when + last_methods_called_map.get(last_method_called));
-				System.out.println(System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called));
 				if (last_methods_called_map.get(last_method_called) != Long.MAX_VALUE &&
 						System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
 					// If the recognizer got frozen, stop listening.

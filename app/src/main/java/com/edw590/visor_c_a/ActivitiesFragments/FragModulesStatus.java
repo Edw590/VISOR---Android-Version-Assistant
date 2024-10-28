@@ -124,7 +124,6 @@ public final class FragModulesStatus extends Fragment {
 		@Override
 		public void run() {
 			while (true) { // Keep checking the modules' status.
-				System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
 				for (int module_index = 0; module_index < ModulesList.ELEMENTS_LIST_LENGTH; ++module_index) {
 					final SwitchCompat switchCompat = current_view.findViewById(module_index);
 

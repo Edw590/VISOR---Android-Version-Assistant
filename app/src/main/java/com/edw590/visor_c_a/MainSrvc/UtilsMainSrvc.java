@@ -138,8 +138,6 @@ public final class UtilsMainSrvc {
 			}
 		}
 
-		System.out.println("EEEEEEEEEEEEEEE");
-
 		return DETECTION_ACTIVATED;
 	}
 }

@@ -22,7 +22,6 @@
 package com.edw590.visor_c_a.ActivitiesFragments;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -34,12 +33,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.edw590.visor_c_a.GlobalUtils.PERMS_CONSTS;
-import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
-import com.edw590.visor_c_a.GlobalUtils.UtilsSysApp;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -47,7 +43,6 @@ import com.edw590.visor_c_a.R;
 
 import java.util.Locale;
 
-import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -86,128 +81,7 @@ public final class FragDevelopment extends Fragment {
 			// BUTTON FOR TESTING
 			// BUTTON FOR TESTING
 
-			final Context context = UtilsContext.getContext();
 
-			//Intent intent = new Intent(getActivity(), ProtectedLockScrAct.class);
-			//startActivity(intent);
-
-			//System.out.println("AAAAAAAAAAAAAAAAAAAAAAAA");
-			//System.out.println("Weather: " + OIG.getWeather());
-			//System.out.println();
-			//System.out.println("News: " + OIG.getNews());
-
-			/*String[] weather_data = {
-					"Lisboa",
-					"14ºC",
-					"70%",
-					"89%",
-					"39 km/h",
-					"Wind and rain"
-			};
-			final String speak = "The weather in " + weather_data[0] + " is " + weather_data[1] +
-					" with " + weather_data[5] + ", precipitation of " + weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
-					weather_data[4] + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, Speech2.MODE2_BYPASS_NO_SND, null);*/
-
-			//UtilsCmdsExecutorBC.processTask("tell me the weather and the news", false, false, false);
-
-			//System.out.println("HHHHHHHHHHHHHHHHHH");
-			//System.out.println(UtilsStaticStorage.getValue(ValuesStorage.last_phone_call_time, 0));
-			//UtilsCmdsExecutorBC.processTask("take a picture", false, false);
-
-			/*System.out.println("HHHHHHHHHHHHHHHHHH");
-			final byte[] password1 = "this is a test".getBytes(Charset.defaultCharset());
-			final byte[] password2 = "this is one other test".getBytes(Charset.defaultCharset());
-			byte[] message = new byte[0];
-			try {
-				message = "this is another test ´1ºªá¨nñë€§«".getBytes(GL_CONSTS.UTF7_NAME_LIB);
-			} catch (final UnsupportedEncodingException ignored) {
-			}
-			final byte[] associated_authed_data = "Test 44".getBytes(Charset.defaultCharset());
-			System.out.println(Arrays.toString(password1));
-			System.out.println(Arrays.toString(password2));
-			System.out.println(Arrays.toString(message));
-			System.out.println(Arrays.toString(associated_authed_data));
-			System.out.println("---");
-
-			final byte[] encrypted_message = UtilsSWA.encryptBytesCRYPTOENDECRYPT(password1, password2, message, associated_authed_data);
-			System.out.println(Arrays.toString(encrypted_message));
-			UtilsFilesDirs.writeFile(Environment.getExternalStorageDirectory() + "/VISOR/teste.txt", encrypted_message);
-			System.out.println("---");*/
-
-			/*final byte[] file_contents = UtilsFilesDirs.readFileBytes(Environment.getExternalStorageDirectory() + "/VISOR/teste.txt");
-			System.out.println(Arrays.toString(file_contents));
-			System.out.println("---");
-
-			final byte[] gotten_message = UtilsSWA.decryptBytesCRYPTOENDECRYPT(password1, password2, file_contents, associated_authed_data);
-			System.out.println(Arrays.toString(gotten_message));
-			System.out.println(UtilsSWA.bytesToPrintableDATACONV(gotten_message, true));
-			System.out.println(UtilsSWA.bytesToPrintableDATACONV(gotten_message, false));*/
-
-			//final byte[] decrypted_message = UtilsSWA.decryptBytesCRYPTOENDECRYPT(password1, password2, encrypted_message, associated_authed_data);
-			//System.out.println(UtilsSWA.bytesToPrintableDATACONV(decrypted_message, true));
-
-			//final List<String> commands = new ArrayList<>(2);
-			//commands.add("svc power reboot deviceowner");
-			//commands.add("am broadcast -a " + Intent.ACTION_REBOOT);
-
-			//*Isto não funciona. Vê porquê
-
-			// As with the shutdown, execution will only get here if there was some error - but it can get here.
-			//UtilsShell.executeShellCmd(commands, true);
-
-			//System.out.println("FFFFFFFFFFFFFFFFFFFFFFFF");
-			//final UtilsShell.CmdOutputObj cmd_output = UtilsShell.executeShellCmd("su -c id", false);
-			//System.out.println(cmd_output.exit_code);
-			//System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmd_output.output_stream, false));
-			//System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmd_output.error_stream, false));
-
-			//System.out.println(UtilsShell.getAccessRights("", true));
-			//System.out.println(UtilsShell.getAccessRights("/oe", true));
-			//System.out.println(UtilsShell.getAccessRights("/oem", true));
-			//System.out.println(UtilsShell.getAccessRights("/", true));
-			//System.out.println(UtilsShell.getAccessRights("/system", true));
-			//System.out.println(UtilsShell.getAccessRights("/storage/emulated/0", true));
-
-			/*System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPP");
-			System.out.println(UtilsSWA.getAveragePingRTTLOCATIONRELATIVE("192.168.1.254"));
-			try {
-				System.out.println(UtilsSWA.getAveragePingRTTLOCATIONRELATIVE("localhost"));
-			} catch (final Throwable e) {
-				e.printStackTrace();
-			}*/
-			//List<String> commands = new ArrayList<>(1);
-			//commands.add("ping -c 50 -i 0.5 -n -s 56 -t 1 -v 192.168.1.254");
-			//System.out.println(UtilsGeneral.convertBytes2Printable(UtilsShell.executeShellCmd(commands).output_stream));
-
-			//MainActTests.for_tests();
-
-			//UtilsAudioRecorderBC.recordAudio(true, MediaRecorder.AudioSource.MIC, false);
-
-			System.out.println("------------------------");
-			System.out.println("IS_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_SYSTEM_APP));
-			System.out.println("IS_UPDATED_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_UPDATED_SYSTEM_APP));
-			System.out.println("IS_ORDINARY_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_ORDINARY_SYSTEM_APP));
-			System.out.println("IS_PRIVILEGED_SYSTEM_APP: " + UtilsSysApp.mainFunction(null, UtilsSysApp.IS_PRIVILEGED_SYSTEM_APP));
-			System.out.println("-----");
-			for (final String[][] permissions : PERMS_CONSTS.list_of_perms_lists) {
-				for (final String[] permission : permissions) {
-					System.out.println(permission[0] + ": " + UtilsPermsAuths.checkSelfPermission(permission[0]));
-				}
-			}
-			System.out.println("android.permission.CAPTURE_AUDIO_HOTWORD: " + UtilsPermsAuths.checkSelfPermission("android.permission.CAPTURE_AUDIO_HOTWORD"));
-			System.out.println("android.permission.MANAGE_VOICE_KEYPHRASES: " + UtilsPermsAuths.checkSelfPermission("android.permission.MANAGE_VOICE_KEYPHRASES"));
-			System.out.println("------------------------");
-
-			System.out.println(SettingsSync.getJsonUserSettings());
-			System.out.println("------------------------");
-			System.out.println(SettingsSync.getJsonDeviceSettings());
-			System.out.println("------------------------");
-
-
-			//KeyphraseEnrollmentInfo keyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(UtilsContext.getContext().getPackageManager());
-			//System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-			//System.out.println(Arrays.toString(keyphraseEnrollmentInfo.listKeyphraseMetadata()));
 
 			// BUTTON FOR TESTING
 			// BUTTON FOR TESTING
