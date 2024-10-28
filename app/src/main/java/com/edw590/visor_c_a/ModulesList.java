@@ -95,14 +95,17 @@ public final class ModulesList {
 	 * is what with {@link #ELEMENT_IS_MODULE}. They must also be in the order of module startup (the Modules Manager must
 	 * be the first one).*/
 	private static final ElementsObj[] ELEMENTS_LIST = {
-			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, true),
-			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
-			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true),
-			//new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true),
+			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, true), // MOD_1
+			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true), // MOD_2
+			new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true), // MOD_9
+			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true), // MOD_10
+			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, true), // MOD_11
+			//new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
+			new ElementsObj(CommandsRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
+			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true), // MOD_13
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),
-			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),
 			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, true),
 
@@ -111,9 +114,6 @@ public final class ModulesList {
 			//  a Throwable.
 			//new ElementsObj(ACD.ACD.class, "Advanced Commands Detection", TYPE1_LIBRARY, TYPE2_MODULE),
 
-			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, true),
-			//new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
-			new ElementsObj(CommandsRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
 			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, true),
 	};
 	public static final int ELEMENTS_LIST_LENGTH = ELEMENTS_LIST.length;
