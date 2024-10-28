@@ -37,6 +37,7 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
 import com.edw590.visor_c_a.Modules.SystemChecker.SystemChecker;
+import com.edw590.visor_c_a.Modules.TasksExecutor.TasksExecutor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
@@ -95,7 +96,6 @@ public final class ModulesList {
 	 * be the first one).*/
 	private static final ElementsObj[] ELEMENTS_LIST = {
 			new ElementsObj(ModulesManager.class, "Modules Manager", TYPE1_INSTANCE, true),
-			//new ElementsObj(PreferencesManager.class, "Preferences Manager", TYPE1_INSTANCE, TYPE2_MODULE),
 			new ElementsObj(Speech2.class, "Speech", TYPE1_INSTANCE, true),
 			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true),
 			//new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true),
