@@ -259,24 +259,21 @@ public final class Speech2 implements IModuleInst {
 		infinity_thread.start();
 	}
 
-	private final Thread infinity_thread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			GPTComm.setTimeBegin(System.currentTimeMillis());
-			while (true) {
-				// Keep getting the next sentence to speak from the server
-				String speak = GPTComm.getNextSpeechSentence();
-				if (speak.isEmpty() || GPTComm.END_ENTRY.equals(speak)) {
-					try {
-						Thread.sleep(1000);
-					} catch (final InterruptedException ignored) {
-					}
-
-					continue;
+	private final Thread infinity_thread = new Thread(() -> {
+		GPTComm.setTimeBegin(System.currentTimeMillis());
+		while (true) {
+			// Keep getting the next sentence to speak from the server
+			String speak = GPTComm.getNextSpeechSentence();
+			if (speak.isEmpty() || GPTComm.END_ENTRY.equals(speak)) {
+				try {
+					Thread.sleep(1000);
+				} catch (final InterruptedException ignored) {
 				}
 
-				speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT);
+				continue;
 			}
+
+			speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT);
 		}
 	});
 
@@ -293,67 +290,64 @@ public final class Speech2 implements IModuleInst {
 			tts = null;
 		}
 
-		tts = new TextToSpeech(UtilsContext.getContext(), new TextToSpeech.OnInitListener() {
-			@Override
-			public void onInit(final int status) {
-				System.out.println("222222222222222222222222222222");
-				success_if:
-				if (status == TextToSpeech.SUCCESS) {
-					System.out.println("1111111111111111111111111111111111");
-					tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
+		tts = new TextToSpeech(UtilsContext.getContext(), status -> {
+			System.out.println("222222222222222222222222222222");
+			success_if:
+			if (status == TextToSpeech.SUCCESS) {
+				System.out.println("1111111111111111111111111111111111");
+				tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
-					if (!isTtsAvailable()) {
-						if (from_constructor || tts_working) {
-							// This won't speak - will show a notification instead, so no problem in calling
-							// from here. Also, it will speak only the first time the problem arises, not every
-							// time until it's fixed.
-							speak("ATTENTION - TTS IS NOT AVAILABLE. The Speech module will keep retrying  until a " +
-									"TTS voice is detected.", PRIORITY_CRITICAL, 0);
+				if (!isTtsAvailable()) {
+					if (from_constructor || tts_working) {
+						// This won't speak - will show a notification instead, so no problem in calling
+						// from here. Also, it will speak only the first time the problem arises, not every
+						// time until it's fixed.
+						speak("ATTENTION - TTS IS NOT AVAILABLE. The Speech module will keep retrying until a " +
+								"TTS voice is detected.", PRIORITY_CRITICAL, 0);
 
-							// todo This is not getting here when I load a wrong folder to disable all voices on Ivona TTS...
+						// todo This is not getting here when I load a wrong folder to disable all voices on Ivona TTS...
 
-						}
-
-						tts_working = false;
-
-						break success_if;
 					}
 
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-						// Set the audio attributes to use
-						final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-							builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
-						}
-						builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-							builder.setUsage(AudioAttributes.USAGE_ASSISTANT);
-						} else {
-							builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
-						}
-						//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
-						// track plays it uses the System (Ringer) volume as the master volume control. Not the media
-						// volume as I would expect." (this is about setting that flag - changes the audio stream).
-						// That's to be changed depending on the speech priority only and the enforcing of the audio
-						// is done manually though DND, volume, and the stream. So don't set this flag.
-						audioAttributes = builder.build();
-						//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
-						// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
-						// speaking and it's interrupted - but onDone() is never called, only onStop().
-						// Which means, if it doesn't work well in at least one case, don't enable.
-					}
-
-					tts_working = true;
-				} else {
 					tts_working = false;
+
+					break success_if;
 				}
 
-				System.out.println("000000000000000000000000000000000");
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					// Set the audio attributes to use
+					final AudioAttributes.Builder builder = new AudioAttributes.Builder();
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+						builder.setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_NONE);
+					}
+					builder.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						builder.setUsage(AudioAttributes.USAGE_ASSISTANT);
+					} else {
+						builder.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE); // Kind of
+					}
+					//builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED); - Don't use: "However, when the
+					// track plays it uses the System (Ringer) volume as the master volume control. Not the media
+					// volume as I would expect." (this is about setting that flag - changes the audio stream).
+					// That's to be changed depending on the speech priority only and the enforcing of the audio
+					// is done manually though DND, volume, and the stream. So don't set this flag.
+					audioAttributes = builder.build();
+					//tts.setAudioAttributes(audioAttributes); - Don't enable this... Makes the app say
+					// "Ready[, sir - this part is cut]" if the phone (BV9500) is in Vibrating mode. It starts
+					// speaking and it's interrupted - but onDone() is never called, only onStop().
+					// Which means, if it doesn't work well in at least one case, don't enable.
+				}
 
-				// Broadcast the ready action and register the receiver after everything is ready. If TTS is not
-				// available, at least there's the notification and activity showing the history.
-				registerRecvBcastReady();
+				tts_working = true;
+			} else {
+				tts_working = false;
 			}
+
+			System.out.println("000000000000000000000000000000000");
+
+			// Broadcast the ready action and register the receiver after everything is ready. If TTS is not
+			// available, at least there's the notification and activity showing the history.
+			registerRecvBcastReady();
 		});
 	}
 
@@ -960,12 +954,9 @@ public final class Speech2 implements IModuleInst {
 		}
 	}
 	final AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener =
-			new AudioManager.OnAudioFocusChangeListener() {
-		@Override
-		public void onAudioFocusChange(final int focusChange) {
-			// No need to implement
-		}
-	};
+			focusChange -> {
+				// No need to implement
+			};
 
 	/**
 	 * <p>Sets or resets the variables {@link #assist_changed_volume_time} and {@link #assist_changed_volume_time} to
