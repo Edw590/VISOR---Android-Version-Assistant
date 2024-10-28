@@ -58,6 +58,7 @@ import com.edw590.visor_c_a.TasksList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Set;
 
@@ -478,12 +479,10 @@ public final class Speech2 implements IModuleInst {
 	public static final int PRIORITY_CRITICAL = SpeechQueue.SpeechQueue.PRIORITY_CRITICAL;
 	// NEVER TEST IF A VARIABLE HAS THE MODEx_DEFAULT BITS SET!!! That way we can set 0 as the all-default instead of
 	// having to put MODE1_DEFAULT | MODE2_DEFAULT.
-	public static final int MODE_DEFAULT = 0;
-	public static final int MODE1_NO_NOTIF = 1 << 0;
-	public static final int MODE1_DEFAULT = 1 << 1;
-	public static final int MODE1_ALWAYS_NOTIFY = 1 << 2;
-	public static final int MODE2_DEFAULT = 1 << 3;
-	public static final int MODE2_BYPASS_NO_SND = 1 << 4;
+	public static final int MODE_DEFAULT = SpeechQueue.SpeechQueue.MODE_DEFAULT;
+	public static final int MODE1_NO_NOTIF = SpeechQueue.SpeechQueue.MODE1_NO_NOTIF;
+	public static final int MODE1_ALWAYS_NOTIFY = SpeechQueue.SpeechQueue.MODE1_ALWAYS_NOTIFY;
+	public static final int MODE2_BYPASS_NO_SND = SpeechQueue.SpeechQueue.MODE2_BYPASS_NO_SND;
 	/**
 	 * <p>Speaks the given text.</p>
 	 * <br>
@@ -497,7 +496,7 @@ public final class Speech2 implements IModuleInst {
 	 * changed one of the changed things, and in that case, the changed thing(s) will remain changed). If the
 	 * priority is {@link #PRIORITY_CRITICAL}, before both things I said, the assistant will also attempt to disable any
 	 * Do Not Disturb setting. The volume will also be set to the maximum the chosen audio stream can handle (which will
-	 * be {@link SpeechObj#AUD_STREAM_PRIORITY_CRITICAL}).</p>
+	 * be {@link #AUD_STREAM_PRIORITY_CRITICAL}).</p>
 	 * <br>
 	 * <p>If a speech is requested, this speech module had already been initialized, and the previously selected TTS
 	 * engine was uninstalled or there was some error attempting to send text to the engine, this module will restart
@@ -524,10 +523,8 @@ public final class Speech2 implements IModuleInst {
 	 * <p>- {@link #PRIORITY_CRITICAL} --> for {@code speech_priority}: critical priority speech</p>
 	 * <br>
 	 * <p>- {@link #MODE_DEFAULT} --> for {@code mode}: all default modes</p>
-	 * <p>- {@link #MODE1_DEFAULT} --> for {@code mode}: default mode of notification (only notify if he can't speak)</p>
 	 * <p>- {@link #MODE1_NO_NOTIF} --> for {@code mode}: don't notify even if he can't speak</p>
 	 * <p>- {@link #MODE1_ALWAYS_NOTIFY} --> for {@code mode}: always notify, even if he can speak</p>
-	 * <p>- {@link #MODE2_DEFAULT} --> for {@code mode}: don't bypass the ringer mode</p>
 	 * <p>- {@link #MODE2_BYPASS_NO_SND} --> for {@code mode}: bypass the ringer mode in case it's not set to normal</p>
 	 * <br>
 	 * <p>- {@link #SPEECH_ON_LIST} --> for the returning value: if the speech was put on the list of to-speak speeches</p>
@@ -684,16 +681,17 @@ public final class Speech2 implements IModuleInst {
 			return TextToSpeech.ERROR;
 		}
 
-		final TtsParamsObj tts_params = new TtsParamsObj();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			tts_params.bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);
+			Bundle bundle = new Bundle(1);
+			bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audio_stream);
 
-			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, tts_params.bundle, utterance_id);
+			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, bundle, utterance_id);
 		} else {
-			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(audio_stream));
-			tts_params.hashmap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utterance_id);
+			HashMap<String, String> hashmap = new LinkedHashMap<>(2);
+			hashmap.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(audio_stream));
+			hashmap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utterance_id);
 
-			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, tts_params.hashmap);
+			return tts.speak(txt_to_speak, TextToSpeech.QUEUE_ADD, hashmap);
 		}
 	}
 
@@ -765,8 +763,10 @@ public final class Speech2 implements IModuleInst {
 	 * <p>- set a new Interruption Filter, in case it needs to be changed</p>
 	 * <p>- set a new ringer mode, in case it needs to be changed</p>
 	 */
-	private void setToSpeakChanges() {
-		if (current_speech_obj.getPriority() == PRIORITY_CRITICAL) {
+	private void setToSpeakChanges(@NonNull final String utterance_id) {
+		SpeechQueue.Speech curr_speech = SpeechQueue.SpeechQueue.getSpeech(utterance_id);
+
+		if (curr_speech.getPriority() == PRIORITY_CRITICAL) {
 			audioFocus(true);
 
 			// Set Do Not Disturb to ALARMS (emergency speech)
@@ -780,21 +780,21 @@ public final class Speech2 implements IModuleInst {
 			}
 
 			// Set the volume
-			final int current_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
+			final int current_volume = audioManager.getStreamVolume(curr_speech.getAudioStream());
 			int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_CRITICAL_VOL, true);
-			int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.getAudioStream());
+			int max_volume = audioManager.getStreamMaxVolume(curr_speech.getAudioStream());
 			int actual_new_volume = new_volume * max_volume / 100;
 			if (current_volume < actual_new_volume) {
-				volumeDndState.audio_stream = current_speech_obj.getAudioStream();
-				volumeDndState.old_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
+				volumeDndState.audio_stream = curr_speech.getAudioStream();
+				volumeDndState.old_volume = audioManager.getStreamVolume(curr_speech.getAudioStream());
 
 				setResetWillChangeVolume(true);
 
-				audioManager.setStreamVolume(current_speech_obj.getAudioStream(), actual_new_volume,
+				audioManager.setStreamVolume(curr_speech.getAudioStream(), actual_new_volume,
 						AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 			}
 		} else {
-			if ((current_speech_obj.getMode() & MODE2_BYPASS_NO_SND) != 0) {
+			if ((curr_speech.getMode() & MODE2_BYPASS_NO_SND) != 0) {
 				volumeDndState.old_ringer_mode = audioManager.getRingerMode();
 				audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
@@ -815,17 +815,17 @@ public final class Speech2 implements IModuleInst {
 				// Set the volume
 				// Put the volume in medium before speaking in case the ringer is NORMAL and the stream is not
 				// RING or NOTIFICATION (for example with STREAM_MUSIC).
-				final int current_volume = audioManager.getStreamVolume(current_speech_obj.getAudioStream());
-				final int max_volume = audioManager.getStreamMaxVolume(current_speech_obj.getAudioStream());
+				final int current_volume = audioManager.getStreamVolume(curr_speech.getAudioStream());
+				final int max_volume = audioManager.getStreamMaxVolume(curr_speech.getAudioStream());
 				final int new_volume = (int) UtilsRegistry.getData(RegistryKeys.K_SPEECH_NORMAL_VOL, true);
 				int actual_new_volume = new_volume * max_volume / 100;
 				if (current_volume < actual_new_volume) {
-					volumeDndState.audio_stream = current_speech_obj.getAudioStream();
+					volumeDndState.audio_stream = curr_speech.getAudioStream();
 					volumeDndState.old_volume = current_volume;
 
 					setResetWillChangeVolume(true);
 
-					audioManager.setStreamVolume(current_speech_obj.getAudioStream(), actual_new_volume,
+					audioManager.setStreamVolume(curr_speech.getAudioStream(), actual_new_volume,
 							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
 				}
 			}
@@ -983,43 +983,45 @@ public final class Speech2 implements IModuleInst {
 	 * {@link UtteranceProgressListener} (means for a speech) to be executed in that case - unless there's a request to
 	 * bypass a no-sound setting, like Do Not Disturb or Vibrating mode, for example.</p>
 	 */
-	void rightBeforeSpeaking() {
+	void rightBeforeSpeaking(@NonNull final String utterance_id) {
+		SpeechQueue.Speech curr_speech = SpeechQueue.SpeechQueue.getSpeech(utterance_id);
+
 		boolean skip_speaking = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
 		// CRITICAL speech (except if it's to bypass a no-sound mode).
 		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-			skip_speaking = (current_speech_obj.getPriority() != PRIORITY_CRITICAL &&
-					(current_speech_obj.getMode() & MODE2_BYPASS_NO_SND) == 0);
+			skip_speaking = (curr_speech.getPriority() != PRIORITY_CRITICAL &&
+					(curr_speech.getMode() & MODE2_BYPASS_NO_SND) == 0);
 		}
 
 		if (skip_speaking) {
 			System.out.println("+++++++++++++++++++++++++++++++++++++++");
-			System.out.println(current_speech_obj.getID());
-			System.out.println(current_speech_obj.getTaskID());
-			new Thread(TasksList.removeTask(current_speech_obj.getTaskID()).runnable).start();
+			System.out.println(curr_speech.getID());
+			System.out.println(curr_speech.getTaskID());
+			new Thread(TasksList.removeTask(curr_speech.getTaskID()).runnable).start();
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
-					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, current_speech_obj.getID()));
+					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, curr_speech.getID()));
 
-			if ((current_speech_obj.getMode() & MODE1_NO_NOTIF) == 0) {
+			if ((curr_speech.getMode() & MODE1_NO_NOTIF) == 0) {
 				// Notify the speech before skipping it (don't skip the notification).
-				addSpeechToNotif(current_speech_obj.getText());
+				addSpeechToNotif(curr_speech.getText());
 			}
 
 			skipCurrentSpeech();
 		} else {
 			// If it's to speak, prepare the app to speak.
 			if (!focus_volume_dnd_done) {
-				setToSpeakChanges();
+				setToSpeakChanges(utterance_id);
 				if (!speeches_on_lists) {
-					if (AudioSystem.isStreamActive(current_speech_obj.getAudioStream(), 0)) { // 0 == Now
+					if (AudioSystem.isStreamActive(curr_speech.getAudioStream(), 0)) { // 0 == Now
 						stream_active_before_begin_all_speeches = volumeDndState.audio_stream;
 					}
 				}
 			}
 
-			if ((current_speech_obj.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
-				addSpeechToNotif(current_speech_obj.getText());
+			if ((curr_speech.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
+				addSpeechToNotif(curr_speech.getText());
 			}
 
 			is_speaking = true;
@@ -1034,7 +1036,7 @@ public final class Speech2 implements IModuleInst {
 		@Override
 		public void onStart(final String utteranceId) {
 			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
-			rightBeforeSpeaking();
+			rightBeforeSpeaking(utteranceId);
 			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
 		}
 

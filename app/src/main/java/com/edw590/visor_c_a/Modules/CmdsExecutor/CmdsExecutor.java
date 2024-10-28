@@ -309,7 +309,7 @@ public final class CmdsExecutor implements IModuleInst {
 			// Keep it checking with CMDi_INF1_DO_SOMETHING and inverting the output. That way, if cmd_to_check is ""
 			// (no previous command), it won't equal DO_SOMETHING and will set cmdi_only_speak to true.
 			final int speech_mode2 = CmdsList.CmdAddInfo.CMDi_INF1_ONLY_SPEAK.
-					equals(CmdsList.CmdAddInfo.CMDi_INFO.get(cmd_to_check)) ? Speech2.MODE2_BYPASS_NO_SND : Speech2.MODE2_DEFAULT;
+					equals(CmdsList.CmdAddInfo.CMDi_INFO.get(cmd_to_check)) ? Speech2.MODE2_BYPASS_NO_SND : Speech2.MODE_DEFAULT;
 
 			switch (cmd_id) {
 				case (CmdsList.CmdIds.CMD_TOGGLE_FLASHLIGHT): {
