@@ -48,8 +48,6 @@ public final class RegistryKeys {
 	public static final String K_POWER_CONNECTED = "POWER_CONNECTED";
 	/** Type: int. */
 	public static final String K_DIST_ROUTER = "DIST_ROUTER";
-	/** Type: String. */
-	public static final String K_PUBLIC_IP = "PUBLIC_IP";
 	/** Type: int. */
 	public static final String K_CURR_NETWORK_TYPE = "CURR_NETWORK_TYPE";
 	/** Type: boolean. */
@@ -62,12 +60,6 @@ public final class RegistryKeys {
 	public static final String K_SOUND_MUTED = "SOUND_MUTED";
 	/** Type: boolean. */
 	public static final String K_DEVICE_IN_USE = "DEVICE_IN_USE";
-
-	// User Locator
-	/** Type: int. */
-	public static final String K_CURR_USER_LOCATION = "CURR_USER_LOCATION";
-	/** Type: boolean. */
-	public static final String K_IS_USER_SLEEPING = "IS_USER_SLEEPING";
 
 	// Telephony - Phone calls
 	/** Type: long. */
@@ -131,7 +123,7 @@ public final class RegistryKeys {
 		UtilsSWA.registerValueREGISTRY(K_POWER_CONNECTED, "System Checker - Power Connected",
 				"Is the device connected to power?", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_AIRPLANE_MODE_ON, "System Checker - Airplane mode On",
-				"Whether the airplane mode is On", UtilsSWA.TYPE_INT, "", true);
+				"Whether the airplane mode is On", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_CURR_NETWORK_TYPE, "System Checker - Current network type",
 				"The current network type", UtilsSWA.TYPE_INT, "", true);
 		UtilsSWA.registerValueREGISTRY(K_SCREEN_BRIGHTNESS, "System Checker - Screen Brightness",
@@ -142,19 +134,9 @@ public final class RegistryKeys {
 				"Whether the sound is muted", UtilsSWA.TYPE_BOOL, "", true);
 		UtilsSWA.registerValueREGISTRY(K_DEVICE_IN_USE, "System Checker - Device In Use",
 				"Whether the device is being used", UtilsSWA.TYPE_BOOL, "", true);
-
-		// TODO: User Locator
 		UtilsSWA.registerValueREGISTRY(K_DIST_ROUTER, "Location - Distance to Wi-Fi router (m)",
 				"Distance in meters from the device to the Wi-Fi router of the current network", UtilsSWA.TYPE_INT, "",
 				true);
-		UtilsSWA.registerValueREGISTRY(K_PUBLIC_IP, "Location - Public IP",
-				"The public IP address from the current network connection", UtilsSWA.TYPE_STRING, "", true);
-
-		// User Locator
-		UtilsSWA.registerValueREGISTRY(K_CURR_USER_LOCATION, "User Locator - Current user location",
-				"The current user location", UtilsSWA.TYPE_INT, "", true);
-		UtilsSWA.registerValueREGISTRY(K_IS_USER_SLEEPING, "User Locator - Is user sleeping",
-				"Is the user sleeping?", UtilsSWA.TYPE_BOOL, "", true);
 
 		// Telephony - Phone calls
 		UtilsSWA.registerValueREGISTRY(K_LAST_PHONE_CALL_TIME, "Telephony - Last call when (ms)",
