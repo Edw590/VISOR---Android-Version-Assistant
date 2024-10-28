@@ -52,6 +52,8 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 
+import SCLink.SCLink;
+
 public class SystemChecker implements IModuleInst {
 
 	private final HandlerThread main_handlerThread =
@@ -73,7 +75,8 @@ public class SystemChecker implements IModuleInst {
 	// EDIT 2: not sure what this above is about. 5 seconds now because of DeviceInfo.sendInfo() needing at most 5 secs
 	// of delay between each info sent.
 	// EDIT 3: no more need for the 5 seconds. But now it's just because I want it checking constantly.
-	public static final long CHECK_TIME = 5_000;
+	// EDIT 4: so if it's to check constantly, let's get it to 1 second.
+	public static final long CHECK_TIME = 1_000;
 
 	@NonNull final PowerManager power_manager = (PowerManager) UtilsContext.getSystemService(Context.POWER_SERVICE);
 
@@ -122,13 +125,37 @@ public class SystemChecker implements IModuleInst {
 		infinity_thread.start();
 	}
 
-	private final Thread infinity_thread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			assert power_manager != null; // It exists - it's the ---Power--- Manager
+	private final Thread infinity_thread = new Thread(() -> {
+		assert power_manager != null; // It exists - it's the ---Power--- Manager
+		long last_time_used = SCLink.getLastTimeUsed();
+		boolean is_interactive = false;
 
-			while (true) {
-				UtilsRegistry.setData(RegistryKeys.K_DEVICE_IN_USE, power_manager.isScreenOn(), false);
+		int times = 0;
+		while (true) {
+			if (times >= 15) {
+				// Only send the info after the first time (15 secs should be enough), so that the ExtDevices are
+				// checked first.
+				StringBuilder wifi_networks = new StringBuilder();
+				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
+					wifi_networks.append(wifi_ap.name).append("\u0001");
+					wifi_networks.append(wifi_ap.address).append("\u0001");
+					wifi_networks.append(wifi_ap.rssi).append("\u0001");
+					wifi_networks.append("\u0000");
+				}
+				StringBuilder bluetooth_devices = new StringBuilder();
+				for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
+					bluetooth_devices.append(bluetooth_device.name).append("\u0001");
+					bluetooth_devices.append(bluetooth_device.address).append("\u0001");
+					bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
+					bluetooth_devices.append("\u0000");
+				}
+				if (power_manager.isScreenOn()) {
+					last_time_used = System.currentTimeMillis() / 1000;
+					is_interactive = true;
+				} else {
+					is_interactive = false;
+				}
+				UtilsRegistry.setData(RegistryKeys.K_DEVICE_IN_USE, is_interactive, false);
 
 				UtilsRegistry.setData(RegistryKeys.K_SCREEN_BRIGHTNESS, UtilsAndroidPower.getScreenBrightness(),
 						false);
@@ -140,25 +167,42 @@ public class SystemChecker implements IModuleInst {
 				UtilsRegistry.setData(RegistryKeys.K_SOUND_MUTED,
 						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
 
-				// Network type
-				// Keep this check here!!!
-				// That way it's not tempered with by VISOR enabling and disabling Wi-Fi, because the network type is
-				// checked before any of that happens (and there's a delay, so the previous iteration won't impact here).
-				// Or there are also no broadcast delays if the function call is right here.
-				UtilsRegistry.setData(RegistryKeys.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
+				SCLink.updateDeviceInfo(
+						last_time_used,
+						UtilsAndroidConnectivity.getAirplaneModeEnabled(),
+						UtilsAndroidConnectivity.getWifiEnabled(),
+						UtilsAndroidConnectivity.getBluetoothEnabled(),
+						(boolean) UtilsRegistry.getData(RegistryKeys.K_POWER_CONNECTED, true),
+						(int) UtilsRegistry.getData(RegistryKeys.K_BATTERY_LEVEL, true),
+						is_interactive,
+						UtilsAndroidPower.getScreenBrightness(),
+						wifi_networks.toString(),
+						bluetooth_devices.toString(),
+						audioManager.getStreamVolume(AudioManager.STREAM_RING),
+						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL
+				);
+			}
+
+			// Network type
+			// Keep this check here!!!
+			// That way it's not tempered with by VISOR enabling and disabling Wi-Fi, because the network type is
+			// checked before any of that happens (and there's a delay, so the previous iteration won't impact here).
+			// Or there are also no broadcast delays if the function call is right here.
+			UtilsRegistry.setData(RegistryKeys.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
 
 
-				// Bluetooth
-				bluetooth_checker.checkBluetooth();
+			// Bluetooth
+			bluetooth_checker.checkBluetooth();
 
-				// Wi-Fi
-				wifi_checker.checkWifi();
+			// Wi-Fi
+			wifi_checker.checkWifi();
 
-				try {
-					Thread.sleep(CHECK_TIME);
-				} catch (final InterruptedException ignored) {
-					return;
-				}
+			times++;
+
+			try {
+				Thread.sleep(CHECK_TIME);
+			} catch (final InterruptedException ignored) {
+				return;
 			}
 		}
 	});
@@ -352,6 +396,7 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Airplane mode
 				case (Intent.ACTION_AIRPLANE_MODE_CHANGED): {
+					System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
 					UtilsRegistry.setData(RegistryKeys.K_AIRPLANE_MODE_ON,
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
 

@@ -41,6 +41,7 @@ import com.edw590.visor_c_a.Modules.TasksExecutor.TasksExecutor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.PhoneCallsProcessor.PhoneCallsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.SmsMsgsProcessor.SmsMsgsProcessor;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
+import com.edw590.visor_c_a.Modules.UserLocator.UserLocator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -100,8 +101,9 @@ public final class ModulesList {
 			new ElementsObj(TasksExecutor.class, "Tasks Executor", TYPE1_INSTANCE, true), // MOD_9
 			new ElementsObj(SystemChecker.class, "System Checker", TYPE1_INSTANCE, true), // MOD_10
 			new ElementsObj(SpeechRecognitionCtrl.class, "Speech Recognition Control", TYPE1_INSTANCE, true), // MOD_11
-			//new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
 			new ElementsObj(CommandsRecognition.class, "Commands recognizer", TYPE1_SERVICE_SEP_CHK_ONLY, false),
+			//new ElementsObj(PocketSphinxRecognition.class, "Hotword recognizer", TYPE1_INSTANCE, false),
+			new ElementsObj(UserLocator.class, "User Locator", TYPE1_INSTANCE, true), // MOD_12
 			new ElementsObj(CmdsExecutor.class, "Commands Executor", TYPE1_INSTANCE, true), // MOD_13
 			new ElementsObj(TelephonyManagement.class, "Telephony Manager", TYPE1_INSTANCE, true),
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
