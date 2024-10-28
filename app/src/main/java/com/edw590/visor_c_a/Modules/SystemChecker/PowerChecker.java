@@ -26,10 +26,8 @@ import android.os.Build;
 
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
-import com.edw590.visor_c_a.Modules.Speech.Speech2;
-import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 public class PowerChecker {
 	class BatteryInfo {
@@ -40,46 +38,16 @@ public class PowerChecker {
 
 	final BatteryInfo bat_info = new BatteryInfo();
 
-	// Minimum and maximum recommended battery percentage values to increase its life
-	private static final int PERCENT_MIN = 20;
-	private static final int PERCENT_MAX = 80;
-
-	private static final int PERCENT_VERY_LOW = 5 + 1;
-	private static final int PERCENT_LOW = PERCENT_MIN + 1;
-
-	@Nullable private Boolean last_detected_power_connected = null;
 	private int last_detected_percent = -1;
 	boolean actions_power_mode_broadcast = false;
-	boolean better_battery_present = false;
 
 	/**
 	 * <p>Processes changes in the device power mode.</p>
 	 *
 	 * @param power_connected true if external power was connected, false otherwise
 	 */
-	final void processBatteryPwrChg(final boolean power_connected) {
-		// Update the Values Storage
+	static void processBatteryPwrChg(final boolean power_connected) {
 		UtilsRegistry.setData(RegistryKeys.K_POWER_CONNECTED, power_connected, false);
-
-		if ((last_detected_percent == -1) ||
-				// Only warn if the power state is new (can't warn every percentage increase... - only on power changes)
-				(last_detected_power_connected != null && power_connected == last_detected_power_connected)) {
-			return;
-		}
-
-		if (power_connected) {
-			if (last_detected_percent > PERCENT_MAX) {
-				final String speak = "Battery already above " + PERCENT_MAX + "%. Please disconnect the charger.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
-			}
-		} else {
-			if (last_detected_percent < PERCENT_MIN) {
-				final String speak = "Battery still below " + PERCENT_MIN + "%. Please reconnect the charger.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
-			}
-		}
-
-		last_detected_power_connected = power_connected;
 	}
 
 	/**
@@ -105,6 +73,7 @@ public class PowerChecker {
 
 		// If the EXTRA_PRESENT can be wrong, check if the battery level is different than 0 and 100, depending on the
 		// device version, as documented here: https://source.android.com/docs/core/power/batteryless.
+		boolean better_battery_present;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
 			better_battery_present = bat_info.battery_percentage != 100;
 		} else {
@@ -181,65 +150,6 @@ public class PowerChecker {
 			}
 		}
 
-		// If the module just started, store the current battery percentage and wait for the next change.
-		if (last_detected_percent == -1) {
-			last_detected_percent = bat_info.battery_percentage;
-			return;
-		}
-
-		// Instead of checking with power_connected, this has direct connection with the percentages, since the
-		// functions will warn based on them only --> then compare the values and be done with it.
-		// Still, use the power_connected status, but only if it's different than null, just to be sure no weird devices
-		// increase the percentage by mistake without being charging. This would warn in that case - now it won't.
-		final boolean power_connected = (boolean) UtilsRegistry.getData(RegistryKeys.K_POWER_CONNECTED, true);
-		if (power_connected) {
-			// Don't do anything if by chance, another broadcast is sent without the battery level having changed.
-			if (bat_info.battery_percentage > last_detected_percent) {
-				warnCharging(bat_info.battery_percentage);
-			} else if (bat_info.battery_percentage < last_detected_percent) {
-				warnDischarging(bat_info.battery_percentage);
-			}
-		}
-
 		last_detected_percent = bat_info.battery_percentage;
-	}
-
-	/**
-	 * <p>Processes the battery percentage if it's charging.</p>
-	 *
-	 * @param battery_percentage the current battery percentage
-	 */
-	private void warnCharging(final int battery_percentage) {
-		// Since I'm putting >= in the if statements, must be from greatest level to the lowest one.
-		if (battery_percentage == 100 && last_detected_percent < 100) {
-			final String speak = "Attention! Device fully charge! Please disconnect the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, true, null);
-		} else if (battery_percentage > PERCENT_MAX && last_detected_percent <= PERCENT_MAX) {
-			final String speak = "Attention! Above " + PERCENT_MAX + "% of battery reached! Please " +
-					"disconnect the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, true, null);
-		}
-	}
-
-	/**
-	 * <p>Processes the battery percentage if it's discharging.</p>
-	 *
-	 * @param battery_percentage the current battery percentage
-	 */
-	private void warnDischarging(final int battery_percentage) {
-		// Since I'm putting <= in the if statements, must be from lowest level to the greatest one.
-		if (battery_percentage < PERCENT_VERY_LOW && last_detected_percent >= PERCENT_VERY_LOW) {
-			// If the battery percentage is VERY_LOW and the last percentage detected is greater than VERY_LOW (meaning
-			// it just detected the change), warn about it. If the last detected percentage is less or equal than
-			// VERY_LOW, then it already detected and warned about it.
-			final String speak = "WARNING! EXTREMELY LOW BATTERY OF " + battery_percentage + "% REACHED! " +
-					"Please connect the charger now!";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
-		} else if (battery_percentage < PERCENT_LOW && last_detected_percent >= PERCENT_LOW) {
-			// Else in the same manner the LOW level.
-			final String speak = "ATTENTION! Below " + PERCENT_MIN + "% of battery reached. Please connect " +
-					"the charger.";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, true, null);
-		}
 	}
 }

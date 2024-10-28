@@ -290,13 +290,13 @@ public class SystemChecker implements IModuleInst {
 				}
 				case (Intent.ACTION_POWER_CONNECTED): {
 					power_checker.actions_power_mode_broadcast = true;
-					power_checker.processBatteryPwrChg(true);
+					PowerChecker.processBatteryPwrChg(true);
 
 					break;
 				}
 				case (Intent.ACTION_POWER_DISCONNECTED): {
 					power_checker.actions_power_mode_broadcast = true;
-					power_checker.processBatteryPwrChg(false);
+					PowerChecker.processBatteryPwrChg(false);
 
 					break;
 				}
@@ -396,7 +396,6 @@ public class SystemChecker implements IModuleInst {
 				/////////////////////////////////////
 				// Airplane mode
 				case (Intent.ACTION_AIRPLANE_MODE_CHANGED): {
-					System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
 					UtilsRegistry.setData(RegistryKeys.K_AIRPLANE_MODE_ON,
 							UtilsAndroidConnectivity.getAirplaneModeEnabled(), false);
 
