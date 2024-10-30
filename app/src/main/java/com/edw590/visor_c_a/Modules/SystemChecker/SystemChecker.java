@@ -54,7 +54,7 @@ import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import SCLink.SCLink;
 
-public class SystemChecker implements IModuleInst {
+public final class SystemChecker implements IModuleInst {
 
 	private final HandlerThread main_handlerThread =
 			new HandlerThread((String) ModulesList.getElementValue(ModulesList.getElementIndex(getClass()),

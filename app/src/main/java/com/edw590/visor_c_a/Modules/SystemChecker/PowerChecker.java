@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
-public class PowerChecker {
+public final class PowerChecker {
 	class BatteryInfo {
 		int battery_percentage = -1;
 		boolean battery_present = false;
@@ -58,7 +58,7 @@ public class PowerChecker {
 	 * @param battery_lvl_scale the value from {@link BatteryManager#EXTRA_SCALE}
 	 * @param battery_present the value from {@link BatteryManager#EXTRA_STATUS}
 	 */
-	final void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
+	void processBatteryLvlChg(final int battery_status, final int battery_lvl, final int battery_lvl_scale,
 									@Nullable final Boolean battery_present) {
 		// Don't if the EXTRA_STATUS is -1, in case it's wrong (can be - checked on miTab Advance).
 		if (battery_lvl == -1 || battery_lvl_scale == -1) {

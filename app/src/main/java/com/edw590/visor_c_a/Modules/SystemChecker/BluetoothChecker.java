@@ -21,6 +21,7 @@
 
 package com.edw590.visor_c_a.Modules.SystemChecker;
 
+import android.Manifest;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -34,13 +35,14 @@ import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
+import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class BluetoothChecker {
+public final class BluetoothChecker {
 	// This below can be null if there's no Bluetooth adapter or there was some error, so Nullable for NPE warnings
 	@Nullable final BluetoothAdapter bluetooth_adapter = BluetoothAdapter.getDefaultAdapter();
 	// This one can be null if there's no BLE on the device or there was some error, so NPE warnings are useful
@@ -60,13 +62,13 @@ public class BluetoothChecker {
 
 	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
-	final void setBluetoothEnabled(final boolean enable) {
+	void setBluetoothEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setBluetoothEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
-	final void startBluetooth() {
+	void startBluetooth() {
 		if (bluetooth_adapter != null) {
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.A2DP);
@@ -84,18 +86,20 @@ public class BluetoothChecker {
 		}
 	}
 
-	final void checkBluetooth() {
+	void checkBluetooth() {
 		if (System.currentTimeMillis() >= last_check_when + waiting_time && bluetooth_adapter != null) {
 			if (bluetooth_adapter.isEnabled()) {
 				enabled_by_visor = false;
-				bluetooth_adapter.startDiscovery();
+				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+					bluetooth_adapter.startDiscovery();
+				}
 			} else {
 				setBluetoothEnabled(true);
 			}
 		}
 	}
 
-	final void powerSaverChanged(final boolean enabled) {
+	void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
 			waiting_time = DISCOVER_BT_EACH_PS;
 		} else {
@@ -103,7 +107,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	final void discoveryStarted() {
+	void discoveryStarted() {
 		// Don't forget other apps can start the discovery...
 		// In that case, use that advantage and don't start it for another period of time. Just listen to
 		// the broadcasts.
@@ -112,7 +116,7 @@ public class BluetoothChecker {
 		nearby_devices_bt.clear();
 	}
 
-	final void discoveryFinished() {
+	void discoveryFinished() {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
@@ -151,7 +155,7 @@ public class BluetoothChecker {
 		);
 	}
 
-	final void bluetoothStateChanged(final Intent intent) {
+	void bluetoothStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int bluetooth_state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
@@ -189,7 +193,7 @@ public class BluetoothChecker {
 		}
 	}
 
-	final void connectionStateChanged(final Intent intent) {
+	void connectionStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);

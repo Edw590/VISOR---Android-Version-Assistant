@@ -44,7 +44,7 @@ import java.util.Locale;
 
 import UtilsSWA.UtilsSWA;
 
-public class WifiChecker {
+public final class WifiChecker {
 	@Nullable final WifiManager wifi_manager = UtilsCheckHardwareFeatures.isWifiSupported() ?
 			UtilsNetwork.getWifiManager() : null;
 
@@ -58,13 +58,13 @@ public class WifiChecker {
 
 	public static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
 
-	final void setWifiEnabled(final boolean enable) {
+	void setWifiEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setWifiEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
-	final void checkWifi() {
+	void checkWifi() {
 		if (System.currentTimeMillis() >= last_check_when + waiting_time && wifi_manager != null) {
 			if (wifi_manager.isWifiEnabled()) {
 				enabled_by_visor = false;
@@ -79,7 +79,7 @@ public class WifiChecker {
 		}
 	}
 
-	final void powerSaverChanged(final boolean enabled) {
+	void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
 			waiting_time = SCAN_WIFI_EACH_PS;
 		} else {
@@ -93,7 +93,7 @@ public class WifiChecker {
 						UtilsSWA.DEFAULT_TX_POWER), true);
 	}
 
-	final void wifiStateChanged(final Intent intent) {
+	void wifiStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 
@@ -109,7 +109,7 @@ public class WifiChecker {
 		}
 	}
 
-	final void scanResultsAvailable(final Intent intent) {
+	void scanResultsAvailable(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		if (!intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, true)) {
@@ -155,6 +155,11 @@ public class WifiChecker {
 				// something (has happened. Networks in range and nothing returned).
 				attempts++;
 				wifi_manager.startScan();
+
+				try {
+					Thread.sleep(1000);
+				} catch (final InterruptedException ignored) {
+				}
 			} else {
 				attempts = 0;
 
@@ -168,7 +173,7 @@ public class WifiChecker {
 		}
 	}
 
-	final void networkStateChanged(final Intent intent) {
+	void networkStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		NetworkInfo.State state = ((NetworkInfo) intent.
