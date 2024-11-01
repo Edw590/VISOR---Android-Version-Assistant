@@ -26,24 +26,24 @@
 
 	<fragment
 		android:id="@+id/frag_main"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragHome"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragHome"
 		android:label="@string/fragMain_title_ACA"
-		tools:layout="@layout/frag_home" />
+		tools:layout="@layout/frag_main" />
 	<fragment
 		android:id="@+id/frag_development"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragDevelopment"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSpeech"
 		android:label="@string/fragDevelopment_title_ACA"
-		tools:layout="@layout/frag_development" />
+		tools:layout="@layout/tab_speech_main" />
 	<fragment
 		android:id="@+id/frag_modules_status"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragModulesStatus"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragModulesManager"
 		android:label="@string/fragModulesStatus_title_ACA"
-		tools:layout="@layout/frag_modules_status" />
+		tools:layout="@layout/frag_main" />
 	<fragment
 		android:id="@+id/frag_values_storage_viewer"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragValuesStorageViewer"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragRegistry"
 		android:label="@string/fragValuesStorageViewer_title_ACA"
-		tools:layout="@layout/frag_values_storage_viewer" />
+		tools:layout="@layout/tab_registry" />
 	<fragment
 		android:id="@+id/frag_cmds_list"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragCmdsList"

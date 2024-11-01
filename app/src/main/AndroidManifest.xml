@@ -237,7 +237,7 @@
 		 vulnerability. So that means, if the app is to support those APIs (currently, yes), then it can NOT rely on
 		 custom permissions for anything important (or anything at all). -->
 
-		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.ActMain"
+		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActMain"
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"
@@ -252,7 +252,7 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.ActAssist"
+		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActAssist"
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"

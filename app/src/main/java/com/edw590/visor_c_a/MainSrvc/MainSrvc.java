@@ -34,7 +34,7 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.edw590.visor_c_a.ActivitiesFragments.ActMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Activities.ActMain;
 import com.edw590.visor_c_a.GlobalUtils.GL_CONSTS;
 import com.edw590.visor_c_a.GlobalUtils.ObjectClasses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;

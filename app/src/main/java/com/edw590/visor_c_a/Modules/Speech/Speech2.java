@@ -549,7 +549,7 @@ public final class Speech2 implements IModuleInst {
 	 * @param task_id same as in {@link TasksList#removeTask(int)}
 	 */
 	int speakInternal(final String txt_to_speak, final int speech_priority, final int mode,
-							  @Nullable final String utterance_id, final int task_id) {
+					  @Nullable final String utterance_id, final int task_id) {
 
 		// todo Make a way of getting him not to listen what he himself is saying... Or he'll hear himself and process
 		// that, which is stupid. For example by cancelling the recognition when he's speaking or, or removing what he

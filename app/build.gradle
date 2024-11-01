@@ -124,13 +124,16 @@ dependencies {
 	// Maven //
 
 	// Android
-	// appcompat can be up to 1.6.1 for mindSdkVersion of <21 and only if compileSdk is >=33
+	// appcompat can be up to 1.6.1 for mindSdkVersion of <21 and only if compileSdk is >=33.
 	implementation "androidx.appcompat:appcompat:1.4.2"
 	implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 	implementation "androidx.multidex:multidex:2.0.1"
 	implementation "androidx.preference:preference:1.2.0"
 	implementation "androidx.navigation:navigation-fragment:2.5.3"
 	implementation "androidx.navigation:navigation-ui:2.5.3"
+	// These 2 below can be higher too if the compileSdk was higher too.
+	implementation "androidx.viewpager2:viewpager2:1.0.0"
+	implementation "com.google.android.material:material:1.6.0"
 
 	// External
 	implementation "org.gavaghan:geodesy:1.1.3"
