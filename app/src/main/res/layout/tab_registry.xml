@@ -27,7 +27,7 @@
 	tools:context=".ActivitiesFragments.Activities.ActMain">
 
 	<LinearLayout
-		android:id="@+id/frag_values_storage_viewer_linear_layout"
+		android:id="@+id/frag_registry_linear_layout"
 		android:orientation="vertical"
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent">

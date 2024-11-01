@@ -54,11 +54,8 @@ public final class TabRegistryManualValues extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.frag_values_storage_viewer_linear_layout);
-		final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
+		final LinearLayout linearLayout = view.findViewById(R.id.frag_registry_linear_layout);
 
-		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT);
 		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
 		// 15 SP seems to be enough as margins.
 		final Resources resources = requireActivity().getResources();
@@ -67,6 +64,7 @@ public final class TabRegistryManualValues extends Fragment {
 
 		TextView textView = new TextView(requireContext());
 		textView.setText(UtilsSWA.getRegistryTextREGISTRY(2));
+		textView.setPadding(padding_px, padding_px, padding_px, padding_px);
 		linearLayout.addView(textView);
 	}
 }
