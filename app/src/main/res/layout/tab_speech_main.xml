@@ -45,7 +45,7 @@
 
 		<android.widget.Space
 			android:layout_width="match_parent"
-			android:layout_height="31dp" />
+			android:layout_height="31sp" />
 
 		<androidx.appcompat.widget.AppCompatEditText
 			android:id="@+id/txt_to_speech"
@@ -82,7 +82,7 @@
 
 		<android.widget.Space
 			android:layout_width="match_parent"
-			android:layout_height="31dp" />
+			android:layout_height="31sp" />
 
 		<androidx.appcompat.widget.AppCompatEditText
 			android:id="@+id/txt_to_send"
@@ -103,7 +103,7 @@
 
 		<android.widget.Space
 			android:layout_width="match_parent"
-			android:layout_height="31dp" />
+			android:layout_height="31sp" />
 
 		<androidx.appcompat.widget.AppCompatButton
 			android:id="@+id/btn_force_stop"

@@ -44,8 +44,8 @@
 		android:textColor="#FFFFFF"
 		android:textSize="20sp"
 		android:textStyle="bold"
-		android:layout_marginLeft="10dp"
-		android:layout_marginRight="10dp"
+		android:layout_marginLeft="10sp"
+		android:layout_marginRight="10sp"
 		app:layout_constraintStart_toEndOf="@+id/imageView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

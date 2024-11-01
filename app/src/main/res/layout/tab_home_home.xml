@@ -33,7 +33,7 @@
 
 		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="match_parent"
-			android:layout_height="81dp"
+			android:layout_height="81sp"
 			android:gravity="center"
 			android:text="@string/app_title_ACA"
 			android:textColor="@color/colorAccent"
@@ -44,36 +44,36 @@
 			android:id="@+id/txt_comm_connected"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="Communicator connected"
-			android:textSize="20dp"
-			android:padding="10dp" />
+			android:text=""
+			android:textSize="20sp"
+			android:padding="10sp" />
 
 		<Space
 			android:layout_width="match_parent"
-			android:layout_height="11dp" />
+			android:layout_height="11sp" />
 
 		<TextView
 			android:id="@+id/txt_site_info_exists"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text=""
-			android:padding="10dp" />
+			android:padding="10sp" />
 
 		<EditText
 			android:id="@+id/editTxt_site_domain"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:inputType="text"
-			android:hint="Website domain or IP"
-			android:padding="10dp" />
+			android:hint="Server domain or IP"
+			android:padding="10sp" />
 
 		<EditText
 			android:id="@+id/editTxt_site_password"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:inputType="textPassword"
-			android:hint="Website password"
-			android:padding="10dp" />
+			android:hint="Server password"
+			android:padding="10sp" />
 
 		<Button
 			android:id="@+id/btn_save_site_info"

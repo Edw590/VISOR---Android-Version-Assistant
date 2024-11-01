@@ -86,10 +86,10 @@ public final class TabHomeMain extends Fragment {
 		String text;
 		if (UtilsSWA.isCommunicatorConnectedSERVER()) {
 			color = color_accent;
-			text = "Communicator connected";
+			text = "Connected to the server";
 		} else {
 			color = color_primary;
-			text = "Communicator not connected";
+			text = "Not connected to the server";
 		}
 		txt_comm_connected.setText(text);
 		txt_comm_connected.setTextColor(Color.parseColor(color));
@@ -98,12 +98,12 @@ public final class TabHomeMain extends Fragment {
 			editTxt_site_domain.setEnabled(true);
 			editTxt_site_password.setEnabled(true);
 			btn_save_site_info.setEnabled(true);
-			txt_site_info_exists.setText("No website info exists. Please enter it to activate full functionality.");
+			txt_site_info_exists.setText("No server info exists. Enter it to activate full functionality.");
 		} else {
 			editTxt_site_domain.setEnabled(false);
 			editTxt_site_password.setEnabled(false);
 			btn_save_site_info.setEnabled(false);
-			txt_site_info_exists.setText("Website info exists");
+			txt_site_info_exists.setText("Server info exists");
 		}
 	}
 }
