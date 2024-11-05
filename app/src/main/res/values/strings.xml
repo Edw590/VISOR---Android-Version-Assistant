@@ -33,6 +33,7 @@
 	<string name="fragCmdsList_title_ACA">Available commands</string>
 	<string name="fragNearbyDevices_title_ACA">Nearby devices/APs</string>
 	<string name="fragSettings_title_ACA">Settings</string>
+	<string name="fragCommunicator_title_ACA">Communicator</string>
 
 
 

@@ -100,10 +100,6 @@ public final class ApplicationClass extends Application {
 
 		/////////////////////////////////////////////////////////////
 
-		if (!SettingsSync.loadDeviceSettings(UtilsSettings.readJsonDeviceSettings())) {
-			System.out.println("Failed to load device settings. Using empty ones...");
-		}
-
 		if (!SettingsSync.loadGenSettings(UtilsSettings.readJsonGenSettings())) {
 			System.out.println("Failed to load generated settings. Using empty ones...");
 		}
@@ -134,9 +130,7 @@ public final class ApplicationClass extends Application {
 
 	Thread infinity_thread = new Thread(() -> {
 		while (true) {
-			// Write user and gen settings and reload device settings every 5 seconds
-
-			SettingsSync.loadDeviceSettings(UtilsSettings.readJsonDeviceSettings());
+			// Write user and gen settings every 5 seconds
 
 			UtilsSettings.writeUserSettings(SettingsSync.getJsonUserSettings());
 

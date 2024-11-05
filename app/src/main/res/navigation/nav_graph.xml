@@ -45,11 +45,6 @@
 		android:label="@string/fragValuesStorageViewer_title_ACA"
 		tools:layout="@layout/tab_registry" />
 	<fragment
-		android:id="@+id/frag_cmds_list"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragCmdsList"
-		android:label="@string/fragCmdsList_title_ACA"
-		tools:layout="@layout/frag_cmds_list" />
-	<fragment
 		android:id="@+id/frag_nearby_devices"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragNearbyDevices"
 		android:label="@string/fragNearbyDevices_title_ACA"
@@ -57,6 +52,11 @@
 	<fragment
 		android:id="@+id/frag_settings"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragSettings"
+		android:label="@string/fragSettings_title_ACA"
+		tools:layout="@layout/frag_settings" />
+	<fragment
+		android:id="@+id/frag_communicator"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragCommunicator"
 		android:label="@string/fragSettings_title_ACA"
 		tools:layout="@layout/frag_settings" />
 

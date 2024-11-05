@@ -1225,7 +1225,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 	private void sendToGPT(final String sentence_str) {
 		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
-			String speak = "GPT unavailable. Communicator not connected.";
+			String speak = "GPT unavailable. Not connected to the server.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
 
 			return;

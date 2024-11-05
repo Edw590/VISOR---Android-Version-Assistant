@@ -39,21 +39,6 @@ public final class UtilsSettings {
 	}
 
 	/**
-	 * <p>Gets the Device Settings in JSON format.</p>
-	 *
-	 * @return the Device Settings in JSON format
-	 */
-	@NonNull
-	public static String readJsonDeviceSettings() {
-		GPath device_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
-		device_settings_path.add2(true, UtilsSWA.DEVICE_SETTINGS_FILE);
-
-		byte[] file_bytes = UtilsFilesDirs.readFileBytes(device_settings_path);
-
-		return UtilsSWA.bytesToPrintableDATACONV(file_bytes, false);
-	}
-
-	/**
 	 * <p>Gets the Generated Settings in JSON format.</p>
 	 *
 	 * @return the Generated Settings in JSON format
