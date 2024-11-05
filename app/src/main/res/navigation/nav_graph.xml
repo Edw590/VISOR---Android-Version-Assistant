@@ -50,6 +50,6 @@
 	<fragment
 		android:id="@+id/frag_communicator"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragCommunicator"
-		android:label="@string/fragSettings_title_ACA" />
+		android:label="@string/fragCommunicator_title_ACA" />
 
 </navigation>
