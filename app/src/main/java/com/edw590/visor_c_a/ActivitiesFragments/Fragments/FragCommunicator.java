@@ -35,7 +35,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorCmdsList;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorMain;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorMemories;
-import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
@@ -66,7 +65,7 @@ public final class FragCommunicator extends Fragment {
 		tabLayout.addTab(tabLayout.newTab().setText("Memories"));
 
 		// Set default fragment when fragment is created
-		replaceFragment(new TabHomeMain());
+		replaceFragment(new TabCommunicatorMain());
 
 		// Set up a listener for tab selection events
 		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

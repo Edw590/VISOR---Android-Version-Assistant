@@ -32,7 +32,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabModManagerModsStatus;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
@@ -62,7 +61,7 @@ public final class FragModulesManager extends Fragment {
 		tabLayout.addTab(tabLayout.newTab().setText("Modules status"));
 
 		// Set default fragment when fragment is created
-		replaceFragment(new TabHomeMain());
+		replaceFragment(new TabModManagerModsStatus());
 
 		// Set up a listener for tab selection events
 		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

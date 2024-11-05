@@ -44,14 +44,25 @@ public final class TabCommunicatorCmdsList extends Fragment {
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 							 @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.frag_cmds_list, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.frag_cmds_list_linear_layout);
+		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+
+		TextView text1 = new TextView(requireContext());
+		text1.setText("List of all commands and variations available (optional words in [...] and generic " +
+				"descriptions in (...)):");
+
+		TextView text2 = new TextView(requireContext());
+		text2.setText("(Note: there is more than one way to say a command, with synonyms and random words in between " +
+				"('switch on the phone's wifi', 'what's the current time', 'terminate the phone call').)");
+
+		linearLayout.addView(text1);
+		linearLayout.addView(text2);
 
 		for (final String command_desc : CmdsList.CMDS_LIST_description) {
 			final TextView textView = new TextView(requireContext());

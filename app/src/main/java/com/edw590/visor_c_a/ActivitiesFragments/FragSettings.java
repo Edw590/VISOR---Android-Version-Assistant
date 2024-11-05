@@ -52,21 +52,18 @@ import UtilsSWA.Value;
  */
 public final class FragSettings extends Fragment {
 
-	View frag_view;
-
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 							 @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.frag_settings, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		frag_view = view;
 
-		LinearLayout linearLayout = view.findViewById(R.id.frag_settings_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 		LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
 
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

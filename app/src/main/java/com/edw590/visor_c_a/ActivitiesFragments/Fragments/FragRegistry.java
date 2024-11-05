@@ -32,7 +32,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRegistryAutomaticValues;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRegistryManualValues;
 import com.edw590.visor_c_a.R;
@@ -61,7 +60,7 @@ public final class FragRegistry extends Fragment {
 		tabLayout.addTab(tabLayout.newTab().setText("Manual values"));
 
 		// Set default fragment when fragment is created
-		replaceFragment(new TabHomeMain());
+		replaceFragment(new TabRegistryAutomaticValues());
 
 		// Set up a listener for tab selection events
 		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

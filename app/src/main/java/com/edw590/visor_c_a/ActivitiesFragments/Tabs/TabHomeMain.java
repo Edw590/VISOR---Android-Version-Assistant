@@ -22,10 +22,13 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -50,22 +53,35 @@ public final class TabHomeMain extends Fragment {
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.tab_home_home, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+
 		String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
 		String color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorAccent));
 
-		TextView txt_comm_connected = requireView().findViewById(R.id.txt_comm_connected);
-		TextView txt_site_info_exists = requireView().findViewById(R.id.txt_site_info_exists);
-		assert txt_comm_connected != null;
-		assert txt_site_info_exists != null;
+		TextView txt_title = new TextView(requireContext());
+		txt_title.setText("V.I.S.O.R. Systems");
+		txt_title.setTextColor(Color.parseColor(color_accent));
+		txt_title.setTextSize(40);
+		txt_title.setTypeface(null, Typeface.BOLD);
+		txt_title.setGravity(Gravity.CENTER);
+		txt_title.setHeight(200);
+
+		TextView txt_comm_connected = new TextView(requireContext());
+		txt_comm_connected.setTextColor(Color.parseColor(color_primary));
+		txt_comm_connected.setTextSize(20);
+		txt_comm_connected.setPadding(20, 20, 20, 20);
+
+		TextView txt_site_info_exists = new TextView(requireContext());
+		txt_site_info_exists.setPadding(20, 20, 20, 20);
 
 		String color;
 		String text;
@@ -84,5 +100,9 @@ public final class TabHomeMain extends Fragment {
 		} else {
 			txt_site_info_exists.setText("Server info exists");
 		}
+
+		linearLayout.addView(txt_title);
+		linearLayout.addView(txt_comm_connected);
+		linearLayout.addView(txt_site_info_exists);
 	}
 }

@@ -23,7 +23,7 @@
 
 	<group android:checkableBehavior="single">
 		<item
-			android:id="@+id/frag_main"
+			android:id="@+id/frag_home"
 			android:title="@string/fragMain_title_ACA"
 			android:icon="@drawable/home" />
 		<item
