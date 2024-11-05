@@ -29,11 +29,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorCmdsList;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabCommunicatorMemories;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,28 +58,51 @@ public final class FragCommunicator extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		ViewPager2 viewPager = view.findViewById(R.id.view_pager);
 		TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
-		// Set the adapter
-		viewPager.setAdapter(new PagerAdapterCommunicator(requireActivity()));
+		// Add tabs with titles
+		tabLayout.addTab(tabLayout.newTab().setText("Main"));
+		tabLayout.addTab(tabLayout.newTab().setText("Commands list"));
+		tabLayout.addTab(tabLayout.newTab().setText("Memories"));
 
-		// Link TabLayout and ViewPager2 with TabLayoutMediator
-		new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+		// Set default fragment when fragment is created
+		replaceFragment(new TabHomeMain());
+
+		// Set up a listener for tab selection events
+		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
-			public void onConfigureTab(@NonNull final TabLayout.Tab tab, final int position) {
-				switch (position) {
+			public void onTabSelected(final TabLayout.Tab tab) {
+				Fragment selectedFragment;
+				switch (tab.getPosition()) {
 					case 0:
-						tab.setText("Main");
+						selectedFragment = new TabCommunicatorMain();
 						break;
 					case 1:
-						tab.setText("Commands list");
+						selectedFragment = new TabCommunicatorCmdsList();
 						break;
 					case 2:
-						tab.setText("Memories");
+						selectedFragment = new TabCommunicatorMemories();
 						break;
+					default:
+						return;
 				}
+				replaceFragment(selectedFragment);
 			}
-		}).attach();
+
+			@Override
+			public void onTabUnselected(final TabLayout.Tab tab) {
+			}
+
+			@Override
+			public void onTabReselected(final TabLayout.Tab tab) {
+			}
+		});
+	}
+
+	void replaceFragment(final Fragment fragment) {
+		FragmentManager fragmentManager = getChildFragmentManager();
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.frame_layout, fragment);
+		transaction.commit();
 	}
 }

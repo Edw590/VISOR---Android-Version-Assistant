@@ -50,7 +50,7 @@ public final class TabHomeSettings extends Fragment {
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.empty, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public final class TabHomeSettings extends Fragment {
 
 		ModsFileInfo.GeneralConsts general_consts = SettingsSync.getInfoGENERAL();
 
-		final LinearLayout linearLayout = view.findViewById(R.id.empty_linear_layout);
+		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		EditText editTxt_pin = new EditText(requireContext());
 		editTxt_pin.setHint("App protection PIN (any number of digits or empty to disable)");

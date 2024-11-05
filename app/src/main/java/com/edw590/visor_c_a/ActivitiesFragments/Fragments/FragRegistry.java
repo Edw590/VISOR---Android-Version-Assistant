@@ -29,11 +29,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRegistryAutomaticValues;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRegistryManualValues;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
@@ -51,25 +54,47 @@ public final class FragRegistry extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		ViewPager2 viewPager = view.findViewById(R.id.view_pager);
 		TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
-		// Set the adapter
-		viewPager.setAdapter(new PagerAdapterRegistry(requireActivity()));
+		// Add tabs with titles
+		tabLayout.addTab(tabLayout.newTab().setText("Automatic values"));
+		tabLayout.addTab(tabLayout.newTab().setText("Manual values"));
 
-		// Link TabLayout and ViewPager2 with TabLayoutMediator
-		new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+		// Set default fragment when fragment is created
+		replaceFragment(new TabHomeMain());
+
+		// Set up a listener for tab selection events
+		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
-			public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-				switch (position) {
+			public void onTabSelected(final TabLayout.Tab tab) {
+				Fragment selectedFragment;
+				switch (tab.getPosition()) {
 					case 0:
-						tab.setText("Automatic values");
+						selectedFragment = new TabRegistryAutomaticValues();
 						break;
 					case 1:
-						tab.setText("Manual values");
+						selectedFragment = new TabRegistryManualValues();
 						break;
+					default:
+						return;
 				}
+				replaceFragment(selectedFragment);
 			}
-		}).attach();
+
+			@Override
+			public void onTabUnselected(final TabLayout.Tab tab) {
+			}
+
+			@Override
+			public void onTabReselected(final TabLayout.Tab tab) {
+			}
+		});
+	}
+
+	void replaceFragment(final Fragment fragment) {
+		FragmentManager fragmentManager = getChildFragmentManager();
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.frame_layout, fragment);
+		transaction.commit();
 	}
 }

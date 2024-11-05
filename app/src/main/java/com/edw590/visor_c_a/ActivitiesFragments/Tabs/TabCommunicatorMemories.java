@@ -49,14 +49,14 @@ public final class TabCommunicatorMemories extends Fragment {
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 							 @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.empty, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.empty_linear_layout);
+		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		TextView txtView_info = new TextView(requireContext());
 		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode):");

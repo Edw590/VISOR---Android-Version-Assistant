@@ -54,7 +54,7 @@ public final class TabModManagerModsStatus extends Fragment {
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 								   @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.empty, container, false);
+		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public final class TabModManagerModsStatus extends Fragment {
 		color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorAccent));
 
-		final LinearLayout linearLayout = current_view.findViewById(R.id.empty_linear_layout);
+		final LinearLayout linearLayout = current_view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);

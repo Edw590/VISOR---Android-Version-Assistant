@@ -29,11 +29,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabModManagerModsStatus;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,22 +56,43 @@ public final class FragModulesManager extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		ViewPager2 viewPager = view.findViewById(R.id.view_pager);
 		TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
-		// Set the adapter
-		viewPager.setAdapter(new PagerAdapterModulesManager(requireActivity()));
+		// Add tabs with titles
+		tabLayout.addTab(tabLayout.newTab().setText("Modules status"));
 
-		// Link TabLayout and ViewPager2 with TabLayoutMediator
-		new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+		// Set default fragment when fragment is created
+		replaceFragment(new TabHomeMain());
+
+		// Set up a listener for tab selection events
+		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
-			public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-				switch (position) {
+			public void onTabSelected(final TabLayout.Tab tab) {
+				Fragment selectedFragment;
+				switch (tab.getPosition()) {
 					case 0:
-						tab.setText("Modules status");
+						selectedFragment = new TabModManagerModsStatus();
 						break;
+					default:
+						return;
 				}
+				replaceFragment(selectedFragment);
 			}
-		}).attach();
+
+			@Override
+			public void onTabUnselected(final TabLayout.Tab tab) {
+			}
+
+			@Override
+			public void onTabReselected(final TabLayout.Tab tab) {
+			}
+		});
+	}
+
+	void replaceFragment(final Fragment fragment) {
+		FragmentManager fragmentManager = getChildFragmentManager();
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.frame_layout, fragment);
+		transaction.commit();
 	}
 }

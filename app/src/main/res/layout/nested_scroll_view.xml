@@ -32,7 +32,7 @@
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:theme="@style/AppTheme.NoActionBar"
-		android:id="@+id/empty_linear_layout">
+		android:id="@+id/nested_scroll_view_linear_layout">
 
 	</LinearLayout>
 
