@@ -49,7 +49,7 @@ public final class TabCommunicatorMemories extends Fragment {
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 							 @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.empty_layout, container, false);
+		return inflater.inflate(R.layout.empty, container, false);
 	}
 
 	@Override

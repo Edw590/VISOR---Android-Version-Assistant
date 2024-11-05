@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeSettings;
 
 public class PagerAdapterHome extends FragmentStateAdapter {
 
@@ -40,6 +41,8 @@ public class PagerAdapterHome extends FragmentStateAdapter {
 		switch (position) {
 			case 0:
 				return new TabHomeMain();
+			case 1:
+				return new TabHomeSettings();
 		}
 
 		// Won't happen
@@ -48,6 +51,6 @@ public class PagerAdapterHome extends FragmentStateAdapter {
 
 	@Override
 	public int getItemCount() {
-		return 1; // Number of tabs
+		return 2; // Number of tabs
 	}
 }

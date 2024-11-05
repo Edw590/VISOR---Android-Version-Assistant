@@ -59,28 +59,6 @@
 			android:text=""
 			android:padding="10sp" />
 
-		<EditText
-			android:id="@+id/editTxt_site_domain"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="text"
-			android:hint="Server domain or IP"
-			android:padding="10sp" />
-
-		<EditText
-			android:id="@+id/editTxt_site_password"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="textPassword"
-			android:hint="Server password"
-			android:padding="10sp" />
-
-		<Button
-			android:id="@+id/btn_save_site_info"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:text="Save" />
-
 	</LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

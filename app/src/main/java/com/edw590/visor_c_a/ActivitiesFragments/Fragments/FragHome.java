@@ -55,6 +55,7 @@ public final class FragHome extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		ViewPager2 viewPager = view.findViewById(R.id.view_pager);
+		viewPager.setOffscreenPageLimit(1);
 		TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
 		// Set the adapter
@@ -67,6 +68,9 @@ public final class FragHome extends Fragment {
 				switch (position) {
 					case 0:
 						tab.setText("Main");
+						break;
+					case 1:
+						tab.setText("Settings");
 						break;
 				}
 			}

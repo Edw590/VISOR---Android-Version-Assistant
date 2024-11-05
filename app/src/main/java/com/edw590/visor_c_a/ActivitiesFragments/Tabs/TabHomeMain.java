@@ -26,8 +26,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -65,22 +63,9 @@ public final class TabHomeMain extends Fragment {
 				R.color.colorAccent));
 
 		TextView txt_comm_connected = requireView().findViewById(R.id.txt_comm_connected);
-		EditText editTxt_site_domain = requireView().findViewById(R.id.editTxt_site_domain);
-		EditText editTxt_site_password = requireView().findViewById(R.id.editTxt_site_password);
-		Button btn_save_site_info = requireView().findViewById(R.id.btn_save_site_info);
 		TextView txt_site_info_exists = requireView().findViewById(R.id.txt_site_info_exists);
 		assert txt_comm_connected != null;
-		assert editTxt_site_domain != null;
-		assert editTxt_site_password != null;
-		assert btn_save_site_info != null;
 		assert txt_site_info_exists != null;
-
-		btn_save_site_info.setOnClickListener(v -> {
-			SettingsSync.setWebsiteInfo(editTxt_site_domain.getText().toString(),
-					editTxt_site_password.getText().toString());
-			editTxt_site_domain.setText("");
-			editTxt_site_password.setText("");
-		});
 
 		String color;
 		String text;
@@ -95,14 +80,8 @@ public final class TabHomeMain extends Fragment {
 		txt_comm_connected.setTextColor(Color.parseColor(color));
 
 		if (SettingsSync.isWebsiteInfoEmpty()) {
-			editTxt_site_domain.setEnabled(true);
-			editTxt_site_password.setEnabled(true);
-			btn_save_site_info.setEnabled(true);
 			txt_site_info_exists.setText("No server info exists. Enter it to activate full functionality.");
 		} else {
-			editTxt_site_domain.setEnabled(false);
-			editTxt_site_password.setEnabled(false);
-			btn_save_site_info.setEnabled(false);
 			txt_site_info_exists.setText("Server info exists");
 		}
 	}
