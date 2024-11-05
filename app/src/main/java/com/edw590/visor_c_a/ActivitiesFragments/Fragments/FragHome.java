@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeLocalSettings;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeSettings;
 import com.edw590.visor_c_a.R;
@@ -61,6 +62,7 @@ public final class FragHome extends Fragment {
 		// Add tabs with titles
 		tabLayout.addTab(tabLayout.newTab().setText("Main"));
 		tabLayout.addTab(tabLayout.newTab().setText("Settings"));
+		tabLayout.addTab(tabLayout.newTab().setText("Local settings"));
 
 		// Set default fragment when fragment is created
 		replaceFragment(new TabHomeMain());
@@ -76,6 +78,9 @@ public final class FragHome extends Fragment {
 						break;
 					case 1:
 						selectedFragment = new TabHomeSettings();
+						break;
+					case 2:
+						selectedFragment = new TabHomeLocalSettings();
 						break;
 					default:
 						return;

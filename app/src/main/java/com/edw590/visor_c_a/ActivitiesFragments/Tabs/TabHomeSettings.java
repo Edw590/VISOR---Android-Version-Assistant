@@ -54,19 +54,10 @@ public final class TabHomeSettings extends Fragment {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-
-		System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
-	}
-
-	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		System.out.println("IIIIIIIIIIIIIIIIIIIIIIIIII");
-
-		ModsFileInfo.GeneralConsts general_consts = SettingsSync.getInfoGENERAL();
+		ModsFileInfo.GeneralConsts general_consts = SettingsSync.getGeneralSettingsGENERAL();
 
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
