@@ -21,7 +21,7 @@
 
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	app:startDestination="@id/frag_home">
+	app:startDestination="@id/frag_communicator">
 
 	<fragment
 		android:id="@+id/frag_home"
