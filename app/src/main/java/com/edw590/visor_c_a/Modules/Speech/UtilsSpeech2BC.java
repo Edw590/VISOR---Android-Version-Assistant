@@ -26,7 +26,6 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.GlobalUtils.PERSONAL_CONSTS_EOG;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.TasksList;
 
@@ -60,8 +59,9 @@ public final class UtilsSpeech2BC {
 							   final boolean auto_gpt, @Nullable final Runnable after_speaking) {
 		if (auto_gpt && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
 				UtilsSWA.isCommunicatorConnectedSERVER() && GPTComm.sendText("", false)) {
-			String text = "Rephrase the following to maintain its meaning but change its wording: \"" +	txt_to_speak +
-					"\". Current device: user's " + PERSONAL_CONSTS_EOG.DEVICE_TYPE + ".";
+			ModsFileInfo.DeviceSettings device_settings = SettingsSync.SettingsSync.getDeviceSettingsGENERAL();
+			String text = "Write ONE different sentence based the following to keep its meaning but change its " +
+					"wording: \"" + txt_to_speak + "\". Current device: user's " + device_settings.getType_() + ".";
 			GPTComm.sendText(text, false);
 
 			return "";

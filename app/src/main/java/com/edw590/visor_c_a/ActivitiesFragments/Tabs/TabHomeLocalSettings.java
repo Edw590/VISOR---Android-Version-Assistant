@@ -62,7 +62,7 @@ public final class TabHomeLocalSettings extends Fragment {
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		EditText editTxt_password = new EditText(requireContext());
-		editTxt_password.setHint("Settings protection password or empty to disable");
+		editTxt_password.setHint("Settings encryption password or empty to disable");
 		editTxt_password.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 		// TODO
 
