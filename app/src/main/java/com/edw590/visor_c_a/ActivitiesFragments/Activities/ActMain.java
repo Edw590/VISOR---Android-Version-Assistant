@@ -21,11 +21,20 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Activities;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Gravity;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.NavHost;
@@ -37,6 +46,8 @@ import com.edw590.visor_c_a.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
+import SettingsSync.SettingsSync;
+
 /**
  * <p>The app's main activity.</p>
  */
@@ -45,11 +56,56 @@ public final class ActMain extends AppCompatActivity {
 	@Override
 	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_main);
 
 		// Do this only once, when the activity is created and while it's not destroyed
 
 		UtilsMainSrvc.startMainService();
+
+
+
+		ModsFileInfo.GeneralConsts generalConsts = SettingsSync.getGeneralSettingsGENERAL();
+
+		if (!generalConsts.getPin().isEmpty()) {
+			setContentView(R.layout.nested_scroll_view);
+
+			LinearLayout linear_layout = findViewById(R.id.nested_scroll_view_linear_layout);
+
+			String color_accent = "#" + Integer.toHexString(ContextCompat.getColor(this, R.color.colorAccent));
+
+			AppCompatTextView txtView_title = new AppCompatTextView(this);
+			txtView_title.setText("V.I.S.O.R. Systems");
+			txtView_title.setTextColor(Color.parseColor(color_accent));
+			txtView_title.setTextSize(40);
+			txtView_title.setTypeface(null, Typeface.BOLD);
+			txtView_title.setGravity(Gravity.CENTER);
+			txtView_title.setHeight(200);
+
+			AppCompatTextView txtView_insert_pin = new AppCompatTextView(this);
+			txtView_insert_pin.setText("Insert PIN:");
+
+			AppCompatEditText editTxt_pin = new AppCompatEditText(this);
+			editTxt_pin.setHint("PIN");
+			editTxt_pin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+
+			AppCompatButton btn_unlock = new AppCompatButton(this);
+			btn_unlock.setText("Unlock");
+			btn_unlock.setOnClickListener(v -> {
+				if (editTxt_pin.getText().toString().equals(generalConsts.getPin())) {
+					startActivity();
+				}
+			});
+
+			linear_layout.addView(txtView_title);
+			linear_layout.addView(txtView_insert_pin);
+			linear_layout.addView(editTxt_pin);
+			linear_layout.addView(btn_unlock);
+		} else {
+			startActivity();
+		}
+	}
+
+	private void startActivity() {
+		setContentView(R.layout.act_main);
 
 		final NavHost navHostFragment = (NavHost) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 		assert navHostFragment != null; // Will never be null - it's on the XMLs
