@@ -65,12 +65,10 @@ public final class TabRSSFeedsList extends Fragment {
 
 		List<String> expandableListTitle = new ArrayList<>();
 		Map<String, List<List<View>>> expandableListDetail = new HashMap<>();
-
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
 		ExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext(), expandableListTitle,
 				expandableListDetail);
 		expandable_list_view.setAdapter(adapter);
-
 		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
 		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
 			Utils.setExpandableListViewSize(expandable_list_view);
@@ -103,9 +101,9 @@ public final class TabRSSFeedsList extends Fragment {
 		List<View> child_views = new ArrayList<>(10);
 		child_items.add(child_views);
 
-		AppCompatCheckBox checkBox = new AppCompatCheckBox(requireContext());
-		checkBox.setText("Feed enabled");
-		checkBox.setChecked(feed_info.getEnabled());
+		AppCompatCheckBox check_enabled = new AppCompatCheckBox(requireContext());
+		check_enabled.setText("Feed enabled");
+		check_enabled.setChecked(feed_info.getEnabled());
 
 		AppCompatEditText editTxt_name = new AppCompatEditText(requireContext());
 		editTxt_name.setText(feed_info.getName());
@@ -130,11 +128,13 @@ public final class TabRSSFeedsList extends Fragment {
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
-			feed_info.setEnabled(checkBox.isChecked());
+			feed_info.setEnabled(check_enabled.isChecked());
 			feed_info.setName(editTxt_name.getText().toString());
 			feed_info.setType_(editTxt_type.getText().toString());
 			feed_info.setUrl(editTxt_url.getText().toString());
 			feed_info.setCustom_msg_subject(editTxt_custom_msg_subject.getText().toString());
+
+			Utils.refreshFragment(this);
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
@@ -148,7 +148,7 @@ public final class TabRSSFeedsList extends Fragment {
 					});
 		});
 
-		child_views.add(checkBox);
+		child_views.add(check_enabled);
 		child_views.add(editTxt_name);
 		child_views.add(editTxt_type);
 		child_views.add(editTxt_url);

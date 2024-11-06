@@ -55,5 +55,9 @@
 		android:id="@+id/frag_rss_feed_notifier"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragRSSFeedNotifier"
 		android:label="@string/fragRSSFeedNotifier_title_ACA" />
+	<fragment
+		android:id="@+id/frag_tasks_executor"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragTasksExecutor"
+		android:label="@string/fragTasksExecutor_title_ACA" />
 
 </navigation>

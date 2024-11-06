@@ -36,6 +36,7 @@
 	<string name="fragCommunicator_title_ACA">Communicator</string>
 	<string name="fragSystemChecker_title_ACA">System Checker</string>
 	<string name="fragRSSFeedNotifier_title_ACA">RSS Feed Notifier</string>
+	<string name="fragTasksExecutor_title_ACA">Tasks Executor</string>
 
 
 

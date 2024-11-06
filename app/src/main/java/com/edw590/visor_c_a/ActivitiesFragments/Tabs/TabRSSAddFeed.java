@@ -56,9 +56,9 @@ public final class TabRSSAddFeed extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		AppCompatCheckBox checkBox = new AppCompatCheckBox(requireContext());
-		checkBox.setText("Feed enabled");
-		checkBox.setChecked(true);
+		AppCompatCheckBox check_enabled = new AppCompatCheckBox(requireContext());
+		check_enabled.setText("Feed enabled");
+		check_enabled.setChecked(true);
 
 		AppCompatEditText editTxt_name = new AppCompatEditText(requireContext());
 		editTxt_name.setHint("Feed name");
@@ -79,14 +79,14 @@ public final class TabRSSAddFeed extends Fragment {
 		AppCompatButton btn_add = new AppCompatButton(requireContext());
 		btn_add.setText("Add");
 		btn_add.setOnClickListener(v -> {
-			SettingsSync.addFeedRSS(checkBox.isChecked(), editTxt_name.getText().toString(),
+			SettingsSync.addFeedRSS(check_enabled.isChecked(), editTxt_name.getText().toString(),
 					editTxt_type.getText().toString(), editTxt_url.getText().toString(),
 					editTxt_custom_msg_subject.getText().toString());
 
 			Utils.refreshFragment(this);
 		});
 
-		linearLayout.addView(checkBox);
+		linearLayout.addView(check_enabled);
 		linearLayout.addView(editTxt_name);
 		linearLayout.addView(editTxt_type);
 		linearLayout.addView(editTxt_url);

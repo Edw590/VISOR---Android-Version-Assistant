@@ -65,8 +65,6 @@ public final class TabCommunicatorMemories extends Fragment {
 		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode):");
 
 		AppCompatEditText editTxt_memories_text = new AppCompatEditText(requireContext());
-		editTxt_memories_text.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-		editTxt_memories_text.setMaxLines(10);
 		editTxt_memories_text.setSingleLine(false);
 		editTxt_memories_text.setHint("Stored memories on the smart LLM");
 		if (UtilsSWA.isCommunicatorConnectedSERVER()) {

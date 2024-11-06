@@ -61,12 +61,10 @@ public final class TabSpeechLocalSettings extends Fragment {
 
 		List<String> expandableListTitle = new ArrayList<>();
 		Map<String, List<List<View>>> expandableListDetail = new HashMap<>();
-
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
 		ExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext(), expandableListTitle,
 				expandableListDetail);
 		expandable_list_view.setAdapter(adapter);
-
 		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
 		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
 			Utils.setExpandableListViewSize(expandable_list_view);

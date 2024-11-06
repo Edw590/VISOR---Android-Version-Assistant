@@ -91,8 +91,6 @@ public final class TabCommunicatorMain extends Fragment {
 				resources.getDisplayMetrics());
 
 		AppCompatEditText editTxt_txt_to_send = new AppCompatEditText(requireContext());
-		editTxt_txt_to_send.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-		editTxt_txt_to_send.setMaxLines(10);
 		editTxt_txt_to_send.setSingleLine(false);
 		editTxt_txt_to_send.setHint("Text to send to VISOR (commands or normal text to the LLM)");
 
