@@ -36,7 +36,11 @@
 			android:icon="@drawable/development" />
 		<item
 			android:id="@+id/frag_development"
-			android:title="@string/fragDevelopment_title_ACA"
+			android:title="@string/fragSpeech_title_ACA"
+			android:icon="@drawable/development" />
+		<item
+			android:id="@+id/frag_rss_feed_notifier"
+			android:title="@string/fragRSSFeedNotifier_title_ACA"
 			android:icon="@drawable/development" />
 		<item
 			android:id="@+id/frag_settings"

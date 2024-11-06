@@ -34,10 +34,13 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.edw590.visor_c_a.R;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
@@ -51,7 +54,8 @@ public class Utils {
 
 	static List<List<View>> createValue(@NonNull final Context context, @NonNull final UtilsSWA.Value value) {
 		List<List<View>> child_items = new ArrayList<>(1);
-		List<View> child_views = new ArrayList<>(5);
+		List<View> child_views = new ArrayList<>(10);
+		child_items.add(child_views);
 
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -125,12 +129,28 @@ public class Utils {
 		});
 		child_views.add(button_save_setting);
 
-		child_items.add(child_views);
-
 		return child_items;
 	}
 
-	public static void setExpandableListViewSize(@NonNull final ExpandableListView myListView) {
+	static void createConfirmation(final Context context, final CharSequence message, final Runnable on_yes) {
+		new AlertDialog.Builder(context)
+				.setTitle("Confirmation")
+				.setMessage(message)
+				.setPositiveButton(android.R.string.yes, (dialog, which) -> {
+					on_yes.run();
+				})
+				.setNegativeButton(android.R.string.no, null)
+				.show();
+	}
+
+	static void refreshFragment(@NonNull final Fragment fragment) {
+		FragmentTransaction ft1 = fragment.getParentFragmentManager().beginTransaction();
+		ft1.detach(fragment).commit();
+		FragmentTransaction ft2 = fragment.getParentFragmentManager().beginTransaction();
+		ft2.attach(fragment).commit();
+	}
+
+	static void setExpandableListViewSize(@NonNull final ExpandableListView myListView) {
 		// Got it from https://stackoverflow.com/a/43177241/8228163.
 
 		ListAdapter myListAdapter = myListView.getAdapter();
@@ -145,6 +165,7 @@ public class Utils {
 			listItem.measure(0, 0);
 			totalHeight += listItem.getMeasuredHeight();
 		}
+		totalHeight *= 1.05; // Correction of mine (Edw590)
 		//setting listview item in adapter
 		ViewGroup.LayoutParams params = myListView.getLayoutParams();
 		params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));

@@ -30,7 +30,7 @@
 	<fragment
 		android:id="@+id/frag_development"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSpeech"
-		android:label="@string/fragDevelopment_title_ACA" />
+		android:label="@string/fragSpeech_title_ACA" />
 	<fragment
 		android:id="@+id/frag_modules_status"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragModulesManager"
@@ -51,5 +51,9 @@
 		android:id="@+id/frag_system_checker"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSystemChecker"
 		android:label="@string/fragSystemChecker_title_ACA" />
+	<fragment
+		android:id="@+id/frag_rss_feed_notifier"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragRSSFeedNotifier"
+		android:label="@string/fragRSSFeedNotifier_title_ACA" />
 
 </navigation>
