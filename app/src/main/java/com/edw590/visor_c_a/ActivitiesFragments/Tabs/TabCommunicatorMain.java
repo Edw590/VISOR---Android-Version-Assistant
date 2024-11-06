@@ -51,17 +51,19 @@ import UtilsSWA.UtilsSWA;
 public final class TabCommunicatorMain extends Fragment {
 
 	EditText editTxt_response;
-	boolean stop_thread = false;
 
 	@Override
 	public void onStart() {
 		super.onStart();
 
-		stop_thread = false;
-		try {
-			infinity_checker.start();
-		} catch (final IllegalThreadStateException ignored) {
-		}
+		infinity_checker.start();
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		infinity_checker.interrupt();
 	}
 
 	@Nullable
@@ -114,20 +116,20 @@ public final class TabCommunicatorMain extends Fragment {
 		linearLayout.addView(editTxt_txt_to_send);
 		linearLayout.addView(btn_send_text);
 		linearLayout.addView(editTxt_response);
-
-		// Make a way to have the thread stop when the fragment is stopped
-		//infinity_checker.start();
 	}
 
 	private final Thread infinity_checker = new Thread(new Runnable() {
 		@Override
 		public void run() {
+			Runnable runnable = () -> {
+				editTxt_response.setText(GPTComm.getLastText());
+			};
 			String old_text = "";
-			while (!stop_thread) {
+			while (true) {
 				String new_text = GPTComm.getLastText();
-				if (!old_text.equals(new_text)) {
+				if (!new_text.equals(old_text)) {
 					old_text = new_text;
-					editTxt_response.setText(old_text);
+					requireActivity().runOnUiThread(runnable);
 				}
 
 				try {
@@ -138,12 +140,4 @@ public final class TabCommunicatorMain extends Fragment {
 			}
 		}
 	});
-
-	@Override
-	public void onStop() {
-		super.onStop();
-
-		stop_thread = true;
-		infinity_checker.interrupt();
-	}
 }
