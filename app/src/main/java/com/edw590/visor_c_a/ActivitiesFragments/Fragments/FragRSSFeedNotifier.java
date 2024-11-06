@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRSSAddFeed;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabRSSFeedsList;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
@@ -56,6 +57,7 @@ public final class FragRSSFeedNotifier extends Fragment {
 
 		// Add tabs with titles
 		tabLayout.addTab(tabLayout.newTab().setText("Feeds list"));
+		tabLayout.addTab(tabLayout.newTab().setText("Add feed"));
 
 		// Set default fragment when fragment is created
 		replaceFragment(new TabRSSFeedsList());
@@ -68,6 +70,9 @@ public final class FragRSSFeedNotifier extends Fragment {
 				switch (tab.getPosition()) {
 					case 0:
 						selectedFragment = new TabRSSFeedsList();
+						break;
+					case 1:
+						selectedFragment = new TabRSSAddFeed();
 						break;
 					default:
 						return;
