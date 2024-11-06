@@ -250,6 +250,9 @@ public final class MainSrvc extends Service {
 				final String speak = "Ready, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
 
+				UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
+				UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
+
 				try {
 					unregisterReceiver(broadcastReceiver);
 				} catch (final IllegalArgumentException ignored) {
