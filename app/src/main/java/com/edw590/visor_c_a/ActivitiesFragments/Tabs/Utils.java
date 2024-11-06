@@ -52,10 +52,8 @@ import java.util.Locale;
 
 public class Utils {
 
-	static List<List<View>> createValue(@NonNull final Context context, @NonNull final UtilsSWA.Value value) {
-		List<List<View>> child_items = new ArrayList<>(1);
+	static List<View> createValue(@NonNull final Context context, @NonNull final UtilsSWA.Value value) {
 		List<View> child_views = new ArrayList<>(10);
-		child_items.add(child_views);
 
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -129,7 +127,7 @@ public class Utils {
 		});
 		child_views.add(button_save_setting);
 
-		return child_items;
+		return child_views;
 	}
 
 	static void createConfirmation(final Context context, final CharSequence message, final Runnable on_yes) {

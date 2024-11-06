@@ -47,6 +47,10 @@
 			android:title="@string/fragTasksExecutor_title_ACA"
 			android:icon="@drawable/development" />
 		<item
+			android:id="@+id/frag_user_locator"
+			android:title="@string/fragUserLocator_title_ACA"
+			android:icon="@drawable/development" />
+		<item
 			android:id="@+id/frag_settings"
 			android:title="@string/fragSettings_title_ACA"
 			android:icon="@drawable/development" />

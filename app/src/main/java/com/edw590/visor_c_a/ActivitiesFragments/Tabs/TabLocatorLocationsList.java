@@ -22,6 +22,7 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ import SettingsSync.SettingsSync;
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
-public final class TabRSSFeedsList extends Fragment {
+public final class TabLocatorLocationsList extends Fragment {
 
 	@Nullable
 	@Override
@@ -73,57 +74,75 @@ public final class TabRSSFeedsList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] feed_ids = SettingsSync.getIdsListRSS().split("\\|");
-		for (final String feed_id : feed_ids) {
-			ModsFileInfo.FeedInfo feed_info = SettingsSync.getFeedRSS(Integer.parseInt(feed_id));
-			String title = "";
-			if (!feed_info.getEnabled()) {
-				title += "[X] ";
+		String[] locs_info_ids = SettingsSync.getIdsListLOCATIONS().split("\\|");
+		for (final String loc_info_id : locs_info_ids) {
+			ModsFileInfo.LocInfo loc_info = SettingsSync.getLocationLOCATIONS(Integer.parseInt(loc_info_id));
+			String title = loc_info.getName();
+			if (title.isEmpty()) {
+				title = loc_info.getAddress();
 			}
-			title += feed_info.getName();
+			title = loc_info.getLocation() + " - " + title;
+			if (!loc_info.getEnabled()) {
+				title = "[X] " + title;
+			}
 
-			adapter.addItem(title, createFeedInfoSetter(feed_info));
+			adapter.addItem(title, createLocationSetter(loc_info));
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.
 		Utils.setExpandableListViewSize(expandable_list_view);
 	}
 
-	private List<View> createFeedInfoSetter(final ModsFileInfo.FeedInfo feed_info) {
+	private List<View> createLocationSetter(final ModsFileInfo.LocInfo loc_info) {
 		List<View> child_views = new ArrayList<>(10);
 
 		AppCompatCheckBox check_enabled = new AppCompatCheckBox(requireContext());
-		check_enabled.setText("Feed enabled");
-		check_enabled.setChecked(feed_info.getEnabled());
-
-		AppCompatEditText editTxt_name = new AppCompatEditText(requireContext());
-		editTxt_name.setText(feed_info.getName());
-		editTxt_name.setHint("Feed name");
-		editTxt_name.setSingleLine();
+		check_enabled.setText("Location enabled");
+		check_enabled.setChecked(loc_info.getEnabled());
 
 		AppCompatEditText editTxt_type = new AppCompatEditText(requireContext());
-		editTxt_type.setText(feed_info.getType_());
-		editTxt_type.setHint("Feed type (\"General\" or \"YouTube [CH|PL] [+S]\")");
+		editTxt_type.setText(loc_info.getType());
+		editTxt_type.setHint("Beacon type (\"wifi\" or \"bluetooth\")");
 		editTxt_type.setSingleLine();
 
-		AppCompatEditText editTxt_url = new AppCompatEditText(requireContext());
-		editTxt_url.setText(feed_info.getUrl());
-		editTxt_url.setHint("Feed URL or YouTube playlist/channel ID");
-		editTxt_url.setSingleLine();
+		AppCompatEditText editTxt_name = new AppCompatEditText(requireContext());
+		editTxt_name.setText(loc_info.getName());
+		editTxt_name.setHint("Beacon name (Wi-Fi SSID or Bluetooth device name)");
+		editTxt_name.setSingleLine();
 
-		AppCompatEditText editTxt_custom_msg_subject = new AppCompatEditText(requireContext());
-		editTxt_custom_msg_subject.setText(feed_info.getCustom_msg_subject());
-		editTxt_custom_msg_subject.setHint("Custom message subject (for YT it's automatic)");
-		editTxt_custom_msg_subject.setSingleLine();
+		AppCompatEditText editTxt_address = new AppCompatEditText(requireContext());
+		editTxt_address.setText(loc_info.getAddress());
+		editTxt_address.setHint("Beacon address (Wi-Fi BSSID or Bluetooth device address");
+		editTxt_address.setSingleLine();
+
+		AppCompatEditText editTxt_last_detection_s = new AppCompatEditText(requireContext());
+		editTxt_last_detection_s.setText(String.valueOf(loc_info.getLast_detection_s()));
+		editTxt_last_detection_s.setHint("How long the beacon is not found but user may still be in the location " +
+				"(in seconds)");
+		editTxt_last_detection_s.setSingleLine();
+		editTxt_last_detection_s.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+		AppCompatEditText editTxt_max_distance = new AppCompatEditText(requireContext());
+		editTxt_max_distance.setText(String.valueOf(loc_info.getMax_distance_m()));
+		editTxt_max_distance.setHint("Maximum distance from the beacon to the user (in meters)");
+		editTxt_max_distance.setSingleLine();
+		editTxt_max_distance.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+		AppCompatEditText editTxt_location_name = new AppCompatEditText(requireContext());
+		editTxt_location_name.setText(loc_info.getLocation());
+		editTxt_location_name.setHint("Location name");
+		editTxt_location_name.setSingleLine();
 
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
-			feed_info.setEnabled(check_enabled.isChecked());
-			feed_info.setName(editTxt_name.getText().toString());
-			feed_info.setType_(editTxt_type.getText().toString());
-			feed_info.setUrl(editTxt_url.getText().toString());
-			feed_info.setCustom_msg_subject(editTxt_custom_msg_subject.getText().toString());
+			loc_info.setEnabled(check_enabled.isChecked());
+			loc_info.setType(editTxt_type.getText().toString());
+			loc_info.setName(editTxt_name.getText().toString());
+			loc_info.setAddress(editTxt_address.getText().toString());
+			loc_info.setLast_detection_s(Integer.parseInt(editTxt_last_detection_s.getText().toString()));
+			loc_info.setMax_distance_m(Integer.parseInt(editTxt_max_distance.getText().toString()));
+			loc_info.setLocation(editTxt_location_name.getText().toString());
 
 			Utils.refreshFragment(this);
 		});
@@ -131,19 +150,21 @@ public final class TabRSSFeedsList extends Fragment {
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
 		btn_delete.setText("Delete");
 		btn_delete.setOnClickListener(v -> {
-			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this feed?",
+			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this location?",
 					() -> {
-						SettingsSync.removeFeedRSS(feed_info.getId());
+						SettingsSync.removeLocationLOCATIONS(loc_info.getId());
 
 						Utils.refreshFragment(this);
 					});
 		});
 
 		child_views.add(check_enabled);
-		child_views.add(editTxt_name);
 		child_views.add(editTxt_type);
-		child_views.add(editTxt_url);
-		child_views.add(editTxt_custom_msg_subject);
+		child_views.add(editTxt_name);
+		child_views.add(editTxt_address);
+		child_views.add(editTxt_last_detection_s);
+		child_views.add(editTxt_max_distance);
+		child_views.add(editTxt_location_name);
 		child_views.add(btn_save);
 		child_views.add(btn_delete);
 

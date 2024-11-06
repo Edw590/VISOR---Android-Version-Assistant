@@ -26,7 +26,6 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 
@@ -68,8 +67,7 @@ public final class TabTasksTasksList extends Fragment {
 		List<String> expandableListTitle = new ArrayList<>();
 		Map<String, List<List<View>>> expandableListDetail = new HashMap<>();
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
-		ExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext(), expandableListTitle,
-				expandableListDetail);
+		GenericExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext());
 		expandable_list_view.setAdapter(adapter);
 		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
 		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
@@ -92,18 +90,15 @@ public final class TabTasksTasksList extends Fragment {
 				title = "[X] " + title;
 			}
 
-			expandableListTitle.add(title);
-			expandableListDetail.put(title,	createTaskSetter(task));
+			adapter.addItem(title, createTaskSetter(task));
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.
 		Utils.setExpandableListViewSize(expandable_list_view);
 	}
 
-	private List<List<View>> createTaskSetter(final ModsFileInfo.Task task) {
-		List<List<View>> child_items = new ArrayList<>(1);
+	private List<View> createTaskSetter(final ModsFileInfo.Task task) {
 		List<View> child_views = new ArrayList<>(10);
-		child_items.add(child_views);
 
 		AppCompatTextView txt_id = new AppCompatTextView(requireContext());
 		txt_id.setText("ID: " + task.getId());
@@ -193,6 +188,6 @@ public final class TabTasksTasksList extends Fragment {
 		child_views.add(btn_save);
 		child_views.add(btn_delete);
 
-		return child_items;
+		return child_views;
 	}
 }

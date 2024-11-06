@@ -30,54 +30,60 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class GenericExpandableListAdapter extends BaseExpandableListAdapter {
-	private Context context;
-	private List<String> listTitle;
-	private Map<String, List<List<View>>> listDetail;
 
-	public GenericExpandableListAdapter(Context context, List<String> listTitle, Map<String, List<List<View>>> listDetail) {
+	private Context context;
+	private List<Pair<String, List<View>>> items; // List to hold pairs of titles and views
+
+	public GenericExpandableListAdapter(Context context) {
 		this.context = context;
-		this.listTitle = listTitle;
-		this.listDetail = listDetail;
+		this.items = new ArrayList<>();
+	}
+
+	// Add a new group with a title and list of views
+	public void addItem(String title, List<View> views) {
+		items.add(new Pair<>(title, views));
+		notifyDataSetChanged();
 	}
 
 	@Override
 	public int getGroupCount() {
-		return listTitle.size();
+		return items.size();
 	}
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
-		return listDetail.get(listTitle.get(groupPosition)).size();
+		return items.get(groupPosition).second.size();
 	}
 
 	@Override
 	public Object getGroup(int groupPosition) {
-		return listTitle.get(groupPosition);
+		return items.get(groupPosition).first;
 	}
 
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
-		return listDetail.get(listTitle.get(groupPosition)).get(childPosition);
+		return items.get(groupPosition).second.get(childPosition);
 	}
 
 	@Override
 	public long getGroupId(int groupPosition) {
-		return groupPosition;
+		return groupPosition; // Using position as ID
 	}
 
 	@Override
 	public long getChildId(int groupPosition, int childPosition) {
-		return childPosition;
+		return childPosition; // Using position as ID
 	}
 
 	@Override
 	public boolean hasStableIds() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -94,18 +100,16 @@ public class GenericExpandableListAdapter extends BaseExpandableListAdapter {
 	public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 		LinearLayout layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.VERTICAL);
-		layout.setPadding(50, 10, 10, 10);
+		layout.setPadding(10, 10, 10, 10);
 
-		// Get the list of views for this child item
-		List<View> childViews = (List<View>) getChild(groupPosition, childPosition);
+		// Get the specific view for this child position
+		View view = items.get(groupPosition).second.get(childPosition);
 
-		// Add each view to the LinearLayout
-		for (View view : childViews) {
-			if (view.getParent() != null) {
-				((ViewGroup) view.getParent()).removeView(view);
-			}
-			layout.addView(view);
+		// Remove the view from its parent if it already has one
+		if (view.getParent() != null) {
+			((ViewGroup) view.getParent()).removeView(view);
 		}
+		layout.addView(view);
 
 		return layout;
 	}
