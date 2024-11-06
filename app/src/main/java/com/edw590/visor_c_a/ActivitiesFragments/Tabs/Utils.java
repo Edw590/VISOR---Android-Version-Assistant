@@ -27,10 +27,13 @@ import android.graphics.Color;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -40,13 +43,15 @@ import com.edw590.visor_c_a.R;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class Utils {
 
-	static void createValue(@NonNull final Context context, @NonNull final LinearLayout linearLayout,
-							@NonNull final UtilsSWA.Value value) {
-		LayoutInflater layoutInflater = LayoutInflater.from(context);
+	static List<List<View>> createValue(@NonNull final Context context, @NonNull final UtilsSWA.Value value) {
+		List<List<View>> child_items = new ArrayList<>(1);
+		List<View> child_views = new ArrayList<>(5);
 
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -64,20 +69,20 @@ public class Utils {
 		String text = "Name: " + value.getPretty_name().substring(value.getPretty_name().indexOf('-') + 2) +
 				"\nType: " + value.getType_().substring("TYPE_".length()).toLowerCase(Locale.ROOT);
 		textView.setText(text);
-		linearLayout.addView(textView);
+		child_views.add(textView);
 
-		ExpandableTextView expandableTextView = (ExpandableTextView) layoutInflater
+		ExpandableTextView expandableTextView = (ExpandableTextView) LayoutInflater.from(context)
 				.inflate(R.layout.expandable_text_view, null);
 		expandableTextView.setText(value.getDescription());
 		expandableTextView.setPadding(padding_px, 0, padding_px, padding_px);
-		linearLayout.addView(expandableTextView);
+		child_views.add(expandableTextView);
 
 		SwitchCompat switchCompat = null;
 		EditText editText = null;
 		if (value.getType_().equals(UtilsSWA.UtilsSWA.TYPE_BOOL)) {
 			switchCompat = new SwitchCompat(context);
 			switchCompat.setChecked(value.getBool(true));
-			linearLayout.addView(switchCompat);
+			child_views.add(switchCompat);
 		} else {
 			editText = new EditText(context);
 			editText.setText(value.getCurr_data());
@@ -103,7 +108,7 @@ public class Utils {
 				}
 			}
 
-			linearLayout.addView(editText);
+			child_views.add(editText);
 		}
 
 		// Add a save button for each setting
@@ -118,6 +123,33 @@ public class Utils {
 				UtilsRegistry.setData(value.getKey(), finalEditText.getText().toString(), false);
 			}
 		});
-		linearLayout.addView(button_save_setting);
+		child_views.add(button_save_setting);
+
+		child_items.add(child_views);
+
+		return child_items;
+	}
+
+	public static void setExpandableListViewSize(@NonNull final ExpandableListView myListView) {
+		// Got it from https://stackoverflow.com/a/43177241/8228163.
+
+		ListAdapter myListAdapter = myListView.getAdapter();
+		if (myListAdapter == null) {
+			//do nothing return null
+			return;
+		}
+		//set listAdapter in loop for getting final size
+		int totalHeight = 0;
+		for (int size = 0; size < myListAdapter.getCount(); size++) {
+			View listItem = myListAdapter.getView(size, null, myListView);
+			listItem.measure(0, 0);
+			totalHeight += listItem.getMeasuredHeight();
+		}
+		//setting listview item in adapter
+		ViewGroup.LayoutParams params = myListView.getLayoutParams();
+		params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));
+		myListView.setLayoutParams(params);
+		// print height of adapter on log
+		//Log.i("height of listItem:", String.valueOf(totalHeight));
 	}
 }

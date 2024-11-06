@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -34,7 +36,10 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.R;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
-import UtilsSWA.Value;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
@@ -54,7 +59,25 @@ public final class TabSpeechLocalSettings extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		for (final Value value : UtilsRegistry.getValues()) {
+		List<String> expandableListTitle = new ArrayList<>();
+		Map<String, List<List<View>>> expandableListDetail = new HashMap<>();
+
+		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
+		ExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext(), expandableListTitle,
+				expandableListDetail);
+		expandable_list_view.setAdapter(adapter);
+
+		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
+		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
+			Utils.setExpandableListViewSize(expandable_list_view);
+		});
+		expandable_list_view.setOnGroupExpandListener(groupPosition -> {
+			Utils.setExpandableListViewSize(expandable_list_view);
+		});
+
+		linearLayout.addView(expandable_list_view);
+
+		for (final UtilsSWA.Value value : UtilsRegistry.getValues()) {
 			if (value.getAuto_set()) {
 				continue;
 			}
@@ -62,7 +85,12 @@ public final class TabSpeechLocalSettings extends Fragment {
 				continue;
 			}
 
-			Utils.createValue(requireContext(), linearLayout, value);
+			String title = value.getPretty_name().substring(value.getPretty_name().indexOf('-') + 2);
+			expandableListTitle.add(title);
+			expandableListDetail.put(title,	Utils.createValue(requireContext(), value));
 		}
+
+		// After adding all the values, set the size of the ExpandableListView.
+		Utils.setExpandableListViewSize(expandable_list_view);
 	}
 }
