@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
@@ -50,7 +51,7 @@ import UtilsSWA.UtilsSWA;
  */
 public final class TabCommunicatorMain extends Fragment {
 
-	AppCompatEditText editTxt_response;
+	AppCompatTextView txt_response;
 
 	@Override
 	public void onStart() {
@@ -113,19 +114,21 @@ public final class TabCommunicatorMain extends Fragment {
 			}
 		});
 
-		editTxt_response = new AppCompatEditText(requireContext());
-		editTxt_response.setHint("Response from the smart LLM");
+		txt_response = new AppCompatTextView(requireContext());
+		txt_response.setPadding(padding_px, padding_px, padding_px, padding_px);
+		txt_response.setText("Response from the smart LLM");
+		txt_response.setTextIsSelectable(true);
 
 		linearLayout.addView(editTxt_txt_to_send);
 		linearLayout.addView(btn_send_text);
-		linearLayout.addView(editTxt_response);
+		linearLayout.addView(txt_response);
 	}
 
 	private final Thread infinity_checker = new Thread(new Runnable() {
 		@Override
 		public void run() {
 			Runnable runnable = () -> {
-				editTxt_response.setText(GPTComm.getLastText());
+				txt_response.setText(GPTComm.getLastText());
 			};
 			String old_text = "";
 			while (true) {
