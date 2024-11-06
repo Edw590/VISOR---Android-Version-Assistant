@@ -241,6 +241,7 @@
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"
+			android:configChanges="orientation|screenSize"
 			android:autoRemoveFromRecents="true">
 			<!--android:excludeFromRecents="true"-->
 			<!-- Don't think about putting noHistory to true, since it will stop the app from being able to request
