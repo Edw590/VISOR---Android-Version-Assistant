@@ -51,8 +51,6 @@ public final class ActMain extends AppCompatActivity {
 
 		UtilsMainSrvc.startMainService();
 
-
-
 		final NavHost navHostFragment = (NavHost) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 		assert navHostFragment != null; // Will never be null - it's on the XMLs
 		final NavController navController = navHostFragment.getNavController();

@@ -47,6 +47,10 @@
 			android:title="@string/fragSettings_title_ACA"
 			android:icon="@drawable/development" />
 		<item
+			android:id="@+id/frag_system_checker"
+			android:title="@string/fragSystemChecker_title_ACA"
+			android:icon="@drawable/development" />
+		<item
 			android:id="@+id/frag_values_storage_viewer"
 			android:title="@string/fragValuesStorageViewer_title_ACA"
 			android:icon="@drawable/development" />

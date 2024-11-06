@@ -51,5 +51,9 @@
 		android:id="@+id/frag_communicator"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragCommunicator"
 		android:label="@string/fragCommunicator_title_ACA" />
+	<fragment
+		android:id="@+id/frag_system_checker"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSystemChecker"
+		android:label="@string/fragSystemChecker_title_ACA" />
 
 </navigation>
