@@ -33,6 +33,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -58,10 +61,10 @@ public final class TabCommunicatorMemories extends Fragment {
 
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		TextView txtView_info = new TextView(requireContext());
+		AppCompatTextView txtView_info = new AppCompatTextView(requireContext());
 		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode):");
 
-		EditText editTxt_memories_text = new EditText(requireContext());
+		AppCompatEditText editTxt_memories_text = new AppCompatEditText(requireContext());
 		editTxt_memories_text.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 		editTxt_memories_text.setMaxLines(10);
 		editTxt_memories_text.setSingleLine(false);
@@ -70,7 +73,7 @@ public final class TabCommunicatorMemories extends Fragment {
 			editTxt_memories_text.setText(GPTComm.getMemories());
 		}
 
-		Button btn_save = new Button(requireContext());
+		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save memories");
 		btn_save.setOnClickListener(new View.OnClickListener() {
 			@Override

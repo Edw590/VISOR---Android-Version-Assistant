@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -62,7 +63,7 @@ public final class TabRegistryAutomaticValues extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
 				resources.getDisplayMetrics());
 
-		TextView textView = new TextView(requireContext());
+		AppCompatTextView textView = new AppCompatTextView(requireContext());
 		textView.setText(UtilsSWA.getRegistryTextREGISTRY(1));
 		textView.setPadding(padding_px, padding_px, padding_px, padding_px);
 

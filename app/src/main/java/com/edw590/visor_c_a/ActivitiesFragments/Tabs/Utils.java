@@ -29,14 +29,14 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.edw590.visor_c_a.R;
@@ -61,7 +61,7 @@ public class Utils {
 		int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
 				resources.getDisplayMetrics());
 
-		TextView textView = new TextView(context);
+		AppCompatTextView textView = new AppCompatTextView(context);
 		textView.setLayoutParams(layoutParams);
 		textView.setPadding(padding_px, padding_px, padding_px, 0);
 		textView.setTextColor(Color.BLACK);
@@ -78,13 +78,13 @@ public class Utils {
 		child_views.add(expandableTextView);
 
 		SwitchCompat switchCompat = null;
-		EditText editText = null;
+		AppCompatEditText editText = null;
 		if (value.getType_().equals(UtilsSWA.UtilsSWA.TYPE_BOOL)) {
 			switchCompat = new SwitchCompat(context);
 			switchCompat.setChecked(value.getBool(true));
 			child_views.add(switchCompat);
 		} else {
-			editText = new EditText(context);
+			editText = new AppCompatEditText(context);
 			editText.setText(value.getCurr_data());
 			switch (value.getType_()) {
 				case (UtilsSWA.UtilsSWA.TYPE_INT):
@@ -112,10 +112,10 @@ public class Utils {
 		}
 
 		// Add a save button for each setting
-		Button button_save_setting = new Button(context);
+		AppCompatButton button_save_setting = new AppCompatButton(context);
 		button_save_setting.setText("Save");
 		final SwitchCompat finalSwitchCompat = switchCompat;
-		final EditText finalEditText = editText;
+		final AppCompatEditText finalEditText = editText;
 		button_save_setting.setOnClickListener(v -> {
 			if (finalSwitchCompat != null) {
 				UtilsRegistry.setData(value.getKey(), finalSwitchCompat.isChecked(), false);

@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -67,7 +68,7 @@ public final class TabHomeMain extends Fragment {
 		String color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorAccent));
 
-		TextView txt_title = new TextView(requireContext());
+		AppCompatTextView txt_title = new AppCompatTextView(requireContext());
 		txt_title.setText("V.I.S.O.R. Systems");
 		txt_title.setTextColor(Color.parseColor(color_accent));
 		txt_title.setTextSize(40);
@@ -75,12 +76,12 @@ public final class TabHomeMain extends Fragment {
 		txt_title.setGravity(Gravity.CENTER);
 		txt_title.setHeight(200);
 
-		TextView txt_comm_connected = new TextView(requireContext());
+		AppCompatTextView txt_comm_connected = new AppCompatTextView(requireContext());
 		txt_comm_connected.setTextColor(Color.parseColor(color_primary));
 		txt_comm_connected.setTextSize(20);
 		txt_comm_connected.setPadding(20, 20, 20, 20);
 
-		TextView txt_site_info_exists = new TextView(requireContext());
+		AppCompatTextView txt_site_info_exists = new AppCompatTextView(requireContext());
 		txt_site_info_exists.setPadding(20, 20, 20, 20);
 
 		String color;

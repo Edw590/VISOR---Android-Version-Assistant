@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -41,13 +42,16 @@ import SettingsSync.SettingsSync;
  */
 public final class TabSysChkSystemState extends Fragment {
 
-	TextView txt_sys_state;
+	AppCompatTextView txt_sys_state;
 
 	@Override
 	public void onStart() {
 		super.onStart();
 
-		infinity_checker.start();
+		try {
+			infinity_checker.start();
+		} catch (final IllegalThreadStateException ignored) {
+		}
 	}
 
 	@Override
@@ -70,7 +74,7 @@ public final class TabSysChkSystemState extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		txt_sys_state = new TextView(requireContext());
+		txt_sys_state = new AppCompatTextView(requireContext());
 
 		linearLayout.addView(txt_sys_state);
 	}

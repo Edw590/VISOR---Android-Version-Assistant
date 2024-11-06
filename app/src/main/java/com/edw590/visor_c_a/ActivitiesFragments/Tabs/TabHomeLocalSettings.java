@@ -32,6 +32,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -61,38 +63,38 @@ public final class TabHomeLocalSettings extends Fragment {
 
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		EditText editTxt_password = new EditText(requireContext());
+		AppCompatEditText editTxt_password = new AppCompatEditText(requireContext());
 		editTxt_password.setHint("Settings encryption password or empty to disable");
 		editTxt_password.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 		// TODO
 
-		Button btn_save_temp = new Button(requireContext());
+		AppCompatButton btn_save_temp = new AppCompatButton(requireContext());
 		btn_save_temp.setText("Save for this session");
 		btn_save_temp.setOnClickListener(v -> {
 			// TODO
 		});
-		Button btn_save_perm = new Button(requireContext());
+		AppCompatButton btn_save_perm = new AppCompatButton(requireContext());
 		btn_save_perm.setText("Save permanently");
 		btn_save_perm.setOnClickListener(v -> {
 			// TODO
 		});
 
-		EditText editTxt_device_id = new EditText(requireContext());
+		AppCompatEditText editTxt_device_id = new AppCompatEditText(requireContext());
 		editTxt_device_id.setHint("Unique device ID (for example \"MyPhone\")");
 		editTxt_device_id.setText(device_settings.getId());
 		editTxt_device_id.setSingleLine();
 
-		EditText editTxt_device_type = new EditText(requireContext());
+		AppCompatEditText editTxt_device_type = new AppCompatEditText(requireContext());
 		editTxt_device_type.setHint("Device type (for example \"phone\")");
 		editTxt_device_type.setText(device_settings.getType_());
 		editTxt_device_type.setSingleLine();
 
-		EditText editTxt_device_description = new EditText(requireContext());
+		AppCompatEditText editTxt_device_description = new AppCompatEditText(requireContext());
 		editTxt_device_description.setHint("Device description (for example the model, \"BV9500\")");
 		editTxt_device_description.setText(device_settings.getDescription());
 		editTxt_device_description.setSingleLine();
 
-		Button btn_save = new Button(requireContext());
+		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
 			device_settings.setId(editTxt_device_id.getText().toString());

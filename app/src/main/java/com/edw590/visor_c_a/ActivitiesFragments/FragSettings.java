@@ -36,6 +36,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
@@ -81,7 +84,7 @@ public final class FragSettings extends Fragment {
 				continue;
 			}
 
-			TextView textView = new TextView(requireContext());
+			AppCompatTextView textView = new AppCompatTextView(requireContext());
 			textView.setLayoutParams(layoutParams);
 			textView.setPadding(padding_px, padding_px, padding_px, 0);
 			textView.setTextColor(Color.BLACK);
@@ -98,14 +101,14 @@ public final class FragSettings extends Fragment {
 			linearLayout.addView(expandableTextView);
 
 			SwitchCompat switchCompat = null;
-			EditText editText = null;
+			AppCompatEditText editText = null;
 			if (value.getType_().equals(UtilsSWA.UtilsSWA.TYPE_BOOL)) {
 				switchCompat = new SwitchCompat(requireContext());
 				switchCompat.setChecked(value.getBool(true));
 				switchCompat.setId(i);
 				linearLayout.addView(switchCompat);
 			} else {
-				editText = new EditText(requireContext());
+				editText = new AppCompatEditText(requireContext());
 				editText.setId(i);
 				editText.setText(value.getCurr_data());
 				switch (value.getType_()) {
@@ -133,10 +136,10 @@ public final class FragSettings extends Fragment {
 			}
 
 			// Add a save button for each setting
-			Button button_save_setting = new Button(requireContext());
+			AppCompatButton button_save_setting = new AppCompatButton(requireContext());
 			button_save_setting.setText("Save");
 			final SwitchCompat finalSwitchCompat = switchCompat;
-			final EditText finalEditText = editText;
+			final AppCompatEditText finalEditText = editText;
 			button_save_setting.setOnClickListener(v -> {
 				if (finalSwitchCompat != null) {
 					UtilsRegistry.setData(value.getKey(), finalSwitchCompat.isChecked(), false);

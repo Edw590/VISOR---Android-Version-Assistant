@@ -32,6 +32,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -61,47 +63,47 @@ public final class TabHomeSettings extends Fragment {
 
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		EditText editTxt_pin = new EditText(requireContext());
+		AppCompatEditText editTxt_pin = new AppCompatEditText(requireContext());
 		editTxt_pin.setHint("App protection PIN (any number of digits or empty to disable)");
 		editTxt_pin.setText(general_consts.getPin());
 		editTxt_pin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 
-		EditText editTxt_visor_email_addr = new EditText(requireContext());
+		AppCompatEditText editTxt_visor_email_addr = new AppCompatEditText(requireContext());
 		editTxt_visor_email_addr.setHint("V.I.S.O.R. email address");
 		editTxt_visor_email_addr.setText(general_consts.getVISOR_email_addr());
 		editTxt_visor_email_addr.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 
-		EditText editTxt_visor_email_pw = new EditText(requireContext());
+		AppCompatEditText editTxt_visor_email_pw = new AppCompatEditText(requireContext());
 		editTxt_visor_email_pw.setHint("V.I.S.O.R. email password");
 		editTxt_visor_email_pw.setText(general_consts.getVISOR_email_pw());
 		editTxt_visor_email_pw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-		EditText editTxt_user_email_addr = new EditText(requireContext());
+		AppCompatEditText editTxt_user_email_addr = new AppCompatEditText(requireContext());
 		editTxt_user_email_addr.setHint("User email address (used for all communication)");
 		editTxt_user_email_addr.setText(general_consts.getUser_email_addr());
 		editTxt_user_email_addr.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 
-		EditText editTxt_server_domain = new EditText(requireContext());
+		AppCompatEditText editTxt_server_domain = new AppCompatEditText(requireContext());
 		editTxt_server_domain.setHint("Server domain or IP");
 		editTxt_server_domain.setText(general_consts.getWebsite_domain());
 		editTxt_server_domain.setSingleLine();
 
-		EditText editTxt_server_pw = new EditText(requireContext());
+		AppCompatEditText editTxt_server_pw = new AppCompatEditText(requireContext());
 		editTxt_server_pw.setHint("Server password");
 		editTxt_server_pw.setText(general_consts.getWebsite_pw());
 		editTxt_server_pw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-		EditText editTxt_wolframalpha_appid = new EditText(requireContext());
+		AppCompatEditText editTxt_wolframalpha_appid = new AppCompatEditText(requireContext());
 		editTxt_wolframalpha_appid.setHint("WolframAlpha App ID");
 		editTxt_wolframalpha_appid.setText(general_consts.getWolframAlpha_AppID());
 		editTxt_wolframalpha_appid.setSingleLine();
 
-		EditText editTxt_picovoice_api_key = new EditText(requireContext());
+		AppCompatEditText editTxt_picovoice_api_key = new AppCompatEditText(requireContext());
 		editTxt_picovoice_api_key.setHint("Picovoice API key");
 		editTxt_picovoice_api_key.setText(general_consts.getPicovoice_API_key());
 		editTxt_picovoice_api_key.setSingleLine();
 
-		Button btn_save = new Button(requireContext());
+		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
 			general_consts.setPin(editTxt_pin.getText().toString());

@@ -28,12 +28,12 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
@@ -50,13 +50,16 @@ import UtilsSWA.UtilsSWA;
  */
 public final class TabCommunicatorMain extends Fragment {
 
-	EditText editTxt_response;
+	AppCompatEditText editTxt_response;
 
 	@Override
 	public void onStart() {
 		super.onStart();
 
-		infinity_checker.start();
+		try {
+			infinity_checker.start();
+		} catch (final IllegalThreadStateException ignored) {
+		}
 	}
 
 	@Override
@@ -86,13 +89,13 @@ public final class TabCommunicatorMain extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
-		EditText editTxt_txt_to_send = new EditText(requireContext());
+		AppCompatEditText editTxt_txt_to_send = new AppCompatEditText(requireContext());
 		editTxt_txt_to_send.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 		editTxt_txt_to_send.setMaxLines(10);
 		editTxt_txt_to_send.setSingleLine(false);
 		editTxt_txt_to_send.setHint("Text to send to VISOR (commands or normal text to the LLM)");
 
-		Button btn_send_text = new Button(requireContext());
+		AppCompatButton btn_send_text = new AppCompatButton(requireContext());
 		btn_send_text.setText("Send text");
 		btn_send_text.setOnClickListener(v -> {
 			final String inserted_text = editTxt_txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
@@ -110,7 +113,7 @@ public final class TabCommunicatorMain extends Fragment {
 			}
 		});
 
-		editTxt_response = new EditText(requireContext());
+		editTxt_response = new AppCompatEditText(requireContext());
 		editTxt_response.setHint("Response from the smart LLM");
 
 		linearLayout.addView(editTxt_txt_to_send);

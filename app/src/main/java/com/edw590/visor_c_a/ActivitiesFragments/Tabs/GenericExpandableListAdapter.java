@@ -29,6 +29,8 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +82,7 @@ public class GenericExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-		TextView textView = new TextView(context);
+		AppCompatTextView textView = new AppCompatTextView(context);
 		textView.setText((String) getGroup(groupPosition));
 		textView.setPadding(100, 20, 20, 20);
 		textView.setTextSize(18);

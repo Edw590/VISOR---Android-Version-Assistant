@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
@@ -53,11 +54,11 @@ public final class TabCommunicatorCmdsList extends Fragment {
 
 		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		TextView text1 = new TextView(requireContext());
+		AppCompatTextView text1 = new AppCompatTextView(requireContext());
 		text1.setText("List of all commands and variations available (optional words in [...] and generic " +
 				"descriptions in (...)):");
 
-		TextView text2 = new TextView(requireContext());
+		AppCompatTextView text2 = new AppCompatTextView(requireContext());
 		text2.setText("(Note: there is more than one way to say a command, with synonyms and random words in between " +
 				"('switch on the phone's wifi', 'what's the current time', 'terminate the phone call').)");
 
@@ -65,7 +66,7 @@ public final class TabCommunicatorCmdsList extends Fragment {
 		linearLayout.addView(text2);
 
 		for (final String command_desc : CmdsList.CMDS_LIST_description) {
-			final TextView textView = new TextView(requireContext());
+			final AppCompatTextView textView = new AppCompatTextView(requireContext());
 			textView.setTextIsSelectable(true);
 			textView.setText("--> " + command_desc);
 
