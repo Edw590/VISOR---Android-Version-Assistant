@@ -243,15 +243,15 @@ public final class MainSrvc extends Service {
 					}
 				}
 
+				UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
+				UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
+
 				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
 				// useful in case the screen gets broken, for example).
 				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
 				// ready.
 				final String speak = "Ready, sir.";
 				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
-
-				UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
-				UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
 
 				try {
 					unregisterReceiver(broadcastReceiver);

@@ -61,7 +61,7 @@ public class Utils {
 		textView.setPadding(padding_px, padding_px, padding_px, 0);
 		textView.setTextColor(Color.BLACK);
 		textView.setTextIsSelectable(true);
-		String text = "Name: " + value.getPretty_name() +
+		String text = "Name: " + value.getPretty_name().substring(value.getPretty_name().indexOf('-') + 2) +
 				"\nType: " + value.getType_().substring("TYPE_".length()).toLowerCase(Locale.ROOT);
 		textView.setText(text);
 		linearLayout.addView(textView);
@@ -97,6 +97,7 @@ public class Utils {
 				}
 				case (UtilsSWA.UtilsSWA.TYPE_STRING): {
 					editText.setInputType(InputType.TYPE_CLASS_TEXT);
+					editText.setSingleLine();
 
 					break;
 				}
