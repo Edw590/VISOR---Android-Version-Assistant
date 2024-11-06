@@ -81,7 +81,7 @@ public final class UtilsMainSrvc {
 			return UNSUPPORTED_OS_VERSION;
 		}
 
-		final LinearLayout linearLayout = new LinearLayout(UtilsContext.getContext()) {
+		LinearLayout linearLayout = new LinearLayout(UtilsContext.getContext()) {
 
 			@Override
 			public void onCloseSystemDialogs(final String reason) {

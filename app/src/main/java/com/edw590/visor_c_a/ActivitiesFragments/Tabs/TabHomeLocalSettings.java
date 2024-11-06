@@ -61,7 +61,7 @@ public final class TabHomeLocalSettings extends Fragment {
 
 		ModsFileInfo.DeviceSettings device_settings = SettingsSync.getDeviceSettingsGENERAL();
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		AppCompatEditText editTxt_password = new AppCompatEditText(requireContext());
 		editTxt_password.setHint("Settings encryption password or empty to disable");

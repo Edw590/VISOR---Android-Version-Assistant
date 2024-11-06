@@ -21,6 +21,8 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -29,14 +31,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.R;
 
 import SettingsSync.SettingsSync;
@@ -61,7 +65,7 @@ public final class TabHomeMain extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
@@ -102,8 +106,37 @@ public final class TabHomeMain extends Fragment {
 			txt_site_info_exists.setText("Server info exists");
 		}
 
+		AppCompatButton btn_perms = new AppCompatButton(requireContext());
+		btn_perms.setText("Click here and on Back until you see the Desktop and nothing left to authorize");
+		btn_perms.setOnClickListener(v -> {
+			// Request all missing permissions
+			final int perms_left = UtilsPermsAuths.checkRequestPerms(getActivity(), true);
+			UtilsPermsAuths.warnPermissions(perms_left, true);
+
+			// Request all missing authorizations
+			final int auths_left = UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_REQUEST);
+			UtilsPermsAuths.warnAuthorizations(auths_left, true);
+		});
+
+		AppCompatButton btn_device_admin = new AppCompatButton(requireContext());
+		btn_device_admin.setText("Open the Device Admins list");
+		btn_device_admin.setOnClickListener(v -> {
+			startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
+					"com.android.settings.DeviceAdminSettings")));
+			// Didn't find any constants for these 2 strings above
+		});
+
+		AppCompatButton btn_force_stop = new AppCompatButton(requireContext());
+		btn_force_stop.setText("Terminate the app");
+		btn_force_stop.setOnClickListener(v -> {
+			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+		});
+
 		linearLayout.addView(txt_title);
 		linearLayout.addView(txt_comm_connected);
 		linearLayout.addView(txt_site_info_exists);
+		linearLayout.addView(btn_perms);
+		linearLayout.addView(btn_device_admin);
+		linearLayout.addView(btn_force_stop);
 	}
 }

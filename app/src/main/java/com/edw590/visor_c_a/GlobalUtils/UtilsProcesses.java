@@ -69,16 +69,6 @@ public final class UtilsProcesses {
         if (pid != -1) {
             android.os.Process.killProcess(pid);
         }
-
-        long curr_millis = System.currentTimeMillis();
-        long max_millis = curr_millis + 5*1000;
-        while (System.currentTimeMillis() < max_millis) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-        }
-
     }
 
     /**

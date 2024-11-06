@@ -80,8 +80,8 @@ public final class TabCommunicatorMain extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
-		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
 		// 15 DP seems to be enough as margins.

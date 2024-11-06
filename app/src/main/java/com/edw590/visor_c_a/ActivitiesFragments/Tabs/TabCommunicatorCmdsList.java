@@ -52,7 +52,7 @@ public final class TabCommunicatorCmdsList extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		AppCompatTextView text1 = new AppCompatTextView(requireContext());
 		text1.setText("List of all commands and variations available (optional words in [...] and generic " +

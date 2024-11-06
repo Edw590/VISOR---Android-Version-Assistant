@@ -61,7 +61,7 @@ public final class TabHomeSettings extends Fragment {
 
 		ModsFileInfo.GeneralConsts general_consts = SettingsSync.getGeneralSettingsGENERAL();
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		AppCompatEditText editTxt_pin = new AppCompatEditText(requireContext());
 		editTxt_pin.setHint("App protection PIN (any number of digits or empty to disable)");
