@@ -162,8 +162,9 @@ public final class SystemChecker implements IModuleInst {
 
 				AudioManager audioManager = (AudioManager) UtilsContext.getContext().
 						getSystemService(Context.AUDIO_SERVICE);
-				UtilsRegistry.setData(RegistryKeys.K_SOUND_VOLUME,
-						audioManager.getStreamVolume(AudioManager.STREAM_RING), false);
+				int normalized_volume = audioManager.getStreamVolume(AudioManager.STREAM_RING) * 100 /
+						audioManager.getStreamMaxVolume(AudioManager.STREAM_RING);
+				UtilsRegistry.setData(RegistryKeys.K_SOUND_VOLUME, normalized_volume, false);
 				UtilsRegistry.setData(RegistryKeys.K_SOUND_MUTED,
 						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL, false);
 
@@ -178,7 +179,7 @@ public final class SystemChecker implements IModuleInst {
 						UtilsAndroidPower.getScreenBrightness(),
 						wifi_networks.toString(),
 						bluetooth_devices.toString(),
-						audioManager.getStreamVolume(AudioManager.STREAM_RING),
+						normalized_volume,
 						audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL
 				);
 			}
