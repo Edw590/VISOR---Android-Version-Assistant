@@ -40,10 +40,6 @@
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragRegistry"
 		android:label="@string/fragValuesStorageViewer_title_ACA" />
 	<fragment
-		android:id="@+id/frag_nearby_devices"
-		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragNearbyDevices"
-		android:label="@string/fragNearbyDevices_title_ACA" />
-	<fragment
 		android:id="@+id/frag_settings"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragSettings"
 		android:label="@string/fragSettings_title_ACA" />
