@@ -33,6 +33,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabSpeechLocalSettings;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabSpeechMain;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
@@ -57,6 +58,7 @@ public final class FragSpeech extends Fragment {
 
 		// Add tabs with titles
 		tabLayout.addTab(tabLayout.newTab().setText("Main"));
+		tabLayout.addTab(tabLayout.newTab().setText("Local settings"));
 
 		// Set default fragment when fragment is created
 		replaceFragment(new TabHomeMain());
@@ -69,6 +71,9 @@ public final class FragSpeech extends Fragment {
 				switch (tab.getPosition()) {
 					case 0:
 						selectedFragment = new TabSpeechMain();
+						break;
+					case 1:
+						selectedFragment = new TabSpeechLocalSettings();
 						break;
 					default:
 						return;

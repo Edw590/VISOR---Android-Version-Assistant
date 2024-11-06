@@ -65,6 +65,7 @@ public final class TabRegistryAutomaticValues extends Fragment {
 		TextView textView = new TextView(requireContext());
 		textView.setText(UtilsSWA.getRegistryTextREGISTRY(1));
 		textView.setPadding(padding_px, padding_px, padding_px, padding_px);
+
 		linearLayout.addView(textView);
 	}
 }

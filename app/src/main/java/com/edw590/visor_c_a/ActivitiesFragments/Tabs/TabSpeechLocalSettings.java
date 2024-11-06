@@ -21,32 +21,30 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
-import UtilsSWA.UtilsSWA;
+import UtilsSWA.Value;
 
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
-public final class TabRegistryManualValues extends Fragment {
+public final class TabSpeechLocalSettings extends Fragment {
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
-								   @Nullable final Bundle savedInstanceState) {
+							 @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
@@ -54,18 +52,17 @@ public final class TabRegistryManualValues extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 SP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
-				resources.getDisplayMetrics());
+		for (final Value value : UtilsRegistry.getValues()) {
+			if (value.getAuto_set()) {
+				continue;
+			}
+			if (!value.getPretty_name().startsWith("Speech - ")) {
+				continue;
+			}
 
-		TextView textView = new TextView(requireContext());
-		textView.setText(UtilsSWA.getRegistryTextREGISTRY(2));
-		textView.setPadding(padding_px, padding_px, padding_px, padding_px);
-
-		linearLayout.addView(textView);
+			Utils.createValue(requireContext(), linearLayout, value);
+		}
 	}
 }
