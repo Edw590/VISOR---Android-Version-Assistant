@@ -187,6 +187,8 @@ public final class UtilsFilesDirs {
 	 * <p>Writes the given files bytes to a file (replaces all file contents).</p>
 	 * <p>ATTENTION: try not to give too big files to this function without checking write permissions, because the
 	 * function that uses shell commands is (notice the name) {@link #writeSmallFile(GPath, byte[])}.</p>
+	 * <p>ATTENTION: if {@link FileUtils#writeByteArrayToFile(File, byte[])} can't write the file,
+	 * {@link #writeSmallFile(GPath, byte[])} will be called which does NOT create parent directories!</p>
 	 *
 	 * @param file_path the path to the file
 	 * @param file_bytes the bytes to write
@@ -207,7 +209,8 @@ public final class UtilsFilesDirs {
 	/**
 	 * <p>Same as {@link #writeFile(GPath, byte[])}, but only uses a shell command.</p>
 	 * <p>ONLY with small files!!! <strong>This function allocates 4-5 times the file size into memory!</strong></p>
-	 * <p>Allocates 4 times more on KitKat+, and 5 times MORE below that.</p>
+	 * <p>Allocates 4 times more on KitKat+, and 5 times more below that.</p>
+	 * <p>ATTENTION: this function does NOT create parent directories!</p>
 	 */
 	private static int writeSmallFile(@NonNull final GPath file_path, @NonNull final byte[] file_bytes) {
 		final String bytes_data;
