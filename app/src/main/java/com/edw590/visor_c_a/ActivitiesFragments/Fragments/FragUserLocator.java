@@ -34,6 +34,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabLocatorAddLocation;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabLocatorLocationsList;
+import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabLocatorSettings;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
@@ -58,6 +59,7 @@ public final class FragUserLocator extends Fragment {
 		// Add tabs with titles
 		tabLayout.addTab(tabLayout.newTab().setText("Locations list"));
 		tabLayout.addTab(tabLayout.newTab().setText("Add location"));
+		tabLayout.addTab(tabLayout.newTab().setText("Settings"));
 
 		// Set default fragment when fragment is created
 		replaceFragment(new TabLocatorLocationsList());
@@ -73,6 +75,9 @@ public final class FragUserLocator extends Fragment {
 						break;
 					case 1:
 						selectedFragment = new TabLocatorAddLocation();
+						break;
+					case 2:
+						selectedFragment = new TabLocatorSettings();
 						break;
 					default:
 						return;
