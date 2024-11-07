@@ -163,7 +163,7 @@ public class Utils {
 			listItem.measure(0, 0);
 			totalHeight += listItem.getMeasuredHeight();
 		}
-		totalHeight *= 1.05; // Correction of mine (Edw590)
+		totalHeight *= 1.5; // Correction of mine (Edw590)
 		//setting listview item in adapter
 		ViewGroup.LayoutParams params = myListView.getLayoutParams();
 		params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));

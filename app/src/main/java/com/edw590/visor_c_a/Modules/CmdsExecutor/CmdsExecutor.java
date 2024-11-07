@@ -387,7 +387,7 @@ public final class CmdsExecutor implements IModuleInst {
 							break;
 						}
 						default: {
-							final String speak = "Unspecified error attempting to the Wi-Fi.";
+							final String speak = "Unspecified error attempting to toggle the Wi-Fi.";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 
 							break;
@@ -1090,7 +1090,7 @@ public final class CmdsExecutor implements IModuleInst {
 						final String weather_str = OICComm.getWeather();
 						if (weather_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
-									speech_priority, speech_mode2, true, null);
+									speech_priority, speech_mode2, false, null);
 
 							break;
 						}
@@ -1103,11 +1103,11 @@ public final class CmdsExecutor implements IModuleInst {
 									" degrees and a minimum of " + weather_data[7] + " degrees. The precipitation is of " +
 									weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
 									weather_data[4] + ".";
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 						}
 					} else {
-						speak = "No network connection available to get the weather.";
-						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
+						speak = "Not connected to the server to get the weather.";
+						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
 					}
 
 					if (!data_was_enabled) {
@@ -1137,7 +1137,7 @@ public final class CmdsExecutor implements IModuleInst {
 						final String news_str = OICComm.getNews();
 						if (news_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
-									speech_priority, speech_mode2, true, null);
+									speech_priority, speech_mode2, false, null);
 
 							break;
 						}
@@ -1162,7 +1162,7 @@ public final class CmdsExecutor implements IModuleInst {
 							UtilsAndroidConnectivity.setWifiEnabled(false);
 						}
 					} else {
-						speak = "No network connection available to get the news.";
+						speak = "Not connected to the server to get the news.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 					}
 
