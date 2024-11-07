@@ -63,5 +63,9 @@
 		android:id="@+id/frag_user_locator"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragUserLocator"
 		android:label="@string/fragUserLocator_title_ACA" />
+	<fragment
+		android:id="@+id/frag_smart_checker"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSMARTChecker"
+		android:label="@string/fragSMARTChecker_title_ACA" />
 
 </navigation>

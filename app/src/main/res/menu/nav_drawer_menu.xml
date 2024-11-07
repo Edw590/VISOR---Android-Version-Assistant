@@ -59,6 +59,10 @@
 			android:title="@string/fragSystemChecker_title_ACA"
 			android:icon="@drawable/development" />
 		<item
+			android:id="@+id/frag_smart_checker"
+			android:title="@string/fragSMARTChecker_title_ACA"
+			android:icon="@drawable/development" />
+		<item
 			android:id="@+id/frag_values_storage_viewer"
 			android:title="@string/fragValuesStorageViewer_title_ACA"
 			android:icon="@drawable/development" />

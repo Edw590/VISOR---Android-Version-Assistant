@@ -26,8 +26,6 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -66,6 +64,7 @@ public final class TabHomeLocalSettings extends Fragment {
 		AppCompatEditText editTxt_password = new AppCompatEditText(requireContext());
 		editTxt_password.setHint("Settings encryption password or empty to disable");
 		editTxt_password.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+		editTxt_password.setEnabled(false);
 		// TODO
 
 		AppCompatButton btn_save_temp = new AppCompatButton(requireContext());

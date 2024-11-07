@@ -40,9 +40,7 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import SettingsSync.SettingsSync;
 
@@ -64,8 +62,6 @@ public final class TabTasksTasksList extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		List<String> expandableListTitle = new ArrayList<>();
-		Map<String, List<List<View>>> expandableListDetail = new HashMap<>();
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
 		GenericExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext());
 		expandable_list_view.setAdapter(adapter);
@@ -79,8 +75,8 @@ public final class TabTasksTasksList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] feed_ids = SettingsSync.getIdsListTASKS().split("\\|");
-		for (final String feed_id : feed_ids) {
+		String[] tasks_ids = SettingsSync.getIdsListTASKS().split("\\|");
+		for (final String feed_id : tasks_ids) {
 			ModsFileInfo.Task task = SettingsSync.getTaskTASKS(Integer.parseInt(feed_id));
 			String title = task.getMessage();
 			if (title.isEmpty()) {
@@ -101,7 +97,7 @@ public final class TabTasksTasksList extends Fragment {
 		List<View> child_views = new ArrayList<>(10);
 
 		AppCompatTextView txt_id = new AppCompatTextView(requireContext());
-		txt_id.setText("ID: " + task.getId());
+		txt_id.setText("Task ID: " + task.getId());
 
 		AppCompatCheckBox check_enabled = new AppCompatCheckBox(requireContext());
 		check_enabled.setText("Task enabled");
