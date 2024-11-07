@@ -22,7 +22,6 @@
 package com.edw590.visor_c_a.GlobalUtils;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.os.Build;
 
 /**
@@ -50,7 +49,6 @@ public final class PERMS_CONSTS {
 			{Manifest.permission.FOREGROUND_SERVICE, String.valueOf(Build.VERSION_CODES.P)},
 			{Manifest.permission.MODIFY_AUDIO_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
 	};*/
-	@SuppressLint("InlinedApi")
 	private static final String[][] danger_perms_list = {
 			//{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)}, todo Enable when taking pictures on Lollipop+ is implemented
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
@@ -64,6 +62,7 @@ public final class PERMS_CONSTS {
 			{Manifest.permission.ACCESS_BACKGROUND_LOCATION, String.valueOf(Build.VERSION_CODES.Q)},
 			{Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
 			{Manifest.permission.CALL_PHONE, String.valueOf(Build.VERSION_CODES.BASE)},
+			{Manifest.permission.BLUETOOTH_CONNECT, String.valueOf(Build.VERSION_CODES.S)},
 	};
 	private static final String[][] dev_perms_list = {
 			// Only from Jelly Bean 4.2 this permission began being of development type, and hence can only be granted
