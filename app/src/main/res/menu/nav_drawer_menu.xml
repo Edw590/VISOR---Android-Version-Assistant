@@ -24,7 +24,7 @@
 	<group android:checkableBehavior="single">
 		<item
 			android:id="@+id/frag_home"
-			android:title="@string/fragMain_title_ACA"
+			android:title="@string/fragHome_title_ACA"
 			android:icon="@drawable/home" />
 		<item
 			android:id="@+id/frag_communicator"
@@ -55,6 +55,10 @@
 			android:title="@string/fragSettings_title_ACA"
 			android:icon="@drawable/development" />
 		<item
+			android:id="@+id/frag_online_info_chk"
+			android:title="@string/fragOnlineInfoChk_title_ACA"
+			android:icon="@drawable/development" />
+		<item
 			android:id="@+id/frag_system_checker"
 			android:title="@string/fragSystemChecker_title_ACA"
 			android:icon="@drawable/development" />
@@ -64,7 +68,7 @@
 			android:icon="@drawable/development" />
 		<item
 			android:id="@+id/frag_values_storage_viewer"
-			android:title="@string/fragValuesStorageViewer_title_ACA"
+			android:title="@string/fragRegistry_title_ACA"
 			android:icon="@drawable/development" />
 	</group>
 

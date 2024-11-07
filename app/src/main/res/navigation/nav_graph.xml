@@ -26,7 +26,7 @@
 	<fragment
 		android:id="@+id/frag_home"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragHome"
-		android:label="@string/fragMain_title_ACA" />
+		android:label="@string/fragHome_title_ACA" />
 	<fragment
 		android:id="@+id/frag_development"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSpeech"
@@ -38,7 +38,7 @@
 	<fragment
 		android:id="@+id/frag_values_storage_viewer"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragRegistry"
-		android:label="@string/fragValuesStorageViewer_title_ACA" />
+		android:label="@string/fragRegistry_title_ACA" />
 	<fragment
 		android:id="@+id/frag_settings"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.FragSettings"
@@ -67,5 +67,9 @@
 		android:id="@+id/frag_smart_checker"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragSMARTChecker"
 		android:label="@string/fragSMARTChecker_title_ACA" />
+	<fragment
+		android:id="@+id/frag_online_info_chk"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragOnlineInfoChk"
+		android:label="@string/fragOnlineInfoChk_title_ACA" />
 
 </navigation>
