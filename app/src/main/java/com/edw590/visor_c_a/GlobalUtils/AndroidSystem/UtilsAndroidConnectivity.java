@@ -99,12 +99,14 @@ public final class UtilsAndroidConnectivity {
 
 		// To understand the meaning of the if statement, check the doc of the setWifiEnabled method.
 		if (UtilsContext.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.Q) {
-			return wifiManager.setWifiEnabled(enabled) ? UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.GEN_ERR;
-		} else {
-			final String command = "svc wifi " + (enabled ? "enable" : "disable");
-
-			return UtilsShell.executeShellCmd(true, command).exit_code;
+			if (wifiManager.setWifiEnabled(enabled)) {
+				return UtilsShell.ErrCodes.NO_ERR;
+			}
 		}
+
+		final String command = "svc wifi " + (enabled ? "enable" : "disable");
+
+		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
 
 	/**
