@@ -261,7 +261,7 @@ public final class Speech2 implements IModuleInst {
 	}
 
 	private final Thread infinity_thread = new Thread(() -> {
-		GPTComm.setTimeBegin(System.currentTimeMillis());
+		GPTComm.setPreparations(System.currentTimeMillis());
 		while (true) {
 			// Keep getting the next sentence to speak from the server
 			String speak = GPTComm.getNextSpeechSentence();
