@@ -1088,9 +1088,17 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
 						final String weather_str = OICComm.getWeather();
+
+						if (!data_was_enabled) {
+							UtilsAndroidConnectivity.setMobileDataEnabled(false);
+						}
+						if (!wifi_was_enabled) {
+							UtilsAndroidConnectivity.setWifiEnabled(false);
+						}
+
 						if (weather_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
-									speech_priority, speech_mode2, false, null);
+									speech_priority, speech_mode2, true, null);
 
 							break;
 						}
@@ -1103,18 +1111,11 @@ public final class CmdsExecutor implements IModuleInst {
 									" degrees and a minimum of " + weather_data[7] + " degrees. The precipitation is of " +
 									weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
 									weather_data[4] + ".";
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 						}
 					} else {
 						speak = "Not connected to the server to get the weather.";
-						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
-					}
-
-					if (!data_was_enabled) {
-						UtilsAndroidConnectivity.setMobileDataEnabled(false);
-					}
-					if (!wifi_was_enabled) {
-						UtilsAndroidConnectivity.setWifiEnabled(false);
+						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 					}
 
 					previous_cmd = new Command(command, "tell the weather", null);
@@ -1135,9 +1136,17 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
 						final String news_str = OICComm.getNews();
+
+						if (!data_was_enabled) {
+							UtilsAndroidConnectivity.setMobileDataEnabled(false);
+						}
+						if (!wifi_was_enabled) {
+							UtilsAndroidConnectivity.setWifiEnabled(false);
+						}
+
 						if (news_str.isEmpty()) {
 							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
-									speech_priority, speech_mode2, false, null);
+									speech_priority, speech_mode2, true, null);
 
 							break;
 						}
@@ -1152,14 +1161,7 @@ public final class CmdsExecutor implements IModuleInst {
 							for (int i = 1; i < news_len; ++i) {
 								speak += news[i] + ". ";
 							}
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, false, null);
-						}
-
-						if (!data_was_enabled) {
-							UtilsAndroidConnectivity.setMobileDataEnabled(false);
-						}
-						if (!wifi_was_enabled) {
-							UtilsAndroidConnectivity.setWifiEnabled(false);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, true, null);
 						}
 					} else {
 						speak = "Not connected to the server to get the news.";
