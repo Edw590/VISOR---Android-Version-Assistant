@@ -69,6 +69,7 @@ public final class CmdsList {
 		public static final String CMD_TELL_WEATHER = "26";
 		public static final String CMD_TELL_NEWS = "27";
 		public static final String CMD_GONNA_SLEEP = "28";
+		public static final String CMD_ASK_EVENTS = "31";
 
 		/**
 		 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -114,6 +115,11 @@ public final class CmdsList {
 		public static final String RET_21_STOP = ".00003";
 		public static final String RET_21_NEXT = ".00004";
 		public static final String RET_21_PREVIOUS = ".00005";
+
+		public static final String RET_31_TODAY = ".00001";
+		public static final String RET_31_TOMORROW = ".00002";
+		public static final String RET_31_THIS_WEEK = ".00003";
+		public static final String RET_31_NEXT_WEEK = ".00004";
 
 		/**
 		 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -173,6 +179,7 @@ public final class CmdsList {
 				put(CmdIds.CMD_TELL_WEATHER,              CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 26
 				put(CmdIds.CMD_TELL_NEWS,                 CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 27
 				put(CmdIds.CMD_GONNA_SLEEP,               CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 28
+				put(CmdIds.CMD_ASK_EVENTS,                CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 31
 			}
 		};
 
@@ -224,6 +231,7 @@ public final class CmdsList {
 			{CmdIds.CMD_TELL_WEATHER, ACD.CMDi_TYPE_ASK, "", "", "weather"},                                                                                // 26
 			{CmdIds.CMD_TELL_NEWS, ACD.CMDi_TYPE_ASK, "", "", "news"},                                                                                      // 27
 			{CmdIds.CMD_GONNA_SLEEP, ACD.CMDi_TYPE_WILL_GO, "", "", "sleep"},                                                                               // 28
+			{CmdIds.CMD_ASK_EVENTS, ACD.CMDi_TYPE_ASK, "", "", "have today|have tomorrow|have this week|have next week"},                                   // 31
 	};
 	static final int CMDS_LIST_len = CMDS_LIST.length;
 
@@ -256,6 +264,10 @@ public final class CmdsList {
 					"(or Home if VISOR is the device's assistant))",
 			"(Ask for the weather)",                                                      // 26
 			"(Ask for the news)",                                                         // 27
-			"(Say that the user is going to sleep)"                                       // 28
+			"(Say that the user is going to sleep)",                                      // 28
+			"(Ask what you have for today/tomorrow/this week/next week - Google Calendar events and tasks (tasks " +
+					"are only retrieved if you ask for today or tomorrow). After asking and if you asked with the server " +
+					"connected (meaning will be the LLM answering), you can then talk normally about your events and tasks " +
+					"with VISOR)",                                                        // 31
 	};
 }

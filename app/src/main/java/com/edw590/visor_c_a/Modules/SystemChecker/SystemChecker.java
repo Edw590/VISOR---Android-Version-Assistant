@@ -311,10 +311,10 @@ public final class SystemChecker implements IModuleInst {
 
 					if (intent.getBooleanExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, false)) {
 						final String speak = "Fast shut down detected.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
 					} else {
 						final String speak = "Shut down detected.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
 					}
 					// Note: must be very small speeches, since the phone will shut down fast.
 
@@ -326,7 +326,7 @@ public final class SystemChecker implements IModuleInst {
 					// No idea if this is supposed detected at all (might be stopped before it gets here by the system
 					// as soon as it detects it or something).
 					final String speak = "Reboot detected.";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
 					// Note: must be a very small speech, since the phone will shut down fast.
 
 

@@ -63,21 +63,21 @@ public final class TabSpeechMain extends Fragment {
 		btn_speak_min.setText("Speak (min priority)");
 		btn_speak_min.setOnClickListener(v -> {
 			String speak = editTxt_to_speak.getText().toString();
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, 0, UtilsSpeech2BC.GPT_NONE, false, null);
 		});
 
 		AppCompatButton btn_speak_high = new AppCompatButton(requireContext());
 		btn_speak_high.setText("Speak (high priority)");
 		btn_speak_high.setOnClickListener(v -> {
 			String speak = editTxt_to_speak.getText().toString();
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_NONE, false, null);
 		});
 
 		AppCompatButton btn_speak_critical = new AppCompatButton(requireContext());
 		btn_speak_critical.setText("Speak (critical priority)");
 		btn_speak_critical.setOnClickListener(v -> {
 			String speak = editTxt_to_speak.getText().toString();
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_CRITICAL, 0, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_CRITICAL, 0, UtilsSpeech2BC.GPT_NONE, false, null);
 		});
 
 		AppCompatButton btn_skip_speech = new AppCompatButton(requireContext());

@@ -48,12 +48,12 @@ public final class UtilsRoot {
         if (UtilsSWA.isRootAvailableROOT()) {
             if (warn_root_available) {
                 final String speak = "Root access available on the device.";
-                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, false, null);
+                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_NONE, false, null);
             }
         } else {
             final String speak = "Attention! Root access was denied or is not available on this device! Some " +
                     "features may not be available!";
-            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, true, null);
+            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
         }
     }
 }
