@@ -60,8 +60,7 @@ public final class UtilsSpeech2BC {
 		if (auto_gpt && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
 				UtilsSWA.isCommunicatorConnectedSERVER() && GPTComm.sendText("", false)) {
 			ModsFileInfo.DeviceSettings device_settings = SettingsSync.SettingsSync.getDeviceSettingsGENERAL();
-			String text = "Write ONE different sentence based the following to keep its meaning but change its " +
-					"wording: \"" + txt_to_speak + "\". Current device: user's " + device_settings.getType_() + ".";
+			String text = "Write differently in English: \"" + txt_to_speak + "\". START THE SENTENCE IMMEDIATELY.";
 			GPTComm.sendText(text, false);
 
 			return "";
