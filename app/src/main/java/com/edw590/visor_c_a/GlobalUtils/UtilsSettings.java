@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 
 import java.nio.charset.Charset;
 
+import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -39,60 +40,60 @@ public final class UtilsSettings {
 	}
 
 	/**
-	 * <p>Gets the Generated Settings in JSON format.</p>
+	 * <p>Reads and loads the User and Generated settings from disk.</p>
 	 *
-	 * @return the Generated Settings in JSON format
+	 * @param user_settings true if the user settings should be loaded, false if the generated settings should be loaded
+	 *
+	 * @return true if the settings were read and loaded successfully, false otherwise
 	 */
-	@NonNull
-	public static String readJsonGenSettings() {
-		GPath gen_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
-		gen_settings_path.add2(true, UtilsSWA.GEN_SETTINGS_FILE_CLIENT);
+	public static boolean loadSettingsFile(final boolean user_settings) {
+		String settings_file_str = user_settings ? UtilsSWA.USER_SETTINGS_FILE : UtilsSWA.GEN_SETTINGS_FILE_CLIENT;
+		String backup_file_str = settings_file_str + ".bak";
 
-		byte[] file_bytes = UtilsFilesDirs.readFileBytes(gen_settings_path);
+		GPath settings_file = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH).add2(false, settings_file_str);
+		GPath backup_file = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH).add2(false, backup_file_str);
 
-		return UtilsSWA.bytesToPrintableDATACONV(file_bytes, false);
+		byte[] file_bytes = UtilsFilesDirs.readFileBytes(settings_file);
+		try {
+			if (user_settings) {
+				SettingsSync.loadUserSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
+			} else {
+				SettingsSync.loadGenSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
+			}
+		} catch (final Exception e) {
+			file_bytes = UtilsFilesDirs.readFileBytes(backup_file);
+			try {
+				if (user_settings) {
+					SettingsSync.loadUserSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
+				} else {
+					SettingsSync.loadGenSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
+				}
+			} catch (final Exception e2) {
+				String user_generated = user_settings ? "user" : "generated";
+				System.out.println("Failed to load " + user_generated + " settings. Using empty ones...");
+				e2.printStackTrace();
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
-	 * <p>Writes the Device Settings in JSON format.</p>
+	 * <p>Writes the User and Generated settings to disk.</p>
 	 *
-	 * @param json the Device Settings in JSON format
-	 *
-	 * @return true if the operation completed successfully, false otherwise
+	 * @param json the JSON string to write
+	 * @param user_settings true if the user settings should be saved, false if the generated settings should be saved
 	 */
-	public static boolean writeGenSettings(@NonNull final String json) {
-		GPath gen_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
-		gen_settings_path.add2(true, UtilsSWA.GEN_SETTINGS_FILE_CLIENT);
+	public static void writeSettingsFile(@NonNull final String json, final boolean user_settings) {
+		String settings_file_str = user_settings ? UtilsSWA.USER_SETTINGS_FILE : UtilsSWA.GEN_SETTINGS_FILE_CLIENT;
+		String backup_file_str = settings_file_str + ".bak";
 
-		return UtilsFilesDirs.writeFile(gen_settings_path, json.getBytes(Charset.defaultCharset())) == 0;
-	}
+		GPath settings_file = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH).add2(false, settings_file_str);
+		GPath backup_file = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH).add2(false, backup_file_str);
 
-	/**
-	 * <p>Gets the Device Settings in JSON format.</p>
-	 *
-	 * @return the Device Settings in JSON format
-	 */
-	@NonNull
-	public static String readJsonUserSettings() {
-		GPath user_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
-		user_settings_path.add2(true, UtilsSWA.USER_SETTINGS_FILE);
-
-		byte[] file_bytes = UtilsFilesDirs.readFileBytes(user_settings_path);
-
-		return UtilsSWA.bytesToPrintableDATACONV(file_bytes, false);
-	}
-
-	/**
-	 * <p>Writes the Device Settings in JSON format.</p>
-	 *
-	 * @param json the Device Settings in JSON format
-	 *
-	 * @return true if the operation completed successfully, false otherwise
-	 */
-	public static boolean writeUserSettings(@NonNull final String json) {
-		GPath user_settings_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
-		user_settings_path.add2(true, UtilsSWA.USER_SETTINGS_FILE);
-
-		return UtilsFilesDirs.writeFile(user_settings_path, json.getBytes(Charset.defaultCharset())) == 0;
+		UtilsFilesDirs.writeFile(settings_file, json.getBytes(Charset.defaultCharset()));
+		UtilsFilesDirs.writeFile(backup_file, json.getBytes(Charset.defaultCharset()));
 	}
 }

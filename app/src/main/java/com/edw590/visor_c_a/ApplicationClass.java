@@ -100,15 +100,12 @@ public final class ApplicationClass extends Application {
 
 		/////////////////////////////////////////////////////////////
 
-		if (!SettingsSync.loadGenSettings(UtilsSettings.readJsonGenSettings())) {
+		if (!UtilsSettings.loadSettingsFile(false)) {
 			System.out.println("Failed to load generated settings. Using empty ones...");
 		}
 
-		try {
-			SettingsSync.loadUserSettings(UtilsSettings.readJsonUserSettings());
-		} catch (final Exception e) {
+		if (!UtilsSettings.loadSettingsFile(true)) {
 			System.out.println("Failed to load user settings. Using empty ones...");
-			e.printStackTrace();
 		}
 
 		infinity_thread.start();
@@ -132,9 +129,9 @@ public final class ApplicationClass extends Application {
 		while (true) {
 			// Write user and gen settings every 5 seconds
 
-			UtilsSettings.writeUserSettings(SettingsSync.getJsonUserSettings());
+			UtilsSettings.writeSettingsFile(SettingsSync.getJsonUserSettings(), true);
 
-			UtilsSettings.writeGenSettings(SettingsSync.getJsonGenSettings());
+			UtilsSettings.writeSettingsFile(SettingsSync.getJsonGenSettings(), false);
 
 			try {
 				Thread.sleep(5000);

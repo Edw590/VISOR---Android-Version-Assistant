@@ -69,6 +69,8 @@ public final class TabCommunicatorMemories extends Fragment {
 		editTxt_memories_text.setHint("Stored memories on the smart LLM");
 		if (UtilsSWA.isCommunicatorConnectedSERVER()) {
 			editTxt_memories_text.setText(GPTComm.getMemories());
+		} else {
+			editTxt_memories_text.setText("[Not connected to the server to get the memories]");
 		}
 
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
