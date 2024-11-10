@@ -52,6 +52,8 @@ import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 
+import java.util.ConcurrentModificationException;
+
 import SCLink.SCLink;
 
 public final class SystemChecker implements IModuleInst {
@@ -136,18 +138,28 @@ public final class SystemChecker implements IModuleInst {
 				// Only send the info after the first time (15 secs should be enough), so that the ExtDevices are
 				// checked first.
 				StringBuilder wifi_networks = new StringBuilder();
-				for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
-					wifi_networks.append(wifi_ap.name).append("\u0001");
-					wifi_networks.append(wifi_ap.address).append("\u0001");
-					wifi_networks.append(wifi_ap.rssi).append("\u0001");
-					wifi_networks.append("\u0000");
+				try {
+					for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
+						wifi_networks.append(wifi_ap.name).append("\u0001");
+						wifi_networks.append(wifi_ap.address).append("\u0001");
+						wifi_networks.append(wifi_ap.rssi).append("\u0001");
+						wifi_networks.append("\u0000");
+					}
+				} catch (final ConcurrentModificationException ignored) {
+					// If the list is being modified, it will throw a ConcurrentModificationException, so catch it and
+					// go to the next cycle immediately, on which the modifications should be ready.
+					continue;
 				}
 				StringBuilder bluetooth_devices = new StringBuilder();
-				for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
-					bluetooth_devices.append(bluetooth_device.name).append("\u0001");
-					bluetooth_devices.append(bluetooth_device.address).append("\u0001");
-					bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
-					bluetooth_devices.append("\u0000");
+				try {
+					for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
+						bluetooth_devices.append(bluetooth_device.name).append("\u0001");
+						bluetooth_devices.append(bluetooth_device.address).append("\u0001");
+						bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");
+						bluetooth_devices.append("\u0000");
+					}
+				} catch (final ConcurrentModificationException ignored) {
+					continue;
 				}
 				if (power_manager.isScreenOn()) {
 					last_time_used = System.currentTimeMillis() / 1000;
