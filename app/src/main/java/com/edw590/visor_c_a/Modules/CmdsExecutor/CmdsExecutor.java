@@ -52,13 +52,12 @@ import com.edw590.visor_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
-import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.TasksList;
 
 import ACD.ACD;
@@ -824,45 +823,40 @@ public final class CmdsExecutor implements IModuleInst {
 					final String contact_name = contacts_list[contact_index][0];
 					final String contact_number = contacts_list[contact_index][1];
 
-					final Runnable do_after_confirm = () -> {
-						final Runnable runnable = () -> {
-							final int return_code = UtilsAndroidTelephony.makePhoneCall(contact_number);
+					final Runnable runnable = () -> {
+						final int return_code = UtilsAndroidTelephony.makePhoneCall(contact_number);
 
-							switch (return_code) {
-								case (UtilsAndroid.NO_CALL_EMERGENCY): {
-									final String speak = "Insufficient privileges to call " + contact_number +
-											", since it is an emergency number. " +
-											"Instead, it was only dialed and requires your manual confirmation " +
-											"to proceed the call.";
-									UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
+						switch (return_code) {
+							case (UtilsAndroid.NO_CALL_EMERGENCY): {
+								final String speak = "Insufficient privileges to call " + contact_number +
+										", since it is an emergency number. " +
+										"Instead, it was only dialed and requires your manual confirmation " +
+										"to proceed the call.";
+								UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 
-									break;
-								}
-								case (UtilsAndroid.NO_CALL_ANY): {
-									final String speak = "Insufficient privileges to call numbers. The number " +
-											"was instead only dialed and requires your manual confirmation " +
-											"to proceed the call.";
-									UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
-
-									break;
-								}
-								case (UtilsAndroid.NOT_AVAILABLE): {
-									final String speak = "Phone calls not supported on the device.";
-									UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
-
-									break;
-								}
+								break;
 							}
-						};
+							case (UtilsAndroid.NO_CALL_ANY): {
+								final String speak = "Insufficient privileges to call numbers. The number " +
+										"was instead only dialed and requires your manual confirmation " +
+										"to proceed the call.";
+								UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 
-						final String speak = "Calling " + contact_name + " now, sir.";
-						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_NONE, false, runnable);
+								break;
+							}
+							case (UtilsAndroid.NOT_AVAILABLE): {
+								final String speak = "Phone calls not supported on the device.";
+								UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
+
+								break;
+							}
+						}
 					};
 
-					final String spoken_action = "phone call " + contact_name;
-					requestConfirmation(spoken_action, speech_mode2);
+					final String speak = "Calling " + contact_name + " now, sir.";
+					UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_NONE, false, runnable);
 
-					previous_cmd = new Command(command, spoken_action, do_after_confirm);
+					previous_cmd = new Command(command, "phone call " + contact_name, null);
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_STOP_RECORD_MEDIA): {
@@ -1003,29 +997,6 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 
 					previous_cmd = new Command(command, "stop media", null);
-					break;
-				}
-				case (CmdsList.CmdIds.CMD_CONFIRM):
-				case (CmdsList.CmdIds.CMD_REJECT): {
-					some_cmd_detected = true;
-					if (only_returning) continue;
-
-					if (previous_cmd.task_id < 0 ||
-							(previous_cmd.detection_when > (System.currentTimeMillis() + 60_000))) {
-						// No runnable to execute (no command needing confirmation then) or the previous command was
-						// more than a minute ago.
-						final String speak = "There is nothing to confirm or reject, sir.";
-						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_NONE, false, null);
-					} else {
-						if (cmd_id.equals(CmdsList.CmdIds.CMD_CONFIRM)) {
-							new Thread(TasksList.removeTask(previous_cmd.task_id).runnable).start();
-						} else {
-							UtilsSpeech2BC.speak(previous_cmd.cmd_spoken_action + " rejected, sir.", speech_priority,
-									speech_mode2, UtilsSpeech2BC.GPT_NONE, false, null);
-						}
-					}
-
-					previous_cmd = new Command();
 					break;
 				}
 				case (CmdsList.CmdIds.CMD_STOP_LISTENING): {
@@ -1241,19 +1212,6 @@ public final class CmdsExecutor implements IModuleInst {
 		} else {
 			return NOTHING_EXECUTED;
 		}
-	}
-
-	/**
-	 * <p>Makes VISOR speak "Do you confirm to [action]?".</p>
-	 *
-	 * @param action the action mentioned above
-	 * @param mode same as in {@link Speech2#speak(String, int, int)}
-	 */
-	private void requestConfirmation(@NonNull final String action, final int mode) {
-		ask_anything_else = false;
-
-		final String speak = "Do you confirm to " + action + "?";
-		UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, mode, UtilsSpeech2BC.GPT_NONE, false, UtilsSpeech2.CALL_COMMANDS_RECOG);
 	}
 
 	private void sendToGPT(final String sentence_str) {

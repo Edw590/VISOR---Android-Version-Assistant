@@ -62,8 +62,6 @@ public final class CmdsList {
 		public static final String CMD_TOGGLE_POWER_SAVER_MODE = "19";
 		public static final String CMD_STOP_RECORD_MEDIA = "20";
 		public static final String CMD_CONTROL_MEDIA = "21";
-		public static final String CMD_CONFIRM = "22";
-		public static final String CMD_REJECT = "23";
 		public static final String CMD_STOP_LISTENING = "24";
 		public static final String CMD_START_LISTENING = "25";
 		public static final String CMD_TELL_WEATHER = "26";
@@ -172,8 +170,6 @@ public final class CmdsList {
 				put(CmdIds.CMD_TOGGLE_POWER_SAVER_MODE,   CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 19
 				put(CmdIds.CMD_STOP_RECORD_MEDIA,         CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 20
 				put(CmdIds.CMD_CONTROL_MEDIA,             CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 21
-				put(CmdIds.CMD_CONFIRM,                   CmdAddInfo.CMDi_INF1_ASSIST_CMD);       // 22
-				put(CmdIds.CMD_REJECT,                    CmdAddInfo.CMDi_INF1_ASSIST_CMD);       // 23
 				put(CmdIds.CMD_STOP_LISTENING,            CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 24
 				put(CmdIds.CMD_START_LISTENING,           CmdAddInfo.CMDi_INF1_DO_SOMETHING);     // 25
 				put(CmdIds.CMD_TELL_WEATHER,              CmdAddInfo.CMDi_INF1_ONLY_SPEAK);       // 26
@@ -224,8 +220,6 @@ public final class CmdsList {
 			{CmdIds.CMD_TOGGLE_POWER_SAVER_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "power/battery saver"},                                                   // 19
 			{CmdIds.CMD_STOP_RECORD_MEDIA, ACD.CMDi_TYPE_STOP, "", "", "recording/record|recording/record audio/sound"},                                    // 20
 			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"},          // 21
-			{CmdIds.CMD_CONFIRM, ACD.CMDi_TYPE_NONE, "i", "", "do/confirm/approve/certify"},                                                                // 22
-			{CmdIds.CMD_REJECT, ACD.CMDi_TYPE_NONE, "i", "", "don't/reject/disapprove"},                                                                    // 23
 			{CmdIds.CMD_STOP_LISTENING, ACD.CMDi_TYPE_STOP, "", "", "listening"},                                                                           // 24
 			{CmdIds.CMD_START_LISTENING, ACD.CMDi_TYPE_START, "", "", "listening"},                                                                         // 25
 			{CmdIds.CMD_TELL_WEATHER, ACD.CMDi_TYPE_ASK, "", "", "weather"},                                                                                // 26
@@ -256,8 +250,6 @@ public final class CmdsList {
 			"Turn on/off the power/battery saver mode",                                   // 19
 			"Stop recording [audio/sound]",                                               // 20
 			"Play/pause/stop/next/previous media (or song, video, etc)",                  // 21
-			"I do/confirm/approve/certify (confirm action when VISOR requests it)",       // 22
-			"I don't/reject/disapprove (reject action instead)",                          // 23
 			"Stop listening (hotword recognizer - useful if VISOR is not a " +            // 24
 					"system app, in which case he'll lock the microphone on himself)",
 			"Start listening (if stopped, to start again - or hold the Power button " +   // 25
