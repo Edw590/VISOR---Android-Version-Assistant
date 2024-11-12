@@ -105,7 +105,7 @@ public final class TabTasksTasksList extends Fragment {
 
 		AppCompatCheckBox check_device_active = new AppCompatCheckBox(requireContext());
 		check_device_active.setText("Device(s) must be in use");
-		check_device_active.setChecked(task.getEnabled());
+		check_device_active.setChecked(task.getDevice_active());
 
 		AppCompatEditText editTxt_device_ids = new AppCompatEditText(requireContext());
 		editTxt_device_ids.setText(task.getDeviceIDs());
