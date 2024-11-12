@@ -73,7 +73,7 @@ public final class UtilsAndroidTelephony {
 	 * @return one of the constants or an SH shell exit code
 	 */
 	public static int answerPhoneCall() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) ||
 					UtilsPermsAuths.checkSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)) {
 				final TelecomManager telecomManager = (TelecomManager) UtilsContext.getSystemService(Context.TELECOM_SERVICE);
