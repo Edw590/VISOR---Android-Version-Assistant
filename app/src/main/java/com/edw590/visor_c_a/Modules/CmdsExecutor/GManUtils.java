@@ -190,12 +190,57 @@ class GManUtils {
 		if (min >= 60) {
 			if (min >= 24 * 60) {
 				if (min >= 7 * 24 * 60) {
-					return (min / (7 * 24 * 60)) + " weeks";
+					long weeks = min / (7 * 24 * 60);
+					long days = (min % (7 * 24 * 60)) / (24 * 60);
+					String week_weeks = "weeks";
+					if (weeks == 1) {
+						week_weeks = "week";
+					}
+					String day_days = "days";
+					if (days == 1) {
+						day_days = "day";
+					}
+					if (days > 0) {
+						return String.format(Locale.US, "%d %s and %d %s", weeks, week_weeks, days, day_days);
+					}
+					return String.format(Locale.US, "%d %s", weeks, week_weeks);
 				}
-				return (min / (24 * 60)) + " days";
+				long days = min / (24 * 60);
+				long hours = (min % (24 * 60)) / 60;
+				String day_days = "days";
+				if (days == 1) {
+					day_days = "day";
+				}
+				String hour_hours = "hours";
+				if (hours == 1) {
+					hour_hours = "hour";
+				}
+				if (hours > 0) {
+					return String.format(Locale.US, "%d %s and %d %s", days, day_days, hours, hour_hours);
+				}
+				return String.format(Locale.US, "%d %s", days, day_days);
 			}
-			return (min / 60) + " hours";
+			long hours = min / 60;
+			long minutes = min % 60;
+			String hour_hours = "hours";
+			if (hours == 1) {
+				hour_hours = "hour";
+			}
+			String minute_minutes = "minutes";
+			if (minutes == 1) {
+				minute_minutes = "minute";
+			}
+			if (minutes > 0) {
+				return String.format(Locale.US, "%d %s and %d %s", hours, hour_hours, minutes, minute_minutes);
+			}
+			return String.format(Locale.US, "%d %s", hours, hour_hours);
 		}
-		return min + " minutes";
+
+		String minute_minutes = "minutes";
+		if (min == 1) {
+			minute_minutes = "minute";
+		}
+
+		return String.format(Locale.US, "%d %s", min, minute_minutes);
 	}
 }
