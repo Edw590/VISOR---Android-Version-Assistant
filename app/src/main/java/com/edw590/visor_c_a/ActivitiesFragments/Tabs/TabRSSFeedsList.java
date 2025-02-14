@@ -73,16 +73,19 @@ public final class TabRSSFeedsList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] feed_ids = SettingsSync.getIdsListRSS().split("\\|");
-		for (final String feed_id : feed_ids) {
-			ModsFileInfo.FeedInfo feed_info = SettingsSync.getFeedRSS(Integer.parseInt(feed_id));
-			String title = "";
-			if (!feed_info.getEnabled()) {
-				title += "[X] ";
-			}
-			title += feed_info.getName();
+		String feeds_ids_str = SettingsSync.getIdsListRSS();
+		if (!feeds_ids_str.isEmpty()) {
+			String[] feed_ids = feeds_ids_str.split("\\|");
+			for (final String feed_id : feed_ids) {
+				ModsFileInfo.FeedInfo feed_info = SettingsSync.getFeedRSS(Integer.parseInt(feed_id));
+				String title = "";
+				if (!feed_info.getEnabled()) {
+					title += "[X] ";
+				}
+				title += feed_info.getName();
 
-			adapter.addItem(title, createFeedInfoSetter(feed_info));
+				adapter.addItem(title, createFeedInfoSetter(feed_info));
+			}
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.

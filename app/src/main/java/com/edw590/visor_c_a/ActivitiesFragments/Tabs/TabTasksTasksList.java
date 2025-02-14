@@ -75,18 +75,21 @@ public final class TabTasksTasksList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] tasks_ids = SettingsSync.getIdsListTASKS().split("\\|");
-		for (final String feed_id : tasks_ids) {
-			ModsFileInfo.Task task = SettingsSync.getTaskTASKS(Integer.parseInt(feed_id));
-			String title = task.getMessage();
-			if (title.isEmpty()) {
-				title = task.getCommand();
-			}
-			if (!task.getEnabled()) {
-				title = "[X] " + title;
-			}
+		String tasks_ids_str = SettingsSync.getIdsListTASKS();
+		if (!tasks_ids_str.isEmpty()) {
+			String[] tasks_ids = tasks_ids_str.split("\\|");
+			for (final String feed_id : tasks_ids) {
+				ModsFileInfo.Task task = SettingsSync.getTaskTASKS(Integer.parseInt(feed_id));
+				String title = task.getMessage();
+				if (title.isEmpty()) {
+					title = task.getCommand();
+				}
+				if (!task.getEnabled()) {
+					title = "[X] " + title;
+				}
 
-			adapter.addItem(title, createTaskSetter(task));
+				adapter.addItem(title, createTaskSetter(task));
+			}
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.

@@ -74,19 +74,22 @@ public final class TabLocatorLocationsList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] locs_info_ids = SettingsSync.getIdsListLOCATIONS().split("\\|");
-		for (final String loc_info_id : locs_info_ids) {
-			ModsFileInfo.LocInfo loc_info = SettingsSync.getLocationLOCATIONS(Integer.parseInt(loc_info_id));
-			String title = loc_info.getName();
-			if (title.isEmpty()) {
-				title = loc_info.getAddress();
-			}
-			title = loc_info.getLocation() + " - " + title;
-			if (!loc_info.getEnabled()) {
-				title = "[X] " + title;
-			}
+		String locs_info_ids_str = SettingsSync.getIdsListLOCATIONS();
+		if (!locs_info_ids_str.isEmpty()) {
+			String[] locs_info_ids = locs_info_ids_str.split("\\|");
+			for (final String loc_info_id : locs_info_ids) {
+				ModsFileInfo.LocInfo loc_info = SettingsSync.getLocationLOCATIONS(Integer.parseInt(loc_info_id));
+				String title = loc_info.getName();
+				if (title.isEmpty()) {
+					title = loc_info.getAddress();
+				}
+				title = loc_info.getLocation() + " - " + title;
+				if (!loc_info.getEnabled()) {
+					title = "[X] " + title;
+				}
 
-			adapter.addItem(title, createLocationSetter(loc_info));
+				adapter.addItem(title, createLocationSetter(loc_info));
+			}
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.

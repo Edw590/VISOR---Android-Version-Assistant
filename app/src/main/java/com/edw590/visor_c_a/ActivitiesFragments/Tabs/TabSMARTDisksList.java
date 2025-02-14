@@ -74,15 +74,18 @@ public final class TabSMARTDisksList extends Fragment {
 
 		linearLayout.addView(expandable_list_view);
 
-		String[] disks_ids = SettingsSync.getIdsListSMART().split("\\|");
-		for (final String disk_id : disks_ids) {
-			ModsFileInfo.DiskInfo disk = SettingsSync.getDiskSMART(disk_id);
-			String title = disk.getLabel();
-			if (!disk.getEnabled()) {
-				title = "[X] " + title;
-			}
+		String disks_ids_str = SettingsSync.getIdsListSMART();
+		if (!disks_ids_str.isEmpty()) {
+			String[] disks_ids = disks_ids_str.split("\\|");
+			for (final String disk_id : disks_ids) {
+				ModsFileInfo.DiskInfo disk = SettingsSync.getDiskSMART(disk_id);
+				String title = disk.getLabel();
+				if (!disk.getEnabled()) {
+					title = "[X] " + title;
+				}
 
-			adapter.addItem(title, createDiskSetter(disk));
+				adapter.addItem(title, createDiskSetter(disk));
+			}
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.
