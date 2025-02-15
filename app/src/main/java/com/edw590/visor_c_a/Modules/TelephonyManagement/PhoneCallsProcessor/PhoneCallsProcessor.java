@@ -42,13 +42,12 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
-import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.TelephonyManagement;
 import com.edw590.visor_c_a.Modules.TelephonyManagement.UtilsTelephony;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -218,8 +217,8 @@ public final class PhoneCallsProcessor implements IModuleInst {
 				} else {
 					final String number_name = UtilsTelephony.getWhatToSayAboutNumber(number);
 					final String speak = "Sir, sir, incoming call from " + number_name + ". Incoming call from " +
-							number_name + ". Do you want to do anything?";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_NONE, false, UtilsSpeech2.CALL_COMMANDS_RECOG);
+							number_name + ".";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_NONE, false, null);
 				}
 				break;
 			}
