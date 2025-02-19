@@ -52,7 +52,7 @@ public final class UtilsMainSrvc {
 	 * <p>Specifically starts the main service doing any things required before or after starting it.</p>
 	 */
 	public static void startMainService() {
-		UtilsServices.startService(MainSrvc.class, null, true, false);
+		UtilsServices.startService(MainSrvc.class, null, true, false, false);
 	}
 
 	public static final int DETECTION_ACTIVATED = 0;

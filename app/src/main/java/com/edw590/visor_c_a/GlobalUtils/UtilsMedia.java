@@ -60,7 +60,7 @@ public final class UtilsMedia {
 	 * @return the {@link File}
 	 */
 	@NonNull
-	public static File getOutputMediaFile(final int media_type){
+	public static File getOutputMediaFile(final int media_type) {
 		final GPath file_path = new GPath(true, GL_CONSTS.VISOR_EXT_FOLDER_PATH);
 		final String time_stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
 				.format(System.currentTimeMillis());

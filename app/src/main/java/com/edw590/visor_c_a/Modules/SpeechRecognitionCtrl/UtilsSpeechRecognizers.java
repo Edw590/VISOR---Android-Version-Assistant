@@ -93,7 +93,7 @@ public final class UtilsSpeechRecognizers {
 
 		final Intent intent = new Intent(UtilsContext.getContext(), CommandsRecognition.class);
 		intent.putExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, System.currentTimeMillis());
-		UtilsServices.startService(CommandsRecognition.class, intent, false, false);
+		UtilsServices.startService(CommandsRecognition.class, intent, false, false, false);
 	}
 
 	/**

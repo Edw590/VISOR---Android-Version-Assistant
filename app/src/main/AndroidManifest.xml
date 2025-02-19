@@ -325,6 +325,10 @@
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true" />
+		<service android:name="com.edw590.visor_c_a.Modules.CameraManager.TakePicture"
+			android:permission=""
+			android:exported="false"
+			android:directBootAware="true" />
 		<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
 			android:permission=""

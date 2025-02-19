@@ -23,10 +23,21 @@ package com.edw590.visor_c_a.Modules.CameraManager;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.Build;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * <p>Camera Manager related utilities.</p>
@@ -92,6 +103,27 @@ final class UtilsCameraManager {
 		// It's never null - read the documentation of getSupportedPictureSizes()
 		assert result != null;
 		return result;
+	}
+
+	@Nullable
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	static Size getHighestResolution(final CameraManager manager, final String cameraId) {
+		try {
+			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+			StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+			if (map != null) {
+				Size[] sizes = map.getOutputSizes(ImageFormat.JPEG);
+				return Collections.max(Arrays.asList(sizes), new Comparator<Size>() {
+					@Override
+					public int compare(final Size s1, final Size s2) {
+						return Long.compare((long) s1.getWidth() * s1.getHeight(), (long) s2.getWidth() * s2.getHeight());
+					}
+				});
+			}
+		} catch (final Exception ignored) {
+		}
+
+		return null;
 	}
 
 	/**

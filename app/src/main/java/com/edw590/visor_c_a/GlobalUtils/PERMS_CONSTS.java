@@ -50,7 +50,7 @@ public final class PERMS_CONSTS {
 			{Manifest.permission.MODIFY_AUDIO_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
 	};*/
 	private static final String[][] danger_perms_list = {
-			//{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)}, todo Enable when taking pictures on Lollipop+ is implemented
+			{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECORD_AUDIO, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(Build.VERSION_CODES.DONUT)},

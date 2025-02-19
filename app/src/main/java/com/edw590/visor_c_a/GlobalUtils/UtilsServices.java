@@ -65,10 +65,19 @@ public final class UtilsServices {
 	 * @param check_already_running if true, startService() will only be called if the service is not running; if false,
 	 *                              the function will be called anyways (note that that means onStartCommand() will be
 	 *                              called again, as it's called every time startService() is called)
+	 * @param wait if this and {@code check_already_running} are true, the function will wait until the service is not
+	 * 								  running anymore before starting it again
 	 */
 	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
-									final boolean foreground, final boolean check_already_running) {
-		if (check_already_running && isServiceRunning(service_class)) {
+									final boolean foreground, final boolean check_already_running, final boolean wait) {
+		if (check_already_running && wait) {
+			while (isServiceRunning(service_class)) {
+				try {
+					Thread.sleep(500);
+				} catch (final InterruptedException ignored) {
+				}
+			}
+		} else if (check_already_running && isServiceRunning(service_class)) {
 			return;
 		}
 

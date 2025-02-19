@@ -140,6 +140,10 @@ public final class SystemChecker implements IModuleInst {
 				StringBuilder wifi_networks = new StringBuilder();
 				try {
 					for (final ExtDevice wifi_ap : WifiChecker.nearby_aps_wifi) {
+						if (wifi_ap == null) {
+							continue;
+						}
+
 						wifi_networks.append(wifi_ap.name).append("\u0001");
 						wifi_networks.append(wifi_ap.address).append("\u0001");
 						wifi_networks.append(wifi_ap.rssi).append("\u0001");
@@ -153,6 +157,10 @@ public final class SystemChecker implements IModuleInst {
 				StringBuilder bluetooth_devices = new StringBuilder();
 				try {
 					for (final ExtDevice bluetooth_device : BluetoothChecker.nearby_devices_bt) {
+						if (bluetooth_device == null) {
+							continue;
+						}
+
 						bluetooth_devices.append(bluetooth_device.name).append("\u0001");
 						bluetooth_devices.append(bluetooth_device.address).append("\u0001");
 						bluetooth_devices.append(bluetooth_device.rssi).append("\u0001");

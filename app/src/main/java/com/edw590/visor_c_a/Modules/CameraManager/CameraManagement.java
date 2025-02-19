@@ -43,11 +43,12 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
+import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.List;
 
@@ -246,7 +247,8 @@ public final class CameraManagement implements IModuleInst {
 							camera_old = UtilsCameraManager.openCamera(true);
 							if (camera_old == null) {
 								final String speak = "Error - Camera already in use.";
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB,
+										false, null);
 
 								return CAMERA_IN_USAGE;
 							}
@@ -269,16 +271,28 @@ public final class CameraManagement implements IModuleInst {
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 					if (takePictureOld == null && camera_old == null) {
 						first_pic_of_two = true;
-						takePictureOld = new TakePictureOld(usage == USAGE_TAKE_REAR_PHOTO, TakePictureOld.FLASH_MODE_OFF_ON, 100);
+						takePictureOld = new TakePictureOld(usage == USAGE_TAKE_REAR_PHOTO,
+								TakePictureOld.FLASH_MODE_OFF_ON, 100);
 					} else {
 						final String speak = "Error - Camera already in use.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false,
+								null);
 
 						return CAMERA_IN_USAGE;
 					}
-				}/* else {
-					// todo
-				}*/
+				} else {
+					Intent intent1 = new Intent(UtilsContext.getContext(), TakePicture.class);
+					intent1.putExtra("rear_pic", usage == USAGE_TAKE_REAR_PHOTO);
+					intent1.putExtra("flash_on", false);
+					UtilsServices.startService(TakePicture.class, intent1, false, true, true);
+
+					if (usage == USAGE_TAKE_REAR_PHOTO) {
+						Intent intent2 = new Intent(UtilsContext.getContext(), TakePicture.class);
+						intent2.putExtra("rear_pic", true);
+						intent2.putExtra("flash_on", true);
+						UtilsServices.startService(TakePicture.class, intent2, false, true, true);
+					}
+				}
 
 				break;
 			}

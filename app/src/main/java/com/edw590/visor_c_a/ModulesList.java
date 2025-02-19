@@ -339,7 +339,7 @@ public final class ModulesList {
 
 		switch (Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
 			case (ModulesList.TYPE1_SERVICE_SEP): {
-				UtilsServices.startService(element_class, null, false, true);
+				UtilsServices.startService(element_class, null, false, true, false);
 
 				break;
 			}
