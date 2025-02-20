@@ -47,6 +47,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import com.edw590.visor_c_a.ActivitiesFragments.Activities.ActFlash;
 import com.edw590.visor_c_a.GlobalUtils.GPath;
 import com.edw590.visor_c_a.GlobalUtils.UtilsFilesDirs;
 import com.edw590.visor_c_a.GlobalUtils.UtilsMedia;
@@ -68,25 +69,36 @@ public final class TakePicture extends Service {
 	static long cameraCaptureStartTime = 0;
 	CameraDevice cameraDevice = null;
 	CameraCaptureSession session = null;
-	private ImageReader imageReader = null;
+	ImageReader imageReader = null;
 
 	boolean use_flash = false;
+	boolean rear_pic = false;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		boolean rear_pic = intent.getBooleanExtra("rear_pic", true);
+		rear_pic = intent.getBooleanExtra("rear_pic", true);
 		use_flash = intent.getBooleanExtra("flash_on", false);
 
-		readyCamera(rear_pic);
+		if (!rear_pic && use_flash) {
+			new Thread(() -> {
+				if (use_flash && !rear_pic) {
+					Intent intent1 = new Intent(this, ActFlash.class);
+					intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					startActivity(intent1);
+				}
+			}).start();
+		}
 
-		return super.onStartCommand(intent, flags, startId);
+		readyCamera();
+
+		return START_NOT_STICKY;
 	}
 
-	void readyCamera(final boolean rear_pic) {
+	void readyCamera() {
 		CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
 		try {
-			String pickedCamera = getCamera(manager, rear_pic);
-			if (use_flash && !isFlashAvailable(manager, pickedCamera)) {
+			String pickedCamera = getCamera(manager);
+			if (rear_pic && use_flash && !isFlashAvailable(manager, pickedCamera)) {
 				return;
 			}
 
@@ -129,6 +141,11 @@ public final class TakePicture extends Service {
 		@Override
 		public void onReady(final CameraCaptureSession session) {
 			TakePicture.this.session = session;
+
+			if (cameraDevice == null) {
+				return;
+			}
+
 			try {
 				CaptureRequest.Builder focusRequest = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 				focusRequest.addTarget(imageReader.getSurface());
@@ -136,13 +153,15 @@ public final class TakePicture extends Service {
 				// Set auto-focus trigger
 				focusRequest.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 
+				if (!rear_pic && use_flash) {
+					Thread.sleep(2000);
+				}
+
 				session.capture(createCaptureRequest(), new CameraCaptureSession.CaptureCallback() {
 					@Override
 					public void onCaptureCompleted(@NonNull final CameraCaptureSession session,
 												   @NonNull final CaptureRequest request,
 												   @NonNull final TotalCaptureResult result) {
-						super.onCaptureCompleted(session, request, result);
-
 						closeCamera();
 					}
 				}, null);
@@ -175,7 +194,7 @@ public final class TakePicture extends Service {
 		}
 	};
 
-	String getCamera(final CameraManager manager, final boolean rear_pic) {
+	String getCamera(final CameraManager manager) {
 		try {
 			for (final String cameraId : manager.getCameraIdList()) {
 				CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
@@ -203,7 +222,7 @@ public final class TakePicture extends Service {
 	public void onDestroy() {
 		try {
 			session.abortCaptures();
-		} catch (final Exception ignoreed) {
+		} catch (final Exception ignored) {
 		}
 		session.close();
 	}
@@ -282,7 +301,7 @@ public final class TakePicture extends Service {
 
 			builder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
-			if (use_flash) {
+			if (use_flash && rear_pic) {
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
 			} else {
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);

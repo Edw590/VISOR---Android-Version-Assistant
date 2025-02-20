@@ -332,4 +332,25 @@ public final class UtilsAndroidPower {
 
 		return brightness * 100 / 255;
 	}
+
+	/**
+	 * <p>Set the screen brightness.</p>
+	 *
+	 * @param brightness the screen brightness percentage
+	 *
+	 * @return true if the brightness was set, false if the app doesn't have the permission to write system settings
+	 */
+	public static boolean setScreenBrightness(final int brightness) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(UtilsContext.getContext())) {
+			return false;
+		}
+
+		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
+
+		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
+				Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightness * 255 / 100);
+
+		return true;
+	}
 }

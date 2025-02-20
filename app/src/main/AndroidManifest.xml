@@ -254,6 +254,13 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActFlash"
+			android:permission=""
+			android:exported="true"
+			android:directBootAware="true"
+			android:autoRemoveFromRecents="true"
+			android:excludeFromRecents="true">
+		</activity>
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActAssist"
 			android:permission=""
 			android:exported="true"

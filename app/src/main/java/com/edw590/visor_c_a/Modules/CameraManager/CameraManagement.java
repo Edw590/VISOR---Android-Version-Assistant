@@ -72,7 +72,6 @@ public final class CameraManagement implements IModuleInst {
 	String main_camera_id = "";
 
 	boolean flashlight_was_on_before_pic = false;
-	boolean first_pic_of_two = false;
 
 	///////////////////////////////////////////////////////////////
 	// IModuleInst stuff
@@ -270,7 +269,6 @@ public final class CameraManagement implements IModuleInst {
 			case USAGE_TAKE_FRONTAL_PHOTO: {
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 					if (takePictureOld == null && camera_old == null) {
-						first_pic_of_two = true;
 						takePictureOld = new TakePictureOld(usage == USAGE_TAKE_REAR_PHOTO,
 								TakePictureOld.FLASH_MODE_OFF_ON, 100);
 					} else {
@@ -281,17 +279,17 @@ public final class CameraManagement implements IModuleInst {
 						return CAMERA_IN_USAGE;
 					}
 				} else {
+					boolean rear_pic = usage == USAGE_TAKE_REAR_PHOTO;
+
 					Intent intent1 = new Intent(UtilsContext.getContext(), TakePicture.class);
-					intent1.putExtra("rear_pic", usage == USAGE_TAKE_REAR_PHOTO);
+					intent1.putExtra("rear_pic", rear_pic);
 					intent1.putExtra("flash_on", false);
 					UtilsServices.startService(TakePicture.class, intent1, false, true, true);
 
-					if (usage == USAGE_TAKE_REAR_PHOTO) {
-						Intent intent2 = new Intent(UtilsContext.getContext(), TakePicture.class);
-						intent2.putExtra("rear_pic", true);
-						intent2.putExtra("flash_on", true);
-						UtilsServices.startService(TakePicture.class, intent2, false, true, true);
-					}
+					Intent intent2 = new Intent(UtilsContext.getContext(), TakePicture.class);
+					intent2.putExtra("rear_pic", rear_pic);
+					intent2.putExtra("flash_on", true);
+					UtilsServices.startService(TakePicture.class, intent2, false, true, true);
 				}
 
 				break;
