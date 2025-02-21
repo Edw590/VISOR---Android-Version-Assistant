@@ -136,7 +136,6 @@ public final class Speech2 implements IModuleInst {
 	private long assist_changed_volume_time = Long.MAX_VALUE - VOLUME_CHANGE_INTERVAL;
 	private boolean assist_will_change_volume = false;
 	private boolean user_changed_volume = false;
-	private boolean is_speaking = false;
 	private boolean focus_volume_dnd_done = false;
 
 	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
@@ -365,9 +364,10 @@ public final class Speech2 implements IModuleInst {
 		// Also, detect only if the assistant is speaking, of course.
 		SpeechQueue.Speech curr_speech = SpeechQueue.SpeechQueue.getSpeech(current_speech_id);
 
-		if (!is_speaking) {
+		if (curr_speech == null) {
 			return;
 		}
+
 		// If the assistant is speaking, check the audio stream always. Though...
 		if (assist_will_change_volume) {
 			if (System.currentTimeMillis() <= assist_changed_volume_time + VOLUME_CHANGE_INTERVAL) {
@@ -979,6 +979,14 @@ public final class Speech2 implements IModuleInst {
 	void rightBeforeSpeaking(@NonNull final String utterance_id) {
 		SpeechQueue.Speech curr_speech = SpeechQueue.SpeechQueue.getSpeech(utterance_id);
 
+		if (curr_speech == null) {
+			// If the speech was removed from the lists before it could be spoken, skip it and return (already happened,
+			// for some reason).
+			skipCurrentSpeech();
+
+			return;
+		}
+
 		boolean skip_speaking = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
@@ -1013,8 +1021,6 @@ public final class Speech2 implements IModuleInst {
 			if ((curr_speech.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
 				addSpeechToNotif(curr_speech.getText());
 			}
-
-			is_speaking = true;
 		}
 	}
 
@@ -1199,7 +1205,6 @@ public final class Speech2 implements IModuleInst {
 	 */
 	private void allSpeechesFinished() {
 		speeches_on_lists = false;
-		is_speaking = false;
 
 		// Since there are no more speeches, reset the stream volume and abandon the audio focus of the last used audio
 		// stream.
