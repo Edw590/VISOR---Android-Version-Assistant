@@ -1050,30 +1050,29 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
-						final String weather_str = OICComm.getWeather();
+						String[] weather_locs = OICComm.getWeatherLocationsList().split("\\|");
+						for (final String weather_loc : weather_locs) {
+							final ModsFileInfo.Weather weather = OICComm.getWeather(weather_loc);
 
-						if (!data_was_enabled) {
-							UtilsAndroidConnectivity.setMobileDataEnabled(false);
-						}
-						if (!wifi_was_enabled) {
-							UtilsAndroidConnectivity.setWifiEnabled(false);
-						}
+							if (!data_was_enabled) {
+								UtilsAndroidConnectivity.setMobileDataEnabled(false);
+							}
+							if (!wifi_was_enabled) {
+								UtilsAndroidConnectivity.setWifiEnabled(false);
+							}
 
-						if (weather_str.isEmpty()) {
-							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
-									speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
+							if (weather == null) {
+								UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
+										speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 
-							break;
-						}
+								break;
+							}
 
-						final String[] weather_by_loc = weather_str.split("\n");
-						for (final String weather : weather_by_loc) {
-							final String[] weather_data = weather.split(" \\|\\|\\| ");
-							speak = "The weather in " + weather_data[0] + " is " + weather_data[5] +
-									" with " + weather_data[1] + " degrees, a maximum of " + weather_data[6] +
-									" degrees and a minimum of " + weather_data[7] + " degrees. The precipitation is of " +
-									weather_data[2] + ", humidity of " + weather_data[3] + ", and wind of " +
-									weather_data[4] + ".";
+							speak = "The weather in " + weather.getLocation() + " is " + weather.getStatus() +
+									" with " + weather.getTemperature() + " degrees, a maximum of " + weather.getMax_temp() +
+									" degrees and a minimum of " + weather.getMin_temp() + " degrees. The precipitation is of " +
+									weather.getPrecipitation() + ", humidity of " + weather.getHumidity() + ", and wind of " +
+									weather.getWind() + ".";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 						}
 					} else {
@@ -1098,31 +1097,30 @@ public final class CmdsExecutor implements IModuleInst {
 						UtilsAndroidConnectivity.setWifiEnabled(true);
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
-						final String news_str = OICComm.getNews();
+						String[] news_locs = OICComm.getNewsLocationsList().split("\\|");
+						for (final String news_loc : news_locs) {
+							final ModsFileInfo.News news = OICComm.getNews(news_loc);
 
-						if (!data_was_enabled) {
-							UtilsAndroidConnectivity.setMobileDataEnabled(false);
-						}
-						if (!wifi_was_enabled) {
-							UtilsAndroidConnectivity.setWifiEnabled(false);
-						}
+							if (!data_was_enabled) {
+								UtilsAndroidConnectivity.setMobileDataEnabled(false);
+							}
+							if (!wifi_was_enabled) {
+								UtilsAndroidConnectivity.setWifiEnabled(false);
+							}
 
-						if (news_str.isEmpty()) {
-							UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
-									speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
+							if (news == null) {
+								UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
+										speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 
-							break;
-						}
+								break;
+							}
 
-						final String[] news_by_loc = news_str.split("\n");
-						for (final String news_data : news_by_loc) {
-							final String[] news = news_data.split(" \\|\\|\\| ");
+							speak = "News in " + news.getLocation() + ". ";
 
-							speak = "News in " + news[0] + ". ";
-
-							final int news_len = news.length;
+							String[] news_info = news.getNewsList().split("\\|");
+							final int news_len = news_info.length;
 							for (int i = 1; i < news_len; ++i) {
-								speak += news[i] + ". ";
+								speak += news_info[i] + ". ";
 							}
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 						}
@@ -1166,7 +1164,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_SMART, true, null);
 					} else {
-						speak = "Not connected to the server to get the events and tasks.";
+						speak = "Not connected to the server to get the tasks and events.";
 						UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, UtilsSpeech2BC.GPT_DUMB, false, null);
 					}
 
