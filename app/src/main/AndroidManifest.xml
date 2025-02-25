@@ -194,6 +194,7 @@
 		android:label="@string/app_name_ACA"
 		android:description="@string/app_description_ACA"
 		android:icon="@mipmap/app_logo_adaptive_all"
+		android:banner="@mipmap/ic_banner_tv"
 		android:roundIcon="@mipmap/app_logo_adaptive_all_round"
 		android:logo="@mipmap/app_logo_legacy_only"
 		android:theme="@style/AppTheme.NoActionBar"
