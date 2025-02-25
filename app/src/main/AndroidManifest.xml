@@ -252,6 +252,7 @@
 				<action android:name="android.intent.action.VIEW" />
 
 				<category android:name="android.intent.category.LAUNCHER" />
+				<category android:name="android.intent.category.LEANBACK_LAUNCHER" />
 			</intent-filter>
 		</activity>
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActFlash"

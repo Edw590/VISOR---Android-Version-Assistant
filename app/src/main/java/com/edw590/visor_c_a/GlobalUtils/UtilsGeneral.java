@@ -22,16 +22,19 @@
 package com.edw590.visor_c_a.GlobalUtils;
 
 import android.app.ActivityManager;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -251,5 +254,49 @@ public final class UtilsGeneral {
 		}
 
 		return resolveInfo.activityInfo.packageName;
+	}
+
+	/**
+	 * <p>Check if the device is running on a TV.</p>
+	 *
+	 * @return true if running on a TV, false otherwise
+	 */
+	public static boolean isRunningOnTV() {
+		Context context = UtilsContext.getContext();
+
+		// First, check if the device is a TV using UiModeManager
+		UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+		int currentMode = uiModeManager.getCurrentModeType();
+
+		if (currentMode == Configuration.UI_MODE_TYPE_TELEVISION) {
+			return true;
+		}
+
+		// If the UiModeManager doesn't indicate a TV, check for Leanback feature
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+			if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+				return true;
+			}
+		}
+
+		// Check if the device supports the TELEVISION feature
+		boolean hasTelevisionFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION);
+		if (hasTelevisionFeature) {
+			return true;
+		}
+
+
+		// Check for tvdpi to confirm it's a TV device
+		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+		int densityDpi = displayMetrics.densityDpi;
+		if (densityDpi == DisplayMetrics.DENSITY_TV) {
+			return true;
+		}
+
+		//verificar se o dispositivo responde ao leanback launcher intent
+
+
+		// If none of the checks indicate a TV, log the result and return false
+		return false;
 	}
 }

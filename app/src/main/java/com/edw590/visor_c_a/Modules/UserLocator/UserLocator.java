@@ -24,7 +24,6 @@ package com.edw590.visor_c_a.Modules.UserLocator;
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 
-import TEHelper.TEHelper;
 import ULHelper.ULHelper;
 
 public class UserLocator implements IModuleInst {
@@ -42,7 +41,7 @@ public class UserLocator implements IModuleInst {
 	}
 	@Override
 	public void destroy() {
-		TEHelper.stopChecker();
+		ULHelper.stopChecker();
 
 		is_module_destroyed = true;
 	}

@@ -38,6 +38,7 @@ import android.os.HandlerThread;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -273,7 +274,7 @@ public final class Speech2 implements IModuleInst {
 				continue;
 			}
 
-			speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT);
+			UtilsSpeech2BC.speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT, UtilsSpeech2BC.GPT_NONE, false, null);
 		}
 	});
 
@@ -407,6 +408,12 @@ public final class Speech2 implements IModuleInst {
 	 * @param txt_to_speak the text of the speech
 	 */
 	private void addSpeechToNotif(final String txt_to_speak) {
+		if (UtilsGeneral.isRunningOnTV()) {
+			Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
+
+			return;
+		}
+
 		speech_notif_speeches.add(txt_to_speak);
 
 		final int notif_speeches_size = speech_notif_speeches.size();
@@ -433,7 +440,14 @@ public final class Speech2 implements IModuleInst {
 	 */
 	boolean isTtsAvailable() {
 		 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			final Set<Voice> voices = tts.getVoices();
+			Set<Voice> voices = null;
+			try {
+				// This is for Android TVs with Lollipop. Was crashing with this call with an NPE for some reason.
+				// (It's a known and won't fix as obsolete bug...)
+				voices = tts.getVoices();
+			} catch (final Exception ignored) {
+			}
+
 			if (voices == null || voices.isEmpty() || tts.getVoice() == null || tts.getVoice().getLocale() == null) {
 				return false;
 			}
@@ -702,7 +716,14 @@ public final class Speech2 implements IModuleInst {
 		}
 		if (!reload_tts) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				final Voice voice = tts.getVoice();
+				Voice voice = null;
+				try {
+					// This is for Android TVs with Lollipop. Was crashing with this call with an NPE for some reason.
+					// (It's a known and won't fix as obsolete bug...)
+					voice = tts.getVoice();
+				} catch (final Exception ignored) {
+				}
+
 				if (voice == null || !voice.equals(tts.getDefaultVoice())) {
 					reload_tts = true;
 				}
