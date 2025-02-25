@@ -23,7 +23,6 @@ package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +38,7 @@ import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
+import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.edw590.visor_c_a.R;
 
 import java.util.Locale;
@@ -94,6 +94,12 @@ public final class TabCommunicatorMain extends Fragment {
 		editTxt_txt_to_send.setSingleLine(false);
 		editTxt_txt_to_send.setHint("Text to send to VISOR (commands or normal text to the LLM)");
 
+		AppCompatButton btn_listen = new AppCompatButton(requireContext());
+		btn_listen.setText("Listen");
+		btn_listen.setOnClickListener(v -> {
+			UtilsSpeechRecognizersBC.startCommandsRecognition();
+		});
+
 		AppCompatButton btn_send_text = new AppCompatButton(requireContext());
 		btn_send_text.setText("Send text");
 		btn_send_text.setOnClickListener(v -> {
@@ -118,6 +124,7 @@ public final class TabCommunicatorMain extends Fragment {
 		txt_response.setTextIsSelectable(true);
 
 		linearLayout.addView(editTxt_txt_to_send);
+		linearLayout.addView(btn_listen);
 		linearLayout.addView(btn_send_text);
 		linearLayout.addView(txt_response);
 	}
