@@ -274,6 +274,9 @@ public final class Speech2 implements IModuleInst {
 				continue;
 			}
 
+			// Don't call the internal speak() directly - use the broadcast. Useful to show Toasts on TVs, and they only
+			// work if sent from the UI thread, which apparently is the thread of the broadcast receiver, because they
+			// work there.
 			UtilsSpeech2BC.speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT, UtilsSpeech2BC.GPT_NONE, false, null);
 		}
 	});
@@ -294,6 +297,13 @@ public final class Speech2 implements IModuleInst {
 		tts = new TextToSpeech(UtilsContext.getContext(), status -> {
 			success_if:
 			if (status == TextToSpeech.SUCCESS) {
+				if (tts == null) {
+					// Already happened on the Android TV emulator (Lollipop)
+					tts_working = false;
+
+					return;
+				}
+
 				tts.setOnUtteranceProgressListener(new TtsUtteranceProgressListener());
 
 				if (!isTtsAvailable()) {
@@ -442,8 +452,8 @@ public final class Speech2 implements IModuleInst {
 		 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			Set<Voice> voices = null;
 			try {
-				// This is for Android TVs with Lollipop. Was crashing with this call with an NPE for some reason.
-				// (It's a known and won't fix as obsolete bug...)
+				// This is for Android TVs (at least with Lollipop). Was crashing with this call with an NPE for some
+				// reason. (It's a known and won't fix as obsolete bug...)
 				voices = tts.getVoices();
 			} catch (final Exception ignored) {
 			}
@@ -718,8 +728,8 @@ public final class Speech2 implements IModuleInst {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				Voice voice = null;
 				try {
-					// This is for Android TVs with Lollipop. Was crashing with this call with an NPE for some reason.
-					// (It's a known and won't fix as obsolete bug...)
+					// This is for Android TVs (at least with Lollipop). Was crashing with this call with an NPE for
+					// some reason. (It's a known and won't fix as obsolete bug...)
 					voice = tts.getVoice();
 				} catch (final Exception ignored) {
 				}
