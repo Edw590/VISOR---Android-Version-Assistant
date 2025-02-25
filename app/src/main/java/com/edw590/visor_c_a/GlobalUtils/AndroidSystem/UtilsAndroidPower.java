@@ -322,13 +322,22 @@ public final class UtilsAndroidPower {
 	 * @return the screen brightness percentage
 	 */
 	public static int getScreenBrightness() {
+		boolean can_write = true;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(UtilsContext.getContext())) {
+			can_write = false;
+		}
+
 		final ContentResolver contentResolver = UtilsContext.getContext().getContentResolver();
 
 		int brightness_mode = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
-		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
-				Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+		if (can_write) {
+			Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
+					Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+		}
 		int brightness = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, -1);
-		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, brightness_mode);
+		if (can_write) {
+			Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, brightness_mode);
+		}
 
 		return brightness * 100 / 255;
 	}
