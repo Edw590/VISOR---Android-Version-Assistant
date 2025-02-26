@@ -34,9 +34,6 @@ public final class GL_CONSTS {
 	private GL_CONSTS() {
 	}
 
-	// Permission strings
-	//public static final String VISOR_C_A_RECV_PERM = "com.edw590.visor_c_a.permission.INTERNAL_RECEIVERS";
-
 	// Notifications
 	public static final int NOTIF_ID_MAIN_SRV_FOREGROUND = 1;
 	public static final int NOTIF_ID_PLS_SRV_FOREGROUND = 2;
@@ -47,15 +44,9 @@ public final class GL_CONSTS {
 	public static final String CH_ID_SPEECHES = "Speech2:Speeches";
 	public static final String CH_ID_COMMANDS_RECOG_FOREGROUND = "CommandsRecognition:FOREGROUND";
 
-	// Media
+	// Files
 	/** The complete path to the VISOR folder on the external storage. */
 	public static final String VISOR_EXT_FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() +
 			"/VISOR/";
-
-	// TTS
-	public static final String PREFERRED_TTS_ENGINE = "ivona.tts";
-	public static final String PREFERRED_TTS_VOICE = "en-GB-Brian";
-
-	// UTF-7 --> to "put public" the private access of com.beetstra.jutf7.CharsetProvider.UTF7_NAME
-	public static final String UTF7_NAME_LIB = "UTF-7";
+	public static final String VISOR_EXT_FILES_PATH = VISOR_EXT_FOLDER_PATH + "Files/";
 }
