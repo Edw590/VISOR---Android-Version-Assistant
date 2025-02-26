@@ -74,7 +74,8 @@ public final class UtilsFilesDirs {
 			if (recursive ? FilesKt.deleteRecursively(path_file) : path_file.delete()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path + "'";
@@ -95,7 +96,8 @@ public final class UtilsFilesDirs {
 			if (path_file.mkdirs()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		final String command = "mkdir -p '" + path + "'";
@@ -122,7 +124,8 @@ public final class UtilsFilesDirs {
 			} else if (src_path_file.renameTo(dest_path_file)) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		final String command = "mv -f '" + src_path + "' '" + dest_path + "'";
@@ -143,7 +146,8 @@ public final class UtilsFilesDirs {
 			if (file.exists()) {
 				return file.length();
 			}
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		final String command = "ls -l '" + file_path + "'";
@@ -170,7 +174,8 @@ public final class UtilsFilesDirs {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			try {
 				return Files.readAllBytes(new File(file_path.toString()).toPath());
-			} catch (final Exception ignored) {
+			} catch (final Exception e) {
+				e.printStackTrace();
 			} catch (final OutOfMemoryError ignored) {
 				return null;
 			}
@@ -200,7 +205,8 @@ public final class UtilsFilesDirs {
 			FileUtils.writeByteArrayToFile(new File(file_path.toString()), file_bytes);
 
 			return UtilsShell.ErrCodes.NO_ERR;
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		return writeSmallFile(file_path, file_bytes);
@@ -245,7 +251,8 @@ public final class UtilsFilesDirs {
 			FileUtils.copyFile(new File(src_path.toString()), new File(dest_path.toString()));
 
 			return UtilsShell.ErrCodes.NO_ERR;
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -289,7 +296,8 @@ public final class UtilsFilesDirs {
 		try {
 			return new File(path.toString()).exists() ?
 					UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.WRONG_USAGE;
-		} catch (final Exception ignored) {
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 
 		final String command = "ls '" + path + "'";

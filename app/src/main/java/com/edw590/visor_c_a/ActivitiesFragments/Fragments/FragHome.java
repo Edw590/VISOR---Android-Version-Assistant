@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeLocalSettings;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeMain;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabHomeSettings;
+import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
@@ -49,8 +50,11 @@ public final class FragHome extends Fragment {
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.frag_main, container, false);
+		if (UtilsApp.isRunningOnWatch()) {
+			return inflater.inflate(R.layout.frag_main_watch, container, false);
+		} else {
+			return inflater.inflate(R.layout.frag_main, container, false);
+		}
 	}
 
 	@Override

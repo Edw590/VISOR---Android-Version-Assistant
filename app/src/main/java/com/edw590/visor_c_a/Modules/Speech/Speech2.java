@@ -418,7 +418,7 @@ public final class Speech2 implements IModuleInst {
 	 * @param txt_to_speak the text of the speech
 	 */
 	private void addSpeechToNotif(final String txt_to_speak) {
-		if (UtilsGeneral.isRunningOnTV()) {
+		if (UtilsApp.isRunningOnTV() || UtilsApp.isRunningOnWatch()) {
 			Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
 
 			return;

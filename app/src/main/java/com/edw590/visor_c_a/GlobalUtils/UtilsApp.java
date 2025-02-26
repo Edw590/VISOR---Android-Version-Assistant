@@ -21,11 +21,14 @@
 
 package com.edw590.visor_c_a.GlobalUtils;
 
+import android.app.UiModeManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.util.DisplayMetrics;
 
 import androidx.annotation.NonNull;
 
@@ -203,5 +206,55 @@ public final class UtilsApp {
 		// something.
 
 		context.sendBroadcast(intent);
+	}
+
+	/**
+	 * <p>Check if the device is running on a TV.</p>
+	 *
+	 * @return true if running on a TV, false otherwise
+	 */
+	public static boolean isRunningOnTV() {
+		Context context = UtilsContext.getContext();
+
+		UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+		if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+			return true;
+		}
+
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+			if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+				return true;
+			}
+		}
+
+		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION)) {
+			return true;
+		}
+
+		if (context.getResources().getDisplayMetrics().densityDpi == DisplayMetrics.DENSITY_TV) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * <p>Check if the device is running on a watch.</p>
+	 *
+	 * @return true if running on a watch, false otherwise
+	 */
+	public static boolean isRunningOnWatch() {
+		Context context = UtilsContext.getContext();
+
+		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+			return true;
+		}
+
+		Configuration config = context.getResources().getConfiguration();
+		if ((config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH) {
+			return true;
+		}
+
+		return false;
 	}
 }

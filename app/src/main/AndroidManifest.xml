@@ -186,6 +186,7 @@
 	<uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi.passpoint" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi.rtt" android:required="false" />
+	<uses-feature android:name="android.hardware.type.watch" />
 
 	<application
 		android:name="com.edw590.visor_c_a.ApplicationClass"
@@ -333,11 +334,11 @@
 		<service android:name="com.edw590.visor_c_a.MainSrvc.MainSrvc"
 			android:permission=""
 			android:exported="false"
-			android:directBootAware="true" />
+			android:directBootAware="false" />
 		<service android:name="com.edw590.visor_c_a.Modules.CameraManager.TakePicture"
 			android:permission=""
 			android:exported="false"
-			android:directBootAware="true" />
+			android:directBootAware="false" />
 		<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
 			android:permission=""

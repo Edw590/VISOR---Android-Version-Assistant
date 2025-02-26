@@ -34,6 +34,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabTasksAddTask;
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabTasksTasksList;
+import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
@@ -46,7 +47,11 @@ public final class FragTasksExecutor extends Fragment {
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
 								   @Nullable final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.frag_main, container, false);
+		if (UtilsApp.isRunningOnWatch()) {
+			return inflater.inflate(R.layout.frag_main_watch, container, false);
+		} else {
+			return inflater.inflate(R.layout.frag_main, container, false);
+		}
 	}
 
 	@Override

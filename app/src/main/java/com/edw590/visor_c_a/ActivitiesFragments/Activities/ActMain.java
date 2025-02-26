@@ -41,6 +41,7 @@ import androidx.navigation.NavHost;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -92,6 +93,8 @@ public final class ActMain extends AppCompatActivity {
 			btn_unlock.setOnClickListener(v -> {
 				if (editTxt_pin.getText().toString().equals(generalConsts.getPin())) {
 					startActivity();
+				} else {
+					editTxt_pin.setText("");
 				}
 			});
 
@@ -105,7 +108,11 @@ public final class ActMain extends AppCompatActivity {
 	}
 
 	private void startActivity() {
-		setContentView(R.layout.act_main);
+		if (UtilsApp.isRunningOnWatch()) {
+			setContentView(R.layout.act_main_watch);
+		} else {
+			setContentView(R.layout.act_main);
+		}
 
 		final NavHost navHostFragment = (NavHost) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 		assert navHostFragment != null; // Will never be null - it's on the XMLs
@@ -122,8 +129,10 @@ public final class ActMain extends AppCompatActivity {
 		final Toolbar toolbar = findViewById(R.id.toolbar);
 		NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
-		final BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
-		NavigationUI.setupWithNavController(bottomNav, navController);
+		if (!UtilsApp.isRunningOnWatch()) {
+			final BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+			NavigationUI.setupWithNavController(bottomNav, navController);
+		}
 	}
 
 	@Override
