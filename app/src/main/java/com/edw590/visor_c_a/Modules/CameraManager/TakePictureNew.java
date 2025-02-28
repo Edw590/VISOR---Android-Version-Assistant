@@ -63,7 +63,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 @RequiresApi(api = 21)
-public final class TakePicture extends Service {
+public final class TakePictureNew extends Service {
 
 	private static final int CAMERA_CALIBRATION_DELAY = 500;
 	static long cameraCaptureStartTime = 0;
@@ -140,7 +140,7 @@ public final class TakePicture extends Service {
 
 		@Override
 		public void onReady(final CameraCaptureSession session) {
-			TakePicture.this.session = session;
+			TakePictureNew.this.session = session;
 
 			if (cameraDevice == null) {
 				return;

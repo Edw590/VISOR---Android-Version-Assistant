@@ -281,15 +281,15 @@ public final class CameraManagement implements IModuleInst {
 				} else {
 					boolean rear_pic = usage == USAGE_TAKE_REAR_PHOTO;
 
-					Intent intent1 = new Intent(UtilsContext.getContext(), TakePicture.class);
+					Intent intent1 = new Intent(UtilsContext.getContext(), TakePictureNew.class);
 					intent1.putExtra("rear_pic", rear_pic);
 					intent1.putExtra("flash_on", false);
-					UtilsServices.startService(TakePicture.class, intent1, false, true, true);
+					UtilsServices.startService(TakePictureNew.class, intent1, false, true, true);
 
-					Intent intent2 = new Intent(UtilsContext.getContext(), TakePicture.class);
+					Intent intent2 = new Intent(UtilsContext.getContext(), TakePictureNew.class);
 					intent2.putExtra("rear_pic", rear_pic);
 					intent2.putExtra("flash_on", true);
-					UtilsServices.startService(TakePicture.class, intent2, false, true, true);
+					UtilsServices.startService(TakePictureNew.class, intent2, false, true, true);
 				}
 
 				break;

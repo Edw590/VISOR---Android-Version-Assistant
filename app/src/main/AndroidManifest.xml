@@ -335,7 +335,7 @@
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="false" />
-		<service android:name="com.edw590.visor_c_a.Modules.CameraManager.TakePicture"
+		<service android:name="com.edw590.visor_c_a.Modules.CameraManager.TakePictureNew"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="false" />
