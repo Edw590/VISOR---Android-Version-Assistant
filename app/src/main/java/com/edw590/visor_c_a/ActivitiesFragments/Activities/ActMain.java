@@ -129,10 +129,10 @@ public final class ActMain extends AppCompatActivity {
 		final Toolbar toolbar = findViewById(R.id.toolbar);
 		NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
-		if (!UtilsApp.isRunningOnWatch()) {
-			final BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
-			NavigationUI.setupWithNavController(bottomNav, navController);
-		}
+		//if (!UtilsApp.isRunningOnWatch()) {
+		//	final BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+		//	NavigationUI.setupWithNavController(bottomNav, navController);
+		//}
 	}
 
 	@Override

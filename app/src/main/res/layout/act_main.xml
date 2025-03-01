@@ -32,7 +32,6 @@
 		android:id="@+id/drawer"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_marginBottom="?attr/actionBarSize"
 		tools:openDrawer="start">
 
 		<LinearLayout
@@ -70,7 +69,7 @@
 
 	</androidx.drawerlayout.widget.DrawerLayout>
 
-	<com.google.android.material.bottomnavigation.BottomNavigationView
+	<!--com.google.android.material.bottomnavigation.BottomNavigationView
 		android:id="@+id/bottom_nav"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
@@ -80,6 +79,6 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:itemIconTint="#000000"
 		app:itemTextColor="#FFFFFF"
-		app:menu="@menu/bottom_nav_menu" />
+		app:menu="@menu/bottom_nav_menu" /-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
