@@ -33,17 +33,16 @@ import android.os.HandlerThread;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
-import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsMedia;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
-import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
 import com.edw590.visor_c_a.ModulesList;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,8 +91,7 @@ public final class AudioRecorder implements IModuleInst {
 				Manifest.permission.RECORD_AUDIO,
 				Manifest.permission.WRITE_EXTERNAL_STORAGE,
 		};
-		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions)
-				&& UtilsCheckHardwareFeatures.isMicrophoneSupported();
+		return UtilsPermsAuths.checkSelfPermissions(min_required_permissions);
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////

@@ -204,7 +204,10 @@ public final class UtilsCheckHardwareFeatures {
 	 * <p>Checks if the device has microphone support.</p>
 	 *
 	 * @return true if microphone is supported, false otherwise
+	 *
+	 * @deprecated The device may have a microphone but not advertise it (example, a TV). So don't trust this function.
 	 */
+	@Deprecated
 	public static boolean isMicrophoneSupported() {
 		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
 	}

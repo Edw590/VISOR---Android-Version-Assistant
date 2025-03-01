@@ -34,13 +34,12 @@ import android.speech.SpeechRecognizer;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
-import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.TasksList;
 
 /**
@@ -107,8 +106,7 @@ public final class SpeechRecognitionCtrl implements IModuleInst {
 		UtilsRegistry.setData(RegistryKeys.K_COMMANDS_RECOG_AVAILABLE, commands_recog_available, false);
 
 		return SpeechRecognizer.isRecognitionAvailable(UtilsContext.getContext()) &&
-				UtilsPermsAuths.checkSelfPermissions(min_required_permissions) &&
-				UtilsCheckHardwareFeatures.isMicrophoneSupported() && commands_recog_available;
+				UtilsPermsAuths.checkSelfPermissions(min_required_permissions) && commands_recog_available;
 	}
 	// IModuleInst stuff
 	///////////////////////////////////////////////////////////////
