@@ -82,7 +82,7 @@ public final class TabSMARTAddDisk extends Fragment {
 				check_is_hdd.isChecked()
 			);
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		linearLayout.addView(editTxt_id);

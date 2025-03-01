@@ -130,7 +130,7 @@ public class Utils {
 		return child_views;
 	}
 
-	static void createConfirmation(final Context context, final CharSequence message, final Runnable on_yes) {
+	static void createConfirmationDialog(final Context context, final CharSequence message, final Runnable on_yes) {
 		new AlertDialog.Builder(context)
 				.setTitle("Confirmation")
 				.setMessage(message)
@@ -141,7 +141,15 @@ public class Utils {
 				.show();
 	}
 
-	static void refreshFragment(@NonNull final Fragment fragment) {
+	static void createErrorDialog(final Context context, final CharSequence message) {
+		new AlertDialog.Builder(context)
+				.setTitle("Error")
+				.setMessage(message)
+				.setCancelable(true)
+				.show();
+	}
+
+	static void reloadFragment(@NonNull final Fragment fragment) {
 		FragmentTransaction ft1 = fragment.getParentFragmentManager().beginTransaction();
 		ft1.detach(fragment).commit();
 		FragmentTransaction ft2 = fragment.getParentFragmentManager().beginTransaction();

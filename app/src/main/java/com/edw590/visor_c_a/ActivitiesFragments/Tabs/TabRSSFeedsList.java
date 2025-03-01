@@ -128,17 +128,17 @@ public final class TabRSSFeedsList extends Fragment {
 			feed_info.setUrl(editTxt_url.getText().toString());
 			feed_info.setCustom_msg_subject(editTxt_custom_msg_subject.getText().toString());
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
 		btn_delete.setText("Delete");
 		btn_delete.setOnClickListener(v -> {
-			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this feed?",
+			Utils.createConfirmationDialog(requireContext(), "Are you sure you want to delete this feed?",
 					() -> {
 						SettingsSync.removeFeedRSS(feed_info.getId());
 
-						Utils.refreshFragment(this);
+						Utils.reloadFragment(this);
 					});
 		});
 

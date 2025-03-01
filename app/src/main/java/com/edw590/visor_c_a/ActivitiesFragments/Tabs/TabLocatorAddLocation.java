@@ -103,7 +103,7 @@ public final class TabLocatorAddLocation extends Fragment {
 					editTxt_location_name.getText().toString()
 			);
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		linearLayout.addView(check_enabled);

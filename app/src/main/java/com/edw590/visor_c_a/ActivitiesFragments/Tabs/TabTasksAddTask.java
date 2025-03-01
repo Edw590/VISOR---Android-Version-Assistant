@@ -110,7 +110,7 @@ public final class TabTasksAddTask extends Fragment {
 				editTxt_programmable_condition.getText().toString()
 			);
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		linearLayout.addView(check_enabled);

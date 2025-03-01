@@ -118,17 +118,17 @@ public final class TabSMARTDisksList extends Fragment {
 			disk.setLabel(editTxt_label.getText().toString());
 			disk.setIs_HDD(check_is_hdd.isChecked());
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
 		btn_delete.setText("Delete");
 		btn_delete.setOnClickListener(v -> {
-			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this disk?",
+			Utils.createConfirmationDialog(requireContext(), "Are you sure you want to delete this disk?",
 					() -> {
 						SettingsSync.removeDiskSMART(disk.getId());
 
-						Utils.refreshFragment(this);
+						Utils.reloadFragment(this);
 					});
 		});
 

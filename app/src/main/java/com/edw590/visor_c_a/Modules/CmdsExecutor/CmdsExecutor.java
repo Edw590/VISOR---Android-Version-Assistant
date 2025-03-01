@@ -1221,8 +1221,25 @@ public final class CmdsExecutor implements IModuleInst {
 		}
 
 
-		if (!GPTComm.sendText(sentence_str, true)) {
-			String speak = "Sorry, the GPT is busy at the moment. Text on hold.";
+		String speak = "";
+		switch (GPTComm.sendText(sentence_str, true)) {
+			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
+				speak = "The GPT is starting up. Text on hold.";
+
+				break;
+			}
+			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_BUSY: {
+				speak = "The GPT is busy. Text on hold.";
+
+				break;
+			}
+			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPING: {
+				speak = "The GPT is stopping. Text on hold.";
+
+				break;
+			}
+		}
+		if (!speak.isEmpty()) {
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_NONE, false, null);
 		}
 	}

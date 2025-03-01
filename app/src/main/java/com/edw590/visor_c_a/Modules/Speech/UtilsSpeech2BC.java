@@ -63,10 +63,29 @@ public final class UtilsSpeech2BC {
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
 							   final int gpt_mode, final boolean wait_for_gpt, @Nullable final Runnable after_speaking) {
 		if (gpt_mode != GPT_NONE && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
-				UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt || GPTComm.sendText("", false))) {
+				UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
+				GPTComm.sendText("", false).equals(ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY))) {
 			String text = "Reword in English: \"" + txt_to_speak + "\". DON'T SAY YOU'RE REWORDING IT.";
-			if (!GPTComm.sendText(text, gpt_mode == GPT_SMART)) {
-				String speak = "Sorry, the GPT is busy at the moment. Text on hold.";
+
+			String speak = "";
+			switch (GPTComm.sendText(text, gpt_mode == GPT_SMART)) {
+				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
+					speak = "The GPT is starting up. Text on hold.";
+
+					break;
+				}
+				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_BUSY: {
+					speak = "The GPT is busy. Text on hold.";
+
+					break;
+				}
+				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPING: {
+					speak = "The GPT is stopping. Text on hold.";
+
+					break;
+				}
+			}
+			if (!speak.isEmpty()) {
 				speakInternal(speak, speech_priority, mode, null);
 			}
 

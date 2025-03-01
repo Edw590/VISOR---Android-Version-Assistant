@@ -147,17 +147,17 @@ public final class TabLocatorLocationsList extends Fragment {
 			loc_info.setMax_distance_m(Integer.parseInt(editTxt_max_distance.getText().toString()));
 			loc_info.setLocation(editTxt_location_name.getText().toString());
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
 		btn_delete.setText("Delete");
 		btn_delete.setOnClickListener(v -> {
-			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this location?",
+			Utils.createConfirmationDialog(requireContext(), "Are you sure you want to delete this location?",
 					() -> {
 						SettingsSync.removeLocationLOCATIONS(loc_info.getId());
 
-						Utils.refreshFragment(this);
+						Utils.reloadFragment(this);
 					});
 		});
 

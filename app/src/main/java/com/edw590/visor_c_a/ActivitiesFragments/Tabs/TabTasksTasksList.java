@@ -160,17 +160,17 @@ public final class TabTasksTasksList extends Fragment {
 			task.setUser_location(editTxt_location.getText().toString());
 			task.setProgrammable_condition(editTxt_programmable_condition.getText().toString());
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
 		btn_delete.setText("Delete");
 		btn_delete.setOnClickListener(v -> {
-			Utils.createConfirmation(requireContext(), "Are you sure you want to delete this task?",
+			Utils.createConfirmationDialog(requireContext(), "Are you sure you want to delete this task?",
 					() -> {
 						SettingsSync.removeTaskTASKS(task.getId());
 
-						Utils.refreshFragment(this);
+						Utils.reloadFragment(this);
 					});
 		});
 

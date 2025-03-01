@@ -83,7 +83,7 @@ public final class TabRSSAddFeed extends Fragment {
 					editTxt_type.getText().toString(), editTxt_url.getText().toString(),
 					editTxt_custom_msg_subject.getText().toString());
 
-			Utils.refreshFragment(this);
+			Utils.reloadFragment(this);
 		});
 
 		linearLayout.addView(check_enabled);
