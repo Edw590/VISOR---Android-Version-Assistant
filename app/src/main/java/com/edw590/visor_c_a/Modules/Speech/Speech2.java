@@ -793,7 +793,7 @@ public final class Speech2 implements IModuleInst {
 			audioFocus(true);
 
 			// Set Do Not Disturb to ALARMS (emergency speech)
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && notificationManager.isNotificationPolicyAccessGranted()) {
 				if (notificationManager.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALARMS) {
 					volumeDndState.old_interruption_filter = notificationManager.getCurrentInterruptionFilter();
 					volumeDndState.new_interruption_filter = NotificationManager.INTERRUPTION_FILTER_ALARMS;
