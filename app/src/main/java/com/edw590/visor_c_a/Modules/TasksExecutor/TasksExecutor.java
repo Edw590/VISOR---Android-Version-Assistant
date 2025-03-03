@@ -76,7 +76,7 @@ public class TasksExecutor implements IModuleInst {
 
 			if (!task.getMessage().isEmpty()) {
 				UtilsSpeech2BC.speak(task.getMessage(), Speech2.PRIORITY_MEDIUM, Speech2.MODE1_ALWAYS_NOTIFY,
-						UtilsSpeech2BC.GPT_NONE, false, null);
+						UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 			}
 
 			if (!task.getCommand().isEmpty()) {

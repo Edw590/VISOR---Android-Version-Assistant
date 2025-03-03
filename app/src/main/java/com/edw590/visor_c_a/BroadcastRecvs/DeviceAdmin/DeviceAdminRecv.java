@@ -32,6 +32,8 @@ import com.edw590.visor_c_a.Modules.ProtectedLockScr.UtilsProtectedLockScr;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 
+import GPTComm.GPTComm;
+
 /**
  * <p>The Device Administration Receiver, which handles all received administration actions.</p>
  */
@@ -67,7 +69,7 @@ public final class DeviceAdminRecv extends DeviceAdminReceiver {
 
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLE_REQUESTED, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 		UtilsMainSrvc.startMainService();
 
@@ -82,7 +84,7 @@ public final class DeviceAdminRecv extends DeviceAdminReceiver {
 		UtilsProtectedLockScr.lockAndShowPLS(UtilsProtectedLockScr.getPLSIntent());
 
 		// todo This is not bypassing DND and vibration mode......!!!!!!!!!!!!!!!!!!!!
-		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLED, Speech2.PRIORITY_CRITICAL, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+		UtilsSpeech2BC.speak(CONSTS.SPEAK_DISABLED, Speech2.PRIORITY_CRITICAL, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 		// Why PRIORITY_CRITICAL? Refer to CONSTS.SPEAK_DISABLED.
 		// todo HE'LL SPEAK AND LEAVE THE PHONE WITH THE DO NOT DISTURB AND THE MAX VOLUME IF IT'S STOPPED IN
 		//  THE MIDDLE!!!!!! How do you fix that.....? You don't, right? xD Cool. No idea.

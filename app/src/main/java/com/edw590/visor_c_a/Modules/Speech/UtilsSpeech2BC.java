@@ -44,31 +44,31 @@ public final class UtilsSpeech2BC {
 	private UtilsSpeech2BC() {
 	}
 
-	public static final int GPT_NONE = 0;
-	public static final int GPT_DUMB = 1;
-	public static final int GPT_SMART = 2;
+	public static final String SESSION_TYPE_NONE = "NONE";
 	/**
 	 * <p>Broadcasts a request - more info on {@link CONSTS_BC_Speech#ACTION_CALL_SPEAK}, but
 	 * {@code bypass_no_sound = true}.</p>
 	 *
-	 * @param gpt_mode one of the GPT_-started constants. {@link #GPT_DUMB} or {@link #GPT_SMART} to send the text to
-	 * the GPTComm library in case the speech priority is less than or equal to {@link Speech2#PRIORITY_USER_ACTION},
-	 * {@code after_speaking} is null and the VISOR's communicator is connected
-	 * @param wait_for_gpt
+	 * @param session_type one of the SESSION_TYPE_-started constants (also from the GPTComm class). Different from
+	 * {@link #SESSION_TYPE_NONE} to send the text to the GPTComm library in case the speech priority is less than or
+	 * equal to {@link Speech2#PRIORITY_USER_ACTION}, {@code after_speaking} is null and the VISOR's communicator is
+	 * connected
+	 * @param wait_for_gpt if true, the function will wait for the GPTComm library to be ready to receive the text
 	 *
 	 * @return the speech ID or an empty string if the VISOR's communicator is connected and the text was sent to the
 	 * GPTComm library to be changed by LLaMA
 	 */
 	@NonNull
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
-							   final int gpt_mode, final boolean wait_for_gpt, @Nullable final Runnable after_speaking) {
-		if (gpt_mode != GPT_NONE && speech_priority <= Speech2.PRIORITY_USER_ACTION && after_speaking == null &&
-				UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
-				GPTComm.sendText("", false).equals(ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY))) {
+							   @NonNull final String session_type, final boolean wait_for_gpt,
+							   @Nullable final Runnable after_speaking) {
+		if (session_type != SESSION_TYPE_NONE && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
+				after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
+				GPTComm.sendText("", GPTComm.SESSION_TYPE_TEMP).equals(ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY))) {
 			String text = "Reword in English: \"" + txt_to_speak + "\". DON'T SAY YOU'RE REWORDING IT.";
 
 			String speak = "";
-			switch (GPTComm.sendText(text, gpt_mode == GPT_SMART)) {
+			switch (GPTComm.sendText(text, session_type)) {
 				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
 					speak = "The GPT is starting up. Text on hold.";
 
@@ -88,11 +88,6 @@ public final class UtilsSpeech2BC {
 			if (!speak.isEmpty()) {
 				speakInternal(speak, speech_priority, mode, null);
 			}
-
-			return "";
-		}
-		if (gpt_mode == GPT_SMART) {
-			// Not supposed to happen
 
 			return "";
 		}

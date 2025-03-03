@@ -44,6 +44,8 @@ import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 
 import java.util.ArrayList;
 
+import GPTComm.GPTComm;
+
 /**
  * <p>Utilities related to checking and requesting permissions and authorizations.</p>
  */
@@ -65,12 +67,12 @@ public final class UtilsPermsAuths {
 		if (perms_left == 0) {
 			if (warn_success) {
 				final String speak = "No permissions left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_NONE, false, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 			}
 		} else {
 			final String speak = "Warning - not all permissions have been granted to the application! Number " +
 					"of permissions left to authorize: " + perms_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 		}
 	}
 
@@ -84,12 +86,12 @@ public final class UtilsPermsAuths {
 		if (auths_left == 0) {
 			if (warn_success) {
 				final String speak = "No authorizations left to grant.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_NONE, false, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 			}
 		} else {
 			final String speak = "Warning - Not all authorizations have been granted to the application! Number of " +
 					"authorizations left to grant: " + auths_left + ".";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_NONE, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 		}
 	}
 

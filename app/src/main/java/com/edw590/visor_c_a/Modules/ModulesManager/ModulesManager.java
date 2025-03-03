@@ -30,6 +30,8 @@ import com.edw590.visor_c_a.ModulesList;
 import java.util.ArrayList;
 import java.util.List;
 
+import GPTComm.GPTComm;
+
 /**
  * <p>The module which ensures all the other modules are working properly.</p>
  */
@@ -98,7 +100,7 @@ public final class ModulesManager implements IModuleInst {
 							final String speak = "The following module is now supported by hardware or application " +
 									"permissions changes: " +
 									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_MEDIUM, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 						}
 						// startModule() already checks if the module is supported or not, but the manager would still
 						// call isModuleFullyWorking() for nothing, so I've put this in the if statement too.
@@ -111,7 +113,7 @@ public final class ModulesManager implements IModuleInst {
 							if (!module_startup) {
 								final String speak = "Attention - Module restarted: " +
 										ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 							}
 						}
 					} else {
@@ -120,7 +122,7 @@ public final class ModulesManager implements IModuleInst {
 							final String speak = "Attention - The following module stopped being supported by " +
 									"hardware or application permissions changes: " +
 									ModulesList.getElementValue(module_index, ModulesList.ELEMENT_NAME);
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 						}
 
 						// If the user disabled some permission, or some hardware component was disconnected and

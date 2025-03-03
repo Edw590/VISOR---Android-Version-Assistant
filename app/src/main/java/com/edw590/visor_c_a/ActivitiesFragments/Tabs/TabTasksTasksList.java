@@ -67,10 +67,10 @@ public final class TabTasksTasksList extends Fragment {
 		expandable_list_view.setAdapter(adapter);
 		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
 		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
-			Utils.setExpandableListViewSize(expandable_list_view);
+			Utils.setExpandableListViewSize(expandable_list_view, false);
 		});
 		expandable_list_view.setOnGroupExpandListener(groupPosition -> {
-			Utils.setExpandableListViewSize(expandable_list_view);
+			Utils.setExpandableListViewSize(expandable_list_view, false);
 		});
 
 		linearLayout.addView(expandable_list_view);
@@ -93,7 +93,7 @@ public final class TabTasksTasksList extends Fragment {
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.
-		Utils.setExpandableListViewSize(expandable_list_view);
+		Utils.setExpandableListViewSize(expandable_list_view, false);
 	}
 
 	private List<View> createTaskSetter(final ModsFileInfo.Task task) {

@@ -308,7 +308,7 @@ public final class PocketSphinxRecognition implements IModuleInst {
 			if ((boolean) UtilsRegistry.getData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, true)) {
 				UtilsRegistry.setData(RegistryKeys.K_POCKETSPHINX_REQUEST_STOP, false, false);
 				UtilsSpeech2BC.speak("Listening in the background again...", Speech2.PRIORITY_USER_ACTION,
-						Speech2.MODE2_BYPASS_NO_SND, UtilsSpeech2BC.GPT_NONE, false, null);
+						Speech2.MODE2_BYPASS_NO_SND, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 			}
 
 			stopListening(); // To ensure this is not called multiple times in a row (happened)

@@ -52,6 +52,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import GPTComm.GPTComm;
+
 /**
  * <p>Captures a picture in the background (without need for a UI).</p>
  * <p>Use up to API 20 (even though it may work on API 22 like it does on my OnePlus X).</p>
@@ -291,7 +293,7 @@ public final class TakePictureOld implements SurfaceHolder.Callback {
 				camera.takePicture(shutterCallback, null, pictureCallback);
 			} catch (final RuntimeException ignored) {
 				final String speak = "Error taking the picture, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 			}
 		}
 	};

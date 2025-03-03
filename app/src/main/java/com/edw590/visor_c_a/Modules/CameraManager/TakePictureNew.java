@@ -62,6 +62,8 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Objects;
 
+import GPTComm.GPTComm;
+
 @RequiresApi(api = 21)
 public final class TakePictureNew extends Service {
 
@@ -126,13 +128,13 @@ public final class TakePictureNew extends Service {
 		@Override
 		public void onDisconnected(@NonNull final CameraDevice camera) {
 			String speak = "Error taking the picture - the camera was disconnected";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 		}
 
 		@Override
 		public void onError(@NonNull final CameraDevice camera, final int error) {
 			String speak = "Generic error taking the picture";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 		}
 	};
 
@@ -214,7 +216,7 @@ public final class TakePictureNew extends Service {
 			cameraDevice.createCaptureSession(Collections.singletonList(imageReader.getSurface()), sessionStateCallback, null);
 		} catch (final CameraAccessException ignored) {
 			String speak = "Error taking the picture";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 		}
 	}
 

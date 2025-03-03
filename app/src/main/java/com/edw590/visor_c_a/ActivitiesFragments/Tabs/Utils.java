@@ -156,7 +156,7 @@ public class Utils {
 		ft2.attach(fragment).commit();
 	}
 
-	static void setExpandableListViewSize(@NonNull final ExpandableListView myListView) {
+	static void setExpandableListViewSize(@NonNull final ExpandableListView myListView, final boolean long_text) {
 		// Got it from https://stackoverflow.com/a/43177241/8228163.
 
 		ListAdapter myListAdapter = myListView.getAdapter();
@@ -171,7 +171,12 @@ public class Utils {
 			listItem.measure(0, 0);
 			totalHeight += listItem.getMeasuredHeight();
 		}
-		totalHeight *= 1.5; // Correction of mine (Edw590)
+		// Correction of mine (Edw590)
+		if (long_text) {
+			totalHeight *= 2;
+		} else {
+			totalHeight *= 1.5;
+		}
 		//setting listview item in adapter
 		ViewGroup.LayoutParams params = myListView.getLayoutParams();
 		params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));

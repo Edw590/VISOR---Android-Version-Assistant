@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import GPTComm.GPTComm;
+
 /**
  * <p>This class activates the available commands speech recognizer and broadcasts the results.</p>
  * <p>The results can be either final results or partial results, and both will be processed (NOT YET - NOT READY).</p>
@@ -78,7 +80,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			ModulesList.ELEMENT_NAME));
 	private Handler main_handler;
 
-	@Nullable private SpeechRecognizer recognizer = null;
+	@Nullable SpeechRecognizer recognizer = null;
 
 	boolean is_listening = false;
 	boolean is_working = false;
@@ -88,7 +90,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 	boolean visor_spoke = false;
 	boolean wait = true;
 
-	private FrozenMethodsChecker frozen_methods_checker = null;
+	FrozenMethodsChecker frozen_methods_checker = null;
 
 	//String last_processed_speech = "";
 	//int partial_results_last_index = 0;
@@ -232,7 +234,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// Else, if the microphone doesn't stop being busy, means it's in use elsewhere (recording, in a call, who
 			// knows), so warn about it and don't do anything.
 			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 			stopListening(true);
 			stopSelf();
@@ -270,7 +272,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		wait = true;
 		// Don't notify about the speech if there was no sound - there's already a notification.
 		listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION, Speech2.MODE1_NO_NOTIF,
-				UtilsSpeech2BC.GPT_NONE, false, null);
+				UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 		visor_spoke = UtilsSpeech2.mightSpeak();
 
 		// Right before calling startListening() but also before the while true just in case it would get stuck.

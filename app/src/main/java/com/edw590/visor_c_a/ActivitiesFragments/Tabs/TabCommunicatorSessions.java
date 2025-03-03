@@ -54,7 +54,7 @@ import UtilsSWA.UtilsSWA;
  */
 public final class TabCommunicatorSessions extends Fragment {
 
-	private final class SessionInfo {
+	final class SessionInfo {
 		String id;
 		ModsFileInfo.Session session;
 	}
@@ -121,7 +121,7 @@ public final class TabCommunicatorSessions extends Fragment {
 				return 0;
 			}
 
-			return s1.session.getCreated_time_s() < s2.session.getCreated_time_s() ? -1 : 1;
+			return s1.session.getCreated_time_s() > s2.session.getCreated_time_s() ? -1 : 1;
 		});
 
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
@@ -129,10 +129,10 @@ public final class TabCommunicatorSessions extends Fragment {
 		expandable_list_view.setAdapter(adapter);
 		expandable_list_view.setLayoutParams(linearLayout.getLayoutParams());
 		expandable_list_view.setOnGroupCollapseListener(groupPosition -> {
-			Utils.setExpandableListViewSize(expandable_list_view);
+			Utils.setExpandableListViewSize(expandable_list_view, true);
 		});
 		expandable_list_view.setOnGroupExpandListener(groupPosition -> {
-			Utils.setExpandableListViewSize(expandable_list_view);
+			Utils.setExpandableListViewSize(expandable_list_view, true);
 		});
 
 		linearLayout.addView(expandable_list_view);
@@ -149,7 +149,7 @@ public final class TabCommunicatorSessions extends Fragment {
 		}
 
 		// After adding all the values, set the size of the ExpandableListView.
-		Utils.setExpandableListViewSize(expandable_list_view);
+		Utils.setExpandableListViewSize(expandable_list_view, true);
 	}
 
 	private List<View> createSessionView(final SessionInfo session_info) {

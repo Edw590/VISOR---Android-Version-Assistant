@@ -277,7 +277,7 @@ public final class Speech2 implements IModuleInst {
 			// Don't call the internal speak() directly - use the broadcast. Useful to show Toasts on TVs, and they only
 			// work if sent from the UI thread, which apparently is the thread of the broadcast receiver, because they
 			// work there.
-			UtilsSpeech2BC.speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT, UtilsSpeech2BC.GPT_NONE, false, null);
+			UtilsSpeech2BC.speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 		}
 	});
 

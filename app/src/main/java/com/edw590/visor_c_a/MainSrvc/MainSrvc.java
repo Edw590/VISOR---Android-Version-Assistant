@@ -49,6 +49,8 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
 
+import GPTComm.GPTComm;
+
 /**
  * The Main {@link Service} of the application, running in foreground.
  */
@@ -131,7 +133,7 @@ public final class MainSrvc extends Service {
 				if (!ModulesList.isElementFullyWorking(mods_manager_index)) {
 					ModulesList.restartElement(mods_manager_index);
 					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 				}
 
 				try {
@@ -170,7 +172,7 @@ public final class MainSrvc extends Service {
 							if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 								final String speak = "WARNING - Installed as privileged application but without updates. " +
 										"Only emergency code commands will be available below Android Marshmallow.";
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 							}
 							//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
 							//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
@@ -183,7 +185,7 @@ public final class MainSrvc extends Service {
 						case (UtilsApp.NON_PRIVILEGED): {
 							final String speak = "WARNING - Installed as non-privileged application! Privileged app " +
 									"features may not be available.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 							break;
 						}
@@ -192,7 +194,7 @@ public final class MainSrvc extends Service {
 					if (!UtilsApp.isDeviceAdmin()) {
 						final String speak = "WARNING - The application is not a Device Administrator! Some security " +
 								"features may not be available.";
-						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 					}
 
 					/* todo if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
@@ -224,21 +226,21 @@ public final class MainSrvc extends Service {
 						case UtilsMainSrvc.UNSUPPORTED_OS_VERSION: {
 							final String speak = "The power button long press detection will not be available. Your " +
 									"Android version is not supported.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 							break;
 						}
 						case UtilsMainSrvc.UNSUPPORTED_HARDWARE: {
 							final String speak = "The power button long press detection will not be available. " +
 									"Your hardware does not seem to support the detection.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 							break;
 						}
 						case UtilsMainSrvc.PERMISSION_DENIED: {
 							final String speak = "The power button long press detection will not be available. The " +
 									"permission to draw a system overlay was denied.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 							break;
 						}
@@ -253,7 +255,7 @@ public final class MainSrvc extends Service {
 				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
 				// ready.
 				final String speak = "Ready, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 				try {
 					unregisterReceiver(broadcastReceiver);

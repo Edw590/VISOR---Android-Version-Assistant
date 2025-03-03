@@ -24,6 +24,7 @@ package com.edw590.visor_c_a.GlobalUtils;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 
+import GPTComm.GPTComm;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -48,12 +49,12 @@ public final class UtilsRoot {
         if (UtilsSWA.isRootAvailableROOT()) {
             if (warn_root_available) {
                 final String speak = "Root access available on the device.";
-                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.GPT_NONE, false, null);
+                UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
             }
         } else {
             final String speak = "Attention! Root access was denied or is not available on this device! Some " +
                     "features may not be available!";
-            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.GPT_DUMB, false, null);
+            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
         }
     }
 }
