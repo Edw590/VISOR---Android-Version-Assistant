@@ -138,7 +138,7 @@ public final class TabCommunicatorSessions extends Fragment {
 		linearLayout.addView(expandable_list_view);
 
 		for (final SessionInfo session_info : sessions_info) {
-			if (session_info.id.equals("dumb")) {
+			if (session_info.id.equals("temp") || session_info.id.equals("dumb")) {
 				continue;
 			}
 
@@ -225,7 +225,7 @@ public final class TabCommunicatorSessions extends Fragment {
 			if (!sessions_ids_str.isEmpty()) {
 				String[] sessions_ids = sessions_ids_str.split("\\|");
 				for (final String session_id : sessions_ids) {
-					if (session_id.equals("dumb")) {
+					if (session_id.equals("temp") || session_id.equals("dumb")) {
 						continue;
 					}
 
