@@ -99,9 +99,23 @@ public final class TabCommunicatorSessions extends Fragment {
 		padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
+		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
+			AppCompatTextView txtView = new AppCompatTextView(requireContext());
+			txtView.setText("[Not connected to the server to get the chats]");
+
+			linearLayout.addView(txtView);
+
+			return;
+		}
+
 		GPTComm.retrieveSessions();
 		String sessions_ids_str = GPTComm.getSessionIdsList();
 		if (sessions_ids_str.isEmpty()) {
+			AppCompatTextView txtView = new AppCompatTextView(requireContext());
+			txtView.setText("[Not connected to the server to get the chats]");
+
+			linearLayout.addView(txtView);
+
 			return;
 		}
 
@@ -219,54 +233,56 @@ public final class TabCommunicatorSessions extends Fragment {
 
 	private final Thread infinity_checker = new Thread(() -> {
 		while (true) {
-			GPTComm.retrieveSessions();
+			if (UtilsSWA.isCommunicatorConnectedSERVER()) {
+				GPTComm.retrieveSessions();
 
-			String sessions_ids_str = GPTComm.getSessionIdsList();
-			if (!sessions_ids_str.isEmpty()) {
-				String[] sessions_ids = sessions_ids_str.split("\\|");
-				for (final String session_id : sessions_ids) {
-					if (session_id.equals("temp") || session_id.equals("dumb")) {
-						continue;
-					}
-
-					String[] session_history = GPTComm.getSessionHistory(session_id).split("\0");
-					String msg_content_str = "";
-					for (final String message : session_history) {
-						String[] message_parts_pipe = message.split("\\|");
-						String[] message_parts_slash = message_parts_pipe[0].split("/");
-
-						String msg_role = message_parts_slash[0];
-						switch (msg_role) {
-							case "system": {
-								continue;
-							}
-							case "assistant": {
-								msg_role = "VISOR";
-
-								break;
-							}
-							case "user": {
-								msg_role = "YOU";
-
-								break;
-							}
+				String sessions_ids_str = GPTComm.getSessionIdsList();
+				if (!sessions_ids_str.isEmpty()) {
+					String[] sessions_ids = sessions_ids_str.split("\\|");
+					for (final String session_id : sessions_ids) {
+						if (session_id.equals("temp") || session_id.equals("dumb")) {
+							continue;
 						}
-						long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
-						String msg_content = message_parts_pipe[1];
 
-						msg_content_str +=
-								"-----------------------------------------------------------------------\n" +
-										"|" + msg_role + "| on " +
-										UtilsSWA.getDateTimeStrTIMEDATE(msg_timestamp_s * 1000) + ":\n" +
-										msg_content + "\n\n";
-					}
-					if (msg_content_str.length() > 2) {
-						msg_content_str = msg_content_str.substring(0, msg_content_str.length() - 2);
-					}
+						String[] session_history = GPTComm.getSessionHistory(session_id).split("\0");
+						String msg_content_str = "";
+						for (final String message : session_history) {
+							String[] message_parts_pipe = message.split("\\|");
+							String[] message_parts_slash = message_parts_pipe[0].split("/");
 
-					AppCompatTextView txtView = txtViews_map.get(session_id);
-					if (txtView != null && !msg_content_str.equals(txtView.toString())) {
-						requireActivity().runOnUiThread(new Runnable1(session_id, msg_content_str));
+							String msg_role = message_parts_slash[0];
+							switch (msg_role) {
+								case "system": {
+									continue;
+								}
+								case "assistant": {
+									msg_role = "VISOR";
+
+									break;
+								}
+								case "user": {
+									msg_role = "YOU";
+
+									break;
+								}
+							}
+							long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
+							String msg_content = message_parts_pipe[1];
+
+							msg_content_str +=
+									"-----------------------------------------------------------------------\n" +
+											"|" + msg_role + "| on " +
+											UtilsSWA.getDateTimeStrTIMEDATE(msg_timestamp_s * 1000) + ":\n" +
+											msg_content + "\n\n";
+						}
+						if (msg_content_str.length() > 2) {
+							msg_content_str = msg_content_str.substring(0, msg_content_str.length() - 2);
+						}
+
+						AppCompatTextView txtView = txtViews_map.get(session_id);
+						if (txtView != null && !msg_content_str.equals(txtView.toString())) {
+							requireActivity().runOnUiThread(new Runnable1(session_id, msg_content_str));
+						}
 					}
 				}
 			}

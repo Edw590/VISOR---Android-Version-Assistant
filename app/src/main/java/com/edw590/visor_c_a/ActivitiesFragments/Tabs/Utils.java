@@ -173,7 +173,7 @@ public class Utils {
 		}
 		// Correction of mine (Edw590)
 		if (long_text) {
-			totalHeight *= 2;
+			totalHeight *= 2.5;
 		} else {
 			totalHeight *= 1.5;
 		}

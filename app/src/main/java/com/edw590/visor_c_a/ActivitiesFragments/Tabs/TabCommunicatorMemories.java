@@ -22,14 +22,10 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,25 +57,28 @@ public final class TabCommunicatorMemories extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
+		String memories = "[Not connected to the server to get the memories]";
+		if (UtilsSWA.isCommunicatorConnectedSERVER()) {
+			memories = GPTComm.getMemories();
+		}
+
+		int num_memories = 0;
+		if (!memories.isEmpty()) {
+			num_memories = memories.split("\n").length;
+		}
 		AppCompatTextView txtView_info = new AppCompatTextView(requireContext());
-		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode):");
+		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode). " +
+				"Number of memories: " + num_memories);
 
 		AppCompatEditText editTxt_memories_text = new AppCompatEditText(requireContext());
 		editTxt_memories_text.setSingleLine(false);
-		editTxt_memories_text.setHint("Stored memories on the smart LLM");
-		if (UtilsSWA.isCommunicatorConnectedSERVER()) {
-			editTxt_memories_text.setText(GPTComm.getMemories());
-		} else {
-			editTxt_memories_text.setText("[Not connected to the server to get the memories]");
-		}
+		editTxt_memories_text.setHint("Stored memories");
+		editTxt_memories_text.setText(memories);
 
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save memories");
-		btn_save.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				GPTComm.setMemories(editTxt_memories_text.getText().toString());
-			}
+		btn_save.setOnClickListener(v -> {
+			GPTComm.setMemories(editTxt_memories_text.getText().toString());
 		});
 
 		linearLayout.addView(txtView_info);
