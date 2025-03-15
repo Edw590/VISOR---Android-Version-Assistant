@@ -62,10 +62,11 @@ public final class UtilsSpeech2BC {
 	public static String speak(@NonNull final String txt_to_speak, final int speech_priority, final int mode,
 							   @NonNull final String session_type, final boolean wait_for_gpt,
 							   @Nullable final Runnable after_speaking) {
-		if (session_type != SESSION_TYPE_NONE && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
+		if (!session_type.equals(SESSION_TYPE_NONE) && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
 				after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
 				GPTComm.sendText("", GPTComm.SESSION_TYPE_TEMP).equals(ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY))) {
-			String text = "Reword in English: \"" + txt_to_speak + "\". DON'T SAY YOU'RE REWORDING IT.";
+			String text = "[SYSTEM TASK - Inform the user of the following: \"" + txt_to_speak +
+					"\". NO SAYING YOU'RE REWORDING IT]";
 
 			String speak = "";
 			switch (GPTComm.sendText(text, session_type)) {
