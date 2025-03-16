@@ -108,7 +108,6 @@ public final class TabCommunicatorSessions extends Fragment {
 			return;
 		}
 
-		GPTComm.retrieveSessions();
 		String sessions_ids_str = GPTComm.getSessionIdsList();
 		if (sessions_ids_str.isEmpty()) {
 			AppCompatTextView txtView = new AppCompatTextView(requireContext());
@@ -234,8 +233,6 @@ public final class TabCommunicatorSessions extends Fragment {
 	private final Thread infinity_checker = new Thread(() -> {
 		while (true) {
 			if (UtilsSWA.isCommunicatorConnectedSERVER()) {
-				GPTComm.retrieveSessions();
-
 				String sessions_ids_str = GPTComm.getSessionIdsList();
 				if (!sessions_ids_str.isEmpty()) {
 					String[] sessions_ids = sessions_ids_str.split("\\|");

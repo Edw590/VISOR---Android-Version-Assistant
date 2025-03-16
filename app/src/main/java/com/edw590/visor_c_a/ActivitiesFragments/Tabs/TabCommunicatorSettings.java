@@ -60,15 +60,10 @@ public final class TabCommunicatorSettings extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
-		AppCompatEditText editTxt_smart_model_loc = new AppCompatEditText(requireContext());
-		editTxt_smart_model_loc.setHint("GGUF location for the smart LLM (used for normal conversation)");
-		editTxt_smart_model_loc.setText(mod_7_user_info.getModel_smart_loc());
-		editTxt_smart_model_loc.setSingleLine();
-
-		AppCompatEditText editTxt_dumb_model_loc = new AppCompatEditText(requireContext());
-		editTxt_dumb_model_loc.setHint("GGUF location for the dumb LLM (used to summarize things)");
-		editTxt_dumb_model_loc.setText(mod_7_user_info.getModel_dumb_loc());
-		editTxt_dumb_model_loc.setSingleLine();
+		AppCompatEditText editTxt_model_name = new AppCompatEditText(requireContext());
+		editTxt_model_name.setHint("GPT model name (example: llama3.2)");
+		editTxt_model_name.setText(mod_7_user_info.getModel_name());
+		editTxt_model_name.setSingleLine();
 
 		AppCompatEditText editTxt_system_info = new AppCompatEditText(requireContext());
 		editTxt_system_info.setHint("LLM system information");
@@ -83,14 +78,12 @@ public final class TabCommunicatorSettings extends Fragment {
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
-			mod_7_user_info.setModel_smart_loc(editTxt_smart_model_loc.getText().toString());
-			mod_7_user_info.setModel_dumb_loc(editTxt_dumb_model_loc.getText().toString());
+			mod_7_user_info.setModel_name(editTxt_model_name.getText().toString());
 			mod_7_user_info.setSystem_info(editTxt_system_info.getText().toString());
 			mod_7_user_info.setUser_nickname(editTxt_user_nickname.getText().toString());
 		});
 
-		linearLayout.addView(editTxt_smart_model_loc);
-		linearLayout.addView(editTxt_dumb_model_loc);
+		linearLayout.addView(editTxt_model_name);
 		linearLayout.addView(editTxt_system_info);
 		linearLayout.addView(editTxt_user_nickname);
 		linearLayout.addView(btn_save);

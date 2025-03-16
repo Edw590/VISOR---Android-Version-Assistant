@@ -64,7 +64,7 @@ public final class UtilsSpeech2BC {
 							   @Nullable final Runnable after_speaking) {
 		if (!session_type.equals(SESSION_TYPE_NONE) && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
 				after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
-				GPTComm.sendText("", GPTComm.SESSION_TYPE_TEMP).equals(ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY))) {
+				GPTComm.sendText("", "") == ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY)) {
 			String text = "[SYSTEM TASK - Inform the user of the following: \"" + txt_to_speak +
 					"\". NO SAYING YOU'RE REWORDING IT]";
 

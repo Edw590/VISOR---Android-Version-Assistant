@@ -44,6 +44,7 @@ import com.edw590.visor_c_a.R;
 import java.util.Locale;
 
 import GPTComm.GPTComm;
+import ModsFileInfo.ModsFileInfo;
 import UtilsSWA.UtilsSWA;
 
 /**
@@ -51,6 +52,7 @@ import UtilsSWA.UtilsSWA;
  */
 public final class TabCommunicatorMain extends Fragment {
 
+	AppCompatTextView txt_gpt_comm_state;
 	AppCompatTextView txt_response;
 
 	@Override
@@ -90,6 +92,11 @@ public final class TabCommunicatorMain extends Fragment {
 		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
 				resources.getDisplayMetrics());
 
+		txt_gpt_comm_state = new AppCompatTextView(requireContext());
+		txt_gpt_comm_state.setPadding(padding_px, padding_px, padding_px, padding_px);
+		txt_gpt_comm_state.setText("GPT state: error");
+		txt_gpt_comm_state.setTextIsSelectable(true);
+
 		AppCompatEditText editTxt_txt_to_send = new AppCompatEditText(requireContext());
 		editTxt_txt_to_send.setSingleLine(false);
 		editTxt_txt_to_send.setHint("Text to send to VISOR (commands or normal text to the LLM)");
@@ -123,6 +130,7 @@ public final class TabCommunicatorMain extends Fragment {
 		txt_response.setText("Response from the smart LLM");
 		txt_response.setTextIsSelectable(true);
 
+		linearLayout.addView(txt_gpt_comm_state);
 		linearLayout.addView(editTxt_txt_to_send);
 		linearLayout.addView(btn_listen);
 		linearLayout.addView(btn_send_text);
@@ -135,6 +143,35 @@ public final class TabCommunicatorMain extends Fragment {
 			Runnable runnable = () -> {
 				txt_response.setText(GPTComm.getLastText());
 			};
+			Runnable runnable1 = () -> {
+				String gpt_state = "[Not connected to the server to get the GPT state]";
+				if (UtilsSWA.isCommunicatorConnectedSERVER()) {
+					gpt_state = "invalid";
+					switch (GPTComm.getModuleState()) {
+						case (ModsFileInfo.MOD_7_STATE_STARTING): {
+							gpt_state = "starting";
+
+							break;
+						}
+						case (ModsFileInfo.MOD_7_STATE_BUSY): {
+							gpt_state = "busy";
+
+							break;
+						}
+						case (ModsFileInfo.MOD_7_STATE_READY): {
+							gpt_state = "ready";
+
+							break;
+						}
+						case (ModsFileInfo.MOD_7_STATE_STOPPING): {
+							gpt_state = "stopping";
+
+							break;
+						}
+					}
+				}
+				txt_gpt_comm_state.setText("GPT state: " + gpt_state);
+			};
 			String old_text = "";
 			while (true) {
 				String new_text = GPTComm.getLastText();
@@ -142,6 +179,8 @@ public final class TabCommunicatorMain extends Fragment {
 					old_text = new_text;
 					requireActivity().runOnUiThread(runnable);
 				}
+
+				requireActivity().runOnUiThread(runnable1);
 
 				try {
 					Thread.sleep(1000);
