@@ -1212,7 +1212,7 @@ public final class CmdsExecutor implements IModuleInst {
 		}
 	}
 
-	private void sendToGPT(final String sentence_str) {
+	private void sendToGPT(final String txt_to_send) {
 		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
 			String speak = "GPT unavailable. Not connected to the server.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
@@ -1222,7 +1222,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 
 		String speak = "";
-		switch (GPTComm.sendText(sentence_str, GPTComm.SESSION_TYPE_ACTIVE)) {
+		switch (GPTComm.sendText(txt_to_send, GPTComm.SESSION_TYPE_ACTIVE)) {
 			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
 				speak = "The GPT is starting up. Text on hold.";
 
@@ -1239,7 +1239,7 @@ public final class CmdsExecutor implements IModuleInst {
 				break;
 			}
 		}
-		if (!speak.isEmpty()) {
+		if (!speak.isEmpty() && !txt_to_send.equals("/stop")) {
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 		}
 	}
