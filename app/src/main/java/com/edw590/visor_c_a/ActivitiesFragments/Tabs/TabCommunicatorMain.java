@@ -93,7 +93,7 @@ public final class TabCommunicatorMain extends Fragment {
 				resources.getDisplayMetrics());
 
 		txt_gpt_comm_state = new AppCompatTextView(requireContext());
-		txt_gpt_comm_state.setPadding(padding_px, padding_px, padding_px, padding_px);
+		txt_gpt_comm_state.setPadding(padding_px, padding_px, padding_px, 0);
 		txt_gpt_comm_state.setText("GPT state: error");
 		txt_gpt_comm_state.setTextIsSelectable(true);
 

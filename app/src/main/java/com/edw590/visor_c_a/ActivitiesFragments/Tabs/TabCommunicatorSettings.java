@@ -22,6 +22,7 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,13 +66,25 @@ public final class TabCommunicatorSettings extends Fragment {
 		editTxt_model_name.setText(mod_7_user_info.getModel_name());
 		editTxt_model_name.setSingleLine();
 
+		AppCompatEditText editTxt_ctx_size = new AppCompatEditText(requireContext());
+		editTxt_ctx_size.setHint("GPT context size (example: 4096)");
+		editTxt_ctx_size.setText(Integer.toString(mod_7_user_info.getContext_size()));
+		editTxt_ctx_size.setSingleLine();
+		editTxt_ctx_size.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+		AppCompatEditText editTxt_temperature = new AppCompatEditText(requireContext());
+		editTxt_temperature.setHint("GPT temperature (example: 0.8)");
+		editTxt_temperature.setText(Float.toString(mod_7_user_info.getTemperature()));
+		editTxt_temperature.setSingleLine();
+		editTxt_temperature.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
 		AppCompatEditText editTxt_system_info = new AppCompatEditText(requireContext());
 		editTxt_system_info.setHint("LLM system information");
 		editTxt_system_info.setText(mod_7_user_info.getSystem_info());
 		editTxt_system_info.setSingleLine();
 
 		AppCompatEditText editTxt_user_nickname = new AppCompatEditText(requireContext());
-		editTxt_user_nickname.setHint("User nickname");
+		editTxt_user_nickname.setHint("User nickname (Sir, for example)");
 		editTxt_user_nickname.setText(mod_7_user_info.getUser_nickname());
 		editTxt_user_nickname.setSingleLine();
 
@@ -79,11 +92,15 @@ public final class TabCommunicatorSettings extends Fragment {
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
 			mod_7_user_info.setModel_name(editTxt_model_name.getText().toString());
+			mod_7_user_info.setContext_size(Integer.parseInt(editTxt_ctx_size.getText().toString()));
+			mod_7_user_info.setTemperature(Float.parseFloat(editTxt_temperature.getText().toString()));
 			mod_7_user_info.setSystem_info(editTxt_system_info.getText().toString());
 			mod_7_user_info.setUser_nickname(editTxt_user_nickname.getText().toString());
 		});
 
 		linearLayout.addView(editTxt_model_name);
+		linearLayout.addView(editTxt_ctx_size);
+		linearLayout.addView(editTxt_temperature);
 		linearLayout.addView(editTxt_system_info);
 		linearLayout.addView(editTxt_user_nickname);
 		linearLayout.addView(btn_save);
