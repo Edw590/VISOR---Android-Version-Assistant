@@ -10,11 +10,9 @@ This project is a part of a bigger project, consisting of the following:
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/GNribewvOi4/0.jpg)](https://www.youtube.com/watch?v=GNribewvOi4)
 
 ## Download
-Currently there are only pre-releases, but they're functional - I use the app on my phone, running all the time, 24/7. Download any (preferably the most recent one) from the [Releases](https://github.com/DADi590/VISOR---A-better-Android-assistant/releases), clicking on Assets.
+Download the most recent release from the [Releases](https://github.com/DADi590/VISOR---A-better-Android-assistant/releases).
 
-They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. As they're pre-releases, I'm releasing them as debug type. Why not, anyway.
-
-They're pre-releases because I don't have any settings yet. So everything is how I programmed it and can't be changed. When I have a settings page I might start releasing the versions as actual releases.
+They say "debug" at the end because they're debug type APKs, meaning you can use Android's logcat to look at what's happening on the app. They're not release type, in which you can't see anything. I'm releasing them as debug type. Why not, anyway.
 
 **NOTE: ignore the "app created for old Android version" warning when installing! That enables me to use system features now locked on newer Android releases!**
 
@@ -25,7 +23,7 @@ They're pre-releases because I don't have any settings yet. So everything is how
 - Lollipop 5.0 on a OnePlus X (the phone with the broken screen that gave reason to the app)
 
 ## Pictures
-Note: these pictures may be outdated.
+Note: these pictures are outdated. Check the video which is more recent.
 
 **NOTE: the commands list picture is outdated. Check below for a complete list.**
 
@@ -51,18 +49,16 @@ Hi all. This Android version is a project I started in January 2020 when I broke
 
 I've now finally decided to make it public, after vastly improving its coding style (<3 IntelliJ's Inspections...) and translating the code to English (was in Portuguese, even though speeches and recognition were already in English).
 
-"A better Android assistant" because it's supposed to help handling the phone, even if it has no screen (my original use for the app with an older phone of mine with a broken screen), or even in the future, with time, one of the ideas is to have it knowing exactly where the user is (**no sharing of anything, all local** - everything will be only local when I create the file to store them) to remind them of something they might need to do (leaving the house, good idea to bring the wallet and the keys, for example. Or going near a supermarket - "You wanted to buy food"). It's all open-source code, so... nothing bad in the background. Don't really trust? - check the code and compile yourself and use it (same app anyways).
+It's supposed to help handling the phone, even if it has no screen (my original use for the app with an older phone of mine with a broken screen), or even in the future, with time, one of the ideas is to have it knowing exactly where the user is (**no sharing of anything, all local** - everything will be only local when I create the file to store them) to remind them of something they might need to do (leaving the house, good idea to bring the wallet and the keys, for example. Or going near a supermarket - "You wanted to buy food"). It's all open-source code, so... nothing bad in the background. Don't really trust? - check the code and compile yourself and use it (same app anyways).
 
 ## Explanation of the assistant
 Its command recognition submodule is not a simple recognition (have a look on the Advanced Commands Detection module mentioned below in the Notice) - you don't have to say the exact command for it to recognize it. It's not smart either though (it's not ML - yet?). You can say any words in-between some hard-coded command words and it will still recognize the action(s). You can even tell it to don't do something you just told it to do. It's supposed to be an assistant for real-life use.
 
 It's also supposed to work 100% offline. It can use online features, but preferably, only if they're not available offline. If Internet connection goes down, app goes down - doesn't seem a good idea... xD
 
-For now it's also an app that has everything hard-coded, so no options to customize in the UI. Feel free to change whatever you'd like and use it yourself, for example. If I decide to publish it on some store, an UI will be made for users to be able to choose as many things as I can make choosable - or with time, even if I don't publish it (for now I'd just like everything implemented and working).
-
 I should also note that I'm making this app to "think" it's a God. That's why you might see some "abusive" parts on it, like my code ready to force permissions to be granted (though, disabled until I have a way to make it optional). It's supposed to be as secure as I can make it. Check it for yourself though. It has nothing that steals data (decompile the APK if you want, there are tools online for that; or compile it yourself). I might try to keep the app without the Internet permission if I release it to a store, so people can be relaxed about it (it will probably cut features if I do it though).
 
-The app "supports" API 15 at minimum (that's Android 4.0.3). That's because I like to support as many devices as I can (GoMobile, a library I'll use, is only available from API 15 onwards).
+The app "supports" API 16 at minimum (that's Android 4.1). That's because I like to support as many devices as I can (gomobile, a library I use, is only available from API 16 onwards).
 
 The app is also able to work with root access and system permissions. The prefered way to install the app is with root permissions, installed as a privileged system app, and Device Administration enabled for it (absolute control XD). The app must work without them perfectly, but if some features are *only* available with one or more of the 3 mentioned ways, they will be added anyways. So to have full functionality, install it that way.
 
