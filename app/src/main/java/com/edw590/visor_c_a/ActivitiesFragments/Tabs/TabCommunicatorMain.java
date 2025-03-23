@@ -147,7 +147,7 @@ public final class TabCommunicatorMain extends Fragment {
 				String gpt_state = "[Not connected to the server to get the GPT state]";
 				if (UtilsSWA.isCommunicatorConnectedSERVER()) {
 					gpt_state = "invalid";
-					switch (GPTComm.sendText("", "")) {
+					switch (GPTComm.getModuleState()) {
 						case (ModsFileInfo.MOD_7_STATE_STOPPED): {
 							gpt_state = "stopped";
 
