@@ -147,14 +147,14 @@ public final class TabCommunicatorMain extends Fragment {
 				String gpt_state = "[Not connected to the server to get the GPT state]";
 				if (UtilsSWA.isCommunicatorConnectedSERVER()) {
 					gpt_state = "invalid";
-					switch (GPTComm.getModuleState()) {
-						case (ModsFileInfo.MOD_7_STATE_STARTING): {
-							gpt_state = "starting";
+					switch (GPTComm.sendText("", "")) {
+						case (ModsFileInfo.MOD_7_STATE_STOPPED): {
+							gpt_state = "stopped";
 
 							break;
 						}
-						case (ModsFileInfo.MOD_7_STATE_BUSY): {
-							gpt_state = "busy";
+						case (ModsFileInfo.MOD_7_STATE_STARTING): {
+							gpt_state = "starting";
 
 							break;
 						}
@@ -163,8 +163,8 @@ public final class TabCommunicatorMain extends Fragment {
 
 							break;
 						}
-						case (ModsFileInfo.MOD_7_STATE_STOPPING): {
-							gpt_state = "stopping";
+						case (ModsFileInfo.MOD_7_STATE_BUSY): {
+							gpt_state = "busy";
 
 							break;
 						}

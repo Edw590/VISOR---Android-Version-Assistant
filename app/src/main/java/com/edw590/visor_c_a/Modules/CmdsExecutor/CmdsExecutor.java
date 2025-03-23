@@ -1223,18 +1223,18 @@ public final class CmdsExecutor implements IModuleInst {
 
 		String speak = "";
 		switch (GPTComm.sendText(txt_to_send, GPTComm.SESSION_TYPE_ACTIVE)) {
-			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
+			case (ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPED): {
+				speak = "The GPT is stopped. Text on hold.";
+
+				break;
+			}
+			case (ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING): {
 				speak = "The GPT is starting up. Text on hold.";
 
 				break;
 			}
-			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_BUSY: {
+			case (ModsFileInfo.ModsFileInfo.MOD_7_STATE_BUSY): {
 				speak = "The GPT is busy. Text on hold.";
-
-				break;
-			}
-			case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPING: {
-				speak = "The GPT is stopping. Text on hold.";
 
 				break;
 			}

@@ -30,6 +30,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.TasksList;
 
 import GPTComm.GPTComm;
+import ModsFileInfo.ModsFileInfo;
 import SpeechQueue.SpeechQueue;
 import UtilsSWA.UtilsSWA;
 
@@ -64,24 +65,24 @@ public final class UtilsSpeech2BC {
 							   @Nullable final Runnable after_speaking) {
 		if (!session_type.equals(SESSION_TYPE_NONE) && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
 				after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
-				GPTComm.sendText("", "") == ModsFileInfo.ModsFileInfo.MOD_7_STATE_READY)) {
+				GPTComm.sendText("", "") == ModsFileInfo.MOD_7_STATE_READY)) {
 			String text = "[SYSTEM TASK - Inform the user of the following: \"" + txt_to_speak +
 					"\". NO SAYING YOU'RE REWORDING IT]";
 
 			String speak = "";
 			switch (GPTComm.sendText(text, session_type)) {
-				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STARTING: {
+				case (ModsFileInfo.MOD_7_STATE_STOPPED): {
+					speak = "The GPT is stopped. Text on hold.";
+
+					break;
+				}
+				case (ModsFileInfo.MOD_7_STATE_STARTING): {
 					speak = "The GPT is starting up. Text on hold.";
 
 					break;
 				}
-				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_BUSY: {
+				case (ModsFileInfo.MOD_7_STATE_BUSY): {
 					speak = "The GPT is busy. Text on hold.";
-
-					break;
-				}
-				case ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPING: {
-					speak = "The GPT is stopping. Text on hold.";
 
 					break;
 				}
