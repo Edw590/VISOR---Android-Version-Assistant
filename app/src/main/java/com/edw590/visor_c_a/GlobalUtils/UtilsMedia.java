@@ -83,6 +83,6 @@ public final class UtilsMedia {
 			}
 		}
 
-		return new File(file_path.toString());
+		return new File(file_path.gPathToStringConversion());
 	}
 }

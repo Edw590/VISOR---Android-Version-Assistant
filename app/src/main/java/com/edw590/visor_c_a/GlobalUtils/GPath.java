@@ -29,8 +29,8 @@ import UtilsSWA.UtilsSWA;
  * <p>Good Path-related utilities.</p>
  * <br>
  * <p>GPath (GoodPath) is sort of a copy of the string type but that represents a *surely* valid and correct path, also
- * according to the project conventions as described in the Path() function.</p>
- * <p>It's a "good path" because it's only given by Path(), which corrects the paths, and because the string component is
+ * according to the project conventions.</p>
+ * <p>It's a "good path" because it's only given by GPath(), which corrects the paths, and because the string component is
  * private to the package and only requested when absolutely necessary, like to communicate with Java's official functions
  * that require a string.</p>
  */
@@ -47,13 +47,19 @@ public final class GPath {
 	}
 
 	@NonNull
-	public GPath path(@NonNull final Boolean describes_dir, @NonNull final String... sub_paths) {
-		final StringBuilder path_joined = new StringBuilder(16*sub_paths.length); // Size like that because "yes" (better ideas?)
-		for (final String sub_path : sub_paths) {
-			path_joined.append(sub_path).append("\u0000");
+	private GPath path(@NonNull final Boolean describes_dir, @NonNull final Object... sub_paths) {
+		final StringBuilder path_joined = new StringBuilder(16 * sub_paths.length); // Size like that because "yes" (better ideas?)
+		for (final Object sub_path : sub_paths) {
+			if (sub_path instanceof String) {
+				path_joined.append((String) sub_path).append("\u0000");
+			} else if (sub_path instanceof GPath) {
+				path_joined.append(((GPath) sub_path).gPathToStringConversion()).append("\u0000");
+			} else {
+				throw new IllegalArgumentException("path() received an invalid type of parameter: " + sub_path.getClass());
+			}
 		}
 
-		final String[] gPath_array = UtilsSWA.pathFILESDIRS(describes_dir, path_joined.toString()).split("\\|");
+		final String[] gPath_array = UtilsSWA.pathFILESDIRS(describes_dir, path_joined.toString()).split("\u0000");
 
 		p = gPath_array[0];
 		dir = Boolean.parseBoolean(gPath_array[1]);
@@ -62,18 +68,21 @@ public final class GPath {
 	}
 
 	@NonNull
-	public GPath add2(final boolean describes_dir, @NonNull final String... sub_paths) {
-		final String[] new_args = new String[sub_paths.length+1];
+	public GPath add2(final boolean describes_dir, @NonNull final Object... sub_paths) {
+		final Object[] new_args = new Object[sub_paths.length + 1];
+		if (sub_paths.length == 0) {
+			return this;
+		}
+
 		System.arraycopy(sub_paths, 0, new_args, 1, sub_paths.length);
-		new_args[0] = toString();
+		new_args[0] = gPathToStringConversion();
 		path(describes_dir, new_args);
 
 		return this;
 	}
 
 	@NonNull
-	@Override
-	public String toString() {
+	public String gPathToStringConversion() {
 		return p;
 	}
 }

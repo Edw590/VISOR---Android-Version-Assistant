@@ -70,7 +70,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static int removePath(@NonNull final GPath path, final boolean recursive) {
 		try {
-			final File path_file = new File(path.toString());
+			final File path_file = new File(path.gPathToStringConversion());
 			if (recursive ? FilesKt.deleteRecursively(path_file) : path_file.delete()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
@@ -92,7 +92,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static int createDirectory(@NonNull final GPath path) {
 		try {
-			final File path_file = new File(path.toString());
+			final File path_file = new File(path.gPathToStringConversion());
 			if (path_file.mkdirs()) {
 				return UtilsShell.ErrCodes.NO_ERR;
 			}
@@ -115,8 +115,8 @@ public final class UtilsFilesDirs {
 	 */
 	public static int movePath(@NonNull final GPath src_path, @NonNull final GPath dest_path) {
 		try {
-			final File src_path_file = new File(src_path.toString());
-			final File dest_path_file = new File(dest_path.toString());
+			final File src_path_file = new File(src_path.gPathToStringConversion());
+			final File dest_path_file = new File(dest_path.gPathToStringConversion());
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 				Files.move(src_path_file.toPath(), dest_path_file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -142,7 +142,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static long getFileSize(@NonNull final GPath file_path) {
 		try {
-			final File file = new File(file_path.toString());
+			final File file = new File(file_path.gPathToStringConversion());
 			if (file.exists()) {
 				return file.length();
 			}
@@ -173,7 +173,7 @@ public final class UtilsFilesDirs {
 	public static byte[] readFileBytes(@NonNull final GPath file_path) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			try {
-				return Files.readAllBytes(new File(file_path.toString()).toPath());
+				return Files.readAllBytes(new File(file_path.gPathToStringConversion()).toPath());
 			} catch (final Exception e) {
 				e.printStackTrace();
 			} catch (final OutOfMemoryError ignored) {
@@ -202,7 +202,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static int writeFile(@NonNull final GPath file_path, @NonNull final byte[] file_bytes) {
 		try {
-			FileUtils.writeByteArrayToFile(new File(file_path.toString()), file_bytes);
+			FileUtils.writeByteArrayToFile(new File(file_path.gPathToStringConversion()), file_bytes);
 
 			return UtilsShell.ErrCodes.NO_ERR;
 		} catch (final Exception e) {
@@ -248,7 +248,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static int copyPath(@NonNull final GPath src_path, @NonNull final GPath dest_path) {
 		try {
-			FileUtils.copyFile(new File(src_path.toString()), new File(dest_path.toString()));
+			FileUtils.copyFile(new File(src_path.gPathToStringConversion()), new File(dest_path.gPathToStringConversion()));
 
 			return UtilsShell.ErrCodes.NO_ERR;
 		} catch (final Exception e) {
@@ -294,7 +294,7 @@ public final class UtilsFilesDirs {
 	 */
 	public static int checkPathExists(@NonNull final GPath path) {
 		try {
-			return new File(path.toString()).exists() ?
+			return new File(path.gPathToStringConversion()).exists() ?
 					UtilsShell.ErrCodes.NO_ERR : UtilsShell.ErrCodes.WRONG_USAGE;
 		} catch (final Exception e) {
 			e.printStackTrace();
