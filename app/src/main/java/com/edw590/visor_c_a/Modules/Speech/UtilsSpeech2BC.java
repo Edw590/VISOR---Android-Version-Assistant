@@ -65,12 +65,9 @@ public final class UtilsSpeech2BC {
 							   @Nullable final Runnable after_speaking) {
 		if (!session_type.equals(SESSION_TYPE_NONE) && speech_priority <= Speech2.PRIORITY_USER_ACTION &&
 				after_speaking == null && UtilsSWA.isCommunicatorConnectedSERVER() && (wait_for_gpt ||
-				GPTComm.sendText("", "") == ModsFileInfo.MOD_7_STATE_READY)) {
-			String text = "[SYSTEM TASK - Inform the user of the following: \"" + txt_to_speak +
-					"\". NO SAYING YOU'RE REWORDING IT]";
-
+				GPTComm.sendText("", "", "", false) == ModsFileInfo.MOD_7_STATE_READY)) {
 			String speak = "";
-			switch (GPTComm.sendText(text, session_type)) {
+			switch (GPTComm.sendText(txt_to_speak, session_type, GPTComm.ROLE_TOOL, false)) {
 				case (ModsFileInfo.MOD_7_STATE_STOPPED): {
 					speak = "The GPT is stopped. Text on hold.";
 

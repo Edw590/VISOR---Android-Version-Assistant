@@ -113,7 +113,6 @@ public final class TabTasksTasksList extends Fragment {
 		AppCompatEditText editTxt_device_ids = new AppCompatEditText(requireContext());
 		editTxt_device_ids.setText(task.getDeviceIDs());
 		editTxt_device_ids.setHint("Device IDs where the task is triggered (one per line)");
-		editTxt_device_ids.setSingleLine(false);
 		editTxt_device_ids.setMaxLines(3);
 
 		AppCompatEditText editTxt_message = new AppCompatEditText(requireContext());

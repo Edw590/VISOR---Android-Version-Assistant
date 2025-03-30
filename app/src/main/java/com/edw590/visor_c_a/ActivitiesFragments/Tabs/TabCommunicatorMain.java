@@ -98,8 +98,7 @@ public final class TabCommunicatorMain extends Fragment {
 		txt_gpt_comm_state.setTextIsSelectable(true);
 
 		AppCompatEditText editTxt_txt_to_send = new AppCompatEditText(requireContext());
-		editTxt_txt_to_send.setSingleLine(false);
-		editTxt_txt_to_send.setHint("Text to send to VISOR (commands or normal text to the LLM)");
+		editTxt_txt_to_send.setHint("Text to send to VISOR");
 
 		AppCompatButton btn_listen = new AppCompatButton(requireContext());
 		btn_listen.setText("Listen");

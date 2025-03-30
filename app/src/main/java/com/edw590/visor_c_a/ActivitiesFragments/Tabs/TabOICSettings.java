@@ -61,13 +61,11 @@ public final class TabOICSettings extends Fragment {
 		AppCompatEditText editTxt_weather_locs = new AppCompatEditText(requireContext());
 		editTxt_weather_locs.setHint("The weather locations to check, one per line");
 		editTxt_weather_locs.setText(SettingsSync.getTempLocsOIC());
-		editTxt_weather_locs.setSingleLine(false);
 		editTxt_weather_locs.setMaxLines(3);
 
 		AppCompatEditText editTxt_news_locs = new AppCompatEditText(requireContext());
 		editTxt_news_locs.setHint("The news locations to check, one per line");
 		editTxt_news_locs.setText(SettingsSync.getNewsLocsOIC());
-		editTxt_news_locs.setSingleLine(false);
 		editTxt_news_locs.setMaxLines(3);
 
 		AppCompatButton btn_save = new AppCompatButton(requireContext());

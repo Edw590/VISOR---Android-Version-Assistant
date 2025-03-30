@@ -71,7 +71,6 @@ public final class TabCommunicatorMemories extends Fragment {
 				"Number of memories: " + num_memories);
 
 		AppCompatEditText editTxt_memories_text = new AppCompatEditText(requireContext());
-		editTxt_memories_text.setSingleLine(false);
 		editTxt_memories_text.setHint("Stored memories");
 		editTxt_memories_text.setText(memories);
 

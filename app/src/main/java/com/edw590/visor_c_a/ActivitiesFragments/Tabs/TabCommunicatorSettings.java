@@ -81,7 +81,6 @@ public final class TabCommunicatorSettings extends Fragment {
 		AppCompatEditText editTxt_system_info = new AppCompatEditText(requireContext());
 		editTxt_system_info.setHint("LLM system information");
 		editTxt_system_info.setText(mod_7_user_info.getSystem_info());
-		editTxt_system_info.setSingleLine();
 
 		AppCompatEditText editTxt_user_nickname = new AppCompatEditText(requireContext());
 		editTxt_user_nickname.setHint("User nickname (Sir, for example)");
