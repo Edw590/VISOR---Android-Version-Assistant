@@ -126,7 +126,7 @@ public final class TabTasksTasksList extends Fragment {
 		editTxt_command.setSingleLine();
 
 		AppCompatEditText editTxt_time = new AppCompatEditText(requireContext());
-		editTxt_time.setText(task.getTime());
+		editTxt_time.setText(String.valueOf(task.getTime_s()));
 		editTxt_time.setHint("Time trigger (format: \"2024-12-31 -- 23:59:59\")");
 		editTxt_time.setSingleLine();
 
@@ -154,7 +154,7 @@ public final class TabTasksTasksList extends Fragment {
 			task.setDeviceIDs(editTxt_device_ids.getText().toString());
 			task.setMessage(editTxt_message.getText().toString());
 			task.setCommand(editTxt_command.getText().toString());
-			task.setTime(editTxt_time.getText().toString());
+			task.setTime_s(Long.parseLong(editTxt_time.getText().toString()));
 			task.setRepeat_each_min(Integer.parseInt(editTxt_repeat_each_min.getText().toString()));
 			task.setUser_location(editTxt_location.getText().toString());
 			task.setProgrammable_condition(editTxt_programmable_condition.getText().toString());

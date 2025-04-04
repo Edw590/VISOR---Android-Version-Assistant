@@ -37,6 +37,9 @@ import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+
 import SettingsSync.SettingsSync;
 
 /**
@@ -97,16 +100,22 @@ public final class TabTasksAddTask extends Fragment {
 		AppCompatButton btn_add = new AppCompatButton(requireContext());
 		btn_add.setText("Add");
 		btn_add.setOnClickListener(v -> {
+			long time = 0;
+			try {
+				DateFormat dateFormat = DateFormat.getDateTimeInstance();
+				time = dateFormat.parse(editTxt_time.getText().toString()).getTime();
+			} catch (final ParseException ignored) {
+			}
 			SettingsSync.addTaskTASKS(
-				check_enabled.isChecked(),
-				check_device_active.isChecked(),
-				editTxt_device_ids.getText().toString(),
-				editTxt_message.getText().toString(),
-				editTxt_command.getText().toString(),
-				editTxt_time.getText().toString(),
-				Integer.parseInt(editTxt_repeat_each_min.getText().toString()),
-				editTxt_location.getText().toString(),
-				editTxt_programmable_condition.getText().toString()
+					check_enabled.isChecked(),
+					check_device_active.isChecked(),
+					editTxt_device_ids.getText().toString(),
+					editTxt_message.getText().toString(),
+					editTxt_command.getText().toString(),
+					time,
+					Integer.parseInt(editTxt_repeat_each_min.getText().toString()),
+					editTxt_location.getText().toString(),
+					editTxt_programmable_condition.getText().toString()
 			);
 
 			Utils.reloadFragment(this);
