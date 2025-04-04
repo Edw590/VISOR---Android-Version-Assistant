@@ -263,8 +263,12 @@ public final class TabCommunicatorSessions extends Fragment {
 									break;
 								}
 							}
+
 							long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
-							String msg_content = message_parts_pipe[1];
+							String msg_content = "";
+							if (message_parts_pipe.length > 1) {
+								msg_content = message_parts_pipe[1];
+							}
 
 							msg_content_str +=
 									"-----------------------------------------------------------------------\n" +
