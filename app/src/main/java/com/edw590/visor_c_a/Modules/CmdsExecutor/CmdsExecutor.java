@@ -1068,9 +1068,23 @@ public final class CmdsExecutor implements IModuleInst {
 								break;
 							}
 
-							speak = "The weather in " + weather.getLocation() + " is " + weather.getStatus() +
-									" with " + weather.getTemperature() + " degrees, a maximum of " + weather.getMax_temp() +
-									" degrees and a minimum of " + weather.getMin_temp() + " degrees. The precipitation is of " +
+							if (weather.getTemperature().isEmpty()) {
+								// One being empty means the whole weather is empty
+								speak = "There was a problem obtaining the weather for " + weather.getLocation() + ".";
+								UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, GPTComm.SESSION_TYPE_TEMP,
+										false, null);
+
+								continue;
+							}
+
+							String status_part = " is " + weather.getStatus() + " with ";
+							if (weather.getStatus().equals("ERROR")) {
+								status_part = " has ";
+							}
+
+							speak = "The weather in " + weather.getLocation() + status_part + weather.getTemperature() +
+									" degrees, a high of " + weather.getMax_temp() + " degrees and a low of " +
+									weather.getMin_temp() + " degrees. The precipitation is of " +
 									weather.getPrecipitation() + ", humidity of " + weather.getHumidity() + ", and wind of " +
 									weather.getWind() + ".";
 							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, GPTComm.SESSION_TYPE_TEMP, false, null);
