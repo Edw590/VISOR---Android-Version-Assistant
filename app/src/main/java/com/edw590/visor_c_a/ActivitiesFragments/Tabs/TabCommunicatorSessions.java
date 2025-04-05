@@ -37,6 +37,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsTimeDate;
 import com.edw590.visor_c_a.R;
 
 import java.util.ArrayList;
@@ -156,7 +157,7 @@ public final class TabCommunicatorSessions extends Fragment {
 			}
 
 			String title = session_info.session.getName() + " - " +
-					UtilsSWA.getDateTimeStrTIMEDATE(GPTComm.getSessionCreatedTime(session_info.id) * 1000);
+					UtilsTimeDate.getTimeDateStr(GPTComm.getSessionCreatedTime(session_info.id));
 
 			adapter.addItem(title, createSessionView(session_info));
 		}
@@ -264,16 +265,18 @@ public final class TabCommunicatorSessions extends Fragment {
 								}
 							}
 
-							long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
-							String msg_content = "";
-							if (message_parts_pipe.length > 1) {
-								msg_content = message_parts_pipe[1];
+							if (message_parts_pipe.length < 2 || message_parts_pipe[1].isEmpty()) {
+								// Means no message (so maybe was a "SYSTEM TASK" message - ignore those)
+								continue;
 							}
+
+							long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
+							String msg_content = message_parts_pipe[1];
 
 							msg_content_str +=
 									"-----------------------------------------------------------------------\n" +
 											"|" + msg_role + "| on " +
-											UtilsSWA.getDateTimeStrTIMEDATE(msg_timestamp_s * 1000) + ":\n" +
+											UtilsTimeDate.getTimeDateStr(msg_timestamp_s) + ":\n" +
 											msg_content + "\n\n";
 						}
 						if (msg_content_str.length() > 2) {

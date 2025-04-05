@@ -33,8 +33,8 @@ import java.util.TimeZone;
  */
 public final class UtilsTimeDate {
 
-	public static final String CURRENT_TIME_FORMAT = "HH:mm:ss z";
-	public static final String CURRENT_DATE_FORMAT = "EEEE dd-MM-yyyy";
+	private static final String TIME_FORMAT = "HH:mm:ss (z)";
+	private static final String DATE_FORMAT = "EEEE dd-MM-yyyy";
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -43,54 +43,54 @@ public final class UtilsTimeDate {
 	}
 
 	/**
-	 * <p>Gets the time in a string with the format of {@link #CURRENT_TIME_FORMAT}.</p>
+	 * <p>Gets the time in a string with the format of {@link #TIME_FORMAT}.</p>
 	 *
-	 * @param millis the milliseconds for the time or -1 to get the current time
+	 * @param s the milliseconds for the time or -1 to get the current time
 	 *
 	 * @return the formatted string
 	 */
 	@NonNull
-	public static String getTimeStr(final long millis) {
-		final SimpleDateFormat time = new SimpleDateFormat(CURRENT_TIME_FORMAT, Locale.getDefault());
+	public static String getTimeStr(final long s) {
+		final SimpleDateFormat time = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
 		time.setTimeZone(TimeZone.getDefault());
 
-		if (millis < 0) {
+		if (s == -1) {
 			return time.format(new Date());
 		} else {
-			return time.format(new Date(millis));
+			return time.format(new Date(s * 1000));
 		}
 	}
 
 	/**
-	 * <p>Gets the date in a string with the format of {@link #CURRENT_DATE_FORMAT}.</p>
+	 * <p>Gets the date in a string with the format of {@link #DATE_FORMAT}.</p>
 	 *
-	 * @param millis the milliseconds for the time or -1 to get the current time
+	 * @param s the seconds for the time or -1 to get the current time
 	 *
 	 * @return the formatted string
 	 */
 	@NonNull
-	public static String getDateStr(final long millis) {
+	public static String getDateStr(final long s) {
 		// Keep the timezone in English here so he can say the weekday in English.
-		final SimpleDateFormat date = new SimpleDateFormat(CURRENT_DATE_FORMAT, Locale.US);
+		final SimpleDateFormat date = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 		date.setTimeZone(TimeZone.getDefault());
 
-		if (millis < 0) {
+		if (s == -1) {
 			return date.format(new Date());
 		} else {
-			return date.format(new Date(millis));
+			return date.format(new Date(s * 1000));
 		}
 	}
 
 	/**
 	 * <p>Gets the time and the date in a string with the format
-	 * "{@link #CURRENT_DATE_FORMAT} -- {@link #CURRENT_TIME_FORMAT}".</p>
+	 * "{@link #DATE_FORMAT} -- {@link #TIME_FORMAT}".</p>
 	 *
-	 * @param millis the milliseconds for the time and date or -1 to get the current time and date
+	 * @param s the seconds for the time and date or -1 to get the current time and date
 	 *
 	 * @return the formatted string
 	 */
 	@NonNull
-	public static String getTimeDateStr(final long millis) {
-		return UtilsTimeDate.getDateStr(millis) + " -- " + UtilsTimeDate.getTimeStr(millis);
+	public static String getTimeDateStr(final long s) {
+		return UtilsTimeDate.getDateStr(s) + " -- " + UtilsTimeDate.getTimeStr(s);
 	}
 }
