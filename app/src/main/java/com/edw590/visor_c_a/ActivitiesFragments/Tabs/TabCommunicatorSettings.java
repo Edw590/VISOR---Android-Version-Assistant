@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
@@ -61,10 +62,19 @@ public final class TabCommunicatorSettings extends Fragment {
 
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
+		AppCompatEditText editTxt_server_url = new AppCompatEditText(requireContext());
+		editTxt_server_url.setHint("GPT Server URL (example localhost:11434)");
+		editTxt_server_url.setText(mod_7_user_info.getServer_url());
+		editTxt_server_url.setSingleLine();
+
 		AppCompatEditText editTxt_model_name = new AppCompatEditText(requireContext());
 		editTxt_model_name.setHint("GPT model name (example: llama3.2)");
 		editTxt_model_name.setText(mod_7_user_info.getModel_name());
 		editTxt_model_name.setSingleLine();
+
+		SwitchCompat switch_model_has_tool_role = new SwitchCompat(requireContext());
+		switch_model_has_tool_role.setText("Is the tool role available for the model?");
+		switch_model_has_tool_role.setChecked(mod_7_user_info.getModel_has_tool_role());
 
 		AppCompatEditText editTxt_ctx_size = new AppCompatEditText(requireContext());
 		editTxt_ctx_size.setHint("GPT context size (example: 4096)");
@@ -90,14 +100,18 @@ public final class TabCommunicatorSettings extends Fragment {
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
+			mod_7_user_info.setServer_url(editTxt_server_url.getText().toString());
 			mod_7_user_info.setModel_name(editTxt_model_name.getText().toString());
+			mod_7_user_info.setModel_has_tool_role(switch_model_has_tool_role.isChecked());
 			mod_7_user_info.setContext_size(Integer.parseInt(editTxt_ctx_size.getText().toString()));
 			mod_7_user_info.setTemperature(Float.parseFloat(editTxt_temperature.getText().toString()));
 			mod_7_user_info.setSystem_info(editTxt_system_info.getText().toString());
 			mod_7_user_info.setUser_nickname(editTxt_user_nickname.getText().toString());
 		});
 
+		linearLayout.addView(editTxt_server_url);
 		linearLayout.addView(editTxt_model_name);
+		linearLayout.addView(switch_model_has_tool_role);
 		linearLayout.addView(editTxt_ctx_size);
 		linearLayout.addView(editTxt_temperature);
 		linearLayout.addView(editTxt_system_info);
