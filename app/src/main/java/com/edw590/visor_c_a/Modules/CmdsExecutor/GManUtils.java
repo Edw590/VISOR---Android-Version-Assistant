@@ -25,10 +25,8 @@ import androidx.annotation.NonNull;
 
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import GMan.GMan;
@@ -38,8 +36,6 @@ class GManUtils {
 	@NonNull
 	static String getTasksList(@NonNull final String[] tasks_ids, @NonNull final String cmd_variant) {
 		String speak = "";
-		SimpleDateFormat date_format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
 		for (final String task_id : tasks_ids) {
 			ModsFileInfo.GTask task = GMan.getTask(task_id);
 			if (task == null) {
@@ -47,11 +43,11 @@ class GManUtils {
 			}
 
 			boolean add_task = false;
-			try {
-				Date task_date = date_format.parse(task.getDate());
-
+			if (task.getDate_s() == 0) {
+				add_task = true;
+			} else if (task.getDate_s() == -1) {
 				Calendar task_calendar = Calendar.getInstance();
-				task_calendar.setTime(task_date);
+				task_calendar.setTimeInMillis(task.getDate_s() * 1000);
 
 				Calendar now = Calendar.getInstance();
 				switch (cmd_variant) {
@@ -67,11 +63,9 @@ class GManUtils {
 						}
 						break;
 				}
-			} catch (final ParseException ignored) {
-				// Meaning, the date is empty
 			}
 
-			if (add_task || task.getDate().isEmpty()) {
+			if (add_task) {
 				speak += task.getTitle() + "; ";
 			}
 		}
@@ -96,7 +90,6 @@ class GManUtils {
 	@NonNull
 	static String getEventsList(@NonNull final String[] events_ids, @NonNull final String cmd_variant) {
 		String speak = "";
-		SimpleDateFormat date_time_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 
 		for (final String event_id : events_ids) {
 			ModsFileInfo.GEvent event = GMan.getEvent(event_id);
@@ -104,15 +97,8 @@ class GManUtils {
 				continue;
 			}
 
-			Date event_date_time;
-			try {
-				event_date_time = date_time_format.parse(event.getStart_time());
-			} catch (final ParseException ignored) {
-				continue;
-			}
-
 			Calendar event_calendar = Calendar.getInstance();
-			event_calendar.setTime(event_date_time);
+			event_calendar.setTimeInMillis(event.getStart_time_s() * 1000);
 
 			boolean add_event = false;
 			Calendar now = Calendar.getInstance();
@@ -152,9 +138,11 @@ class GManUtils {
 						cmd_variant.equals(CmdsList.CmdRetIds.RET_31_NEXT_WEEK)) {
 					event_on = " on " + event_calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.US);
 				}
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.US);
+				sdf.setTimeZone(event_calendar.getTimeZone());
 				speak += event.getSummary() +
 						event_on +
-						" at "+ new SimpleDateFormat("HH:mm", Locale.US).format(event_date_time) +
+						" at " + sdf.format(event_calendar.getTime()) +
 						" for " + getEventDuration(event.getDuration_min()) + "; ";
 			}
 		}
