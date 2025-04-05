@@ -250,9 +250,6 @@ public final class TabCommunicatorSessions extends Fragment {
 
 							String msg_role = message_parts_slash[0];
 							switch (msg_role) {
-								case "system": {
-									continue;
-								}
 								case "assistant": {
 									msg_role = "VISOR";
 
@@ -262,6 +259,9 @@ public final class TabCommunicatorSessions extends Fragment {
 									msg_role = "YOU";
 
 									break;
+								}
+								default: {
+									continue;
 								}
 							}
 

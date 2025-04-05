@@ -1087,7 +1087,7 @@ public final class CmdsExecutor implements IModuleInst {
 									weather.getMin_temp() + " degrees. The precipitation is of " +
 									weather.getPrecipitation() + ", humidity of " + weather.getHumidity() + ", and wind of " +
 									weather.getWind() + ".";
-							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, GPTComm.SESSION_TYPE_TEMP, false, null);
+							UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2, GPTComm.SESSION_TYPE_ACTIVE, false, null);
 						}
 					} else {
 						speak = "Not connected to the server to get the weather.";
