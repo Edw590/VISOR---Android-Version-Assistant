@@ -63,7 +63,7 @@ public final class TabCommunicatorSettings extends Fragment {
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
 
 		AppCompatEditText editTxt_server_url = new AppCompatEditText(requireContext());
-		editTxt_server_url.setHint("GPT Server URL (example localhost:11434)");
+		editTxt_server_url.setHint("GPT Server URL (example: localhost:11434)");
 		editTxt_server_url.setText(mod_7_user_info.getServer_url());
 		editTxt_server_url.setSingleLine();
 
