@@ -26,7 +26,6 @@ import androidx.annotation.NonNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * <p>Utilities related to date and time.</p>
@@ -34,7 +33,7 @@ import java.util.TimeZone;
 public final class UtilsTimeDate {
 
 	private static final String TIME_FORMAT = "HH:mm:ss (z)";
-	private static final String DATE_FORMAT = "EEEE dd-MM-yyyy";
+	private static final String DATE_FORMAT = "EEEE yyyy-MM-dd";
 
 	/**
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
@@ -52,7 +51,6 @@ public final class UtilsTimeDate {
 	@NonNull
 	public static String getTimeStr(final long s) {
 		final SimpleDateFormat time = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
-		time.setTimeZone(TimeZone.getDefault());
 
 		if (s == -1) {
 			return time.format(new Date());
@@ -72,7 +70,6 @@ public final class UtilsTimeDate {
 	public static String getDateStr(final long s) {
 		// Keep the timezone in English here so he can say the weekday in English.
 		final SimpleDateFormat date = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		date.setTimeZone(TimeZone.getDefault());
 
 		if (s == -1) {
 			return date.format(new Date());

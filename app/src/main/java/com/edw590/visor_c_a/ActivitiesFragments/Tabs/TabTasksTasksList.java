@@ -39,8 +39,12 @@ import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import SettingsSync.SettingsSync;
 
@@ -126,7 +130,8 @@ public final class TabTasksTasksList extends Fragment {
 		editTxt_command.setSingleLine();
 
 		AppCompatEditText editTxt_time = new AppCompatEditText(requireContext());
-		editTxt_time.setText(String.valueOf(task.getTime_s()));
+		editTxt_time.setText(task.getTime_s() == 0 ? "" : new SimpleDateFormat("yyyy-MM-dd -- HH:mm:ss",
+				Locale.getDefault()).format(new Date(task.getTime_s() * 1000)));
 		editTxt_time.setHint("Time trigger (format: \"2024-12-31 -- 23:59:59\")");
 		editTxt_time.setSingleLine();
 
@@ -149,12 +154,26 @@ public final class TabTasksTasksList extends Fragment {
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
+			long time_s = 0;
+			String time_text = editTxt_time.getText().toString();
+			if (!time_text.isEmpty()) {
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd -- HH:mm:ss", Locale.getDefault());
+					Date date = sdf.parse(time_text);
+					if (date == null) {
+						return;
+					}
+					time_s = date.getTime() / 1000;
+				} catch (final ParseException ignored) {
+					return;
+				}
+			}
 			task.setEnabled(check_enabled.isChecked());
 			task.setDevice_active(check_device_active.isChecked());
 			task.setDeviceIDs(editTxt_device_ids.getText().toString());
 			task.setMessage(editTxt_message.getText().toString());
 			task.setCommand(editTxt_command.getText().toString());
-			task.setTime_s(Long.parseLong(editTxt_time.getText().toString()));
+			task.setTime_s(time_s);
 			task.setRepeat_each_min(Integer.parseInt(editTxt_repeat_each_min.getText().toString()));
 			task.setUser_location(editTxt_location.getText().toString());
 			task.setProgrammable_condition(editTxt_programmable_condition.getText().toString());

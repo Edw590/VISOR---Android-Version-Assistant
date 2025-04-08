@@ -37,8 +37,10 @@ import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.R;
 
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import SettingsSync.SettingsSync;
 
@@ -100,11 +102,19 @@ public final class TabTasksAddTask extends Fragment {
 		AppCompatButton btn_add = new AppCompatButton(requireContext());
 		btn_add.setText("Add");
 		btn_add.setOnClickListener(v -> {
-			long time = 0;
-			try {
-				DateFormat dateFormat = DateFormat.getDateTimeInstance();
-				time = dateFormat.parse(editTxt_time.getText().toString()).getTime();
-			} catch (final ParseException ignored) {
+			long time_s = 0;
+			String time_text = editTxt_time.getText().toString();
+			if (!time_text.isEmpty()) {
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd -- HH:mm:ss", Locale.getDefault());
+					Date date = sdf.parse(time_text);
+					if (date == null) {
+						return;
+					}
+					time_s = date.getTime() / 1000;
+				} catch (final ParseException ignored) {
+					return;
+				}
 			}
 			SettingsSync.addTaskTASKS(
 					check_enabled.isChecked(),
@@ -112,7 +122,7 @@ public final class TabTasksAddTask extends Fragment {
 					editTxt_device_ids.getText().toString(),
 					editTxt_message.getText().toString(),
 					editTxt_command.getText().toString(),
-					time,
+					time_s,
 					Integer.parseInt(editTxt_repeat_each_min.getText().toString()),
 					editTxt_location.getText().toString(),
 					editTxt_programmable_condition.getText().toString()
