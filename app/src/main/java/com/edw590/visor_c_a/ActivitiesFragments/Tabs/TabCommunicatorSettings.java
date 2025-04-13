@@ -67,14 +67,18 @@ public final class TabCommunicatorSettings extends Fragment {
 		editTxt_server_url.setText(mod_7_user_info.getServer_url());
 		editTxt_server_url.setSingleLine();
 
-		AppCompatEditText editTxt_model_name = new AppCompatEditText(requireContext());
-		editTxt_model_name.setHint("GPT model name (example: llama3.2)");
-		editTxt_model_name.setText(mod_7_user_info.getModel_name());
-		editTxt_model_name.setSingleLine();
+		AppCompatEditText editTxt_models_to_use = new AppCompatEditText(requireContext());
+		editTxt_models_to_use.setHint("GPT model names and types one per line in order of preference\n" +
+				"Example: \"llama3.2 - TEXT\" - can be TEXT or VISION)");
+		editTxt_models_to_use.setText(mod_7_user_info.getModels_to_use());
 
 		SwitchCompat switch_model_has_tool_role = new SwitchCompat(requireContext());
 		switch_model_has_tool_role.setText("Is the tool role available for the model?");
 		switch_model_has_tool_role.setChecked(mod_7_user_info.getModel_has_tool_role());
+
+		SwitchCompat switch_prioritize_clients = new SwitchCompat(requireContext());
+		switch_prioritize_clients.setText("Give priority to models on the clients?");
+		switch_prioritize_clients.setChecked(mod_7_user_info.getPrioritize_clients_models());
 
 		AppCompatEditText editTxt_ctx_size = new AppCompatEditText(requireContext());
 		editTxt_ctx_size.setHint("GPT context size (example: 4096)");
@@ -101,8 +105,9 @@ public final class TabCommunicatorSettings extends Fragment {
 		btn_save.setText("Save");
 		btn_save.setOnClickListener(v -> {
 			mod_7_user_info.setServer_url(editTxt_server_url.getText().toString());
-			mod_7_user_info.setModel_name(editTxt_model_name.getText().toString());
+			mod_7_user_info.setModels_to_use(editTxt_models_to_use.getText().toString());
 			mod_7_user_info.setModel_has_tool_role(switch_model_has_tool_role.isChecked());
+			mod_7_user_info.setPrioritize_clients_models(switch_prioritize_clients.isChecked());
 			mod_7_user_info.setContext_size(Integer.parseInt(editTxt_ctx_size.getText().toString()));
 			mod_7_user_info.setTemperature(Float.parseFloat(editTxt_temperature.getText().toString()));
 			mod_7_user_info.setSystem_info(editTxt_system_info.getText().toString());
@@ -110,8 +115,9 @@ public final class TabCommunicatorSettings extends Fragment {
 		});
 
 		linearLayout.addView(editTxt_server_url);
-		linearLayout.addView(editTxt_model_name);
+		linearLayout.addView(editTxt_models_to_use);
 		linearLayout.addView(switch_model_has_tool_role);
+		linearLayout.addView(switch_prioritize_clients);
 		linearLayout.addView(editTxt_ctx_size);
 		linearLayout.addView(editTxt_temperature);
 		linearLayout.addView(editTxt_system_info);
