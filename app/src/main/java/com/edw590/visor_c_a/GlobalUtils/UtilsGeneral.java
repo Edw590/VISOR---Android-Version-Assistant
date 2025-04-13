@@ -37,6 +37,8 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.ApplicationClass;
+
 import java.util.List;
 
 /**
@@ -253,4 +255,14 @@ public final class UtilsGeneral {
 		return resolveInfo.activityInfo.packageName;
 	}
 
+	/**
+	 * <p>Get the current timestamp in nanoseconds since Epoch.</p>
+	 *
+	 * @return the current timestamp in nanoseconds since Epoch
+	 */
+	public static long getUnixNano() {
+		long elapsed_since_init_nano = System.nanoTime() - ApplicationClass.init_nano_time;
+
+		return ApplicationClass.init_millis_time * 1000000L + elapsed_since_init_nano;
+	}
 }

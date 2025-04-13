@@ -620,8 +620,10 @@ public final class Speech2 implements IModuleInst {
 					audio_stream = AUD_STREAM_PRIORITY_OTHERS_SPEAKERS;
 				}
 			}
+			// Keep this with nanoseconds. He already swapped the supposed order of speeches, I imagine because of
+			// having been added in the same millisecond. So use nanoseconds.
 			utterance_id_to_use = SpeechQueue.SpeechQueue.addSpeech(txt_to_speak, utterance_id_to_use,
-					System.currentTimeMillis(), speech_priority, actual_mode, audio_stream, task_id);
+					UtilsGeneral.getUnixNano(), speech_priority, actual_mode, audio_stream, task_id);
 		}
 
 		if (current_speech_id.isEmpty()) {

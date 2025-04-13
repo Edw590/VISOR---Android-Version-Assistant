@@ -36,6 +36,7 @@ import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import ACD.ACD;
+import GPTComm.GPTComm;
 import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
@@ -69,6 +70,9 @@ public final class ApplicationClass extends Application {
 	 */
 	@Nullable public static Context application_context = null;
 
+	public static long init_nano_time = 0;
+	public static long init_millis_time = 0;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -89,6 +93,9 @@ public final class ApplicationClass extends Application {
 		// Set the context for the entire app to use. I guess it's better than using ActivityThread.currentApplication(),
 		// which returns null sometimes - and that only works if called from the main app thread (UI thread).
 		application_context = getApplicationContext();
+
+		init_millis_time = System.currentTimeMillis();
+		init_nano_time = System.nanoTime();
 
 		// Setup handler for uncaught exceptions
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -112,6 +119,7 @@ public final class ApplicationClass extends Application {
 
 		UtilsSWA.initializeCommsChannels();
 
+		GPTComm.startReportingNoModelsOLLAMA();
 		UtilsSWA.startCommunicatorSERVER();
 		SettingsSync.syncUserSettings();
 
