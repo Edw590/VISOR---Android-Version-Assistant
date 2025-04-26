@@ -126,7 +126,7 @@ public final class TabCommunicatorMain extends Fragment {
 
 		txt_response = new AppCompatTextView(requireContext());
 		txt_response.setPadding(padding_px, padding_px, padding_px, padding_px);
-		txt_response.setText("Response from the smart LLM");
+		txt_response.setText("Response");
 		txt_response.setTextIsSelectable(true);
 
 		linearLayout.addView(txt_gpt_comm_state);

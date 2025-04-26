@@ -52,6 +52,14 @@ import java.util.Locale;
 
 public class Utils {
 
+	/**
+	 * <p>Creates a list of views for a given value.</p>
+	 *
+	 * @param context the context
+	 * @param value the value to create views for
+	 *
+	 * @return the list of views
+	 */
 	static List<View> createValue(@NonNull final Context context, @NonNull final UtilsSWA.Value value) {
 		List<View> child_views = new ArrayList<>(10);
 
@@ -119,10 +127,10 @@ public class Utils {
 		final SwitchCompat finalSwitchCompat = switchCompat;
 		final AppCompatEditText finalEditText = editText;
 		button_save_setting.setOnClickListener(v -> {
-			if (finalSwitchCompat != null) {
-				UtilsRegistry.setData(value.getKey(), finalSwitchCompat.isChecked(), false);
-			} else {
+			if (finalSwitchCompat == null) {
 				UtilsRegistry.setData(value.getKey(), finalEditText.getText().toString(), false);
+			} else {
+				UtilsRegistry.setData(value.getKey(), finalSwitchCompat.isChecked(), false);
 			}
 		});
 		child_views.add(button_save_setting);
@@ -130,6 +138,13 @@ public class Utils {
 		return child_views;
 	}
 
+	/**
+	 * <p>Creates a confirmation dialog.</p>
+	 *
+	 * @param context the context
+	 * @param message the message to show
+	 * @param on_yes the action to perform if the user clicks "yes"
+	 */
 	static void createConfirmationDialog(final Context context, final CharSequence message, final Runnable on_yes) {
 		new AlertDialog.Builder(context)
 				.setTitle("Confirmation")
@@ -141,6 +156,12 @@ public class Utils {
 				.show();
 	}
 
+	/**
+	 * <p>Creates an error dialog.</p>
+	 *
+	 * @param context the context
+	 * @param message the message to show
+	 */
 	static void createErrorDialog(final Context context, final CharSequence message) {
 		new AlertDialog.Builder(context)
 				.setTitle("Error")
@@ -149,6 +170,11 @@ public class Utils {
 				.show();
 	}
 
+	/**
+	 * <p>Reloads a fragment.</p>
+	 *
+	 * @param fragment the fragment to reload
+	 */
 	static void reloadFragment(@NonNull final Fragment fragment) {
 		FragmentTransaction ft1 = fragment.getParentFragmentManager().beginTransaction();
 		ft1.detach(fragment).commit();
@@ -156,6 +182,12 @@ public class Utils {
 		ft2.attach(fragment).commit();
 	}
 
+	/**
+	 * <p>Set the height of an ExpandableListView.</p>
+	 *
+	 * @param myListView the list view
+	 * @param long_text true if the text can be long, false otherwise
+	 */
 	static void setExpandableListViewSize(@NonNull final ExpandableListView myListView, final boolean long_text) {
 		// Got it from https://stackoverflow.com/a/43177241/8228163.
 
@@ -166,8 +198,8 @@ public class Utils {
 		}
 		//set listAdapter in loop for getting final size
 		int totalHeight = 0;
-		for (int size = 0; size < myListAdapter.getCount(); size++) {
-			View listItem = myListAdapter.getView(size, null, myListView);
+		for (int i = 0; i < myListAdapter.getCount(); i++) {
+			View listItem = myListAdapter.getView(i, null, myListView);
 			listItem.measure(0, 0);
 			totalHeight += listItem.getMeasuredHeight();
 		}
@@ -183,5 +215,27 @@ public class Utils {
 		myListView.setLayoutParams(params);
 		// print height of adapter on log
 		//Log.i("height of listItem:", String.valueOf(totalHeight));
+	}
+
+	/**
+	 * <p>Creates a horizontal button bar.</p>
+	 *
+	 * @param context the context
+	 * @param buttons the buttons to add
+	 *
+	 * @return the horizontal button bar
+	 */
+	static View createHorizontalButtonBar(@NonNull final Context context, final AppCompatButton... buttons) {
+		LinearLayout horizontal_button_bar = new LinearLayout(context);
+		horizontal_button_bar.setOrientation(LinearLayout.HORIZONTAL);
+		horizontal_button_bar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+
+		for (final AppCompatButton button : buttons) {
+			horizontal_button_bar.addView(button);
+			button.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+		}
+
+		return horizontal_button_bar;
 	}
 }

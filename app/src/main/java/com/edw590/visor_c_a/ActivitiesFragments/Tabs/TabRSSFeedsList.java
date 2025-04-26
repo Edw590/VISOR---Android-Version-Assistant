@@ -147,8 +147,7 @@ public final class TabRSSFeedsList extends Fragment {
 		child_views.add(editTxt_type);
 		child_views.add(editTxt_url);
 		child_views.add(editTxt_custom_msg_subject);
-		child_views.add(btn_save);
-		child_views.add(btn_delete);
+		child_views.add(Utils.createHorizontalButtonBar(requireContext(), btn_save, btn_delete));
 
 		return child_views;
 	}

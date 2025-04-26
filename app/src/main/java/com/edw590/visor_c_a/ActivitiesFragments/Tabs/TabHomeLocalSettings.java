@@ -102,8 +102,7 @@ public final class TabHomeLocalSettings extends Fragment {
 		});
 
 		linearLayout.addView(editTxt_password);
-		linearLayout.addView(btn_save_temp);
-		linearLayout.addView(btn_save_perm);
+		linearLayout.addView(Utils.createHorizontalButtonBar(requireContext(), btn_save_temp, btn_save_perm));
 		linearLayout.addView(editTxt_device_id);
 		linearLayout.addView(editTxt_device_type);
 		linearLayout.addView(editTxt_device_description);

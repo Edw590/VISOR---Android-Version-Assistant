@@ -1319,7 +1319,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 
 		String speak = "";
-		switch (GPTComm.sendText(txt_to_send, GPTComm.SESSION_TYPE_ACTIVE, GPTComm.ROLE_USER, false, GPTComm.MODEL_TYPE_TEXT)) {
+		switch (GPTComm.sendText(txt_to_send, GPTComm.SESSION_TYPE_ACTIVE, GPTComm.ROLE_USER, false)) {
 			case (ModsFileInfo.ModsFileInfo.MOD_7_STATE_STOPPED): {
 				speak = "The GPT is stopped. Text on hold.";
 

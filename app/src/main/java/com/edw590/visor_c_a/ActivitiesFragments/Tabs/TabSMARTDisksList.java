@@ -136,8 +136,7 @@ public final class TabSMARTDisksList extends Fragment {
 		child_views.add(check_enabled);
 		child_views.add(editTxt_label);
 		child_views.add(check_is_hdd);
-		child_views.add(btn_save);
-		child_views.add(btn_delete);
+		child_views.add(Utils.createHorizontalButtonBar(requireContext(), btn_save, btn_delete));
 
 		return child_views;
 	}

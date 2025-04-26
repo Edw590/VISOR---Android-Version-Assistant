@@ -67,7 +67,7 @@ public final class TabCommunicatorMemories extends Fragment {
 			num_memories = memories.split("\n").length;
 		}
 		AppCompatTextView txtView_info = new AppCompatTextView(requireContext());
-		txtView_info.setText("List of memories stored for the smart LLM, one per line (use in landscape mode). " +
+		txtView_info.setText("List of memories stored, one per line (use in landscape mode). " +
 				"Number of memories: " + num_memories);
 
 		AppCompatEditText editTxt_memories_text = new AppCompatEditText(requireContext());

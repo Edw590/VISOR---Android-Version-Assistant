@@ -175,7 +175,7 @@ public final class TabCommunicatorSessions extends Fragment {
 		editTxt_name.setSingleLine();
 
 		AppCompatButton btn_save = new AppCompatButton(requireContext());
-		btn_save.setText("Save");
+		btn_save.setText("Save name");
 		btn_save.setOnClickListener(v -> {
 			if (editTxt_name.getText().toString().isEmpty()) {
 				Utils.createErrorDialog(requireContext(), "The chat name must not be empty");
@@ -189,7 +189,7 @@ public final class TabCommunicatorSessions extends Fragment {
 		});
 
 		AppCompatButton btn_delete = new AppCompatButton(requireContext());
-		btn_delete.setText("Delete");
+		btn_delete.setText("Delete chat");
 		btn_delete.setOnClickListener(v -> {
 			Utils.createConfirmationDialog(requireContext(), "Are you sure you want to delete this chat?",
 					() -> {
@@ -205,8 +205,7 @@ public final class TabCommunicatorSessions extends Fragment {
 		txtViews_map.put(session_info.id, txtView_history);
 
 		child_views.add(editTxt_name);
-		child_views.add(btn_save);
-		child_views.add(btn_delete);
+		child_views.add(Utils.createHorizontalButtonBar(requireContext(), btn_save, btn_delete));
 		child_views.add(txtView_history);
 
 		return child_views;

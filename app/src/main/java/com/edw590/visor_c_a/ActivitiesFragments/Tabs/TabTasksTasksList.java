@@ -202,8 +202,7 @@ public final class TabTasksTasksList extends Fragment {
 		child_views.add(editTxt_repeat_each_min);
 		child_views.add(editTxt_location);
 		child_views.add(editTxt_programmable_condition);
-		child_views.add(btn_save);
-		child_views.add(btn_delete);
+		child_views.add(Utils.createHorizontalButtonBar(requireContext(), btn_save, btn_delete));
 
 		return child_views;
 	}
