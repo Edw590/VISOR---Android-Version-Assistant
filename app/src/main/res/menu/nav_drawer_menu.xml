@@ -70,6 +70,10 @@
 			android:id="@+id/frag_values_storage_viewer"
 			android:title="@string/fragRegistry_title_ACA"
 			android:icon="@drawable/development" />
+		<item
+			android:id="@+id/frag_opengl"
+			android:title="@string/fragOpenGL_title_ACA"
+			android:icon="@drawable/development" />
 	</group>
 
 </menu>

@@ -110,7 +110,7 @@
 
 	<!-- Allow app installation through Google Play Store even if features are not available on the device -->
 	<!-- Keep checking this in https://developer.android.com/guide/topics/manifest/uses-feature-element#permissions!
-	 Last check on 2022-01-06. EDIT: Plan B to prevent future... All available on Android Studio set to false. -->
+	 Last check on 2022-01-06. EDIT: Plan B to prevent some future... All available on Android Studio set to false. -->
 	<uses-feature android:name="android.hardware.audio.low_latency" android:required="false" />
 	<uses-feature android:name="android.hardware.audio.output" android:required="false" />
 	<uses-feature android:name="android.hardware.audio.pro" android:required="false" />
@@ -173,7 +173,6 @@
 	<uses-feature android:name="android.hardware.type.embedded" android:required="false" />
 	<uses-feature android:name="android.hardware.type.pc" android:required="false" />
 	<uses-feature android:name="android.hardware.type.television" android:required="false" />
-	<!--<uses-feature android:name="android.hardware.type.watch" android:required="false"->Not supported here/>-->
 	<uses-feature android:name="android.hardware.usb.accessory" android:required="false" />
 	<uses-feature android:name="android.hardware.usb.host" android:required="false" />
 	<uses-feature android:name="android.hardware.vr.headtracking" android:required="false" />
@@ -187,6 +186,7 @@
 	<uses-feature android:name="android.hardware.wifi.passpoint" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi.rtt" android:required="false" />
 	<uses-feature android:name="android.hardware.type.watch" />
+	<uses-feature android:name="android.software.leanback" android:required="false" />
 
 	<application
 		android:name="com.edw590.visor_c_a.ApplicationClass"
@@ -240,6 +240,10 @@
 		 vulnerability. So that means, if the app is to support those APIs (currently, yes), then it can NOT rely on
 		 custom permissions for anything important (or anything at all). -->
 
+		<meta-data
+			android:name="com.google.android.wearable.standalone"
+			android:value="true" />
+
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActMain"
 			android:permission=""
 			android:exported="true"
@@ -258,6 +262,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActFlash"
+			android:noHistory="true"
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"
@@ -265,6 +270,7 @@
 			android:excludeFromRecents="true">
 		</activity>
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActAssist"
+			android:noHistory="true"
 			android:permission=""
 			android:exported="true"
 			android:directBootAware="true"
@@ -310,6 +316,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrAct"
+			android:noHistory="true"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="true"

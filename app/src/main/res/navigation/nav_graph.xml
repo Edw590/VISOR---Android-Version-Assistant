@@ -71,5 +71,9 @@
 		android:id="@+id/frag_online_info_chk"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragOnlineInfoChk"
 		android:label="@string/fragOnlineInfoChk_title_ACA" />
+	<fragment
+		android:id="@+id/frag_opengl"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragOpenGL"
+		android:label="@string/fragOpenGL_title_ACA" />
 
 </navigation>
