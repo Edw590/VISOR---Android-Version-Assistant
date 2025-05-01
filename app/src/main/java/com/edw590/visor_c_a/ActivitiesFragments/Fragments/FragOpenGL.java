@@ -23,7 +23,6 @@ package com.edw590.visor_c_a.ActivitiesFragments.Fragments;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,10 +62,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		FloatBuffer vertex_buffer = null;
 		FloatBuffer color_buffer = null;
 		ByteBuffer index_buffer = null;
-		int vertex_count = 0;
-		float model[] = new float[16];
-		float view[] = new float[16];
-		float projection[] = new float[16];
+		int index_count = 0;
 	}
 	private final List<ObjectData> objects = new ArrayList<>(10);
 
@@ -80,32 +76,26 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	public FragOpenGL() {
 		addObject(new float[] {
-				-1.0f, -1.0f, 0.0f,
-				 0.0f, -1.0f, 0.0f,
-				 0.0f,  0.0f, 0.0f,
-				-1.0f,  0.0f, 0.0f,
+				-1.0f, -1.0f,  0.5f,
+				 1.0f, -1.0f,  0.5f,
+				 0.0f,  1.0f, -0.5f,
 		}, new float[] {
 				1.0f, 0.0f, 0.0f, 1.0f,
 				0.0f, 1.0f, 0.0f, 1.0f,
 				0.0f, 0.0f, 1.0f, 1.0f,
-				1.0f, 1.0f, 1.0f, 1.0f,
 		}, new short[] {
 				0, 1, 2,
-				2, 3, 0,
 		});
 		addObject(new float[] {
-				 1.0f,  1.0f, 0.0f,
-				-0.0f,  1.0f, 0.0f,
-				-0.0f, -0.0f, 0.0f,
-				 1.0f, -0.0f, 0.0f,
+				 1.0f,  1.0f,  0.5f,
+				-1.0f,  1.0f,  0.5f,
+				 0.0f, -1.0f, -0.5f,
 		}, new float[] {
 				1.0f, 0.0f, 0.0f, 1.0f,
 				0.0f, 1.0f, 0.0f, 1.0f,
 				0.0f, 0.0f, 1.0f, 1.0f,
-				1.0f, 1.0f, 1.0f, 1.0f,
 		}, new short[] {
 				0, 1, 2,
-				2, 3, 0,
 		});
 	}
 
@@ -165,6 +155,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	@Override
 	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) {
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
 		int program_handle = UtilsOpenGL.createProgram();
 		if (program_handle == 0) {
 			throw new RuntimeException("Error creating OpenGL program");
@@ -184,7 +176,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	@Override
 	public void onDrawFrame(final GL10 gl) {
 		frame_count++;
-		long curr_time = new Date().getTime();
+		long curr_time = System.currentTimeMillis();
 		double seconds = (curr_time - start_time) / 1000.0;
 		if (seconds > 1.0) {
 			// Update the TextView with the FPS
@@ -197,7 +189,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 
 		UtilsOpenGL.clearGLErrors();
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
 		for (final ObjectData object : objects) {
@@ -213,7 +205,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 					object.color_buffer);
 			UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
 
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, object.vertex_count, GLES20.GL_UNSIGNED_SHORT,
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES, object.index_count, GLES20.GL_UNSIGNED_SHORT,
 					object.index_buffer);
 			UtilsOpenGL.checkGLErrors("glDrawElements");
 		}
@@ -250,10 +242,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 		object.index_buffer.position(0);
 
-		object.vertex_count = indices.length;
-		Matrix.setIdentityM(object.model, 0);
-		Matrix.setIdentityM(object.view, 0);
-		Matrix.setIdentityM(object.projection, 0);
+		object.index_count = indices.length;
 
 		objects.add(object);
 	}
