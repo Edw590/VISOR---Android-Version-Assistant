@@ -37,12 +37,12 @@ public final class Shader {
 	//				"    v_color = u_color;" +
 	//				"}";
 	static final String VERTEX_SHADER_CODE =
-					"attribute vec4 a_position;" +
+					"attribute vec3 a_position;" +
 					"attribute vec4 a_color;" +
 					"varying vec4 v_color;" +
 					"uniform float u_scale;" +
 					"void main() {" +
-					"    gl_Position = vec4(a_position.x * u_scale, a_position.y * u_scale, a_position.z * u_scale, 1.0);" +
+					"    gl_Position = vec4(a_position * u_scale, 1.0);" +
 					"    v_color = a_color;" +
 					"}";
 

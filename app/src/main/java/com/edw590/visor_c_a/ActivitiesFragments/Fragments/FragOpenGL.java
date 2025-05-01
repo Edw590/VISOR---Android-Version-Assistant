@@ -37,12 +37,14 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.OpenGL.ObjectData;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.OpenGL.Vector;
+import com.edw590.visor_c_a.OpenGL.Vertex;
 import com.edw590.visor_c_a.R;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,21 +60,14 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	/** Hold a reference to our GLSurfaceView. */
 	private GLSurfaceView mGLSurfaceView;
 
-	static class ObjectData {
-		FloatBuffer vertex_buffer = null;
-		FloatBuffer color_buffer = null;
-		ByteBuffer index_buffer = null;
-		int index_count = 0;
-	}
 	private final List<ObjectData> objects = new ArrayList<>(10);
 
-	private int scale_handle = 0;
+	private int position_id = 0;
+	private int color_id = 0;
+	private int scale_id = 0;
 
 	private float scale = 0.0f;
 	private float increment = 0.05f;
-
-	private int position_handle = 0;
-	private int color_handle = 0;
 
 	public FragOpenGL() {
 		addObject(new float[] {
@@ -163,9 +158,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 		GLES20.glUseProgram(program_handle);
 
-		position_handle = GLES20.glGetAttribLocation(program_handle, "a_position");
-		color_handle = GLES20.glGetAttribLocation(program_handle, "a_color");
-		scale_handle = GLES20.glGetUniformLocation(program_handle, "u_scale");
+		position_id = GLES20.glGetAttribLocation(program_handle, "a_position");
+		color_id = GLES20.glGetAttribLocation(program_handle, "a_color");
+		scale_id = GLES20.glGetUniformLocation(program_handle, "u_scale");
 	}
 
 	@Override
@@ -193,15 +188,15 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		UtilsOpenGL.checkGLErrors("glClear");
 
 		for (final ObjectData object : objects) {
-			GLES20.glEnableVertexAttribArray(position_handle);
+			GLES20.glEnableVertexAttribArray(position_id);
 			UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 1");
-			GLES20.glVertexAttribPointer(position_handle, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
+			GLES20.glVertexAttribPointer(position_id, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
 					object.vertex_buffer);
 			UtilsOpenGL.checkGLErrors("glVertexAttribPointer 1");
 
-			GLES20.glEnableVertexAttribArray(color_handle);
+			GLES20.glEnableVertexAttribArray(color_id);
 			UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 2");
-			GLES20.glVertexAttribPointer(color_handle, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
+			GLES20.glVertexAttribPointer(color_id, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
 					object.color_buffer);
 			UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
 
@@ -217,11 +212,24 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			increment = 0.05f;
 		}
 		scale += increment;
-		GLES20.glUniform1f(scale_handle, scale);
+		GLES20.glUniform1f(scale_id, scale);
 	}
 
 	private void addObject(@NonNull final float[] vertices, @NonNull final float[] colors, @NonNull final short[] indices) {
 		ObjectData object = new ObjectData();
+
+		object.vertices = new Vertex[vertices.length / UtilsOpenGL.FLOATS_PER_VERTEX];
+		for (int i = 0; i < vertices.length / UtilsOpenGL.FLOATS_PER_VERTEX; i++) {
+			object.vertices[i] = new Vertex();
+			object.vertices[i].position = new Vector(
+					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX],
+					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX + 1],
+					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX + 2]);
+			object.vertices[i].color = new Vector(colors[i * UtilsOpenGL.FLOATS_PER_VERTEX],
+					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 1],
+					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 2],
+					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 3]);
+		}
 
 		object.vertex_buffer = ByteBuffer.allocateDirect(vertices.length * UtilsOpenGL.FLOAT_BYTES)
 				.order(ByteOrder.nativeOrder())
