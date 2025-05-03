@@ -59,29 +59,35 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	/** Hold a reference to our GLSurfaceView. */
 	private GLSurfaceView mGLSurfaceView;
 
-	private final List<Object> objects = new ArrayList<>(100);
-
-	private float scale = 0.0f;
-	private float increment = 0.05f;
+	private final List<Object> objects = new ArrayList<>(50);
 
 	public FragOpenGL() {
 		objects.add(new Parallelepiped(
-				new Vector(0.0f, 0.0f, 0.0f),
+				new Vector(0.0f, 0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));
+		objects.add(new Parallelepiped(
+				new Vector(0.0f, 0.0f, -3.0f),
+				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+		));
+		objects.add(new Parallelepiped(
+				new Vector(0.3f, -0.5f, -3.0f),
+				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+		));
+		/*objects.add(new Triangle(
+				new Vector(0.0f, 0.0f, 0.0f),
+				1.0f, 1.0f, 90.0f, 0.0f, 0.0f, 0.0f
+		));*/
 	}
 
-	int program_handle = 0;
+	int program_id = 0;
 
 	private int frame_count = 0;
 	private long start_time = new Date().getTime();
 
 	private AppCompatTextView textView;
 
-	private final float[] translation_matrix = new float[16];
-	private final float[] rotation_matrix = new float[16];
 	private final float[] projection_matrix = new float[16];
-	private final float[] transformation_matrix = new float[16];
 
 	@Nullable
 	@Override
@@ -136,18 +142,12 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
-		program_handle = UtilsOpenGL.createProgram();
-		if (program_handle == 0) {
+		program_id = UtilsOpenGL.createProgram();
+		if (program_id == 0) {
 			throw new RuntimeException("Error creating OpenGL program");
 		}
-		GLES20.glUseProgram(program_handle);
-		UtilsOpenGL.setProgramID(program_handle);
-
-		Matrix.setIdentityM(translation_matrix, 0);
-		Matrix.setIdentityM(rotation_matrix, 0);
-		Matrix.setIdentityM(projection_matrix, 0);
-
-		Matrix.translateM(translation_matrix, 0, 0.0f, 0.0f, -3.0f);
+		GLES20.glUseProgram(program_id);
+		UtilsOpenGL.setProgramID(program_id);
 	}
 
 	@Override
@@ -176,31 +176,26 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
+		int transformation_id = GLES20.glGetUniformLocation(program_id, "u_transformation");
+		float[] transformation_matrix = new float[16];
 		for (final Object object : objects) {
-			object.draw();
-			//object.rotate(null, 0.3f, 1.0f, 0.6f);
+			object.rotate(null, 0.3f, 1.0f, 0.6f);
+			//object.rotate(null, 0.0f, 0.0f, 0.6f);
 			//object.scale(-0.01f, -0.01f, 0);
 			//object.translate(0.0f, 0.0f, 0.01f);
+
+			//object.translateM(0.0f, 0.0f, -0.01f);
+			//object.rotateM(0.3f, 1.0f, 0.6f);
+			//object.rotateM(0.0f, 0.0f, 0.6f);
+
+
+			// Multiply the position first by the rotation matrix, then by the translation matrix and finally by the
+			// projection matrix: projection * translation * rotation * position.
+			Matrix.multiplyMM(transformation_matrix, 0, projection_matrix, 0, object.getModelMatrix(), 0);
+			GLES20.glUniformMatrix4fv(transformation_id, 1, false, transformation_matrix, 0);
+
+			object.draw();
 		}
-
-		//Matrix.translateM(translation_matrix, 0, 0.0f, 0.0f, 0.01f);
-		Object.rotateM(rotation_matrix, 0.3f, 1.0f, 0.6f);
-
-		// Multiply the position first by the rotation matrix, then by the translation matrix and finally by the
-		// projection matrix: projection * translation * rotation * position.
-		Matrix.multiplyMM(transformation_matrix, 0, translation_matrix, 0, rotation_matrix, 0);
-		Matrix.multiplyMM(transformation_matrix, 0, projection_matrix, 0, transformation_matrix, 0);
-
-		int transformation_id = GLES20.glGetUniformLocation(program_handle, "u_transformation");
-		GLES20.glUniformMatrix4fv(transformation_id, 1, false, transformation_matrix, 0);
-
-		// Set scale
-		if (scale > 1.0f) {
-			increment = -0.05f;
-		} else if (scale < 0.0f) {
-			increment = 0.05f;
-		}
-		scale += increment;
 	}
 
 	@Override
