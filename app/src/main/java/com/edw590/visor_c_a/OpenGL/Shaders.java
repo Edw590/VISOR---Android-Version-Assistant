@@ -41,8 +41,9 @@ public final class Shaders {
 					"attribute vec4 a_color;" +
 					"varying vec4 v_color;" +
 					"uniform float u_scale;" +
+					"uniform mat4 u_transformation;" +
 					"void main() {" +
-					"    gl_Position = vec4(a_position, 1.0);" +
+					"    gl_Position = u_transformation * vec4(a_position, 1.0);" +
 					"    v_color = a_color;" +
 					"}";
 

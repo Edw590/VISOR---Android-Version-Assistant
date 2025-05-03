@@ -23,6 +23,7 @@ package com.edw590.visor_c_a.ActivitiesFragments.Fragments;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -77,7 +78,12 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private int frame_count = 0;
 	private long start_time = new Date().getTime();
 
-	AppCompatTextView textView;
+	private AppCompatTextView textView;
+
+	private final float[] translation_matrix = new float[16];
+	private final float[] rotation_matrix = new float[16];
+	private final float[] projection_matrix = new float[16];
+	private final float[] transformation_matrix = new float[16];
 
 	@Nullable
 	@Override
@@ -140,11 +146,19 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		UtilsOpenGL.setProgramID(program_handle);
 
 		scale_id = GLES20.glGetUniformLocation(program_handle, "u_scale");
+
+		Matrix.setIdentityM(translation_matrix, 0);
+		Matrix.setIdentityM(rotation_matrix, 0);
+		Matrix.setIdentityM(projection_matrix, 0);
+
+		Matrix.translateM(translation_matrix, 0, 0.0f, 0.0f, -3.0f);
 	}
 
 	@Override
 	public void onSurfaceChanged(final GL10 gl, final int width, final int height) {
 		GLES20.glViewport(0, 0, width, height);
+
+		Matrix.perspectiveM(projection_matrix, 0, 60, (float) width / height, 0.1f, 10.0f);
 	}
 
 	@Override
@@ -168,8 +182,19 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		for (final Object object : objects) {
 			object.draw();
-			object.rotate(null, 0.3f, 1.0f, 0.6f);
+			//object.rotate(null, 0.3f, 1.0f, 0.6f);
 		}
+
+		//Matrix.translateM(translation_matrix, 0, 0.001f, -0.001f, -0.1f);
+		Object.rotateM(rotation_matrix, 0.3f, 1.0f, 0.6f);
+
+		// Multiply the position first by the rotation matrix, then by the translation matrix and finally by the
+		// projection matrix: projection * translation * rotation * position.
+		Matrix.multiplyMM(transformation_matrix, 0, translation_matrix, 0, rotation_matrix, 0);
+		Matrix.multiplyMM(transformation_matrix, 0, projection_matrix, 0, transformation_matrix, 0);
+
+		int full_transform_id = GLES20.glGetUniformLocation(program_handle, "u_transformation");
+		GLES20.glUniformMatrix4fv(full_transform_id, 1, false, transformation_matrix, 0);
 
 		// Set scale
 		if (scale > 1.0f) {

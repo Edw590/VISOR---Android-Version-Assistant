@@ -21,6 +21,8 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
+import android.opengl.Matrix;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -41,4 +43,13 @@ public abstract class Object {
 	public abstract void scale(final float x_scale, final float y_scale, final float z_scale);
 
 	public abstract void draw();
+
+	public static void rotateM(@NonNull final float[] matrix, final float x_angle, final float y_angle, final float z_angle) {
+		// Rotate around the X-axis
+		Matrix.rotateM(matrix, 0, x_angle, 1.0f, 0.0f, 0.0f);
+		// Rotate around the Y-axis
+		Matrix.rotateM(matrix, 0, y_angle, 0.0f, 1.0f, 0.0f);
+		// Rotate around the Z-axis
+		Matrix.rotateM(matrix, 0, -z_angle, 0.0f, 0.0f, 1.0f);
+	}
 }
