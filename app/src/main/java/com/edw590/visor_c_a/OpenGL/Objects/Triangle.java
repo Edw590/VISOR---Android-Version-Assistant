@@ -134,6 +134,8 @@ public final class Triangle extends Object {
 	}
 
 	public void translate(final float x_offset, final float y_offset, final float z_offset) {
+		super.translate(x_offset, y_offset, z_offset);
+
 		for (int i = 0; i < vertex_buffer.capacity() / 3; i++) {
 			float x = vertex_buffer.get(i * 3) + x_offset;
 			float y = vertex_buffer.get(i * 3 + 1) + y_offset;
