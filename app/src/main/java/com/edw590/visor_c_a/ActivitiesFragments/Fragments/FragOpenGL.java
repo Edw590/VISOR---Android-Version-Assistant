@@ -178,13 +178,13 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		for (final Object object : objects) {
 			object.draw();
-			object.rotate(null, 0.3f, 1.0f, 0.6f);
+			//object.rotate(null, 0.3f, 1.0f, 0.6f);
 			//object.scale(-0.01f, -0.01f, 0);
-			object.translate(0.0f, 0.0f, 0.01f);
+			//object.translate(0.0f, 0.0f, 0.01f);
 		}
 
-		//Matrix.translateM(translation_matrix, 0, 0.001f, -0.001f, -0.1f);
-		//Object.rotateM(rotation_matrix, 0.3f, 1.0f, 0.6f);
+		//Matrix.translateM(translation_matrix, 0, 0.0f, 0.0f, 0.01f);
+		Object.rotateM(rotation_matrix, 0.3f, 1.0f, 0.6f);
 
 		// Multiply the position first by the rotation matrix, then by the translation matrix and finally by the
 		// projection matrix: projection * translation * rotation * position.

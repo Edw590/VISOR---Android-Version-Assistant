@@ -50,6 +50,6 @@ public abstract class Object {
 		// Rotate around the Y-axis
 		Matrix.rotateM(matrix, 0, y_angle, 0.0f, 1.0f, 0.0f);
 		// Rotate around the Z-axis
-		Matrix.rotateM(matrix, 0, -z_angle, 0.0f, 0.0f, 1.0f);
+		Matrix.rotateM(matrix, 0, z_angle, 0.0f, 0.0f, 1.0f);
 	}
 }

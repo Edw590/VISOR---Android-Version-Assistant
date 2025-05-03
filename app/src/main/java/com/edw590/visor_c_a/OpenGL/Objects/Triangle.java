@@ -126,7 +126,7 @@ public final class Triangle extends Object {
 					vertex_buffer.get(i * 3 + 1),
 					vertex_buffer.get(i * 3 + 2)
 			);
-			Utils.applyRotation(vertex, used_center, -x_angle, y_angle, -z_angle);
+			Utils.applyRotation(vertex, used_center, -x_angle, y_angle, z_angle);
 			vertex_buffer.put(i * 3, vertex.x);
 			vertex_buffer.put(i * 3 + 1, vertex.y);
 			vertex_buffer.put(i * 3 + 2, vertex.z);
