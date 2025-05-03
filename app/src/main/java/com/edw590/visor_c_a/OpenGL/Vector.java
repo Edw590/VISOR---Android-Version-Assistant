@@ -21,8 +21,7 @@
 
 package com.edw590.visor_c_a.OpenGL;
 
-
-public class Vector {
+public final class Vector {
 	public float x;
 	public float y;
 	public float z;

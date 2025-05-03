@@ -37,6 +37,15 @@ public final class Triangle extends Object {
 	private FloatBuffer vertex_buffer = null;
 	private FloatBuffer color_buffer = null;
 
+	public Triangle(@NonNull final Vector first_vertex, @NonNull final Vector second_vertex,
+				 @NonNull final Vector third_vertex) {
+		vertexes[0] = new Vertex(first_vertex.x, first_vertex.y, first_vertex.z);
+		vertexes[1] = new Vertex(second_vertex.x, second_vertex.y, second_vertex.z);
+		vertexes[2] = new Vertex(third_vertex.x, third_vertex.y, third_vertex.z);
+
+		restOfConstructor();
+	}
+
 	public Triangle(@NonNull final Vector first_vertex, final float width, final float height, final float main_angle,
 					final float x_angle, final float y_angle, final float z_angles) {
 		// First vertex is the main vertex
@@ -62,13 +71,19 @@ public final class Triangle extends Object {
 		);
 		vertexes[2] = new Vertex(third_vertex.x, third_vertex.y, third_vertex.z);
 
+		restOfConstructor();
+
+		// Rotate the triangle
+		rotate(null, x_angle, y_angle, z_angles);
+	}
+
+	private void restOfConstructor() {
 		// Set the center of the triangle
 		center = new Vector(
-				(first_vertex.x + second_vertex.x + third_vertex.x) / 3,
-				(first_vertex.y + second_vertex.y + third_vertex.y) / 3,
-				(first_vertex.z + second_vertex.z + third_vertex.z) / 3
+				(vertexes[0].position.x + vertexes[1].position.x + vertexes[2].position.x) / 3,
+				(vertexes[0].position.y + vertexes[1].position.y + vertexes[2].position.y) / 3,
+				(vertexes[0].position.z + vertexes[1].position.z + vertexes[2].position.z) / 3
 		);
-
 
 		// Set the vertices float array
 		float[] vertices = {
@@ -100,9 +115,6 @@ public final class Triangle extends Object {
 				.asFloatBuffer()
 				.put(colors);
 		color_buffer.position(0);
-
-		// Rotate the triangle
-		rotate(null, x_angle, y_angle, z_angles);
 	}
 
 	public void setColor(final float r, final float g, final float b, final float a) {

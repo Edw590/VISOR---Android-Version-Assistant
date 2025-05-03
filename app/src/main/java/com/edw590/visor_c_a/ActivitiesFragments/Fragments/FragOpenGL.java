@@ -66,17 +66,25 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				new Vector(0.0f, 0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));
-		objects.add(new Parallelepiped(
+		/*objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));
 		objects.add(new Parallelepiped(
 				new Vector(0.3f, -0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
-		));
+		));*/
 		/*objects.add(new Triangle(
-				new Vector(0.0f, 0.0f, 0.0f),
+				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 90.0f, 0.0f, 0.0f, 0.0f
+		));*/
+		/*objects.add(new Icosahidral(
+				new Vector(0.0f, 0.0f, -10.0f),
+				1.0f
+		));*/
+		/*objects.add(new Sphere(
+				new Vector(0.0f, 0.0f, -3.0f),
+				1.0f, 20, 20
 		));*/
 	}
 
