@@ -19,15 +19,26 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.OpenGL;
+package com.edw590.visor_c_a.OpenGL.Objects;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-public class ObjectData {
-	public Vertex[] vertexes = null;
-	public FloatBuffer vertex_buffer = null;
-	public FloatBuffer color_buffer = null;
-	public ByteBuffer index_buffer = null;
-	public int index_count = 0;
+import com.edw590.visor_c_a.OpenGL.Vector;
+
+public abstract class Object {
+	@NonNull public Vector center;
+
+	public void translate(final float x_offset, final float y_offset, final float z_offset) {
+		center.x += x_offset;
+		center.y += y_offset;
+		center.z += z_offset;
+	}
+
+	public abstract void rotate(@Nullable final Vector center, final float x_angle, final float y_angle,
+								final float z_angle);
+
+	public abstract void scale(final float x_scale, final float y_scale, final float z_scale);
+
+	public abstract void draw();
 }

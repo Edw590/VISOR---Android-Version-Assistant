@@ -25,6 +25,10 @@ import android.opengl.GLES20;
 
 import androidx.annotation.NonNull;
 
+import com.edw590.visor_c_a.OpenGL.Objects.Triangle;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,16 +41,61 @@ public final class UtilsOpenGL {
 
 	public static final int FLOATS_PER_VERTEX = 3;
 
+	private static int program_id = 0;
+
+	public static void setProgramID(final int program_id) {
+		UtilsOpenGL.program_id = program_id;
+	}
+
+	public static void drawTriangle(@NonNull final Triangle triangle) {
+		clearGLErrors();
+
+		int position_id = GLES20.glGetAttribLocation(program_id, "a_position");
+		UtilsOpenGL.checkGLErrors("glGetAttribLocation 1");
+		if (position_id == -1) {
+			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_position");
+
+			return;
+		}
+		int color_id = GLES20.glGetAttribLocation(program_id, "a_color");
+		UtilsOpenGL.checkGLErrors("glGetAttribLocation 2");
+		if (color_id == -1) {
+			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_color");
+
+			return;
+		}
+
+		GLES20.glEnableVertexAttribArray(position_id);
+		UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 1");
+		GLES20.glVertexAttribPointer(position_id, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
+				triangle.getVertexBuffer());
+		UtilsOpenGL.checkGLErrors("glVertexAttribPointer 1");
+
+		GLES20.glEnableVertexAttribArray(color_id);
+		UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 2");
+		GLES20.glVertexAttribPointer(color_id, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
+				triangle.getColorBuffer());
+		UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
+
+		ByteBuffer index_buffer = ByteBuffer.allocateDirect(3);
+		index_buffer.order(ByteOrder.nativeOrder());
+		index_buffer.put(new byte[] {0, 1, 2});
+		index_buffer.position(0);
+
+		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 3, GLES20.GL_UNSIGNED_BYTE, index_buffer);
+		UtilsOpenGL.checkGLErrors("glDrawElements");
+	}
+
 	public static int createProgram() {
 		clearGLErrors();
 
-		int vertex_shader_id = compileShader(GLES20.GL_VERTEX_SHADER, Shader.VERTEX_SHADER_CODE);
+		int vertex_shader_id = compileShader(GLES20.GL_VERTEX_SHADER, Shaders.VERTEX_SHADER_CODE);
 		if (vertex_shader_id == 0) {
 			LOGGER_STR.log(Level.SEVERE, "Error creating vertex shader");
 
 			return 0;
 		}
-		int fragment_shader_id = compileShader(GLES20.GL_FRAGMENT_SHADER, Shader.FRAGMENT_SHADER_CODE);
+		int fragment_shader_id = compileShader(GLES20.GL_FRAGMENT_SHADER, Shaders.FRAGMENT_SHADER_CODE);
 		if (fragment_shader_id == 0) {
 			LOGGER_STR.log(Level.SEVERE, "Error creating fragment shader");
 			GLES20.glDeleteShader(vertex_shader_id);

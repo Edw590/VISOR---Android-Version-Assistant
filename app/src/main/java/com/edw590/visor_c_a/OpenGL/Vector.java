@@ -23,16 +23,16 @@ package com.edw590.visor_c_a.OpenGL;
 
 
 public class Vector {
-	float x;
-	float y;
-	float z;
-	float w;
+	public float x;
+	public float y;
+	public float z;
+	public float w;
 
 	public Vector(final float x, final float y, final float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.w = 0.0f;
+		w = 0.0f;
 	}
 
 	public Vector(final float x, final float y, final float z, final float w) {

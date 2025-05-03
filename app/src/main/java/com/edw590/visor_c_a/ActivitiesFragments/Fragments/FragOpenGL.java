@@ -37,14 +37,12 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
-import com.edw590.visor_c_a.OpenGL.ObjectData;
+import com.edw590.visor_c_a.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.OpenGL.Objects.Parallelepiped;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
-import com.edw590.visor_c_a.OpenGL.Vertex;
 import com.edw590.visor_c_a.R;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,39 +58,21 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	/** Hold a reference to our GLSurfaceView. */
 	private GLSurfaceView mGLSurfaceView;
 
-	private final List<ObjectData> objects = new ArrayList<>(10);
+	private final List<Object> objects = new ArrayList<>(100);
 
-	private int position_id = 0;
-	private int color_id = 0;
 	private int scale_id = 0;
 
 	private float scale = 0.0f;
 	private float increment = 0.05f;
 
 	public FragOpenGL() {
-		addObject(new float[] {
-				-1.0f, -1.0f,  0.5f,
-				 1.0f, -1.0f,  0.5f,
-				 0.0f,  1.0f, -0.5f,
-		}, new float[] {
-				1.0f, 0.0f, 0.0f, 1.0f,
-				0.0f, 1.0f, 0.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-		}, new short[] {
-				0, 1, 2,
-		});
-		addObject(new float[] {
-				 1.0f,  1.0f,  0.5f,
-				-1.0f,  1.0f,  0.5f,
-				 0.0f, -1.0f, -0.5f,
-		}, new float[] {
-				1.0f, 0.0f, 0.0f, 1.0f,
-				0.0f, 1.0f, 0.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-		}, new short[] {
-				0, 1, 2,
-		});
+		objects.add(new Parallelepiped(
+				new Vector(0.0f, 0.0f, 0.0f),
+				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+		));
 	}
+
+	int program_handle = 0;
 
 	private int frame_count = 0;
 	private long start_time = new Date().getTime();
@@ -152,14 +132,13 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
-		int program_handle = UtilsOpenGL.createProgram();
+		program_handle = UtilsOpenGL.createProgram();
 		if (program_handle == 0) {
 			throw new RuntimeException("Error creating OpenGL program");
 		}
 		GLES20.glUseProgram(program_handle);
+		UtilsOpenGL.setProgramID(program_handle);
 
-		position_id = GLES20.glGetAttribLocation(program_handle, "a_position");
-		color_id = GLES20.glGetAttribLocation(program_handle, "a_color");
 		scale_id = GLES20.glGetUniformLocation(program_handle, "u_scale");
 	}
 
@@ -187,22 +166,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
-		for (final ObjectData object : objects) {
-			GLES20.glEnableVertexAttribArray(position_id);
-			UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 1");
-			GLES20.glVertexAttribPointer(position_id, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
-					object.vertex_buffer);
-			UtilsOpenGL.checkGLErrors("glVertexAttribPointer 1");
-
-			GLES20.glEnableVertexAttribArray(color_id);
-			UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 2");
-			GLES20.glVertexAttribPointer(color_id, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
-					object.color_buffer);
-			UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
-
-			GLES20.glDrawElements(GLES20.GL_TRIANGLES, object.index_count, GLES20.GL_UNSIGNED_SHORT,
-					object.index_buffer);
-			UtilsOpenGL.checkGLErrors("glDrawElements");
+		for (final Object object : objects) {
+			object.draw();
+			object.rotate(null, 0.3f, 1.0f, 0.6f);
 		}
 
 		// Set scale
@@ -213,46 +179,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 		scale += increment;
 		GLES20.glUniform1f(scale_id, scale);
-	}
-
-	private void addObject(@NonNull final float[] vertices, @NonNull final float[] colors, @NonNull final short[] indices) {
-		ObjectData object = new ObjectData();
-
-		object.vertices = new Vertex[vertices.length / UtilsOpenGL.FLOATS_PER_VERTEX];
-		for (int i = 0; i < vertices.length / UtilsOpenGL.FLOATS_PER_VERTEX; i++) {
-			object.vertices[i] = new Vertex();
-			object.vertices[i].position = new Vector(
-					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX],
-					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX + 1],
-					vertices[i * UtilsOpenGL.FLOATS_PER_VERTEX + 2]);
-			object.vertices[i].color = new Vector(colors[i * UtilsOpenGL.FLOATS_PER_VERTEX],
-					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 1],
-					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 2],
-					colors[i * UtilsOpenGL.FLOATS_PER_VERTEX + 3]);
-		}
-
-		object.vertex_buffer = ByteBuffer.allocateDirect(vertices.length * UtilsOpenGL.FLOAT_BYTES)
-				.order(ByteOrder.nativeOrder())
-				.asFloatBuffer()
-				.put(vertices);
-		object.vertex_buffer.position(0);
-
-		object.color_buffer = ByteBuffer.allocateDirect(colors.length * UtilsOpenGL.FLOAT_BYTES)
-				.order(ByteOrder.nativeOrder())
-				.asFloatBuffer()
-				.put(colors);
-		object.color_buffer.position(0);
-
-		object.index_buffer = ByteBuffer.allocateDirect(indices.length * UtilsOpenGL.SHORT_BYTES)
-				.order(ByteOrder.nativeOrder());
-		for (final short index : indices) {
-			object.index_buffer.putShort(index);
-		}
-		object.index_buffer.position(0);
-
-		object.index_count = indices.length;
-
-		objects.add(object);
 	}
 
 	@Override

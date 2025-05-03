@@ -24,4 +24,15 @@ package com.edw590.visor_c_a.OpenGL;
 public class Vertex {
 	public Vector position = null;
 	public Vector color = null;
+
+	public Vertex(final float x, final float y, final float z) {
+		this.position = new Vector(x, y, z);
+		this.color = new Vector(1.0f, 1.0f, 1.0f);
+	}
+
+	public Vertex(final float x, final float y, final float z, final float r, final float g, final float b,
+				  final float a) {
+		position = new Vector(x, y, z);
+		color = new Vector(r, g, b, a);
+	}
 }
