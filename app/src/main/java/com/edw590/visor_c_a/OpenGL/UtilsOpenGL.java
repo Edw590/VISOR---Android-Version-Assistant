@@ -113,6 +113,15 @@ public final class UtilsOpenGL {
 		GLES20.glLinkProgram(program_id);
 		checkGLErrors("glLinkProgram");
 
+		GLES20.glDetachShader(program_id, vertex_shader_id);
+		checkGLErrors("glDetachShader 1");
+		GLES20.glDeleteShader(vertex_shader_id);
+		checkGLErrors("glDeleteShader 1");
+		GLES20.glDetachShader(program_id, fragment_shader_id);
+		checkGLErrors("glDetachShader 2");
+		GLES20.glDeleteShader(fragment_shader_id);
+		checkGLErrors("glDeleteShader 2");
+
 		return program_id;
 	}
 
