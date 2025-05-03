@@ -146,9 +146,9 @@ public final class Triangle extends Object {
 
 	public void scale(final float x_scale, final float y_scale, final float z_scale) {
 		for (int i = 0; i < vertex_buffer.capacity() / 3; i++) {
-			float x = vertex_buffer.get(i * 3) * x_scale;
-			float y = vertex_buffer.get(i * 3 + 1) * y_scale;
-			float z = vertex_buffer.get(i * 3 + 2) * z_scale;
+			float x = vertex_buffer.get(i * 3) * (1 + x_scale);
+			float y = vertex_buffer.get(i * 3 + 1) * (1 + y_scale);
+			float z = vertex_buffer.get(i * 3 + 2) * (1 + z_scale);
 			vertex_buffer.put(i * 3, x);
 			vertex_buffer.put(i * 3 + 1, y);
 			vertex_buffer.put(i * 3 + 2, z);
