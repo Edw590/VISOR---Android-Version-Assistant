@@ -29,7 +29,6 @@ import com.edw590.visor_c_a.OpenGL.Objects.Triangle;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,10 +94,6 @@ public final class UtilsOpenGL {
 
 			return;
 		}
-
-		System.out.println("-----------------------------------------------------------");
-		System.out.println("model_matrix: " + Arrays.toString(model_matrix));
-		System.out.println("projection_matrix: " + Arrays.toString(projection_matrix));
 
 		GLES20.glUniformMatrix4fv(model_matrix_id, 1, false, model_matrix, 0);
 		UtilsOpenGL.checkGLErrors("glUniformMatrix4fv 1");

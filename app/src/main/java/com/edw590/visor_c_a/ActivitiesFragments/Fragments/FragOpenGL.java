@@ -188,12 +188,11 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
-		int transformation_id = GLES20.glGetUniformLocation(program_id, "u_transformation");
 		for (final Object object : objects) {
 			//object.translateM(0.0f, 0.0f, -0.01f);
 			object.rotateM(0.3f, 1.0f, 0.6f);
 			//object.rotateM(0.0f, 0.0f, 0.6f);
-			//object.scaleM(0.0f, 0.0f, 0.01f);
+			//object.scaleM(1.0f, 1.0f, 0.999f);
 
 			object.draw(null);
 		}
