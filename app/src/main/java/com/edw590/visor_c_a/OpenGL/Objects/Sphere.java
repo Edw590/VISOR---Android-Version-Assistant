@@ -59,8 +59,8 @@ public final class Sphere extends Object {
 				Vector p4 = sphericalToCartesian(radius, phi1, theta2);
 
 				// Two triangles per quad
-				triangles.add(new Triangle(p1, p2, p3));
-				triangles.add(new Triangle(p1, p3, p4));
+				triangles.add(new Triangle(p1, p3, p2));
+				triangles.add(new Triangle(p1, p4, p3));
 			}
 		}
 

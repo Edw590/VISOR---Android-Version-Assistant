@@ -35,11 +35,11 @@ public final class Parallelepiped extends Object {
 						  final float x_angle, final float y_angle, final float z_angle) {
 		rectangles = new Rectangle[6];
 		rectangles[0] = new Rectangle(new Vector(0, 0, depth / 2), width, height, 0, 0, 0);
-		rectangles[1] = new Rectangle(new Vector(0, 0, -depth / 2), width, height, 0, 0, 90);
+		rectangles[1] = new Rectangle(new Vector(0, 0, -depth / 2), width, height, 0, 180, 0);
 		rectangles[2] = new Rectangle(new Vector(width / 2, 0, 0), height, depth, 0, 90, 0);
-		rectangles[3] = new Rectangle(new Vector(-width / 2, 0, 0), height, depth, 0, 90, 90);
-		rectangles[4] = new Rectangle(new Vector(0, height / 2, 0), width, depth, 90, 0, 0);
-		rectangles[5] = new Rectangle(new Vector(0, -height / 2, 0), width, depth, 90, 0, 90);
+		rectangles[3] = new Rectangle(new Vector(-width / 2, 0, 0), height, depth, 0, -90, 0);
+		rectangles[4] = new Rectangle(new Vector(0, height / 2, 0), width, depth, -90, 0, 0);
+		rectangles[5] = new Rectangle(new Vector(0, -height / 2, 0), width, depth, 90, 0, 0);
 
 		rotateM(x_angle, y_angle, z_angle);
 		translateM(center.x, center.y, center.z);

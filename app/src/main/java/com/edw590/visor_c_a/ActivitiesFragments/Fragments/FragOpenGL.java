@@ -151,6 +151,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	@Override
 	public void onSurfaceCreated(final GL10 gl, final EGLConfig config) {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glCullFace(GLES20.GL_BACK);
+		GLES20.glFrontFace(GLES20.GL_CCW);
 
 		program_id = UtilsOpenGL.createProgram();
 		if (program_id == 0) {
