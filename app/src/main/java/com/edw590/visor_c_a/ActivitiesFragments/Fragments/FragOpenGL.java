@@ -62,15 +62,15 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private final List<Object> objects = new ArrayList<>(50);
 
 	public FragOpenGL() {
-		objects.add(new Parallelepiped(
+		/*objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
-		));
-		/*objects.add(new Parallelepiped(
+		));*/
+		objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));
-		objects.add(new Parallelepiped(
+		/*objects.add(new Parallelepiped(
 				new Vector(0.3f, -0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));*/
@@ -78,8 +78,12 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 90.0f, 0.0f, 0.0f, 0.0f
 		));*/
+		/*objects.add(new Rectangle(
+				new Vector(0.0f, 0.0f, -3.0f),
+				1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+		));*/
 		/*objects.add(new Icosahidral(
-				new Vector(0.0f, 0.0f, -10.0f),
+				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f
 		));*/
 		/*objects.add(new Sphere(
@@ -94,8 +98,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private long start_time = new Date().getTime();
 
 	private AppCompatTextView textView;
-
-	private final float[] projection_matrix = new float[16];
 
 	@Nullable
 	@Override
@@ -162,7 +164,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	public void onSurfaceChanged(final GL10 gl, final int width, final int height) {
 		GLES20.glViewport(0, 0, width, height);
 
+		float[] projection_matrix = new float[16];
 		Matrix.perspectiveM(projection_matrix, 0, 60, (float) width / height, 0.1f, 10.0f);
+		UtilsOpenGL.setProjectionMatrix(projection_matrix);
 	}
 
 	@Override
@@ -185,24 +189,13 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		UtilsOpenGL.checkGLErrors("glClear");
 
 		int transformation_id = GLES20.glGetUniformLocation(program_id, "u_transformation");
-		float[] transformation_matrix = new float[16];
 		for (final Object object : objects) {
-			object.rotate(null, 0.3f, 1.0f, 0.6f);
-			//object.rotate(null, 0.0f, 0.0f, 0.6f);
-			//object.scale(-0.01f, -0.01f, 0);
-			//object.translate(0.0f, 0.0f, 0.01f);
-
 			//object.translateM(0.0f, 0.0f, -0.01f);
-			//object.rotateM(0.3f, 1.0f, 0.6f);
+			object.rotateM(0.3f, 1.0f, 0.6f);
 			//object.rotateM(0.0f, 0.0f, 0.6f);
+			//object.scaleM(0.0f, 0.0f, 0.01f);
 
-
-			// Multiply the position first by the rotation matrix, then by the translation matrix and finally by the
-			// projection matrix: projection * translation * rotation * position.
-			Matrix.multiplyMM(transformation_matrix, 0, projection_matrix, 0, object.getModelMatrix(), 0);
-			GLES20.glUniformMatrix4fv(transformation_id, 1, false, transformation_matrix, 0);
-
-			object.draw();
+			object.draw(null);
 		}
 	}
 

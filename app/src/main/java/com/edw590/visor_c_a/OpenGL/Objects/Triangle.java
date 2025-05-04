@@ -21,87 +21,79 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
+import android.opengl.Matrix;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
-import com.edw590.visor_c_a.OpenGL.Vertex;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public final class Triangle extends Object {
-	private final Vertex[] vertexes = new Vertex[3];
 	private FloatBuffer vertex_buffer = null;
 	private FloatBuffer color_buffer = null;
 
 	public Triangle(@NonNull final Vector first_vertex, @NonNull final Vector second_vertex,
-				 @NonNull final Vector third_vertex) {
-		vertexes[0] = new Vertex(first_vertex.x, first_vertex.y, first_vertex.z);
-		vertexes[1] = new Vertex(second_vertex.x, second_vertex.y, second_vertex.z);
-		vertexes[2] = new Vertex(third_vertex.x, third_vertex.y, third_vertex.z);
+					@NonNull final Vector third_vertex) {
+		Vector[] vertices = new Vector[3];
 
-		restOfConstructor();
+		// Store final vertices
+		vertices[0] = new Vector(first_vertex.x, first_vertex.y, first_vertex.z);
+		vertices[1] = new Vector(second_vertex.x, second_vertex.y, second_vertex.z);
+		vertices[2] = new Vector(third_vertex.x, third_vertex.y, third_vertex.z);
+
+		restOfConstructor(vertices);
 	}
 
-	public Triangle(@NonNull final Vector first_vertex, final float width, final float height, final float main_angle,
-					final float x_angle, final float y_angle, final float z_angles) {
-		// First vertex is the main vertex
-		vertexes[0] = new Vertex(first_vertex.x, first_vertex.y, first_vertex.z);
+	public Triangle(@NonNull final Vector center, final float width, final float height, final float main_angle,
+					final float x_angle, final float y_angle, final float z_angle) {
+		Vector[] vertices = new Vector[3];
 
-		// Calculate the second vertex
-		Vector second_vertex = new Vector(
-				first_vertex.x + width,
-				first_vertex.y,
-				first_vertex.z
-		);
-		vertexes[1] = new Vertex(second_vertex.x, second_vertex.y, second_vertex.z);
+		// Local triangle: vertex A at origin
+		Vector A = new Vector(0.0f, 0.0f, 0.0f);  // Main vertex
 
-		double main_angle_rad = Math.toRadians(main_angle);
-		float dx = (float) (height * StrictMath.cos(main_angle_rad));
-		float dy = (float) (height * StrictMath.sin(main_angle_rad));
+		// Vertex B goes horizontally by width
+		Vector B = new Vector(width, 0.0f, 0.0f);
 
-		// Still relative to A (first_vertex), but at angle
-		Vector third_vertex = new Vector(
-				first_vertex.x + dx,
-				first_vertex.y + dy,
-				first_vertex.z
-		);
-		vertexes[2] = new Vertex(third_vertex.x, third_vertex.y, third_vertex.z);
+		// Vertex C is height units away from A, at 'main_angle' from AB
+		double radians = Math.toRadians(main_angle);
+		float dx = (float) (height * StrictMath.cos(radians));
+		float dy = (float) (height * StrictMath.sin(radians));
+		Vector C = new Vector(dx, dy, 0.0f);
 
-		restOfConstructor();
+		// Compute centroid to center the triangle in local space
+		float cx = (A.x + B.x + C.x) / 3.0f;
+		float cy = (A.y + B.y + C.y) / 3.0f;
+		float cz = (A.z + B.z + C.z) / 3.0f;
 
-		// Rotate the triangle
-		rotate(null, x_angle, y_angle, z_angles);
+		// Shift all vertices to center the triangle
+		A = A.subtract(cx, cy, cz);
+		B = B.subtract(cx, cy, cz);
+		C = C.subtract(cx, cy, cz);
+
+		// Store final vertices
+		vertices[0] = new Vector(A.x, A.y, A.z);
+		vertices[1] = new Vector(B.x, B.y, B.z);
+		vertices[2] = new Vector(C.x, C.y, C.z);
+
+		restOfConstructor(vertices);
+
+		// Apply rotation in 3D
+		rotateM(x_angle, y_angle, z_angle);
+
+		// Move to final position
+		translateM(center.x, center.y, center.z);
 	}
 
-	private void restOfConstructor() {
-		// Set the center of the triangle
-		center = new Vector(
-				(vertexes[0].position.x + vertexes[1].position.x + vertexes[2].position.x) / 3,
-				(vertexes[0].position.y + vertexes[1].position.y + vertexes[2].position.y) / 3,
-				(vertexes[0].position.z + vertexes[1].position.z + vertexes[2].position.z) / 3
-		);
-
-		// Set the vertices float array
+	private void restOfConstructor(@NonNull final Vector[] vertices_vectors) {
 		float[] vertices = {
-				vertexes[0].position.x, vertexes[0].position.y, vertexes[0].position.z,
-				vertexes[1].position.x, vertexes[1].position.y, vertexes[1].position.z,
-				vertexes[2].position.x, vertexes[2].position.y, vertexes[2].position.z
-		};
-
-		// Set the colors float array
-		float[] colors = {
-				vertexes[0].color.x, vertexes[0].color.y, vertexes[0].color.z, vertexes[0].color.w,
-				vertexes[1].color.x, vertexes[1].color.y, vertexes[1].color.z, vertexes[1].color.w,
-				vertexes[2].color.x, vertexes[2].color.y, vertexes[2].color.z , vertexes[2].color.w
-		};
-		colors = new float[]{
-				1.0f, 0.0f, 0.0f, 1.0f,
-				0.0f, 1.0f, 0.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f
+				vertices_vectors[0].x, vertices_vectors[0].y, vertices_vectors[0].z,
+				vertices_vectors[1].x, vertices_vectors[1].y, vertices_vectors[1].z,
+				vertices_vectors[2].x, vertices_vectors[2].y, vertices_vectors[2].z
 		};
 
 		vertex_buffer = ByteBuffer.allocateDirect(vertices.length * UtilsOpenGL.FLOAT_BYTES)
@@ -110,63 +102,21 @@ public final class Triangle extends Object {
 				.put(vertices);
 		vertex_buffer.position(0);
 
+		setColor(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+
+	public void setColor(final float r, final float g, final float b, final float a) {
+		float[] colors = {
+				1.0f, 0.0f, 0.0f, 1.0f,
+				0.0f, 1.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f, 1.0f
+		};
+
 		color_buffer = ByteBuffer.allocateDirect(colors.length * UtilsOpenGL.FLOAT_BYTES)
 				.order(ByteOrder.nativeOrder())
 				.asFloatBuffer()
 				.put(colors);
 		color_buffer.position(0);
-	}
-
-	public void setColor(final float r, final float g, final float b, final float a) {
-		for (final Vertex vertex : vertexes) {
-			vertex.color.x = r;
-			vertex.color.y = g;
-			vertex.color.z = b;
-			vertex.color.w = a;
-		}
-	}
-
-	public void rotate(@Nullable final Vector center, final float x_angle, final float y_angle, final float z_angle) {
-		Vector used_center = center;
-		if (center == null) {
-			used_center = this.center;
-		}
-
-		for (int i = 0; i < vertex_buffer.capacity() / 3; i++) {
-			Vector vertex = new Vector(
-					vertex_buffer.get(i * 3),
-					vertex_buffer.get(i * 3 + 1),
-					vertex_buffer.get(i * 3 + 2)
-			);
-			Utils.applyRotation(vertex, used_center, -x_angle, y_angle, z_angle);
-			vertex_buffer.put(i * 3, vertex.x);
-			vertex_buffer.put(i * 3 + 1, vertex.y);
-			vertex_buffer.put(i * 3 + 2, vertex.z);
-		}
-	}
-
-	public void translate(final float x_offset, final float y_offset, final float z_offset) {
-		super.translate(x_offset, y_offset, z_offset);
-
-		for (int i = 0; i < vertex_buffer.capacity() / 3; i++) {
-			float x = vertex_buffer.get(i * 3) + x_offset;
-			float y = vertex_buffer.get(i * 3 + 1) + y_offset;
-			float z = vertex_buffer.get(i * 3 + 2) + z_offset;
-			vertex_buffer.put(i * 3, x);
-			vertex_buffer.put(i * 3 + 1, y);
-			vertex_buffer.put(i * 3 + 2, z);
-		}
-	}
-
-	public void scale(final float x_scale, final float y_scale, final float z_scale) {
-		for (int i = 0; i < vertex_buffer.capacity() / 3; i++) {
-			float x = vertex_buffer.get(i * 3) * (1 + x_scale);
-			float y = vertex_buffer.get(i * 3 + 1) * (1 + y_scale);
-			float z = vertex_buffer.get(i * 3 + 2) * (1 + z_scale);
-			vertex_buffer.put(i * 3, x);
-			vertex_buffer.put(i * 3 + 1, y);
-			vertex_buffer.put(i * 3 + 2, z);
-		}
 	}
 
 	@NonNull
@@ -180,7 +130,13 @@ public final class Triangle extends Object {
 	}
 
 	@Override
-	public void draw() {
-		UtilsOpenGL.drawTriangle(this);
+	public void draw(@Nullable final float[] parent_model_matrix) {
+		float[] model_matrix = getModelMatrix();
+
+		if (parent_model_matrix != null) {
+			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
+		}
+
+		UtilsOpenGL.drawTriangle(this, model_matrix);
 	}
 }

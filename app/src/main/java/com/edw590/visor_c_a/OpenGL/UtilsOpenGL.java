@@ -29,6 +29,7 @@ import com.edw590.visor_c_a.OpenGL.Objects.Triangle;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,14 +42,28 @@ public final class UtilsOpenGL {
 
 	public static final int FLOATS_PER_VERTEX = 3;
 
+	private static ByteBuffer index_buffer = null;
+
 	private static int program_id = 0;
+	private static float[] projection_matrix = new float[16];
 
 	public static void setProgramID(final int program_id) {
 		UtilsOpenGL.program_id = program_id;
 	}
 
-	public static void drawTriangle(@NonNull final Triangle triangle) {
+	public static void setProjectionMatrix(@NonNull final float[] projection_matrix) {
+		UtilsOpenGL.projection_matrix = projection_matrix.clone();
+	}
+
+	public static void drawTriangle(@NonNull final Triangle triangle, @NonNull final float[] model_matrix) {
 		clearGLErrors();
+
+		if (index_buffer == null) {
+			index_buffer = ByteBuffer.allocateDirect(3);
+			index_buffer.order(ByteOrder.nativeOrder());
+			index_buffer.put(new byte[] {0, 1, 2});
+			index_buffer.position(0);
+		}
 
 		int position_id = GLES20.glGetAttribLocation(program_id, "a_position");
 		UtilsOpenGL.checkGLErrors("glGetAttribLocation 1");
@@ -65,6 +80,31 @@ public final class UtilsOpenGL {
 			return;
 		}
 
+		int model_matrix_id = GLES20.glGetUniformLocation(program_id, "u_model");
+		UtilsOpenGL.checkGLErrors("glGetUniformLocation 1");
+		if (model_matrix_id == -1) {
+			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_model");
+
+			return;
+		}
+
+		int projection_matrix_id = GLES20.glGetUniformLocation(program_id, "u_projection");
+		UtilsOpenGL.checkGLErrors("glGetUniformLocation 2");
+		if (projection_matrix_id == -1) {
+			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_projection");
+
+			return;
+		}
+
+		System.out.println("-----------------------------------------------------------");
+		System.out.println("model_matrix: " + Arrays.toString(model_matrix));
+		System.out.println("projection_matrix: " + Arrays.toString(projection_matrix));
+
+		GLES20.glUniformMatrix4fv(model_matrix_id, 1, false, model_matrix, 0);
+		UtilsOpenGL.checkGLErrors("glUniformMatrix4fv 1");
+		GLES20.glUniformMatrix4fv(projection_matrix_id, 1, false, projection_matrix, 0);
+		UtilsOpenGL.checkGLErrors("glUniformMatrix4fv 3");
+
 		GLES20.glEnableVertexAttribArray(position_id);
 		UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 1");
 		GLES20.glVertexAttribPointer(position_id, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
@@ -76,11 +116,6 @@ public final class UtilsOpenGL {
 		GLES20.glVertexAttribPointer(color_id, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
 				triangle.getColorBuffer());
 		UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
-
-		ByteBuffer index_buffer = ByteBuffer.allocateDirect(3);
-		index_buffer.order(ByteOrder.nativeOrder());
-		index_buffer.put(new byte[] {0, 1, 2});
-		index_buffer.position(0);
 
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 3, GLES20.GL_UNSIGNED_BYTE, index_buffer);
 		UtilsOpenGL.checkGLErrors("glDrawElements");

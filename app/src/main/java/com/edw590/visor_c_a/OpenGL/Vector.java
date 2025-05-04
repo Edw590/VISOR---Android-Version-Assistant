@@ -21,6 +21,8 @@
 
 package com.edw590.visor_c_a.OpenGL;
 
+import androidx.annotation.NonNull;
+
 public final class Vector {
 	public float x;
 	public float y;
@@ -39,5 +41,10 @@ public final class Vector {
 		this.y = y;
 		this.z = z;
 		this.w = w;
+	}
+
+	@NonNull
+	public Vector subtract(final float dx, final float dy, final float dz) {
+		return new Vector(x - dx, y - dy, z - dz);
 	}
 }

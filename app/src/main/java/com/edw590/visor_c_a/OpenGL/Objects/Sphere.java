@@ -21,9 +21,12 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
+import android.opengl.Matrix;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 
 import java.util.ArrayList;
@@ -33,7 +36,7 @@ public final class Sphere extends Object {
 	private final List<Triangle> triangles = new ArrayList<>(30);
 
 	/**
-	 * Generates a sphere using spherical coordinates.
+	 * Creates a sphere using spherical coordinates.
 	 *
 	 * @param center center of the sphere
 	 * @param radius radius of the sphere
@@ -41,8 +44,6 @@ public final class Sphere extends Object {
 	 * @param slices number of horizontal segments (longitude)
 	 */
 	public Sphere(@NonNull final Vector center, final float radius, final int stacks, final int slices) {
-		this.center = center;
-
 		for (int i = 0; i < stacks; i++) {
 			float phi1 = (float) Math.PI * i / stacks;
 			float phi2 = (float) Math.PI * (i + 1) / stacks;
@@ -52,58 +53,41 @@ public final class Sphere extends Object {
 				float theta2 = (float) (2 * Math.PI) * (j + 1) / slices;
 
 				// Calculate points
-				Vector p1 = sphericalToCartesian(center, radius, phi1, theta1);
-				Vector p2 = sphericalToCartesian(center, radius, phi2, theta1);
-				Vector p3 = sphericalToCartesian(center, radius, phi2, theta2);
-				Vector p4 = sphericalToCartesian(center, radius, phi1, theta2);
+				Vector p1 = sphericalToCartesian(radius, phi1, theta1);
+				Vector p2 = sphericalToCartesian(radius, phi2, theta1);
+				Vector p3 = sphericalToCartesian(radius, phi2, theta2);
+				Vector p4 = sphericalToCartesian(radius, phi1, theta2);
 
 				// Two triangles per quad
 				triangles.add(new Triangle(p1, p2, p3));
 				triangles.add(new Triangle(p1, p3, p4));
 			}
 		}
+
+		translateM(center.x, center.y, center.z);
 	}
 
-	private static Vector sphericalToCartesian(@NonNull final Vector center, final float radius, final float phi, final float theta) {
-		float x = (float) (radius * StrictMath.sin(phi) * StrictMath.cos(theta)) + center.x;
-		float y = (float) (radius * StrictMath.cos(phi)) + center.y;
-		float z = (float) (radius * StrictMath.sin(phi) * StrictMath.sin(theta)) + center.z;
+	private static Vector sphericalToCartesian(final float radius, final float phi, final float theta) {
+		float x = (float) (radius * StrictMath.sin(phi) * StrictMath.cos(theta));
+		float y = (float) (radius * StrictMath.cos(phi));
+		float z = (float) (radius * StrictMath.sin(phi) * StrictMath.sin(theta));
 
 		return new Vector(x, y, z);
 	}
 
 	@Override
-	public void translate(final float x_offset, final float y_offset, final float z_offset) {
-		super.translate(x_offset, y_offset, z_offset);
+	public void draw(@Nullable final float[] parent_model_matrix) {
+		float[] model_matrix = getModelMatrix();
 
-		for (final Triangle triangle : triangles) {
-			triangle.translate(x_offset, y_offset, z_offset);
-		}
-	}
-
-	@Override
-	public void rotate(@Nullable final Vector center, final float x_angle, final float y_angle, final float z_angle) {
-		Vector used_center = center;
-		if (center == null) {
-			used_center = this.center;
+		if (parent_model_matrix != null) {
+			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
 		}
 
+		float[] final_model_matrix = new float[16];
 		for (final Triangle triangle : triangles) {
-			triangle.rotate(used_center, x_angle, y_angle, z_angle);
-		}
-	}
+			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, triangle.getModelMatrix(), 0);
 
-	@Override
-	public void scale(final float x_scale, final float y_scale, final float z_scale) {
-		for (final Triangle triangle : triangles) {
-			triangle.scale(x_scale, y_scale, z_scale);
-		}
-	}
-
-	@Override
-	public void draw() {
-		for (final Triangle triangle : triangles) {
-			triangle.draw();
+			UtilsOpenGL.drawTriangle(triangle, final_model_matrix);
 		}
 	}
 }

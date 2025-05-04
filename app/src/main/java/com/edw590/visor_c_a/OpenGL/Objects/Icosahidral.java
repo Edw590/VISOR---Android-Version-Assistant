@@ -21,17 +21,18 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
+import android.opengl.Matrix;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 
 public class Icosahidral extends Object {
 	private Triangle[] triangles = null;
 
 	public Icosahidral(@NonNull final Vector center, final float radius) {
-		this.center = center;
-
 		triangles = new Triangle[20];
 
 		// Golden ratio
@@ -63,45 +64,28 @@ public class Icosahidral extends Object {
 
 			// Offset vertices by the center
 			triangles[i] = new Triangle(
-					new Vector(first_vertex[0] + center.x, first_vertex[1] + center.y, first_vertex[2] + center.z),
-					new Vector(second_vertex[0] + center.x, second_vertex[1] + center.y, second_vertex[2] + center.z),
-					new Vector(third_vertex[0] + center.x, third_vertex[1] + center.y, third_vertex[2] + center.z)
+					new Vector(first_vertex[0], first_vertex[1], first_vertex[2]),
+					new Vector(second_vertex[0], second_vertex[1], second_vertex[2]),
+					new Vector(third_vertex[0], third_vertex[1], third_vertex[2])
 			);
 		}
+
+		translateM(center.x, center.y, center.z);
 	}
 
 	@Override
-	public void translate(final float x_offset, final float y_offset, final float z_offset) {
-		super.translate(x_offset, y_offset, z_offset);
+	public void draw(@Nullable final float[] parent_model_matrix) {
+		float[] model_matrix = getModelMatrix();
 
-		for (final Triangle triangle : triangles) {
-			triangle.translate(x_offset, y_offset, z_offset);
-		}
-	}
-
-	@Override
-	public void rotate(@Nullable final Vector center, final float x_angle, final float y_angle, final float z_angle) {
-		Vector used_center = center;
-		if (center == null) {
-			used_center = this.center;
+		if (parent_model_matrix != null) {
+			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
 		}
 
+		float[] final_model_matrix = new float[16];
 		for (final Triangle triangle : triangles) {
-			triangle.rotate(used_center, x_angle, y_angle, z_angle);
-		}
-	}
+			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, triangle.getModelMatrix(), 0);
 
-	@Override
-	public void scale(final float x_scale, final float y_scale, final float z_scale) {
-		for (final Triangle triangle : triangles) {
-			triangle.scale(x_scale, y_scale, z_scale);
-		}
-	}
-
-	@Override
-	public void draw() {
-		for (final Triangle triangle : triangles) {
-			triangle.draw();
+			UtilsOpenGL.drawTriangle(triangle, final_model_matrix);
 		}
 	}
 }

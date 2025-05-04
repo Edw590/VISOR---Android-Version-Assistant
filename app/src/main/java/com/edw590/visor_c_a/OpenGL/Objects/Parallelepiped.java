@@ -21,6 +21,8 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
+import android.opengl.Matrix;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -31,51 +33,31 @@ public final class Parallelepiped extends Object {
 
 	public Parallelepiped(@NonNull final Vector center, final float width, final float height, final float depth,
 						  final float x_angle, final float y_angle, final float z_angle) {
-		this.center = center;
-
 		rectangles = new Rectangle[6];
-		rectangles[0] = new Rectangle(new Vector(center.x, center.y, center.z + depth / 2), width, height, 0, 0, 0);
-		rectangles[1] = new Rectangle(new Vector(center.x, center.y, center.z - depth / 2), width, height, 0, 0, 90);
-		rectangles[2] = new Rectangle(new Vector(center.x + width / 2, center.y, center.z), height, depth, 0, 90, 0);
-		rectangles[3] = new Rectangle(new Vector(center.x - width / 2, center.y, center.z), height, depth, 0, 90, 90);
-		rectangles[4] = new Rectangle(new Vector(center.x, center.y + height / 2, center.z), width, depth, 90, 0, 0);
-		rectangles[5] = new Rectangle(new Vector(center.x, center.y - height / 2, center.z), width, depth, 90, 0, 90);
+		rectangles[0] = new Rectangle(new Vector(0, 0, depth / 2), width, height, 0, 0, 0);
+		rectangles[1] = new Rectangle(new Vector(0, 0, -depth / 2), width, height, 0, 0, 90);
+		rectangles[2] = new Rectangle(new Vector(width / 2, 0, 0), height, depth, 0, 90, 0);
+		rectangles[3] = new Rectangle(new Vector(-width / 2, 0, 0), height, depth, 0, 90, 90);
+		rectangles[4] = new Rectangle(new Vector(0, height / 2, 0), width, depth, 90, 0, 0);
+		rectangles[5] = new Rectangle(new Vector(0, -height / 2, 0), width, depth, 90, 0, 90);
 
-		rotate(null, x_angle, y_angle, z_angle);
+		rotateM(x_angle, y_angle, z_angle);
+		translateM(center.x, center.y, center.z);
 	}
 
 	@Override
-	public void translate(final float x_offset, final float y_offset, final float z_offset) {
-		super.translate(x_offset, y_offset, z_offset);
+	public void draw(@Nullable final float[] parent_model_matrix) {
+		float[] model_matrix = getModelMatrix();
 
-		for (final Rectangle rectangle : rectangles) {
-			rectangle.translate(x_offset, y_offset, z_offset);
-		}
-	}
-
-	@Override
-	public void rotate(@Nullable final Vector center, final float x_angle, final float y_angle, final float z_angle) {
-		Vector used_center = center;
-		if (center == null) {
-			used_center = this.center;
+		if (parent_model_matrix != null) {
+			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
 		}
 
+		float[] final_model_matrix = new float[16];
 		for (final Rectangle rectangle : rectangles) {
-			rectangle.rotate(used_center, x_angle, y_angle, z_angle);
-		}
-	}
+			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, rectangle.getModelMatrix(), 0);
 
-	@Override
-	public void scale(final float x_scale, final float y_scale, final float z_scale) {
-		for (final Rectangle rectangle : rectangles) {
-			rectangle.scale(x_scale, y_scale, z_scale);
-		}
-	}
-
-	@Override
-	public void draw() {
-		for (final Rectangle rectangle : rectangles) {
-			rectangle.draw();
+			rectangle.draw(model_matrix);
 		}
 	}
 }

@@ -26,10 +26,7 @@ import android.opengl.Matrix;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.OpenGL.Vector;
-
 public abstract class Object {
-	@NonNull public Vector center = new Vector(0.0f, 0.0f, 0.0f);
 	@NonNull public float[] translation_matrix = new float[16];
 	@NonNull public float[] rotation_matrix = new float[16];
 
@@ -38,25 +35,11 @@ public abstract class Object {
 		Matrix.setIdentityM(rotation_matrix, 0);
 	}
 
-	public void translate(final float x_offset, final float y_offset, final float z_offset) {
-		center.x += x_offset;
-		center.y += y_offset;
-		center.z += z_offset;
-	}
-
-	public abstract void rotate(@Nullable final Vector center, final float x_angle, final float y_angle,
-								final float z_angle);
-
-	public abstract void scale(final float x_scale, final float y_scale, final float z_scale);
-
-	public abstract void draw();
+	public abstract void draw(@Nullable final float[] parent_model_matrix);
 
 	public final void rotateM(final float x_angle, final float y_angle, final float z_angle) {
-		// Rotate around the X-axis
 		Matrix.rotateM(rotation_matrix, 0, x_angle, 1.0f, 0.0f, 0.0f);
-		// Rotate around the Y-axis
 		Matrix.rotateM(rotation_matrix, 0, y_angle, 0.0f, 1.0f, 0.0f);
-		// Rotate around the Z-axis
 		Matrix.rotateM(rotation_matrix, 0, z_angle, 0.0f, 0.0f, 1.0f);
 	}
 
