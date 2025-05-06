@@ -26,18 +26,30 @@ import android.opengl.Matrix;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
 public abstract class Object {
-	@NonNull public float[] scale_matrix = new float[16];
-	@NonNull public float[] translation_matrix = new float[16];
-	@NonNull public float[] rotation_matrix = new float[16];
+	@NonNull float vertices[] = null;
+	@NonNull float colors[] = null;
+	@Nullable short indexes[] = null;
+
+	FloatBuffer vertex_buffer = null;
+	FloatBuffer color_buffer = null;
+	ByteBuffer index_buffer = null;
+
+	@NonNull private final float[] scale_matrix = new float[16];
+	@NonNull private final float[] translation_matrix = new float[16];
+	@NonNull private final float[] rotation_matrix = new float[16];
 
 	public Object() {
 		Matrix.setIdentityM(scale_matrix, 0);
 		Matrix.setIdentityM(translation_matrix, 0);
 		Matrix.setIdentityM(rotation_matrix, 0);
 	}
-
-	public abstract void draw(@Nullable final float[] parent_model_matrix);
 
 	public final void rotateM(final float x_angle, final float y_angle, final float z_angle) {
 		Matrix.rotateM(rotation_matrix, 0, x_angle, 1.0f, 0.0f, 0.0f);
@@ -54,11 +66,63 @@ public abstract class Object {
 	}
 
 	@NonNull
+	public final FloatBuffer getVertexBuffer() {
+		if (vertex_buffer == null) {
+			vertex_buffer = ByteBuffer.allocateDirect(vertices.length * UtilsOpenGL.FLOAT_BYTES)
+					.order(ByteOrder.nativeOrder())
+					.asFloatBuffer()
+					.put(vertices);
+			vertex_buffer.position(0);
+		}
+
+		return vertex_buffer;
+	}
+
+	public final int getVertexFloatsCount() {
+		return vertices.length;
+	}
+
+	@NonNull
+	public final FloatBuffer getColorBuffer() {
+		if (color_buffer == null) {
+			color_buffer = ByteBuffer.allocateDirect(colors.length * UtilsOpenGL.FLOAT_BYTES)
+					.order(ByteOrder.nativeOrder())
+					.asFloatBuffer()
+					.put(colors);
+			color_buffer.position(0);
+		}
+
+		return color_buffer;
+	}
+
+	@Nullable
+	public final ByteBuffer getIndexBuffer() {
+		if (index_buffer == null && indexes != null) {
+			index_buffer = ByteBuffer.allocateDirect(indexes.length * UtilsOpenGL.SHORT_BYTES)
+					.order(ByteOrder.nativeOrder());
+			for (final short index : indexes) {
+				index_buffer.putShort(index);
+			}
+			index_buffer.position(0);
+		}
+
+		return index_buffer;
+	}
+
+	public final int getIndexCount() {
+		return (indexes == null) ? 0 : indexes.length;
+	}
+
+	@NonNull
 	public final float[] getModelMatrix() {
 		float[] model_matrix = new float[16];
 		Matrix.multiplyMM(model_matrix, 0, rotation_matrix, 0, scale_matrix, 0);
 		Matrix.multiplyMM(model_matrix, 0, translation_matrix, 0, model_matrix, 0);
 
 		return model_matrix;
+	}
+
+	public void draw() {
+		UtilsOpenGL.draw(this);
 	}
 }

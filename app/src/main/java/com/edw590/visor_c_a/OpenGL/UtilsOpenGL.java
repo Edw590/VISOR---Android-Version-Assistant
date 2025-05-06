@@ -25,10 +25,9 @@ import android.opengl.GLES20;
 
 import androidx.annotation.NonNull;
 
-import com.edw590.visor_c_a.OpenGL.Objects.Triangle;
+import com.edw590.visor_c_a.OpenGL.Objects.Object;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,9 +38,8 @@ public final class UtilsOpenGL {
 	public static final int FLOAT_BYTES = 4;
 	public static final int SHORT_BYTES = 2;
 
-	public static final int FLOATS_PER_VERTEX = 3;
-
-	private static ByteBuffer index_buffer = null;
+	public static final int FLOATS_PER_VERTEX_POS = 3;
+	public static final int FLOATS_PER_VERTEX_COLOR = 4;
 
 	private static int program_id = 0;
 	private static float[] projection_matrix = new float[16];
@@ -54,25 +52,18 @@ public final class UtilsOpenGL {
 		UtilsOpenGL.projection_matrix = projection_matrix.clone();
 	}
 
-	public static void drawTriangle(@NonNull final Triangle triangle, @NonNull final float[] model_matrix) {
+	public static void draw(@NonNull final Object object) {
 		clearGLErrors();
 
-		if (index_buffer == null) {
-			index_buffer = ByteBuffer.allocateDirect(3);
-			index_buffer.order(ByteOrder.nativeOrder());
-			index_buffer.put(new byte[] {0, 1, 2});
-			index_buffer.position(0);
-		}
-
 		int position_id = GLES20.glGetAttribLocation(program_id, "a_position");
-		UtilsOpenGL.checkGLErrors("glGetAttribLocation 1");
+		checkGLErrors("glGetAttribLocation 1");
 		if (position_id == -1) {
 			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_position");
 
 			return;
 		}
 		int color_id = GLES20.glGetAttribLocation(program_id, "a_color");
-		UtilsOpenGL.checkGLErrors("glGetAttribLocation 2");
+		checkGLErrors("glGetAttribLocation 2");
 		if (color_id == -1) {
 			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_color");
 
@@ -80,7 +71,7 @@ public final class UtilsOpenGL {
 		}
 
 		int model_matrix_id = GLES20.glGetUniformLocation(program_id, "u_model");
-		UtilsOpenGL.checkGLErrors("glGetUniformLocation 1");
+		checkGLErrors("glGetUniformLocation 1");
 		if (model_matrix_id == -1) {
 			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_model");
 
@@ -88,32 +79,39 @@ public final class UtilsOpenGL {
 		}
 
 		int projection_matrix_id = GLES20.glGetUniformLocation(program_id, "u_projection");
-		UtilsOpenGL.checkGLErrors("glGetUniformLocation 2");
+		checkGLErrors("glGetUniformLocation 2");
 		if (projection_matrix_id == -1) {
 			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_projection");
 
 			return;
 		}
 
-		GLES20.glUniformMatrix4fv(model_matrix_id, 1, false, model_matrix, 0);
-		UtilsOpenGL.checkGLErrors("glUniformMatrix4fv 1");
+		GLES20.glUniformMatrix4fv(model_matrix_id, 1, false, object.getModelMatrix(), 0);
+		checkGLErrors("glUniformMatrix4fv 1");
 		GLES20.glUniformMatrix4fv(projection_matrix_id, 1, false, projection_matrix, 0);
-		UtilsOpenGL.checkGLErrors("glUniformMatrix4fv 3");
+		checkGLErrors("glUniformMatrix4fv 3");
 
 		GLES20.glEnableVertexAttribArray(position_id);
-		UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 1");
-		GLES20.glVertexAttribPointer(position_id, 3, GLES20.GL_FLOAT, false, 3 * UtilsOpenGL.FLOAT_BYTES,
-				triangle.getVertexBuffer());
-		UtilsOpenGL.checkGLErrors("glVertexAttribPointer 1");
+		checkGLErrors("glEnableVertexAttribArray 1");
+		GLES20.glVertexAttribPointer(position_id, FLOATS_PER_VERTEX_POS, GLES20.GL_FLOAT, false,
+				FLOATS_PER_VERTEX_POS * FLOAT_BYTES, object.getVertexBuffer());
+		checkGLErrors("glVertexAttribPointer 1");
 
 		GLES20.glEnableVertexAttribArray(color_id);
-		UtilsOpenGL.checkGLErrors("glEnableVertexAttribArray 2");
-		GLES20.glVertexAttribPointer(color_id, 4, GLES20.GL_FLOAT, false, 4 * UtilsOpenGL.FLOAT_BYTES,
-				triangle.getColorBuffer());
-		UtilsOpenGL.checkGLErrors("glVertexAttribPointer 2");
+		checkGLErrors("glEnableVertexAttribArray 2");
+		GLES20.glVertexAttribPointer(color_id, FLOATS_PER_VERTEX_COLOR, GLES20.GL_FLOAT, false,
+				FLOATS_PER_VERTEX_COLOR * FLOAT_BYTES, object.getColorBuffer());
+		checkGLErrors("glVertexAttribPointer 2");
 
-		GLES20.glDrawElements(GLES20.GL_TRIANGLES, 3, GLES20.GL_UNSIGNED_BYTE, index_buffer);
-		UtilsOpenGL.checkGLErrors("glDrawElements");
+		ByteBuffer index_buffer = object.getIndexBuffer();
+		if (index_buffer == null) {
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, object.getVertexFloatsCount() / FLOATS_PER_VERTEX_POS);
+			checkGLErrors("glDrawArrays");
+		} else {
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES, object.getIndexCount() * SHORT_BYTES, GLES20.GL_UNSIGNED_SHORT,
+					index_buffer);
+			checkGLErrors("glDrawElements");
+		}
 	}
 
 	public static int createProgram() {

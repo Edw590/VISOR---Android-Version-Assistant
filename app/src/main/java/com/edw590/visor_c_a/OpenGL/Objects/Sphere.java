@@ -21,47 +21,88 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
-import android.opengl.Matrix;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class Sphere extends Object {
-	private final List<Triangle> triangles = new ArrayList<>(30);
-
 	/**
 	 * Creates a sphere using spherical coordinates.
 	 *
 	 * @param center center of the sphere
 	 * @param radius radius of the sphere
 	 * @param stacks number of vertical segments (latitude)
-	 * @param slices number of horizontal segments (longitude)
+	 * @param sectors number of horizontal segments (longitude)
 	 */
-	public Sphere(@NonNull final Vector center, final float radius, final int stacks, final int slices) {
-		for (int i = 0; i < stacks; i++) {
-			float phi1 = (float) Math.PI * i / stacks;
-			float phi2 = (float) Math.PI * (i + 1) / stacks;
+	public Sphere(@NonNull final Vector center, final float radius, final int stacks, final int sectors) {
+		List<Float> vertices_list = new ArrayList<>(1500);
+		double stack_step = Math.PI / stacks;
+		double sector_step = 2 * Math.PI / sectors;
+		for (int i = 0; i <= stacks; ++i) {
+			double stack_angle = Math.PI / 2 - i * stack_step;
+			double xy = radius * StrictMath.cos(stack_angle);
+			double z = radius * StrictMath.sin(stack_angle);
 
-			for (int j = 0; j < slices; j++) {
-				float theta1 = (float) (2 * Math.PI) * j / slices;
-				float theta2 = (float) (2 * Math.PI) * (j + 1) / slices;
+			for (int j = 0; j <= sectors; ++j) {
+				double sector_angle = j * sector_step;
 
-				// Calculate points
-				Vector p1 = sphericalToCartesian(radius, phi1, theta1);
-				Vector p2 = sphericalToCartesian(radius, phi2, theta1);
-				Vector p3 = sphericalToCartesian(radius, phi2, theta2);
-				Vector p4 = sphericalToCartesian(radius, phi1, theta2);
+				double x = xy * StrictMath.cos(sector_angle);
+				double y = xy * StrictMath.sin(sector_angle);
 
-				// Two triangles per quad
-				triangles.add(new Triangle(p1, p3, p2));
-				triangles.add(new Triangle(p1, p4, p3));
+				vertices_list.add((float) x);
+				vertices_list.add((float) y);
+				vertices_list.add((float) z);
 			}
+		}
+		// This exists because the original way was with indices - and glitches would appear.
+		// They seem to be gone having this below and no indices, so I'm leaving it like this.
+		List<Float> final_vertices = new ArrayList<>(7500);
+		for (int i = 0; i < stacks; ++i) {
+			for (int j = 0; j < sectors; ++j) {
+				int k1 = i * (sectors + 1) + j;
+				int k2 = k1 + sectors + 1;
+
+				int[] tri = {
+						k1, k2, k1 + 1,
+						k1 + 1, k2, k2 + 1
+				};
+
+				for (final int k : tri) {
+					int index = k * 3;
+					final_vertices.add(vertices_list.get(index));
+					final_vertices.add(vertices_list.get(index + 1));
+					final_vertices.add(vertices_list.get(index + 2));
+				}
+			}
+		}
+		vertices = new float[final_vertices.size()];
+		for (int i = 0; i < vertices.length; i++) {
+			vertices[i] = final_vertices.get(i);
+		}
+
+		List<Float> colors_list = new ArrayList<>(10000);
+		for (int i = 0; i < final_vertices.size() / (3 * 3); i++) {
+			colors_list.add(1.0f);
+			colors_list.add(0.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+
+			colors_list.add(0.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+			colors_list.add(1.0f);
+		}
+		colors = new float[colors_list.size()];
+		for (int i = 0; i < colors_list.size(); i++) {
+			colors[i] = colors_list.get(i);
 		}
 
 		translateM(center.x, center.y, center.z);
@@ -73,21 +114,5 @@ public final class Sphere extends Object {
 		float z = (float) (radius * StrictMath.sin(phi) * StrictMath.sin(theta));
 
 		return new Vector(x, y, z);
-	}
-
-	@Override
-	public void draw(@Nullable final float[] parent_model_matrix) {
-		float[] model_matrix = getModelMatrix();
-
-		if (parent_model_matrix != null) {
-			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
-		}
-
-		float[] final_model_matrix = new float[16];
-		for (final Triangle triangle : triangles) {
-			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, triangle.getModelMatrix(), 0);
-
-			UtilsOpenGL.drawTriangle(triangle, final_model_matrix);
-		}
 	}
 }

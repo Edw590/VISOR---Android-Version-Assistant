@@ -21,40 +21,37 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
-import android.opengl.Matrix;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 
 public final class Rectangle extends Object {
-	private Triangle[] triangles = null;
 
 	public Rectangle(@NonNull final Vector center, final float width, final float height,
 					 final float x_angle, final float y_angle, final float z_angle) {
-		triangles = new Triangle[2];
-		triangles[0] = new Triangle(new Vector(-width / 6.0f, -height / 6.0f, 0.0f), width, height, 90, 0, 0, 0);
-		triangles[1] = new Triangle(new Vector(width / 6.0f, height / 6.0f, 0.0f), -width, -height, 90, 0, 0, 0);
+		// Generate vertices based on width, length, and depth
+		float half_width = width / 2.0f;
+		float half_length = height / 2.0f;
+
+		vertices = new float[]{
+				-half_width, -half_length, 0,
+				half_width, -half_length, 0,
+				half_width, half_length, 0,
+				-half_width, -half_length, 0,
+				half_width, half_length, 0,
+				-half_width, half_length, 0,
+		};
+
+		colors = new float[]{
+				1.0f, 0.0f, 0.0f, 1.0f,
+				0.0f, 1.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f, 1.0f,
+				1.0f, 0.0f, 0.0f, 1.0f,
+				0.0f, 1.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f, 1.0f,
+		};
 
 		rotateM(x_angle, y_angle, z_angle);
 		translateM(center.x, center.y, center.z);
-	}
-
-	@Override
-	public void draw(@Nullable final float[] parent_model_matrix) {
-		float[] model_matrix = getModelMatrix();
-
-		if (parent_model_matrix != null) {
-			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
-		}
-
-		float[] final_model_matrix = new float[16];
-		for (final Triangle triangle : triangles) {
-			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, triangle.getModelMatrix(), 0);
-
-			UtilsOpenGL.drawTriangle(triangle, final_model_matrix);
-		}
 	}
 }

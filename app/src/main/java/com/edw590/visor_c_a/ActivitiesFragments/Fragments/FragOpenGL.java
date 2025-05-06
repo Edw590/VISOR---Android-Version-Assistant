@@ -45,8 +45,7 @@ import com.edw590.visor_c_a.OpenGL.Vector;
 import com.edw590.visor_c_a.R;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.Collection;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -57,9 +56,9 @@ import javax.microedition.khronos.opengles.GL10;
 public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer {
 
 	/** Hold a reference to our GLSurfaceView. */
-	private GLSurfaceView mGLSurfaceView;
+	private GLSurfaceView mGLSurfaceView = null;
 
-	private final List<Object> objects = new ArrayList<>(50);
+	private final Collection<Object> objects = new ArrayList<>(50);
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -95,9 +94,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	int program_id = 0;
 
 	private int frame_count = 0;
-	private long start_time = new Date().getTime();
+	private long start_time = System.currentTimeMillis();
 
-	private AppCompatTextView textView;
+	private AppCompatTextView textView = null;
 
 	@Nullable
 	@Override
@@ -197,7 +196,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			//object.rotateM(0.0f, 0.0f, 0.6f);
 			//object.scaleM(1.0f, 1.0f, 0.999f);
 
-			object.draw(null);
+			object.draw();
 		}
 	}
 

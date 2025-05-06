@@ -21,43 +21,99 @@
 
 package com.edw590.visor_c_a.OpenGL.Objects;
 
-import android.opengl.Matrix;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
+import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 
-public final class Parallelepiped extends Object {
-	private Rectangle[] rectangles = null;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Parallelepiped extends Object {
+	private static final int NUM_TRIANGLES = 12;
+	private static final int NUM_VERTICES = 36;
 
 	public Parallelepiped(@NonNull final Vector center, final float width, final float height, final float depth,
 						  final float x_angle, final float y_angle, final float z_angle) {
-		rectangles = new Rectangle[6];
-		rectangles[0] = new Rectangle(new Vector(0, 0, depth / 2), width, height, 0, 0, 0);
-		rectangles[1] = new Rectangle(new Vector(0, 0, -depth / 2), width, height, 0, 180, 0);
-		rectangles[2] = new Rectangle(new Vector(width / 2, 0, 0), height, depth, 0, 90, 0);
-		rectangles[3] = new Rectangle(new Vector(-width / 2, 0, 0), height, depth, 0, -90, 0);
-		rectangles[4] = new Rectangle(new Vector(0, height / 2, 0), width, depth, -90, 0, 0);
-		rectangles[5] = new Rectangle(new Vector(0, -height / 2, 0), width, depth, 90, 0, 0);
+		// Generate vertices based on width, height, and depth
+		float half_width = width / 2.0f;
+		float half_height = height / 2.0f;
+		float half_depth = depth / 2.0f;
+
+		vertices = new float[]{
+				// Front face
+				-half_width, -half_height, half_depth,
+				half_width, -half_height, half_depth,
+				half_width, half_height, half_depth,
+				-half_width, -half_height, half_depth,
+				half_width, half_height, half_depth,
+				-half_width, half_height, half_depth,
+
+				// Back face
+				-half_width, -half_height, -half_depth,
+				-half_width, half_height, -half_depth,
+				half_width, half_height, -half_depth,
+				-half_width, -half_height, -half_depth,
+				half_width, half_height, -half_depth,
+				half_width, -half_height, -half_depth,
+
+				// Left face
+				-half_width, -half_height, -half_depth,
+				-half_width, -half_height, half_depth,
+				-half_width, half_height, half_depth,
+				-half_width, -half_height, -half_depth,
+				-half_width, half_height, half_depth,
+				-half_width, half_height, -half_depth,
+
+				// Right face
+				half_width, -half_height, -half_depth,
+				half_width, half_height, -half_depth,
+				half_width, half_height, half_depth,
+				half_width, -half_height, -half_depth,
+				half_width, half_height, half_depth,
+				half_width, -half_height, half_depth,
+
+				// Top face
+				-half_width, half_height, -half_depth,
+				-half_width, half_height, half_depth,
+				half_width, half_height, half_depth,
+				-half_width, half_height, -half_depth,
+				half_width, half_height, half_depth,
+				half_width, half_height, -half_depth,
+
+				// Bottom face
+				-half_width, -half_height, -half_depth,
+				half_width, -half_height, -half_depth,
+				half_width, -half_height, half_depth,
+				-half_width, -half_height, -half_depth,
+				half_width, -half_height, half_depth,
+				-half_width, -half_height, half_depth
+		};
+
+		int colors_floats_len = NUM_VERTICES * UtilsOpenGL.FLOATS_PER_VERTEX_COLOR;
+		List<Float> colors_list = new ArrayList<>(colors_floats_len);
+		for (int i = 0; i < NUM_TRIANGLES; i++) {
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+
+			colors_list.add(0.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+			colors_list.add(1.0f);
+
+			colors_list.add(1.0f);
+			colors_list.add(0.0f);
+			colors_list.add(0.0f);
+			colors_list.add(1.0f);
+		}
+		colors = new float[colors_floats_len];
+		for (int i = 0; i < colors_floats_len; i++) {
+			colors[i] = colors_list.get(i);
+		}
 
 		rotateM(x_angle, y_angle, z_angle);
 		translateM(center.x, center.y, center.z);
-	}
-
-	@Override
-	public void draw(@Nullable final float[] parent_model_matrix) {
-		float[] model_matrix = getModelMatrix();
-
-		if (parent_model_matrix != null) {
-			Matrix.multiplyMM(model_matrix, 0, parent_model_matrix, 0, model_matrix, 0);
-		}
-
-		float[] final_model_matrix = new float[16];
-		for (final Rectangle rectangle : rectangles) {
-			Matrix.multiplyMM(final_model_matrix, 0, model_matrix, 0, rectangle.getModelMatrix(), 0);
-
-			rectangle.draw(model_matrix);
-		}
 	}
 }
