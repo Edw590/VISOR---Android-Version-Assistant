@@ -27,13 +27,13 @@ public final class Shaders {
 					"attribute vec3 a_position;" +
 					"attribute vec4 a_color;" +
 					"varying vec4 v_color;" +
-					"uniform mat4 u_rotation;" +
 					"uniform mat4 u_model;" +
+					"uniform mat4 u_view;" +
 					"uniform mat4 u_projection;" +
 					"void main() {" +
 						// Multiply the position first by the rotation matrix, then by the translation matrix and
-						// finally by the projection matrix: projection * translation * rotation * position.
-					"    gl_Position = u_projection * u_model * vec4(a_position, 1.0);" +
+						// finally by the projection matrix: projection * view * model * position.
+					"    gl_Position = u_projection * u_view * u_model * vec4(a_position, 1.0);" +
 					"    v_color = a_color;" +
 					"}";
 

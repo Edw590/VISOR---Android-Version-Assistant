@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Edw590
+ * Copyright 2021-2025 Edw590
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,11 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Fragments;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -40,6 +45,7 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.OpenGL.Objects.Object;
 import com.edw590.visor_c_a.OpenGL.Objects.Parallelepiped;
+import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 import com.edw590.visor_c_a.R;
@@ -59,6 +65,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private GLSurfaceView mGLSurfaceView = null;
 
 	private final Collection<Object> objects = new ArrayList<>(50);
+
+	float[] view_matrix = new float[16];
+	SensorManager sensor_manager;
+	GyroRotationCorrection orientation_fusion = new GyroRotationCorrection();
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -90,8 +100,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				1.0f, 20, 20
 		));*/
 	}
-
-	int program_id = 0;
 
 	private int frame_count = 0;
 	private long start_time = System.currentTimeMillis();
@@ -145,6 +153,12 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		// Set the FrameLayout as the content view
 		requireActivity().setContentView(frameLayout);
+
+		// /////////////////////////////////////////////////////////////////////
+
+		prepareSensors();
+
+		Matrix.setIdentityM(view_matrix, 0);
 	}
 
 	@Override
@@ -154,7 +168,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glCullFace(GLES20.GL_BACK);
 		GLES20.glFrontFace(GLES20.GL_CCW);
 
-		program_id = UtilsOpenGL.createProgram();
+		int program_id = UtilsOpenGL.createProgram();
 		if (program_id == 0) {
 			throw new RuntimeException("Error creating OpenGL program");
 		}
@@ -190,6 +204,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
+		UtilsOpenGL.setViewMatrix(view_matrix);
+
 		for (final Object object : objects) {
 			//object.translateM(0.0f, 0.0f, -0.01f);
 			object.rotateM(0.3f, 1.0f, 0.6f);
@@ -200,15 +216,51 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		mGLSurfaceView.onPause();
+	private void prepareSensors() {
+		sensor_manager = (SensorManager) requireContext().
+				getSystemService(Context.SENSOR_SERVICE);
+		if (sensor_manager == null) {
+			System.out.println("SensorManager is null");
+
+			return;
+		}
+
+		Sensor accelerometer = sensor_manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		Sensor magnetometer = sensor_manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		Sensor gyroscope = sensor_manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+		if (accelerometer == null || magnetometer == null) {
+			System.out.println("Accelerometer and/or Magnetometer not available");
+
+			return;
+		}
+
+		sensor_manager.registerListener(sensor_listener, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+		sensor_manager.registerListener(sensor_listener, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+		if (gyroscope != null) {
+			sensor_manager.registerListener(sensor_listener, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+		}
 	}
 
+	private final SensorEventListener sensor_listener = new SensorEventListener() {
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			view_matrix = orientation_fusion.onSensorChanged(event);
+		}
+
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+			// No need to implement
+		}
+	};
+
 	@Override
-	public void onResume() {
-		super.onResume();
-		mGLSurfaceView.onResume();
+	public void onDestroyView() {
+		super.onDestroyView();
+		if (mGLSurfaceView != null) {
+			mGLSurfaceView.onPause();
+			mGLSurfaceView = null;
+		}
+		sensor_manager.unregisterListener(sensor_listener);
+		UtilsOpenGL.deleteProgram();
 	}
 }

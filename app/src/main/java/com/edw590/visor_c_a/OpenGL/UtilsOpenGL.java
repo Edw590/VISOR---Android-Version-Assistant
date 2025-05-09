@@ -43,6 +43,11 @@ public final class UtilsOpenGL {
 
 	private static int program_id = 0;
 	private static float[] projection_matrix = new float[16];
+	private static float[] view_matrix = new float[16];
+
+	private UtilsOpenGL() {
+		// Prevent instantiation
+	}
 
 	public static void setProgramID(final int program_id) {
 		UtilsOpenGL.program_id = program_id;
@@ -50,6 +55,18 @@ public final class UtilsOpenGL {
 
 	public static void setProjectionMatrix(@NonNull final float[] projection_matrix) {
 		UtilsOpenGL.projection_matrix = projection_matrix.clone();
+	}
+
+	public static void setViewMatrix(@NonNull final float[] view_matrix) {
+		UtilsOpenGL.view_matrix = view_matrix.clone();
+	}
+
+	public static void deleteProgram() {
+		if (program_id != 0) {
+			GLES20.glDeleteProgram(program_id);
+			checkGLErrors("glDeleteProgram");
+			program_id = 0;
+		}
 	}
 
 	public static void draw(@NonNull final Object object) {
@@ -78,6 +95,14 @@ public final class UtilsOpenGL {
 			return;
 		}
 
+		int view_matrix_id = GLES20.glGetUniformLocation(program_id, "u_view");
+		checkGLErrors("glGetUniformLocation 2");
+		if (view_matrix_id == -1) {
+			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_view");
+
+			return;
+		}
+
 		int projection_matrix_id = GLES20.glGetUniformLocation(program_id, "u_projection");
 		checkGLErrors("glGetUniformLocation 2");
 		if (projection_matrix_id == -1) {
@@ -88,6 +113,8 @@ public final class UtilsOpenGL {
 
 		GLES20.glUniformMatrix4fv(model_matrix_id, 1, false, object.getModelMatrix(), 0);
 		checkGLErrors("glUniformMatrix4fv 1");
+		GLES20.glUniformMatrix4fv(view_matrix_id, 1, false, view_matrix, 0);
+		checkGLErrors("glUniformMatrix4fv 2");
 		GLES20.glUniformMatrix4fv(projection_matrix_id, 1, false, projection_matrix, 0);
 		checkGLErrors("glUniformMatrix4fv 3");
 
