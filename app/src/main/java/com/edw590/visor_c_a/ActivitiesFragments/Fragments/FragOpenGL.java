@@ -243,12 +243,15 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	private final SensorEventListener sensor_listener = new SensorEventListener() {
 		@Override
-		public void onSensorChanged(SensorEvent event) {
-			view_matrix = orientation_fusion.onSensorChanged(event);
+		public void onSensorChanged(final SensorEvent event) {
+			float[] matrix = orientation_fusion.onSensorChanged(event);
+			if (matrix != null) {
+				view_matrix = matrix;
+			}
 		}
 
 		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
 			// No need to implement
 		}
 	};
@@ -258,7 +261,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		super.onDestroyView();
 		if (mGLSurfaceView != null) {
 			mGLSurfaceView.onPause();
-			mGLSurfaceView = null;
 		}
 		sensor_manager.unregisterListener(sensor_listener);
 		UtilsOpenGL.deleteProgram();

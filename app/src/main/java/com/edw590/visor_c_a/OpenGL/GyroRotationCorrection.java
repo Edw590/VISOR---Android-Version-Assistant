@@ -27,78 +27,90 @@ import android.hardware.SensorManager;
 import android.opengl.Matrix;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-public class GyroRotationCorrection {
-	private static final float DRIFT_THRESHOLD = (float) Math.toRadians(3);
+import java.util.Arrays;
+
+public final class GyroRotationCorrection {
+	private static final float GYRO_DRIFT_THRESHOLD = (float) Math.toRadians(3);
+
+	private static final float ACCEL_THRESHOLD = 0.5f;
+	private static final float MAGNET_THRESHOLD = 0.3f;
+	private static final int GYRO_BIAS_SAMPLE_COUNT = 50;
 
 	private final float[] accel_data = new float[3];
 	private final float[] magnet_data = new float[3];
-	private float[] gyro_rotation_matrix = new float[9];
+	private float[] gyro_rotation_matrix = {
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1,
+	};
 	private long last_gyro_timestamp = 0;
 
-	// At startup: collect gyro samples over ~1 second
-	private int gyro_sample_count = 0;
 	private final float[] gyro_bias = new float[3];
-	private boolean calibrated = false;
-
-	private final float[] view_matrix = new float[16];
+	private boolean first_gyro_calibration = false;
 
 	private boolean gyro_in_use = false;
 
-	public GyroRotationCorrection() {
-		reset();
-	}
+	private final float[] gyro_bias_sum = new float[3];
+	private int gyro_bias_samples = 0;
 
-	public void reset() {
-		// Identity matrix
-		gyro_rotation_matrix = new float[]{
-				1, 0, 0,
-				0, 1, 0,
-				0, 0, 1,
-		};
-		last_gyro_timestamp = 0;
-	}
+	private final float[] last_magnet = new float[3];
+	private boolean is_first_magnet = true;
 
-	@NonNull
+	// This flips Z axis
+	private static final float[] ANDROID_TO_OPEN_GL = {
+			-1,  0, 0, 0,
+			 0, -1, 0, 0,
+			 0,  0, 1, 0,
+			 0,  0, 0, 1,
+	};
+
+	@Nullable
 	public float[] onSensorChanged(@NonNull final SensorEvent event) {
 		switch (event.sensor.getType()) {
-			case Sensor.TYPE_ACCELEROMETER:
+			case Sensor.TYPE_ACCELEROMETER: {
 				System.arraycopy(event.values, 0, accel_data, 0, 3);
+
 				break;
-			case Sensor.TYPE_MAGNETIC_FIELD:
+			}
+			case Sensor.TYPE_MAGNETIC_FIELD: {
 				System.arraycopy(event.values, 0, magnet_data, 0, 3);
+
 				break;
-			case Sensor.TYPE_GYROSCOPE:
+			}
+			case Sensor.TYPE_GYROSCOPE: {
+				if (isPhoneStill(accel_data, magnet_data)) {
+					accumulateGyroBias(event.values);
+				} else {
+					resetGyroBiasAccumulation();
+				}
+
 				handleGyro(event);
+
 				break;
-			default:
+			}
+			default: {
 				// Ignore other sensor types
-				return view_matrix;
+				return null;
+			}
 		}
 
-		correctGyro();
+		float[] matrix_to_use = correctGyro();
+		if (matrix_to_use == null) {
+			return null;
+		}
+
+		float[] view_matrix = new float[16];
+		convertToOpenGLMatrix(matrix_to_use, view_matrix);
+
+		Matrix.multiplyMM(view_matrix, 0, view_matrix.clone(), 0, ANDROID_TO_OPEN_GL, 0);
 
 		return view_matrix;
 	}
 
-	private void calibrateGyro(SensorEvent event) {
-		for (int i = 0; i < 3; i++) {
-			gyro_bias[i] += event.values[i];
-		}
-		gyro_sample_count++;
-
-		if (gyro_sample_count >= 100) {
-			for (int i = 0; i < 3; i++) {
-				gyro_bias[i] /= gyro_sample_count;
-			}
-			calibrated = true;
-		}
-	}
-
-	private void handleGyro(SensorEvent event) {
-		if (!calibrated) {
-			calibrateGyro(event);
-
+	private void handleGyro(@NonNull final SensorEvent event) {
+		if (!first_gyro_calibration) {
 			return;
 		}
 
@@ -131,11 +143,14 @@ public class GyroRotationCorrection {
 	 * it - this is done by comparing the gyroscope rotation matrix with the one obtained from the accelerometer and
 	 * magnetometer and if the difference is too big, we reset the gyroscope rotation matrix to the one obtained from
 	 * the accelerometer and magnetometer.</p>
+	 *
+	 * @return the matrix to get the view matrix from
 	 */
-	private void correctGyro() {
+	@Nullable
+	private float[] correctGyro() {
 		float[] acc_mag_matrix = new float[9];
 		if (!SensorManager.getRotationMatrix(acc_mag_matrix, null, accel_data, magnet_data)) {
-			return;
+			return null;
 		}
 
 		// gyro_rotation_matrix is your rotation from gyro integration
@@ -144,9 +159,7 @@ public class GyroRotationCorrection {
 		if (!gyro_in_use) {
 			// If gyro is not in use (maybe not available on the device, or just no data yet), just use the
 			// acc_mag_matrix.
-			convertToOpenGLMatrix(acc_mag_matrix, view_matrix);
-
-			return;
+			return acc_mag_matrix;
 		}
 
 		// Convert both matrices to quaternions
@@ -156,16 +169,62 @@ public class GyroRotationCorrection {
 		// Compute angle difference (in radians) between the two quaternions
 		float angle_diff = quaternionAngleDifference(gyro_quat, acc_mag_quat);
 
-		if (angle_diff > DRIFT_THRESHOLD) {
+		if (angle_diff > GYRO_DRIFT_THRESHOLD) {
 			// Reset gyro drift
 			System.arraycopy(acc_mag_matrix, 0, gyro_rotation_matrix, 0, 9);
 		}
 
-		// Done! This is your view matrix now
-		convertToOpenGLMatrix(gyro_rotation_matrix, view_matrix);
+		return gyro_rotation_matrix;
 	}
 
-	private void getRotationVectorFromGyro(float[] gyro, float[] delta_vector, float dt) {
+	private boolean isPhoneStill(@NonNull final float[] accel, @NonNull final float[] magnet) {
+		float accel_norm = (float) Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2]);
+		if (Math.abs(accel_norm - 9.8f) > ACCEL_THRESHOLD) {
+			return false;
+		}
+
+		if (is_first_magnet) {
+			System.arraycopy(magnet, 0, last_magnet, 0, 3);
+			is_first_magnet = false;
+
+			return false;
+		}
+
+		for (int i = 0; i < 3; i++) {
+			if (Math.abs(magnet[i] - last_magnet[i]) > MAGNET_THRESHOLD) {
+				System.arraycopy(magnet, 0, last_magnet, 0, 3);
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void accumulateGyroBias(@NonNull final float[] gyro_values) {
+		for (int i = 0; i < 3; i++) {
+			gyro_bias_sum[i] += gyro_values[i];
+		}
+		gyro_bias_samples++;
+
+		if (gyro_bias_samples >= GYRO_BIAS_SAMPLE_COUNT) {
+			for (int i = 0; i < 3; i++) {
+				gyro_bias[i] = gyro_bias_sum[i] / gyro_bias_samples;
+			}
+
+			first_gyro_calibration = true;
+
+			resetGyroBiasAccumulation();
+		}
+	}
+
+	private void resetGyroBiasAccumulation() {
+		gyro_bias_samples = 0;
+		Arrays.fill(gyro_bias_sum, 0);
+	}
+
+	private static void getRotationVectorFromGyro(@NonNull final float[] gyro, @NonNull final float[] delta_vector,
+												  final float dt) {
 		float omega_magnitude = (float) StrictMath.sqrt(gyro[0]*gyro[0] + gyro[1]*gyro[1] + gyro[2]*gyro[2]);
 
 		if (omega_magnitude > 0.0001f) {
@@ -184,7 +243,8 @@ public class GyroRotationCorrection {
 		delta_vector[3] = cos;
 	}
 
-	private float[] matrixMultiply(float[] A, float[] B) {
+	@NonNull
+	private static float[] matrixMultiply(@NonNull final float[] A, @NonNull final float[] B) {
 		float[] result = new float[9];
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -198,7 +258,8 @@ public class GyroRotationCorrection {
 		return result;
 	}
 
-	private static float[] rotationMatrixToQuaternion(float[] R) {
+	@NonNull
+	private static float[] rotationMatrixToQuaternion(@NonNull final float[] R) {
 		float[] quat = new float[4];
 		float trace = R[0] + R[4] + R[8];
 
@@ -209,19 +270,19 @@ public class GyroRotationCorrection {
 			quat[1] = (R[2] - R[6]) / s;
 			quat[2] = (R[3] - R[1]) / s;
 		} else if ((R[0] > R[4]) && (R[0] > R[8])) {
-			float s = (float) Math.sqrt(1.0f + R[0] - R[4] - R[8]) * 2f;
+			float s = (float) Math.sqrt(1.0f + R[0] - R[4] - R[8]) * 2.0f;
 			quat[3] = (R[7] - R[5]) / s;
 			quat[0] = 0.25f * s;
 			quat[1] = (R[1] + R[3]) / s;
 			quat[2] = (R[2] + R[6]) / s;
 		} else if (R[4] > R[8]) {
-			float s = (float) Math.sqrt(1.0f + R[4] - R[0] - R[8]) * 2f;
+			float s = (float) Math.sqrt(1.0f + R[4] - R[0] - R[8]) * 2.0f;
 			quat[3] = (R[2] - R[6]) / s;
 			quat[0] = (R[1] + R[3]) / s;
 			quat[1] = 0.25f * s;
 			quat[2] = (R[5] + R[7]) / s;
 		} else {
-			float s = (float) Math.sqrt(1.0f + R[8] - R[0] - R[4]) * 2f;
+			float s = (float) Math.sqrt(1.0f + R[8] - R[0] - R[4]) * 2.0f;
 			quat[3] = (R[3] - R[1]) / s;
 			quat[0] = (R[2] + R[6]) / s;
 			quat[1] = (R[5] + R[7]) / s;
@@ -231,7 +292,7 @@ public class GyroRotationCorrection {
 		return quat;
 	}
 
-	private float quaternionAngleDifference(float[] q1, float[] q2) {
+	private static float quaternionAngleDifference(@NonNull final float[] q1, @NonNull final float[] q2) {
 		// dot product gives cos(theta/2), so angle = 2 * acos(dot)
 		float dot = 0;
 		for (int i = 0; i < 4; i++) {
@@ -239,7 +300,7 @@ public class GyroRotationCorrection {
 		}
 		dot = Math.max(-1.0f, Math.min(1.0f, dot)); // clamp to avoid NaN
 
-		return (float)(2.0 * Math.acos(Math.abs(dot))); // radians
+		return (float) (2.0 * StrictMath.acos(Math.abs(dot))); // radians
 	}
 
 	private static void convertToOpenGLMatrix(@NonNull final float[] rotation_matrix_3x3,
