@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -17,14 +18,14 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
+public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
 
 	private Mat rgba_frame = null;
 
 	private Point[][] detected_rects_array = null;
 
 	@Override
-	public void onCameraViewStarted(int width, int height) {
+	public void onCameraViewStarted(final int width, final int height) {
 		rgba_frame = new Mat();
 	}
 
@@ -35,14 +36,14 @@ public class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
 
 	@Override
 	@NonNull
-	public Mat onCameraFrame(@NonNull final CameraBridgeViewBase.CvCameraViewFrame input_frame) {
-		rgba_frame = input_frame.rgba();
+	public Mat onCameraFrame(final CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
+		rgba_frame = cvCameraViewFrame.rgba();
 		detectAndDrawFlatSurfaces(rgba_frame);
 
 		return rgba_frame;
 	}
 
-	private void detectAndDrawFlatSurfaces(Mat frame) {
+	private void detectAndDrawFlatSurfaces(@NonNull final Mat frame) {
 		Mat gray = new Mat();
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_RGBA2GRAY);
 		Imgproc.GaussianBlur(gray, gray, new Size(5, 5), 0);
@@ -95,14 +96,20 @@ public class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
 
 		List<Rectangle> rectangles = new ArrayList<>(10);
 		for (final Point[] points : detected_rects_array) {
-			float ndc_x = (float) ((points[0].x / rgba_frame.width()) * 2.0 - 1.0);
-			float ndc_y = (float) (1.0 - (points[0].y / rgba_frame.height()) * 2.0);
+			float ndc_x = (float) (1.0 - (points[0].y / rgba_frame.height()) * 2.0);
+			float ndc_y = (float) -((points[0].x / rgba_frame.width()) * 2.0 - 1.0);
+			float ndc_z = -3.0f;
+			float width = (float) (2.0 * (points[1].x - points[0].x) / rgba_frame.width());
+			float height = (float) (2.0 * (points[1].y - points[0].y) / rgba_frame.height());
 			rectangles.add(new Rectangle(
-					new Vector(ndc_x, ndc_y, 0.0f),
-					(float) (points[1].x - points[0].x),
-					(float) (points[1].y - points[0].y),
+					new Vector(ndc_x, ndc_y, ndc_z),
+					width, height,
 					0.0f, 0.0f, 0.0f
 			));
+
+			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			System.out.println("X: " + ndc_x + " Y: " + ndc_y + " Z: " + ndc_z);
+			System.out.println("Width: " + (points[1].x - points[0].x) + " Height: " + (points[1].y - points[0].y));
 		}
 
 		return rectangles.toArray(new Rectangle[0]);
