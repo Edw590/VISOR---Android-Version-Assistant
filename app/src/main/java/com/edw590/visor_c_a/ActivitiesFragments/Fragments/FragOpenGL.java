@@ -29,6 +29,7 @@ import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,14 +39,16 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
 import com.edw590.visor_c_a.OpenGL.Objects.Object;
 import com.edw590.visor_c_a.OpenGL.Objects.Parallelepiped;
-import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
+import com.edw590.visor_c_a.OpenGL.OpenCV;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.OpenGL.Vector;
 import com.edw590.visor_c_a.R;
@@ -69,6 +72,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	float[] view_matrix = new float[16];
 	SensorManager sensor_manager;
 	GyroRotationCorrection orientation_fusion = new GyroRotationCorrection();
+
+	private OpenCV open_cv = new OpenCV();
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -117,6 +122,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
@@ -124,13 +130,17 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		FrameLayout frameLayout = new FrameLayout(requireContext());
 
-		// Initialize GLSurfaceView
+		//JavaCameraView cameraView = new JavaCameraView(requireContext(), 0);
+		//cameraView.setVisibility(View.VISIBLE);
+		//cameraView.setCvCameraViewListener(open_cv);
+		//cameraView.enableView();
+		//frameLayout.addView(cameraView);
+
+		// Initialize GLSurfaceView and add to the FrameLayout
 		mGLSurfaceView = new GLSurfaceView(requireContext());
 		mGLSurfaceView.setEGLContextClientVersion(2);
 		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		mGLSurfaceView.setRenderer(this);
-
-		// Add GLSurfaceView to the FrameLayout
 		frameLayout.addView(mGLSurfaceView);
 
 		// Create a TextView
@@ -140,7 +150,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 		textView.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
 
-		// Set layout parameters for the TextView to position it at the top
+		// Set layout parameters for the TextView to position it at the top right corner
 		FrameLayout.LayoutParams textViewParams = new FrameLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT
@@ -214,6 +224,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 			object.draw();
 		}
+
+		//for (final Object object : open_cv.getDetectedRectangles()) {
+		//	object.draw();
+		//}
 	}
 
 	private void prepareSensors() {

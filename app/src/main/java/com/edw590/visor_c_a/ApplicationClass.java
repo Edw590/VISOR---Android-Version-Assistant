@@ -35,6 +35,8 @@ import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 
+import org.opencv.android.OpenCVLoader;
+
 import ACD.ACD;
 import GPTComm.GPTComm;
 import SettingsSync.SettingsSync;
@@ -114,6 +116,9 @@ public final class ApplicationClass extends Application {
 		if (!UtilsSettings.loadSettingsFile(true)) {
 			System.out.println("Failed to load user settings. Using empty ones...");
 		}
+
+		// Load OpenCV
+		OpenCVLoader.initDebug();
 
 		infinity_thread.start();
 

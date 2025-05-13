@@ -153,6 +153,7 @@ dependencies {
 	// External
 	implementation files("libs/jutf7-1.0.0.jar")
 	implementation files("libs/pocketsphinx-android-5prealpha-release.aar")
+	implementation files("libs/opencv-3.4.16.aar")
 }
 
 ant.importBuild 'assets.xml'
