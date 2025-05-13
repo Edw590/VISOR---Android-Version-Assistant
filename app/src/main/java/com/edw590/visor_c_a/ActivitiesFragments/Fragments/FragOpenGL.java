@@ -70,10 +70,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private final Collection<Object> objects = new ArrayList<>(50);
 
 	float[] view_matrix = new float[16];
-	SensorManager sensor_manager;
-	GyroRotationCorrection orientation_fusion = new GyroRotationCorrection();
+	SensorManager sensor_manager = null;
+	GyroRotationCorrection gyro_rotation_correction = new GyroRotationCorrection();
 
-	private OpenCV open_cv = new OpenCV();
+	private final OpenCV open_cv = new OpenCV();
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -130,7 +130,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		FrameLayout frameLayout = new FrameLayout(requireContext());
 
-		//JavaCameraView cameraView = new JavaCameraView(requireContext(), 0);
+		//CustomJavaCameraView cameraView = new CustomJavaCameraView(requireContext(), 0,
+		//		CustomJavaCameraView.Orientation.PORTRAIT);
 		//cameraView.setVisibility(View.VISIBLE);
 		//cameraView.setCvCameraViewListener(open_cv);
 		//cameraView.enableView();
@@ -258,7 +259,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private final SensorEventListener sensor_listener = new SensorEventListener() {
 		@Override
 		public void onSensorChanged(final SensorEvent event) {
-			float[] matrix = orientation_fusion.onSensorChanged(event);
+			float[] matrix = gyro_rotation_correction.onSensorChanged(event);
 			if (matrix != null) {
 				view_matrix = matrix;
 			}
