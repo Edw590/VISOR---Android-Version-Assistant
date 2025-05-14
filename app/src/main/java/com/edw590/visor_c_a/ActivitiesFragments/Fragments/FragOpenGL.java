@@ -45,15 +45,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.OpenGL.CustomJavaCameraView;
 import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
 import com.edw590.visor_c_a.OpenGL.Objects.Object;
-import com.edw590.visor_c_a.OpenGL.Objects.Parallelepiped;
 import com.edw590.visor_c_a.OpenGL.OpenCV;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
-import com.edw590.visor_c_a.OpenGL.Vector;
 import com.edw590.visor_c_a.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -75,15 +75,17 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	private final OpenCV open_cv = new OpenCV();
 
+	private long last_mov_check = 0;
+
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));*/
-		objects.add(new Parallelepiped(
+		/*objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
-		));
+		));*/
 		/*objects.add(new Parallelepiped(
 				new Vector(0.3f, -0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
@@ -130,19 +132,19 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		FrameLayout frameLayout = new FrameLayout(requireContext());
 
-		//CustomJavaCameraView cameraView = new CustomJavaCameraView(requireContext(), 0,
-		//		CustomJavaCameraView.Orientation.PORTRAIT);
-		//cameraView.setVisibility(View.VISIBLE);
-		//cameraView.setCvCameraViewListener(open_cv);
-		//cameraView.enableView();
-		//frameLayout.addView(cameraView);
+		CustomJavaCameraView cameraView = new CustomJavaCameraView(requireContext(), 0,
+				CustomJavaCameraView.Orientation.PORTRAIT);
+		cameraView.setVisibility(View.VISIBLE);
+		cameraView.setCvCameraViewListener(open_cv);
+		cameraView.enableView();
+		frameLayout.addView(cameraView);
 
 		// Initialize GLSurfaceView and add to the FrameLayout
 		mGLSurfaceView = new GLSurfaceView(requireContext());
 		mGLSurfaceView.setEGLContextClientVersion(2);
 		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		mGLSurfaceView.setRenderer(this);
-		frameLayout.addView(mGLSurfaceView);
+		//frameLayout.addView(mGLSurfaceView);
 
 		// Create a TextView
 		textView = new AppCompatTextView(requireContext());
@@ -217,18 +219,32 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		UtilsOpenGL.setViewMatrix(view_matrix);
 
-		for (final Object object : objects) {
+		/*for (final Object object : objects) {
 			//object.translateM(0.0f, 0.0f, -0.01f);
 			object.rotateM(0.3f, 1.0f, 0.6f);
 			//object.rotateM(0.0f, 0.0f, 0.6f);
 			//object.scaleM(1.0f, 1.0f, 0.999f);
 
 			object.draw();
+		}*/
+
+		if (System.currentTimeMillis() - last_mov_check > 33) {
+			System.out.println(gyro_rotation_correction.getAccelDifference());
+			if (gyro_rotation_correction.getAccelDifference() > 0.75f) {
+				gyro_rotation_correction.saveCurrentAccel();
+				objects.clear();
+				objects.addAll(Arrays.asList(open_cv.getDetectedRectangles()));
+			}
+
+			last_mov_check = System.currentTimeMillis();
+		}
+		if (objects.isEmpty()) {
+			objects.addAll(Arrays.asList(open_cv.getDetectedRectangles()));
 		}
 
-		//for (final Object object : open_cv.getDetectedRectangles()) {
-		//	object.draw();
-		//}
+		for (final Object object : objects) {
+			object.draw();
+		}
 	}
 
 	private void prepareSensors() {
@@ -261,7 +277,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		public void onSensorChanged(final SensorEvent event) {
 			float[] matrix = gyro_rotation_correction.onSensorChanged(event);
 			if (matrix != null) {
-				view_matrix = matrix;
+				//view_matrix = matrix;
 			}
 		}
 

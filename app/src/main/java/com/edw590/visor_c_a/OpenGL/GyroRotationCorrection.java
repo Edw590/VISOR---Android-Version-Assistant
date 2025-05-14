@@ -66,6 +66,23 @@ public final class GyroRotationCorrection {
 			 0,  0, 0, 1,
 	};
 
+	// Save this when the device is still
+	float[] saved_accel = new float[3];
+
+	// Call this to save the current position
+	public void saveCurrentAccel() {
+		System.arraycopy(accel_data, 0, saved_accel, 0, 3);
+	}
+
+	// Call this on each accelerometer update
+	public float getAccelDifference() {
+		float dx = accel_data[0] - saved_accel[0];
+		float dy = accel_data[1] - saved_accel[1];
+		float dz = accel_data[2] - saved_accel[2];
+
+		return (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
+	}
+
 	@Nullable
 	public float[] onSensorChanged(@NonNull final SensorEvent event) {
 		switch (event.sensor.getType()) {

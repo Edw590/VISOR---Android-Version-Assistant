@@ -109,7 +109,7 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 
 			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 			System.out.println("X: " + ndc_x + " Y: " + ndc_y + " Z: " + ndc_z);
-			System.out.println("Width: " + (points[1].x - points[0].x) + " Height: " + (points[1].y - points[0].y));
+			System.out.println("Width: " + width + " Height: " + height);
 		}
 
 		return rectangles.toArray(new Rectangle[0]);
