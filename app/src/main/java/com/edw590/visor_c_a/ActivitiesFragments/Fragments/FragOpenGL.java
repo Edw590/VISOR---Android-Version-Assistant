@@ -244,6 +244,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 			last_mov_check = System.currentTimeMillis();
 		}
+		if (System.currentTimeMillis() - last_clear > 1000) {
+			last_clear = System.currentTimeMillis();
+			objects.clear();
+		}
 		if (objects.isEmpty()) {
 			objects.addAll(Arrays.asList(open_cv.getDetectedRectangles()));
 		}
