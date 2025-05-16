@@ -22,6 +22,7 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Fragments;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -77,6 +78,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private final OpenCV open_cv = new OpenCV();
 
 	private long last_mov_check = 0;
+	private long last_clear = 0;
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -144,6 +146,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		mGLSurfaceView.setEGLContextClientVersion(2);
 		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		mGLSurfaceView.setRenderer(this);
+		mGLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		mGLSurfaceView.setZOrderOnTop(true);
 		frameLayout.addView(mGLSurfaceView);
 
 		// Create a TextView
@@ -215,6 +219,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 
 		UtilsOpenGL.clearGLErrors();
+		GLES20.glClearColor(0, 0, 0, 0); // Transparent
+		UtilsOpenGL.checkGLErrors("glClearColor");
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
