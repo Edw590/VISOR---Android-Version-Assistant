@@ -45,12 +45,13 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
-import com.edw590.visor_c_a.OpenGL.CustomJavaCameraView;
 import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
 import com.edw590.visor_c_a.OpenGL.Objects.Object;
 import com.edw590.visor_c_a.OpenGL.OpenCV;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.R;
+
+import org.opencv.android.JavaCameraView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,8 +133,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		FrameLayout frameLayout = new FrameLayout(requireContext());
 
-		CustomJavaCameraView cameraView = new CustomJavaCameraView(requireContext(), 0,
-				CustomJavaCameraView.Orientation.PORTRAIT);
+		JavaCameraView cameraView = new JavaCameraView(requireContext(), 0);
 		cameraView.setVisibility(View.VISIBLE);
 		cameraView.setCvCameraViewListener(open_cv);
 		cameraView.enableView();
@@ -144,7 +144,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		mGLSurfaceView.setEGLContextClientVersion(2);
 		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		mGLSurfaceView.setRenderer(this);
-		//frameLayout.addView(mGLSurfaceView);
+		frameLayout.addView(mGLSurfaceView);
 
 		// Create a TextView
 		textView = new AppCompatTextView(requireContext());
@@ -194,7 +194,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glViewport(0, 0, width, height);
 
 		float[] projection_matrix = new float[16];
-		Matrix.perspectiveM(projection_matrix, 0, 60, (float) width / height, 0.1f, 10.0f);
+		Matrix.perspectiveM(projection_matrix, 0, UtilsOpenGL.setFovY(60), UtilsOpenGL.setAspectRatio(width, height),
+				0.1f, 10.0f);
 		UtilsOpenGL.setProjectionMatrix(projection_matrix);
 	}
 
@@ -228,8 +229,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			object.draw();
 		}*/
 
-		if (System.currentTimeMillis() - last_mov_check > 33) {
-			System.out.println(gyro_rotation_correction.getAccelDifference());
+		if (System.currentTimeMillis() - last_mov_check > 33) { // 33 ms
 			if (gyro_rotation_correction.getAccelDifference() > 0.75f) {
 				gyro_rotation_correction.saveCurrentAccel();
 				objects.clear();

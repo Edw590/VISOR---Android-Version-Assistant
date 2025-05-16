@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
 
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -20,6 +19,9 @@ import java.util.List;
 
 public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
 
+	private float window_width = 0.0f;
+	private float window_height = 0.0f;
+
 	private Mat rgba_frame = null;
 
 	private Point[][] detected_rects_array = null;
@@ -27,6 +29,8 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 	@Override
 	public void onCameraViewStarted(final int width, final int height) {
 		rgba_frame = new Mat();
+		window_width = width;
+		window_height = height;
 	}
 
 	@Override
@@ -50,12 +54,12 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 		Mat edges = new Mat();
 		Imgproc.Canny(gray, edges, 50, 150);
 
-		List<MatOfPoint> contours = new ArrayList<>();
+		List<MatOfPoint> contours = new ArrayList<>(50);
 		Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		// Clear previous detected quads
 		List<Point[]> detected_rects_list = new ArrayList<>(10);
-		for (MatOfPoint contour : contours) {
+		for (final MatOfPoint contour : contours) {
 			MatOfPoint2f contour_2f = new MatOfPoint2f(contour.toArray());
 			double peri = Imgproc.arcLength(contour_2f, true);
 			MatOfPoint2f approx = new MatOfPoint2f();
@@ -95,21 +99,22 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 		}
 
 		List<Rectangle> rectangles = new ArrayList<>(10);
+		float ndc_z = -3.1f;
+		float max_x = UtilsOpenGL.getMaxX(ndc_z);
+		float max_y = UtilsOpenGL.getMaxY(ndc_z);
+		float view_width = max_x * 2;
+		float view_height = max_y * 2;
 		for (final Point[] points : detected_rects_array) {
-			float ndc_x = (float) (1.0 - (points[0].y / rgba_frame.height()) * 2.0);
-			float ndc_y = (float) -((points[0].x / rgba_frame.width()) * 2.0 - 1.0);
-			float ndc_z = -3.0f;
-			float width = (float) (2.0 * (points[1].x - points[0].x) / rgba_frame.width());
-			float height = (float) (2.0 * (points[1].y - points[0].y) / rgba_frame.height());
+			float width = (float) ((points[1].x - points[0].x) / window_width * view_width);
+			float height = (float) ((points[1].y - points[0].y) / window_height * view_height);
+			float ndc_x = (float) (view_width * (points[0].x + points[1].x)/2 / window_width - max_x);
+			float ndc_y = (float) -(view_height * (points[0].y + points[1].y)/2 / window_height - max_y);
+
 			rectangles.add(new Rectangle(
 					new Vector(ndc_x, ndc_y, ndc_z),
 					width, height,
 					0.0f, 0.0f, 0.0f
 			));
-
-			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-			System.out.println("X: " + ndc_x + " Y: " + ndc_y + " Z: " + ndc_z);
-			System.out.println("Width: " + width + " Height: " + height);
 		}
 
 		return rectangles.toArray(new Rectangle[0]);

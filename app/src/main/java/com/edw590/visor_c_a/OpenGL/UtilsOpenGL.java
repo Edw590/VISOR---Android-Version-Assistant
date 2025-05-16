@@ -45,6 +45,9 @@ public final class UtilsOpenGL {
 	private static float[] projection_matrix = new float[16];
 	private static float[] view_matrix = new float[16];
 
+	private static float fovY = 0.0f;
+	private static float aspect_ratio = 0.0f;
+
 	private UtilsOpenGL() {
 		// Prevent instantiation
 	}
@@ -52,14 +55,30 @@ public final class UtilsOpenGL {
 	public static void setProgramID(final int program_id) {
 		UtilsOpenGL.program_id = program_id;
 	}
-
 	public static void setProjectionMatrix(@NonNull final float[] projection_matrix) {
 		UtilsOpenGL.projection_matrix = projection_matrix.clone();
 	}
-
 	public static void setViewMatrix(@NonNull final float[] view_matrix) {
 		UtilsOpenGL.view_matrix = view_matrix.clone();
 	}
+	public static float setFovY(final float degrees) {
+		UtilsOpenGL.fovY = degrees;
+
+		return degrees;
+	}
+	public static float setAspectRatio(final float width, final float height) {
+		UtilsOpenGL.aspect_ratio = width / height;
+
+		return aspect_ratio;
+	}
+
+	public static float getMaxY(final float z) {
+		return (float) (StrictMath.tan(Math.toRadians(fovY) / 2) * Math.abs((double) z));
+	}
+	public static float getMaxX(final float z) {
+		return getMaxY(z) * aspect_ratio;
+	}
+
 
 	public static void deleteProgram() {
 		if (program_id != 0) {
