@@ -67,7 +67,7 @@ android {
 
 	defaultConfig {
 		applicationId "com.edw590.visor_c_a"
-		compileSdk 32
+		compileSdk 33
 		minSdkVersion 16
 		//noinspection ExpiredTargetSdkVersion
 		targetSdkVersion 23

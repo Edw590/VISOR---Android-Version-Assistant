@@ -144,13 +144,14 @@ public final class BluetoothChecker {
 				break;
 			}
 		}
+		String alias = bluetoothDevice.getAlias();
 		nearby_devices_bt.add(new ExtDevice(
 				ExtDevice.TYPE_BLUETOOTH,
 				address,
 				time_detection,
 				rssi,
 				bluetoothDevice.getName(),
-				bluetoothDevice.getAlias(),
+				alias == null ? "null" : alias,
 				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED)
 		);
 	}
