@@ -258,8 +258,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	}
 
 	private void prepareSensors() {
-		sensor_manager = (SensorManager) requireContext().
-				getSystemService(Context.SENSOR_SERVICE);
+		sensor_manager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
 		if (sensor_manager == null) {
 			System.out.println("SensorManager is null");
 

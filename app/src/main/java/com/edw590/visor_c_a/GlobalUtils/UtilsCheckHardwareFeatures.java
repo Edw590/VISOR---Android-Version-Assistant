@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.telecom.PhoneAccount;
@@ -228,24 +227,5 @@ public final class UtilsCheckHardwareFeatures {
 	 */
 	public static boolean isBluetoothSupported() {
 		return UtilsContext.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
-	}
-
-	/**
-	 * <p>Checks if the device has data network support.</p>
-	 *
-	 * @return true if data network is supported, false otherwise
-	 */
-	public static boolean isAnyDataNetworkSupported() {
-		final ConnectivityManager connectivityManager = (ConnectivityManager) UtilsContext.
-				getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (connectivityManager == null) {
-			return false;
-		}
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			return connectivityManager.getAllNetworks().length != 0;
-		} else {
-			return connectivityManager.getAllNetworkInfo().length != 0;
-		}
 	}
 }

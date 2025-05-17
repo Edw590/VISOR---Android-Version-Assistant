@@ -29,16 +29,11 @@ import android.net.wifi.WifiManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.spongycastle.util.Arrays;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
 /**
@@ -50,22 +45,6 @@ public final class UtilsNetwork {
 	 * <p>Private empty constructor so the class can't be instantiated (utility class).</p>
 	 */
 	private UtilsNetwork() {
-	}
-
-	/**
-	 * <p>Gets the IPv4 address of the current Wi-Fi connection's router.</p>
-	 *
-	 * @return the IPv4 string, or an empty string if there is no Wi-Fi connection
-	 */
-	@Nullable
-	public static String getRouterIpv4() {
-		final byte[] myIPAddress = BigInteger.valueOf((long) getWifiManager().getDhcpInfo().gateway).toByteArray();
-		try {
-			return InetAddress.getByAddress(Arrays.reverse(myIPAddress)).getHostAddress();
-		} catch (final UnknownHostException ignored) {
-			// Won't happen, just supply an IPv4
-			return "";
-		}
 	}
 
 	/**
