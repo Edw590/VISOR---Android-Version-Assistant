@@ -30,17 +30,19 @@ import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -48,6 +50,7 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
 import com.edw590.visor_c_a.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.OpenGL.OpenCV;
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.R;
@@ -67,7 +70,7 @@ import javax.microedition.khronos.opengles.GL10;
 public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer {
 
 	/** Hold a reference to our GLSurfaceView. */
-	private GLSurfaceView mGLSurfaceView = null;
+	private GLSurfaceView gl_surface_view = null;
 
 	private final Collection<Object> objects = new ArrayList<>(50);
 
@@ -79,6 +82,16 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	private long last_mov_check = 0;
 	private long last_clear = 0;
+
+	private AppCompatTextView fps_text_view = null;
+	private int frame_count = 0;
+	private long start_time = System.currentTimeMillis();
+
+	private WebView web_view_youtube = null;
+	private boolean player_ready = false;
+	private long player_ready_time = 0;
+	private long player_unmute_time = System.currentTimeMillis() + 1000000000;
+	private long player_continue_time = System.currentTimeMillis() + 1000000000;
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -111,11 +124,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		));*/
 	}
 
-	private int frame_count = 0;
-	private long start_time = System.currentTimeMillis();
-
-	private AppCompatTextView textView = null;
-
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
@@ -127,35 +135,37 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	@Override
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		FrameLayout frameLayout = new FrameLayout(requireContext());
+		frameLayout.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
 
-		JavaCameraView cameraView = new JavaCameraView(requireContext(), 0);
-		cameraView.setVisibility(View.VISIBLE);
-		cameraView.setCvCameraViewListener(open_cv);
-		cameraView.enableView();
-		frameLayout.addView(cameraView);
+		JavaCameraView camera_view = new JavaCameraView(requireContext(), 0);
+		camera_view.setVisibility(View.VISIBLE);
+		camera_view.setCvCameraViewListener(open_cv);
+		camera_view.enableView();
+		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		camera_view.setZOrderOnTop(true);
+		frameLayout.addView(camera_view);
 
 		// Initialize GLSurfaceView and add to the FrameLayout
-		mGLSurfaceView = new GLSurfaceView(requireContext());
-		mGLSurfaceView.setEGLContextClientVersion(2);
-		mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-		mGLSurfaceView.setRenderer(this);
-		mGLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		mGLSurfaceView.setZOrderOnTop(true);
-		frameLayout.addView(mGLSurfaceView);
+		gl_surface_view = new GLSurfaceView(requireContext());
+		gl_surface_view.setEGLContextClientVersion(2);
+		gl_surface_view.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+		gl_surface_view.setRenderer(this);
+		gl_surface_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		gl_surface_view.setZOrderOnTop(true);
+		frameLayout.addView(gl_surface_view);
 
 		// Create a TextView
-		textView = new AppCompatTextView(requireContext());
-		textView.setText("FPS: ERROR");
-		textView.setTextSize(20);
-		textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-		textView.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+		fps_text_view = new AppCompatTextView(requireContext());
+		fps_text_view.setText("FPS: ERROR");
+		fps_text_view.setTextSize(20);
+		fps_text_view.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+		fps_text_view.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
 
 		// Set layout parameters for the TextView to position it at the top right corner
 		FrameLayout.LayoutParams textViewParams = new FrameLayout.LayoutParams(
@@ -163,10 +173,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				ViewGroup.LayoutParams.WRAP_CONTENT
 		);
 		textViewParams.gravity = Gravity.TOP | Gravity.END;
-		textView.setLayoutParams(textViewParams);
+		fps_text_view.setLayoutParams(textViewParams);
 
 		// Add TextView to the FrameLayout
-		frameLayout.addView(textView);
+		frameLayout.addView(fps_text_view);
 
 		// Set the FrameLayout as the content view
 		requireActivity().setContentView(frameLayout);
@@ -176,6 +186,287 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		prepareSensors();
 
 		Matrix.setIdentityM(view_matrix, 0);
+
+		web_view_youtube = new WebView(requireContext());
+		web_view_youtube.setLayoutParams(new FrameLayout.LayoutParams(
+				500,
+				200
+		));
+		web_view_youtube.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.transparent));
+		web_view_youtube.getSettings().setJavaScriptEnabled(true);
+		web_view_youtube.getSettings().setDomStorageEnabled(true);
+		web_view_youtube.setWebChromeClient(new WebChromeClient());
+		// Inject the YouTubePlayerBridge
+		web_view_youtube.addJavascriptInterface(new java.lang.Object() {
+			@JavascriptInterface
+			public void sendYouTubeIFrameAPIReady() {
+				System.out.println("YouTube: Iframe API ready");
+			}
+
+			@JavascriptInterface
+			public void sendReady() {
+				System.out.println("YouTube: Player is ready");
+				player_ready = true;
+				player_ready_time = System.currentTimeMillis();
+			}
+
+			@JavascriptInterface
+			public void sendStateChange(String state) {
+				System.out.println("YouTube: State changed to: " + state);
+			}
+
+			@JavascriptInterface
+			public void sendVideoDuration(double duration) {
+				System.out.println("YouTube: Duration: " + duration);
+			}
+
+			@JavascriptInterface
+			public void sendVideoCurrentTime(double time) {
+				System.out.println("YouTube: Current time: " + time);
+			}
+
+			@JavascriptInterface
+			public void sendVideoLoadedFraction(double fraction) {
+				System.out.println("YouTube: Loaded fraction: " + fraction);
+			}
+
+			@JavascriptInterface
+			public void sendPlaybackQualityChange(String quality) {
+				System.out.println("YouTube: Quality changed to: " + quality);
+			}
+
+			@JavascriptInterface
+			public void sendPlaybackRateChange(String rate) {
+				System.out.println("YouTube: Playback rate changed to: " + rate);
+			}
+
+			@JavascriptInterface
+			public void sendError(String error) {
+				System.out.println("YouTube: Error: " + error);
+			}
+
+			@JavascriptInterface
+			public void sendApiChange() {
+				System.out.println("YouTube: API Changed");
+			}
+
+			@JavascriptInterface
+			public void sendVideoId(String id) {
+				System.out.println("YouTube: Video ID: " + id);
+			}
+
+		}, "YouTubePlayerBridge");
+		web_view_youtube.loadData(
+				"<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <style type=\"text/css\">\n" +
+				"        html, body {\n" +
+				"            height: 100%;\n" +
+				"            width: 100%;\n" +
+				"            margin: 0;\n" +
+				"            padding: 0;\n" +
+				"            background-color: #000000;\n" +
+				"            overflow: hidden;\n" +
+				"            position: fixed;\n" +
+				"        }\n" +
+				"    </style>\n" +
+				"\n" +
+				"  <head>\n" +
+				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">\n" +
+				"    <!-- defer forces the library to execute after the html page is fully parsed. -->\n" +
+				"    <!-- This is needed to avoid race conditions, where the library executes and calls `onYouTubeIframeAPIReady` before the page is fully parsed. -->\n" +
+				"    <!-- See #873 on GitHub -->\n" +
+				"    <script defer src=\"https://www.youtube.com/iframe_api\"></script>\n" +
+				"  </head>\n" +
+				"\n" +
+				"  <body>\n" +
+				"    <div id=\"youTubePlayerDOM\"></div>\n" +
+				"    <button id=\"playBtn\" onclick=\"player.unMute(); player.playVideo();\">Play</button>\n" +
+				"  </body>\n" +
+				"\n" +
+				"  <script type=\"text/javascript\">\n" +
+				"    var UNSTARTED = \"UNSTARTED\";\n" +
+				"    var ENDED = \"ENDED\";\n" +
+				"    var PLAYING = \"PLAYING\";\n" +
+				"    var PAUSED = \"PAUSED\";\n" +
+				"    var BUFFERING = \"BUFFERING\";\n" +
+				"    var CUED = \"CUED\";\n" +
+				"\n" +
+				"    var YouTubePlayerBridge = window.YouTubePlayerBridge;\n" +
+				"    var YouTubePlayerCallbacks = window.YouTubePlayerCallbacks;\n" +
+				"    var player;\n" +
+				"\n" +
+				"    var timerId;\n" +
+				"\n" +
+				"    function onYouTubeIframeAPIReady() {\n" +
+				"\n" +
+				"      YouTubePlayerBridge.sendYouTubeIFrameAPIReady();\n" +
+				"            \n" +
+				"    \tplayer = new YT.Player('youTubePlayerDOM', {\n" +
+				"    \t\t\t\n" +
+				"        height: '100%',\n" +
+				"    \t  width: '100%',\n" +
+				"    \t  videoId: 'tgbNymZ7vqY',\n" +
+				"    \t\t\t\n" +
+				"        events: {\n" +
+				"    \t    onReady: function(event) { YouTubePlayerBridge.sendReady() },\n" +
+				"    \t\t  onStateChange: function(event) { sendPlayerStateChange(event.data) },\n" +
+				"    \t\t  onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },\n" +
+				"    \t\t  onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },\n" +
+				"    \t\t  onError: function(error) { YouTubePlayerBridge.sendError(error.data) },\n" +
+				"    \t\t  onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }\n" +
+				"    \t  },\n" +
+				"\n" +
+				"    \t  playerVars: {\n" +
+						"  autoplay: 1,\n" +
+						"  mute: 0,\n" +
+						"  playsinline: 1,\n" +
+						"  fs: 0,\n" +
+						"  modestbranding: 1,\n" +
+						"  rel: 0,\n" +
+						"  enablejsapi: 1,\n" +
+						"}\n" +
+						"\n" +
+						"      });\n" +
+						"    }\n" +
+						"\n" +
+						"    function sendPlayerStateChange(playerState) {\n" +
+						"      clearTimeout(timerId);\n" +
+						"\n" +
+						"      switch (playerState) {\n" +
+						"        case YT.PlayerState.UNSTARTED:\n" +
+						"          sendStateChange(UNSTARTED);\n" +
+						"          sendVideoIdFromPlaylistIfAvailable(player);\n" +
+						"          return;\n" +
+						"\n" +
+						"        case YT.PlayerState.ENDED:\n" +
+						"          sendStateChange(ENDED);\n" +
+						"          return;\n" +
+						"\n" +
+						"        case YT.PlayerState.PLAYING:\n" +
+						"          sendStateChange(PLAYING);\n" +
+						"\n" +
+						"          startSendCurrentTimeInterval();\n" +
+						"          sendVideoData(player);\n" +
+						"          return;\n" +
+						"\n" +
+						"        case YT.PlayerState.PAUSED:\n" +
+						"          sendStateChange(PAUSED);\n" +
+						"          return;\n" +
+						"\n" +
+						"        case YT.PlayerState.BUFFERING:\n" +
+						"          sendStateChange(BUFFERING);\n" +
+						"          return;\n" +
+						"\n" +
+						"        case YT.PlayerState.CUED:\n" +
+						"          sendStateChange(CUED);\n" +
+						"          return;\n" +
+						"      }\n" +
+						"\n" +
+						"      function sendVideoData(player) {\n" +
+						"        var videoDuration = player.getDuration();\n" +
+						"\n" +
+						"        YouTubePlayerBridge.sendVideoDuration(videoDuration);\n" +
+						"      }\n" +
+						"\n" +
+						"      // This method checks if the player is playing a playlist.\n" +
+						"      // If yes, it sends out the video id of the video being played.\n" +
+						"      function sendVideoIdFromPlaylistIfAvailable(player) {\n" +
+						"        var playlist = player.getPlaylist();\n" +
+						"        if ( typeof playlist !== 'undefined' && Array.isArray(playlist) && playlist.length > 0 ) {\n" +
+						"          var index = player.getPlaylistIndex();\n" +
+						"          var videoId = playlist[index];\n" +
+						"          YouTubePlayerBridge.sendVideoId(videoId);\n" +
+						"        }\n" +
+						"      }\n" +
+						"\n" +
+						"      function sendStateChange(newState) {\n" +
+						"        YouTubePlayerBridge.sendStateChange(newState)\n" +
+						"      }\n" +
+						"\n" +
+						"      function startSendCurrentTimeInterval() {\n" +
+						"        timerId = setInterval(function() {\n" +
+						"          YouTubePlayerBridge.sendVideoCurrentTime( player.getCurrentTime() )\n" +
+						"          YouTubePlayerBridge.sendVideoLoadedFraction( player.getVideoLoadedFraction() )\n" +
+						"        }, 100 );\n" +
+						"      }\n" +
+						"    }\n" +
+						"\n" +
+						"    // JAVA to WEB functions\n" +
+						"\n" +
+						"    function seekTo(startSeconds) {\n" +
+						"      player.seekTo(startSeconds, true);\n" +
+						"    }\n" +
+						"\n" +
+						"    function pauseVideo() {\n" +
+						"      player.pauseVideo();\n" +
+						"    }\n" +
+						"\n" +
+						"    function playVideo() {\n" +
+						"      player.playVideo();\n" +
+						"    }\n" +
+						"\n" +
+						"    function loadVideo(videoId, startSeconds) {\n" +
+						"      player.loadVideoById(videoId, startSeconds);\n" +
+						"      YouTubePlayerBridge.sendVideoId(videoId);\n" +
+						"    }\n" +
+						"\n" +
+						"    function cueVideo(videoId, startSeconds) {\n" +
+						"      player.cueVideoById(videoId, startSeconds);\n" +
+						"      YouTubePlayerBridge.sendVideoId(videoId);\n" +
+						"    }\n" +
+						"\n" +
+						"    function mute() {\n" +
+						"      player.mute();\n" +
+						"    }\n" +
+						"\n" +
+						"    function unMute() {\n" +
+						"      player.unMute();\n" +
+						"    }\n" +
+						"\n" +
+						"    function setVolume(volumePercent) {\n" +
+						"      player.setVolume(volumePercent);\n" +
+						"    }\n" +
+						"\n" +
+						"    function setPlaybackRate(playbackRate) {\n" +
+						"      player.setPlaybackRate(playbackRate);\n" +
+						"    }\n" +
+						"\n" +
+						"    function toggleFullscreen() {\n" +
+						"      player.toggleFullscreen();\n" +
+						"    }\n" +
+						"\n" +
+						"    function nextVideo() {\n" +
+						"      player.nextVideo();\n" +
+						"    }\n" +
+						"\n" +
+						"    function previousVideo() {\n" +
+						"      player.previousVideo();\n" +
+						"    }\n" +
+						"\n" +
+						"    function playVideoAt(index) {\n" +
+						"      player.playVideoAt(index);\n" +
+						"    }\n" +
+						"\n" +
+						"    function setLoop(loop) {\n" +
+						"      player.setLoop(loop);\n" +
+						"    }\n" +
+						"\n" +
+						"    function setShuffle(shuffle) {\n" +
+						"      player.setShuffle(shuffle);\n" +
+						"    }\n" +
+						"\n" +
+						"    function getMuteValue(requestId) {\n" +
+						"      var isMuted = player.isMuted();\n" +
+						"      YouTubePlayerCallbacks.sendBooleanValue(requestId, isMuted);\n" +
+						"    }\n" +
+						"\n" +
+						"  </script>\n" +
+						"</html>\n",
+				"text/html",
+				"utf-8"
+		);
+		frameLayout.addView(web_view_youtube);
 	}
 
 	@Override
@@ -214,7 +505,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			frame_count = 0;
 			start_time = curr_time;
 			requireActivity().runOnUiThread(() -> {
-				textView.setText("FPS: " + fps);
+				fps_text_view.setText("FPS: " + fps);
 			});
 		}
 
@@ -253,8 +544,62 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 
 		for (final Object object : objects) {
-			object.draw();
+			if (object instanceof Rectangle) {
+				Rectangle rectangle = (Rectangle) object;
+				float x = rectangle.getCenter().x;
+				float y = rectangle.getCenter().y;
+				float z = rectangle.getCenter().z;
+				float width = rectangle.getWidth();
+				float height = rectangle.getHeight();
+
+				float max_x = UtilsOpenGL.getMaxX(z);
+				float max_y = UtilsOpenGL.getMaxY(z);
+				float view_width = max_x * 2;
+				float view_height = max_y * 2;
+
+				requireActivity().runOnUiThread(() -> {
+					DisplayMetrics display_metrics = requireContext().getResources().getDisplayMetrics();
+					FrameLayout.LayoutParams layout_params = new FrameLayout.LayoutParams(
+							(int) (width / view_width * display_metrics.widthPixels),
+							(int) (height / view_height * display_metrics.heightPixels)
+					);
+					layout_params.leftMargin = (int) ((x + max_x - width / 2) / view_width * display_metrics.widthPixels);
+					layout_params.topMargin = (int) ((-y + max_y - height / 2) / view_height * display_metrics.heightPixels);
+					web_view_youtube.setLayoutParams(layout_params);
+				});
+			} else {
+				object.draw();
+			}
 		}
+
+		/*if (player_ready && System.currentTimeMillis() - player_ready_time > 3000) {
+			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			requireActivity().runOnUiThread(() -> {
+				web_view_youtube.evaluateJavascript("loadVideo('tgbNymZ7vqY', 0); playVideo();", null);
+				web_view_youtube.evaluateJavascript("document.getElementById('youTubePlayerDOM').click();", null);
+			});
+
+			player_ready = false;
+			player_ready_time = System.currentTimeMillis() + 100000000;
+			player_unmute_time = System.currentTimeMillis();
+		} else if (System.currentTimeMillis() - player_unmute_time > 3000) {
+			System.out.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+			requireActivity().runOnUiThread(() -> {
+				//web_view_youtube.evaluateJavascript("unMute();", null);
+			});
+
+			player_unmute_time = System.currentTimeMillis() + 100000000;
+			player_continue_time = System.currentTimeMillis();
+		} else if (System.currentTimeMillis() - player_continue_time > 3000) {
+			System.out.println("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+			requireActivity().runOnUiThread(() -> {
+				//web_view_youtube.evaluateJavascript("unMute(); loadVideo('tgbNymZ7vqY', 0);", null);
+				//web_view_youtube.evaluateJavascript("document.getElementById('youTubePlayerDOM').click();", null);
+				//web_view_youtube.evaluateJavascript("document.getElementById('playBtn').click();", null);
+			});
+
+			player_continue_time = System.currentTimeMillis() + 100000000;
+		}*/
 	}
 
 	private void prepareSensors() {
@@ -297,10 +642,24 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	};
 
 	@Override
+	public void onPause() {
+		super.onPause();
+
+		System.out.println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		System.out.println("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
+	}
+
+	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		if (mGLSurfaceView != null) {
-			mGLSurfaceView.onPause();
+		if (gl_surface_view != null) {
+			gl_surface_view.onPause();
 		}
 		sensor_manager.unregisterListener(sensor_listener);
 		UtilsOpenGL.deleteProgram();

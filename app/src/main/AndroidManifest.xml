@@ -334,6 +334,8 @@
 			 screen... -->
 			<!-- resizeableActivity false so the user can't split the screen while on the PLS (would be a security flaw) -->
 
+		<profileable android:shell="true"/>
+
 		<!-- Persistence only applies to services in the default application process. If any <service> tag includes an
 		 "android:process" attribute that causes it to run in a separate process, that process will NOT be persistent. -->
 		<!-- On the services that say the type is for location, I just think location will be given more priority for

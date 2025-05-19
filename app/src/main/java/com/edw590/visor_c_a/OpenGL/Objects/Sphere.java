@@ -38,6 +38,8 @@ public final class Sphere extends Object {
 	 * @param sectors number of horizontal segments (longitude)
 	 */
 	public Sphere(@NonNull final Vector center, final float radius, final int stacks, final int sectors) {
+		super(center);
+
 		List<Float> vertices_list = new ArrayList<>(1500);
 		double stack_step = Math.PI / stacks;
 		double sector_step = 2 * Math.PI / sectors;

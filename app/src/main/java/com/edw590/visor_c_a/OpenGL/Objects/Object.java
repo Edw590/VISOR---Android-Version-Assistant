@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.OpenGL.Vector;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -45,7 +46,11 @@ public abstract class Object {
 	@NonNull private final float[] translation_matrix = new float[16];
 	@NonNull private final float[] rotation_matrix = new float[16];
 
-	public Object() {
+	Vector center = new Vector(0.0f, 0.0f, 0.0f);
+
+	public Object(@NonNull final Vector center) {
+		this.center = center;
+
 		Matrix.setIdentityM(scale_matrix, 0);
 		Matrix.setIdentityM(translation_matrix, 0);
 		Matrix.setIdentityM(rotation_matrix, 0);
@@ -120,6 +125,11 @@ public abstract class Object {
 		Matrix.multiplyMM(model_matrix, 0, translation_matrix, 0, model_matrix, 0);
 
 		return model_matrix;
+	}
+
+	@NonNull
+	public Vector getCenter() {
+		return center;
 	}
 
 	public void draw() {

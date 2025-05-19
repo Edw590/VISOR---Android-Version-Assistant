@@ -27,8 +27,15 @@ import com.edw590.visor_c_a.OpenGL.Vector;
 
 public final class Rectangle extends Object {
 
+	private final float width;
+	private final float height;
+
 	public Rectangle(@NonNull final Vector center, final float width, final float height,
 					 final float x_angle, final float y_angle, final float z_angle) {
+		super(center);
+		this.width = width;
+		this.height = height;
+
 		// Generate vertices based on width, length, and depth
 		float half_width = width / 2.0f;
 		float half_length = height / 2.0f;
@@ -53,5 +60,12 @@ public final class Rectangle extends Object {
 
 		rotateM(x_angle, y_angle, z_angle);
 		translateM(center.x, center.y, center.z);
+	}
+
+	public float getWidth() {
+		return width;
+	}
+	public float getHeight() {
+		return height;
 	}
 }

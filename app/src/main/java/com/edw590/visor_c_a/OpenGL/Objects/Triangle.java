@@ -33,6 +33,8 @@ public final class Triangle extends Object {
 
 	public Triangle(@NonNull final Vector center, final float width, final float height, final float main_angle,
 					final float x_angle, final float y_angle, final float z_angle) {
+		super(center);
+
 		Vector[] vertices_vectors = new Vector[3];
 
 		// Local triangle: vertex A at origin

@@ -1,6 +1,7 @@
 package com.edw590.visor_c_a.OpenGL;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
 
@@ -10,7 +11,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -39,17 +39,21 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 	}
 
 	@Override
-	@NonNull
+	@Nullable
 	public Mat onCameraFrame(final CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
 		rgba_frame = cvCameraViewFrame.rgba();
 		detectAndDrawFlatSurfaces(rgba_frame);
 
-		return rgba_frame;
+		return null;
 	}
 
 	private void detectAndDrawFlatSurfaces(@NonNull final Mat frame) {
 		Mat gray = new Mat();
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_RGBA2GRAY);
+
+		// Blacken the frame
+		//frame.setTo(new Scalar(0, 0, 0, 255));
+
 		Imgproc.GaussianBlur(gray, gray, new Size(5, 5), 0);
 		Mat edges = new Mat();
 		Imgproc.Canny(gray, edges, 50, 150);
@@ -69,12 +73,13 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 			if (approx_points.total() == 4 && Imgproc.contourArea(approx_points) > 1000 && Imgproc.isContourConvex(approx_points)) {
 				Rect rect = Imgproc.boundingRect(contour);
 
+				// Store the 2 corners of the rectangle
 				detected_rects_list.add(new Point[]{
 						rect.tl(),
 						rect.br()
-				}); // Store the 2 corners of the rectangle
+				});
 
-				float ratio = (float) rect.width / rect.height;
+				/*float ratio = (float) rect.width / rect.height;
 				Scalar color;
 				if (ratio > 0.8 && ratio < 1.2) {
 					// Draw the rectangle
@@ -85,7 +90,7 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 				}
 				//Imgproc.drawContours(frame, Collections.singletonList(approx_points), -1, color, 2);
 
-				Imgproc.rectangle(frame, rect.tl(), rect.br(), color, -1);
+				Imgproc.rectangle(frame, rect.tl(), rect.br(), color, -1);*/
 			}
 		}
 
@@ -107,8 +112,8 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 		for (final Point[] points : detected_rects_array) {
 			float width = (float) ((points[1].x - points[0].x) / window_width * view_width);
 			float height = (float) ((points[1].y - points[0].y) / window_height * view_height);
-			float ndc_x = (float) (view_width * (points[0].x + points[1].x)/2 / window_width - max_x);
-			float ndc_y = (float) -(view_height * (points[0].y + points[1].y)/2 / window_height - max_y);
+			float ndc_x = (float) ((points[0].x + points[1].x)/2 / window_width * view_width - max_x);
+			float ndc_y = (float) -((points[0].y + points[1].y)/2 / window_height * view_height - max_y);
 
 			rectangles.add(new Rectangle(
 					new Vector(ndc_x, ndc_y, ndc_z),

@@ -35,6 +35,8 @@ public class Parallelepiped extends Object {
 
 	public Parallelepiped(@NonNull final Vector center, final float width, final float height, final float depth,
 						  final float x_angle, final float y_angle, final float z_angle) {
+		super(center);
+
 		// Generate vertices based on width, height, and depth
 		float half_width = width / 2.0f;
 		float half_height = height / 2.0f;

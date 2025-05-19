@@ -27,6 +27,8 @@ import com.edw590.visor_c_a.OpenGL.Vector;
 
 public class Icosahidral extends Object {
 	public Icosahidral(@NonNull final Vector center, final float radius) {
+		super(center);
+
 		// Golden ratio
 		float phi = (1 + (float) Math.sqrt(5)) / 2;
 
