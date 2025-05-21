@@ -344,11 +344,11 @@
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="false" />
+		<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.edw590.visor_c_a.Modules.CameraManager.TakePictureNew"
 			android:permission=""
 			android:exported="false"
 			android:directBootAware="false" />
-		<!-- Do NOT put the process tag in the Main Service!!! (Read the persistence note above) -->
 		<service android:name="com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv"
 			android:permission=""
 			android:exported="false"
@@ -359,6 +359,16 @@
 			android:exported="false"
 			android:directBootAware="true"
 			android:process=":Commands_Speech_Recognition" />
+		<service android:name="com.edw590.visor_c_a.AccessibilityService.AccessibilityService"
+			android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+			android:exported="true"
+			android:directBootAware="true">
+			<intent-filter>
+				<action android:name="android.accessibilityservice.AccessibilityService" />
+			</intent-filter>
+			<meta-data android:name="android.accessibilityservice"
+				android:resource="@xml/accessibility_service" />
+		</service>
 
 		<receiver android:name="com.edw590.visor_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv"
 			android:permission="android.permission.BIND_DEVICE_ADMIN"

@@ -346,9 +346,38 @@ public final class UtilsPermsAuths {
 			}
 		}
 
+		if (!UtilsApp.isAccessibilityServiceEnabled(AccessibilityService.class)) {
+			if (what_to_do == ALSO_FORCE) {
+				forceAccessibilityService();
+
+				missing_authorizations += UtilsApp.isAccessibilityServiceEnabled(AccessibilityService.class) ? 0 : 1;
+			} else {
+				++missing_authorizations;
+
+				if (what_to_do == ALSO_REQUEST) {
+					final Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					UtilsContext.startActivity(intent);
+				}
+			}
+		}
+
 		return missing_authorizations;
 	}
 
+	/**
+	 * <p>Forces enabling the Accessibility Service authorization to the app.</p>
+	 */
+	public static void forceAccessibilityService() {
+		String full_accessibility_service_name = new ComponentName(UtilsContext.getContext(),
+				AccessibilityService.class).flattenToString();
+		UtilsShell.executeShellCmd(true, "settings put secure enabled_accessibility_services " +
+				full_accessibility_service_name);
+	}
+
+	/**
+	 * <p>Forces enabling Device Administrator authorization to the app.</p>
+	 */
 	public static void forceDeviceAdmin() {
 		// todo Remove this function and rename the forceDeviceAdmin1() one to this one when you make a way to request
 		//  VISOR to stop requesting specific permissions

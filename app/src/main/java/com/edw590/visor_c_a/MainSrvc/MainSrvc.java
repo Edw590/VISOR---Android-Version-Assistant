@@ -119,29 +119,26 @@ public final class MainSrvc extends Service {
 		ModulesList.startElement(ModulesList.getElementIndex(Speech2.class));
 	}
 
-	final Thread infinity_thread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			final int mods_manager_index = ModulesList.getElementIndex(ModulesManager.class);
+	final Thread infinity_thread = new Thread(() -> {
+		final int mods_manager_index = ModulesList.getElementIndex(ModulesManager.class);
 
-			while (true) {
-				// Force the permissions every some seconds.
-				UtilsPermsAuths.checkRequestPerms(null, true);
-				UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_FORCE);
+		while (true) {
+			// Force the permissions every some seconds.
+			UtilsPermsAuths.checkRequestPerms(null, true);
+			UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_FORCE);
 
-				// Keep checking if the Modules Manager is working and in case it's not, restart it.
-				if (!ModulesList.isElementFullyWorking(mods_manager_index)) {
-					ModulesList.restartElement(mods_manager_index);
-					final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
-					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-				}
+			// Keep checking if the Modules Manager is working and in case it's not, restart it.
+			if (!ModulesList.isElementFullyWorking(mods_manager_index)) {
+				ModulesList.restartElement(mods_manager_index);
+				final String speak = "WARNING - The Modules Manager stopped working and has been restarted!";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+			}
 
-				try {
-					Thread.sleep(ModulesManager.CHECK_INTERVAL/2);
-				} catch (final InterruptedException ignored) {
-					// Terminate the app forcefully for the system to restart it.
-					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
-				}
+			try {
+				Thread.sleep(ModulesManager.CHECK_INTERVAL/2);
+			} catch (final InterruptedException ignored) {
+				// Terminate the app forcefully for the system to restart it.
+				UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
 			}
 		}
 	});
@@ -159,108 +156,110 @@ public final class MainSrvc extends Service {
 
 			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
-			if (intent.getAction().equals(CONSTS_BC_Speech.ACTION_READY)) {
-				// Start the Modules Manager.
-				ModulesList.startElement(ModulesList.getElementIndex(ModulesManager.class));
-				infinity_thread.start();
+			if (!intent.getAction().equals(CONSTS_BC_Speech.ACTION_READY)) {
+				return;
+			}
 
-				if (!UtilsApp.isRunningOnTV() && !UtilsApp.isRunningOnWatch()) {
-					UtilsRoot.checkWarnRootAccess(false);
+			// Start the Modules Manager.
+			ModulesList.startElement(ModulesList.getElementIndex(ModulesManager.class));
+			infinity_thread.start();
 
-					switch (UtilsApp.appInstallationType()) {
-						case (UtilsApp.PRIVILEGED_WITHOUT_UPDATES): {
-							if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-								final String speak = "WARNING - Installed as privileged application but without updates. " +
-										"Only emergency code commands will be available below Android Marshmallow.";
-								UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-							}
-							//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
-							//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
-							//   memory? (always from memory, preferably)
-							//   Maybe try to extract to the cache partition or folder or something? Not as safe, but more
-							//   probable of being possible.
+			if (!UtilsApp.isRunningOnTV() && !UtilsApp.isRunningOnWatch()) {
+				UtilsRoot.checkWarnRootAccess(false);
 
-							break;
-						}
-						case (UtilsApp.NON_PRIVILEGED): {
-							final String speak = "WARNING - Installed as non-privileged application! Privileged app " +
-									"features may not be available.";
+				switch (UtilsApp.appInstallationType()) {
+					case (UtilsApp.PRIVILEGED_WITHOUT_UPDATES): {
+						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+							final String speak = "WARNING - Installed as privileged application but without updates. " +
+									"Only emergency code commands will be available below Android Marshmallow.";
 							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-
-							break;
 						}
-					}
+						//  todo Remember the user who said you could "potentially" emulate loading from the APK itself?
+						//   Try that below Marshmallow... Maybe read the APK? Or extract it to memory and load from
+						//   memory? (always from memory, preferably)
+						//   Maybe try to extract to the cache partition or folder or something? Not as safe, but more
+						//   probable of being possible.
 
-					if (!UtilsApp.isDeviceAdmin()) {
-						final String speak = "WARNING - The application is not a Device Administrator! Some security " +
+						break;
+					}
+					case (UtilsApp.NON_PRIVILEGED): {
+						final String speak = "WARNING - Installed as non-privileged application! Privileged app " +
 								"features may not be available.";
 						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-					}
 
-					/* todo if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
-						switch (Copiar_bibliotecas.copiar_biblioteca_PocketSphinx(getApplicationContext())) {
-							case (ARQUITETURA_NAO_DISPONIVEL): {
-								// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
-								pocketsphinx_disponivel = false;
-								fala.speak("WARNING - It was not possible to find a compatible CPU architecture for PocketSphinx " +
-										"library to be copied to the device. It will not be possible to have background hotword " +
-										"detection.", Fala.SEM_COMANDOS_ADICIONAIS, null, false);
-								break;
-							}
-							case (ERRO_COPIA): {
-								// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
-								pocketsphinx_disponivel = false;
-								fala.speak("WARNING - It was not possible to copy the PocketSphinx library to the device. It will " +
-										"not be possible to have background hotword detection.", Fala.SEM_COMANDOS_ADICIONAIS,
-										null, false);
-								break;
-							}
-						}
-					}*/
-
-					// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in
-					//  a loop or whatever. Or with some event that the app could broadcast when it detects granted or
-					//  denied permissions (this could be useful...).
-					// Enable the power button long press detection.
-					switch (UtilsMainSrvc.startLongPwrBtnDetection()) {
-						case UtilsMainSrvc.UNSUPPORTED_OS_VERSION: {
-							final String speak = "The power button long press detection will not be available. Your " +
-									"Android version is not supported.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-
-							break;
-						}
-						case UtilsMainSrvc.UNSUPPORTED_HARDWARE: {
-							final String speak = "The power button long press detection will not be available. " +
-									"Your hardware does not seem to support the detection.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-
-							break;
-						}
-						case UtilsMainSrvc.PERMISSION_DENIED: {
-							final String speak = "The power button long press detection will not be available. The " +
-									"permission to draw a system overlay was denied.";
-							UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-
-							break;
-						}
+						break;
 					}
 				}
 
-				UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
-				UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
-
-				// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
-				// useful in case the screen gets broken, for example).
-				// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
-				// ready.
-				final String speak = "Ready, sir.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
-
-				try {
-					unregisterReceiver(broadcastReceiver);
-				} catch (final IllegalArgumentException ignored) {
+				if (!UtilsApp.isDeviceAdmin()) {
+					final String speak = "WARNING - The application is not a Device Administrator! Some security " +
+							"features may not be available.";
+					UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 				}
+
+				/* todo if (app_installation_type == UtilsApp.SYSTEM_WITHOUT_UPDATES) {
+					switch (Copiar_bibliotecas.copiar_biblioteca_PocketSphinx(getApplicationContext())) {
+						case (ARQUITETURA_NAO_DISPONIVEL): {
+							// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
+							pocketsphinx_disponivel = false;
+							fala.speak("WARNING - It was not possible to find a compatible CPU architecture for PocketSphinx " +
+									"library to be copied to the device. It will not be possible to have background hotword " +
+									"detection.", Fala.SEM_COMANDOS_ADICIONAIS, null, false);
+							break;
+						}
+						case (ERRO_COPIA): {
+							// Não é preciso ser fala de emergência, já que isto é das primeiras coisa que ele diz.
+							pocketsphinx_disponivel = false;
+							fala.speak("WARNING - It was not possible to copy the PocketSphinx library to the device. It will " +
+									"not be possible to have background hotword detection.", Fala.SEM_COMANDOS_ADICIONAIS,
+									null, false);
+							break;
+						}
+					}
+				}*/
+
+				// todo If the overlay permission is granted with the app started, this won't care --> fix it. Put it in
+				//  a loop or whatever. Or with some event that the app could broadcast when it detects granted or
+				//  denied permissions (this could be useful...).
+				// Enable the power button long press detection.
+				switch (UtilsMainSrvc.startLongPwrBtnDetection()) {
+					case UtilsMainSrvc.UNSUPPORTED_OS_VERSION: {
+						final String speak = "The power button long press detection will not be available. Your " +
+								"Android version is not supported.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+
+						break;
+					}
+					case UtilsMainSrvc.UNSUPPORTED_HARDWARE: {
+						final String speak = "The power button long press detection will not be available. " +
+								"Your hardware does not seem to support the detection.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+
+						break;
+					}
+					case UtilsMainSrvc.PERMISSION_DENIED: {
+						final String speak = "The power button long press detection will not be available. The " +
+								"permission to draw a system overlay was denied.";
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+
+						break;
+					}
+				}
+			}
+
+			UtilsPermsAuths.warnPermissions(UtilsPermsAuths.checkRequestPerms(null, false), false);
+			UtilsPermsAuths.warnAuthorizations(UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.CHECK_ONLY), false);
+
+			// The Main Service is completely ready, so it warns about it so we can start speaking to it (very
+			// useful in case the screen gets broken, for example).
+			// It's also said in high priority so the user can know immediately (hopefully) that the assistant is
+			// ready.
+			final String speak = "Ready, sir.";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+
+			try {
+				unregisterReceiver(broadcastReceiver);
+			} catch (final IllegalArgumentException ignored) {
 			}
 		}
 	};

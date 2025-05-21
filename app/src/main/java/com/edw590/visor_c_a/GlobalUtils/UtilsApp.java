@@ -21,6 +21,7 @@
 
 package com.edw590.visor_c_a.GlobalUtils;
 
+import android.accessibilityservice.AccessibilityService;
 import android.app.UiModeManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -28,6 +29,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import androidx.annotation.NonNull;
@@ -253,6 +256,38 @@ public final class UtilsApp {
 		Configuration config = context.getResources().getConfiguration();
 		if ((config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH) {
 			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * <p>Check if an accessibility service is enabled.</p>
+	 *
+	 * @param service the service class
+	 *
+	 * @return true if the service is enabled, false otherwise
+	 */
+	public static boolean isAccessibilityServiceEnabled(@NonNull final Class<? extends AccessibilityService> service) {
+		Context context = UtilsContext.getContext();
+		ComponentName expected_component_name = new ComponentName(context, service);
+
+		String enabled_services_setting = Settings.Secure.getString(context.getContentResolver(),
+				Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+		if (enabled_services_setting == null) {
+			return false;
+		}
+
+		TextUtils.SimpleStringSplitter colon_splitter = new TextUtils.SimpleStringSplitter(':');
+		colon_splitter.setString(enabled_services_setting);
+
+		while (colon_splitter.hasNext()) {
+			String component_name_string = colon_splitter.next();
+			ComponentName enabled_service = ComponentName.unflattenFromString(component_name_string);
+
+			if (enabled_service != null && enabled_service.equals(expected_component_name)) {
+				return true;
+			}
 		}
 
 		return false;

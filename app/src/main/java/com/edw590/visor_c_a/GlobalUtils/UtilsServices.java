@@ -68,7 +68,7 @@ public final class UtilsServices {
 	 * @param wait if this and {@code check_already_running} are true, the function will wait until the service is not
 	 * 								  running anymore before starting it again
 	 */
-	public static void startService(@NonNull final Class<?> service_class, @Nullable final Intent intent,
+	public static void startService(@NonNull final Class<? extends Service> service_class, @Nullable final Intent intent,
 									final boolean foreground, final boolean check_already_running, final boolean wait) {
 		if (check_already_running && wait) {
 			while (isServiceRunning(service_class)) {

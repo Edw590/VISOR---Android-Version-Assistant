@@ -21,6 +21,8 @@
 
 package com.edw590.visor_c_a;
 
+import android.app.Service;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -339,7 +341,7 @@ public final class ModulesList {
 
 		switch (Math.abs((int) getElementValue(element_index, ELEMENT_TYPE1))) {
 			case (ModulesList.TYPE1_SERVICE_SEP): {
-				UtilsServices.startService(element_class, null, false, true, false);
+				UtilsServices.startService((Class<? extends Service>) element_class, null, false, true, false);
 
 				break;
 			}

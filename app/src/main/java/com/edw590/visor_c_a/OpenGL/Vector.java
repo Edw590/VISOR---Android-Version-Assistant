@@ -24,10 +24,10 @@ package com.edw590.visor_c_a.OpenGL;
 import androidx.annotation.NonNull;
 
 public final class Vector {
-	public float x;
-	public float y;
-	public float z;
-	public float w;
+	public final float x;
+	public final float y;
+	public final float z;
+	public final float w;
 
 	public Vector(final float x, final float y, final float z) {
 		this.x = x;
