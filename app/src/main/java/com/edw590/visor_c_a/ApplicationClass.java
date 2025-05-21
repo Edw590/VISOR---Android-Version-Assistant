@@ -21,6 +21,7 @@
 
 package com.edw590.visor_c_a;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 
@@ -75,6 +76,8 @@ public final class ApplicationClass extends Application {
 	public static long init_nano_time = 0;
 	public static long init_millis_time = 0;
 
+	private boolean settings_files_checked = false;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -109,12 +112,16 @@ public final class ApplicationClass extends Application {
 
 		/////////////////////////////////////////////////////////////
 
-		if (!UtilsSettings.loadSettingsFile(false)) {
-			System.out.println("Failed to load generated settings. Using empty ones...");
-		}
+		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+			if (!UtilsSettings.loadSettingsFile(false)) {
+				System.out.println("Failed to load generated settings. Using empty ones...");
+			}
 
-		if (!UtilsSettings.loadSettingsFile(true)) {
-			System.out.println("Failed to load user settings. Using empty ones...");
+			if (!UtilsSettings.loadSettingsFile(true)) {
+				System.out.println("Failed to load user settings. Using empty ones...");
+			}
+
+			settings_files_checked = true;
 		}
 
 		// Load OpenCV
@@ -139,6 +146,21 @@ public final class ApplicationClass extends Application {
 	}
 
 	Thread infinity_thread = new Thread(() -> {
+		while (!settings_files_checked) {
+			// Keep trying to check if the files exist or not
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+				UtilsSettings.loadSettingsFile(false);
+				UtilsSettings.loadSettingsFile(true);
+
+				settings_files_checked = true;
+			}
+
+			try {
+				Thread.sleep(1000);
+			} catch (final InterruptedException ignored) {
+				return;
+			}
+		}
 		while (true) {
 			// Write user and gen settings every 5 seconds
 
