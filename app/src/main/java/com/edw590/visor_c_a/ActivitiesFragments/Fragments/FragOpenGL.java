@@ -319,7 +319,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				"\n" +
 				"    \t  playerVars: {\n" +
 						"  autoplay: 1,\n" +
-						"  mute: 0,\n" +
+						"  mute: 1,\n" +
 						"  playsinline: 1,\n" +
 						"  fs: 0,\n" +
 						"  modestbranding: 1,\n" +
@@ -571,35 +571,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				object.draw();
 			}
 		}
-
-		/*if (player_ready && System.currentTimeMillis() - player_ready_time > 3000) {
-			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-			requireActivity().runOnUiThread(() -> {
-				web_view_youtube.evaluateJavascript("loadVideo('tgbNymZ7vqY', 0); playVideo();", null);
-				web_view_youtube.evaluateJavascript("document.getElementById('youTubePlayerDOM').click();", null);
-			});
-
-			player_ready = false;
-			player_ready_time = System.currentTimeMillis() + 100000000;
-			player_unmute_time = System.currentTimeMillis();
-		} else if (System.currentTimeMillis() - player_unmute_time > 3000) {
-			System.out.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-			requireActivity().runOnUiThread(() -> {
-				//web_view_youtube.evaluateJavascript("unMute();", null);
-			});
-
-			player_unmute_time = System.currentTimeMillis() + 100000000;
-			player_continue_time = System.currentTimeMillis();
-		} else if (System.currentTimeMillis() - player_continue_time > 3000) {
-			System.out.println("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
-			requireActivity().runOnUiThread(() -> {
-				//web_view_youtube.evaluateJavascript("unMute(); loadVideo('tgbNymZ7vqY', 0);", null);
-				//web_view_youtube.evaluateJavascript("document.getElementById('youTubePlayerDOM').click();", null);
-				//web_view_youtube.evaluateJavascript("document.getElementById('playBtn').click();", null);
-			});
-
-			player_continue_time = System.currentTimeMillis() + 100000000;
-		}*/
 	}
 
 	private void prepareSensors() {
@@ -661,7 +632,12 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		if (gl_surface_view != null) {
 			gl_surface_view.onPause();
 		}
-		sensor_manager.unregisterListener(sensor_listener);
+		if (web_view_youtube != null) {
+			web_view_youtube.destroy();
+		}
+		if (sensor_manager != null) {
+			sensor_manager.unregisterListener(sensor_listener);
+		}
 		UtilsOpenGL.deleteProgram();
 	}
 }
