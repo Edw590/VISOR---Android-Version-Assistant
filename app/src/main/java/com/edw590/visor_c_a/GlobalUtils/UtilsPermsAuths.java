@@ -38,9 +38,12 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.edw590.visor_c_a.AccessibilityService.AccessibilityService;
 import com.edw590.visor_c_a.BroadcastRecvs.DeviceAdmin.DeviceAdminRecv;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.ArrayList;
 
@@ -118,8 +121,8 @@ public final class UtilsPermsAuths {
 		final String [][][] list_to_use = PERMS_CONSTS.list_of_perms_lists;
 		final int list_to_use_len = list_to_use.length;
 		final boolean force_permissions = (request && activity == null);
-		if (force_permissions) {
-			// todo Get this out of here when... --> same as on the auths function
+		final boolean force_all_perms_auths = (boolean) UtilsRegistry.getData(RegistryKeys.K_PERMS_AUTHS_FORCE_ALL, true);
+		if (!force_all_perms_auths && force_permissions) {
 			return 0;
 		}
 		int num_not_granted_perms = 0;
@@ -214,9 +217,8 @@ public final class UtilsPermsAuths {
 		final String package_name = context.getPackageName();
 		int missing_authorizations = 0;
 
-		// todo Remove this when you make a way to request VISOR to stop requesting specific permissions
-		// Also I can't test stuff with this thing forcing all auths and perms to be granted...
-		if (what_to_do == ALSO_FORCE) {
+		final boolean force_all_perms_auths = (boolean) UtilsRegistry.getData(RegistryKeys.K_PERMS_AUTHS_FORCE_ALL, true);
+		if (!force_all_perms_auths && what_to_do == ALSO_FORCE) {
 			what_to_do = CHECK_ONLY;
 		}
 
@@ -250,7 +252,7 @@ public final class UtilsPermsAuths {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
 			// screen for the user to grant it.
-			final NotificationManager mNotificationManager = (NotificationManager) UtilsContext.getNotificationManager();
+			final NotificationManager mNotificationManager = UtilsContext.getNotificationManager();
 			if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
 				if (what_to_do == ALSO_FORCE) {
 					final String command = "cmd notification allow_dnd " + package_name;
@@ -379,21 +381,17 @@ public final class UtilsPermsAuths {
 	 * <p>Forces enabling Device Administrator authorization to the app.</p>
 	 */
 	public static void forceDeviceAdmin() {
-		// todo Remove this function and rename the forceDeviceAdmin1() one to this one when you make a way to request
-		//  VISOR to stop requesting specific permissions
-	}
-	/**
-	 * <p>Forces enabling Device Administrator authorization to the app.</p>
-	 */
-	public static void forceDeviceAdmin1() {
+		final boolean force_all_perms_auths = (boolean) UtilsRegistry.getData(RegistryKeys.K_PERMS_AUTHS_FORCE_ALL, true);
+		if (!force_all_perms_auths) {
+			return;
+		}
+
 		final String full_device_admin_recv_name = new ComponentName(UtilsContext.getContext(),
 				DeviceAdminRecv.class).flattenToString();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			// dpm is only available from Lollipop onwards
-			// Have the "su" command already here and in one string alone to be as fast as possible executing this -
-			// the user may be attempting to uninstall the app and this must enable Device Admin back right away.
-			final String command = "su\ndpm set-active-admin " + full_device_admin_recv_name;
-			UtilsShell.executeShellCmd(false, command);
+			final String command = "dpm set-active-admin " + full_device_admin_recv_name;
+			UtilsShell.executeShellCmd(true, command);
 		} else {
 
 

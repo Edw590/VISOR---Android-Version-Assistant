@@ -106,6 +106,10 @@ public final class RegistryKeys {
 	/** Type: boolean. */
 	public static final String K_SPEECH_ALWAYS_NOTIFY = SETTINGS_PREFIX + "SPEECH_ALWAYS_NOTIFY";
 
+	// Permissions and authorizations
+	/** Type: boolean. */
+	public static final String K_PERMS_AUTHS_FORCE_ALL = SETTINGS_PREFIX + "PERMS_AUTHS_KEEP_FORCING";
+
 	// Note: if the value is not being updated, remove it from the list
 
 	/**
@@ -184,6 +188,10 @@ public final class RegistryKeys {
 				"The volume at which to speak critical speeches", UtilsSWA.TYPE_INT, "100", false);
 		UtilsSWA.registerValueREGISTRY(K_SPEECH_ALWAYS_NOTIFY, "Speech - Always notify",
 				"Always notify speeches", UtilsSWA.TYPE_BOOL, "false", false);
+
+		// Permissions and authorizations
+		UtilsSWA.registerValueREGISTRY(K_PERMS_AUTHS_FORCE_ALL, "Permissions and authorizations - Force all",
+				"Keep forcing all app permissions and authorizations", UtilsSWA.TYPE_BOOL, "false", false);
 
 
 		/////////////////////////////////////////////
