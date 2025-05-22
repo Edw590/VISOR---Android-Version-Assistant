@@ -1,6 +1,7 @@
 package com.edw590.visor_c_a.AccessibilityService;
 
 import android.app.Notification;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -8,7 +9,11 @@ import android.view.accessibility.AccessibilityEvent;
 
 import androidx.annotation.RequiresApi;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+
 public class AccessibilityService extends android.accessibilityservice.AccessibilityService {
+
+	public static final String ACTION_NEW_NOTIFICATION = "AccessSrvc_ACTION_NEW_NOTIFICATION";
 
 	private boolean initialized = false;
 
@@ -43,6 +48,13 @@ public class AccessibilityService extends android.accessibilityservice.Accessibi
 				String package_name = event.getPackageName().toString();
 				System.out.println("Package " + package_name + " posted a notification with title: " +
 						title + " and content: " + (text.isEmpty() ? text2 : text));
+
+				Intent broadcast_intent = new Intent(ACTION_NEW_NOTIFICATION);
+				broadcast_intent.putExtra("pkg_name", package_name);
+				broadcast_intent.putExtra("title", title);
+				broadcast_intent.putExtra("txt", text);
+				broadcast_intent.putExtra("txt_big", text2);
+				UtilsApp.sendInternalBroadcast(broadcast_intent);
 			}
 		}
 	}

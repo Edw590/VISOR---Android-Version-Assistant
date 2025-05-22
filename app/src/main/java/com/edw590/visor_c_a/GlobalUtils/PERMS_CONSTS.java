@@ -35,20 +35,6 @@ public final class PERMS_CONSTS {
 	private PERMS_CONSTS() {
 	}
 
-	// Note: all permissions listed here exist in Manifest.permission. If an error appears, that means the app is not
-	// being compiled with hidden/internal classes enabled - it must be.
-
-	/*private static final String[][] norm_perms_list = {
-			{Manifest.permission.INTERNET, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.ACCESS_NETWORK_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.RECEIVE_BOOT_COMPLETED, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.ACCESS_WIFI_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.CHANGE_WIFI_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.BLUETOOTH, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.BLUETOOTH_ADMIN, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.FOREGROUND_SERVICE, String.valueOf(Build.VERSION_CODES.P)},
-			{Manifest.permission.MODIFY_AUDIO_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
-	};*/
 	private static final String[][] danger_perms_list = {
 			{Manifest.permission.CAMERA, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.RECEIVE_SMS, String.valueOf(Build.VERSION_CODES.BASE)},
@@ -69,15 +55,6 @@ public final class PERMS_CONSTS {
 			// through ADB commands from that point onwards.
 			{Manifest.permission.WRITE_SECURE_SETTINGS, String.valueOf(Build.VERSION_CODES.JELLY_BEAN)},
 	};
-	/*private static final String[][] sys_perms_list = {
-			{Manifest.permission.REBOOT, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.SHUTDOWN, String.valueOf(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)}, Now it's Jelly Bean
-			{Manifest.permission.WRITE_SETTINGS, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.WRITE_SECURE_SETTINGS, String.valueOf(Build.VERSION_CODES.CUPCAKE)},
-			{Manifest.permission.CONNECTIVITY_INTERNAL, String.valueOf(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)}, Now it's Jelly Bean
-			{Manifest.permission.MODIFY_PHONE_STATE, String.valueOf(Build.VERSION_CODES.BASE)},
-			{Manifest.permission.CAPTURE_AUDIO_OUTPUT, String.valueOf(Build.VERSION_CODES.KITKAT)},
-	};*/
 
 	// NOTICE: keep the dangerous permissions list on the index 0 of the array. On the permissions checker function,
 	// only the permissions from the list on index 0 here are counted as not granted and warned to the user. With all

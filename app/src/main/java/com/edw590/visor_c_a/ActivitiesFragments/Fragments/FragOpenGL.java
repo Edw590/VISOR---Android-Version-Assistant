@@ -21,7 +21,10 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -47,12 +50,14 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.AccessibilityService.AccessibilityService;
 import com.edw590.visor_c_a.AugmentedReality.GyroRotationCorrection;
+import com.edw590.visor_c_a.AugmentedReality.NotificationView;
+import com.edw590.visor_c_a.AugmentedReality.OpenCV;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
-import com.edw590.visor_c_a.AugmentedReality.OpenCV;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 
 import org.opencv.android.JavaCameraView;
@@ -71,6 +76,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	/** Hold a reference to our GLSurfaceView. */
 	private GLSurfaceView gl_surface_view = null;
+
+	FrameLayout frame_layout = null;
 
 	private final Collection<Object> objects = new ArrayList<>(50);
 
@@ -136,8 +143,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		super.onViewCreated(view, savedInstanceState);
 
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
-		FrameLayout frameLayout = new FrameLayout(requireContext());
-		frameLayout.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+		frame_layout = new FrameLayout(requireContext());
+		frame_layout.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
 
 		JavaCameraView camera_view = new JavaCameraView(requireContext(), 0);
 		camera_view.setVisibility(View.VISIBLE);
@@ -145,7 +152,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		camera_view.enableView();
 		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
 		camera_view.setZOrderOnTop(true);
-		frameLayout.addView(camera_view);
+		frame_layout.addView(camera_view);
 
 		// Initialize GLSurfaceView and add to the FrameLayout
 		gl_surface_view = new GLSurfaceView(requireContext());
@@ -154,7 +161,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		gl_surface_view.setRenderer(this);
 		gl_surface_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
 		gl_surface_view.setZOrderOnTop(true);
-		frameLayout.addView(gl_surface_view);
+		frame_layout.addView(gl_surface_view);
 
 		// Create a TextView
 		fps_text_view = new AppCompatTextView(requireContext());
@@ -172,10 +179,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		fps_text_view.setLayoutParams(textViewParams);
 
 		// Add TextView to the FrameLayout
-		frameLayout.addView(fps_text_view);
+		frame_layout.addView(fps_text_view);
 
 		// Set the FrameLayout as the content view
-		requireActivity().setContentView(frameLayout);
+		requireActivity().setContentView(frame_layout);
 
 		// /////////////////////////////////////////////////////////////////////
 
@@ -196,57 +203,46 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		web_view_youtube.addJavascriptInterface(new java.lang.Object() {
 			@JavascriptInterface
 			public void sendYouTubeIFrameAPIReady() {
-				System.out.println("YouTube: Iframe API ready");
 			}
 
 			@JavascriptInterface
 			public void sendReady() {
-				System.out.println("YouTube: Player is ready");
 			}
 
 			@JavascriptInterface
 			public void sendStateChange(String state) {
-				System.out.println("YouTube: State changed to: " + state);
 			}
 
 			@JavascriptInterface
 			public void sendVideoDuration(double duration) {
-				System.out.println("YouTube: Duration: " + duration);
 			}
 
 			@JavascriptInterface
 			public void sendVideoCurrentTime(double time) {
-				System.out.println("YouTube: Current time: " + time);
 			}
 
 			@JavascriptInterface
 			public void sendVideoLoadedFraction(double fraction) {
-				System.out.println("YouTube: Loaded fraction: " + fraction);
 			}
 
 			@JavascriptInterface
 			public void sendPlaybackQualityChange(String quality) {
-				System.out.println("YouTube: Quality changed to: " + quality);
 			}
 
 			@JavascriptInterface
 			public void sendPlaybackRateChange(String rate) {
-				System.out.println("YouTube: Playback rate changed to: " + rate);
 			}
 
 			@JavascriptInterface
 			public void sendError(String error) {
-				System.out.println("YouTube: Error: " + error);
 			}
 
 			@JavascriptInterface
 			public void sendApiChange() {
-				System.out.println("YouTube: API Changed");
 			}
 
 			@JavascriptInterface
 			public void sendVideoId(String id) {
-				System.out.println("YouTube: Video ID: " + id);
 			}
 
 		}, "YouTubePlayerBridge");
@@ -460,7 +456,13 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				"text/html",
 				"utf-8"
 		);
-		frameLayout.addView(web_view_youtube);
+		frame_layout.addView(web_view_youtube);
+
+		try {
+			requireContext().registerReceiver(broadcastReceiver,
+					new IntentFilter(AccessibilityService.ACTION_NEW_NOTIFICATION));
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 
 	@Override
@@ -606,19 +608,31 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 	};
 
-	@Override
-	public void onPause() {
-		super.onPause();
+	final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(@Nullable final Context context, @Nullable final Intent intent) {
+			if (intent == null || intent.getAction() == null) {
+				return;
+			}
 
-		System.out.println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-	}
+			System.out.println("PPPPPPPPPPPPPPPPPP-FragOpenGL - " + intent.getAction());
 
-	@Override
-	public void onResume() {
-		super.onResume();
+			if (!intent.getAction().equals(AccessibilityService.ACTION_NEW_NOTIFICATION)) {
+				return;
+			}
 
-		System.out.println("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
-	}
+			if (frame_layout == null) {
+				return;
+			}
+
+			String title = intent.getStringExtra("title");
+			String txt = intent.getStringExtra("txt");
+			String txt_big = intent.getStringExtra("txt_big");
+			NotificationView notification_view = new NotificationView(requireContext(), title,
+					txt.isEmpty() ? txt_big : txt);
+			notification_view.showIn(frame_layout, 7500);
+		}
+	};
 
 	@Override
 	public void onDestroyView() {
@@ -633,5 +647,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			sensor_manager.unregisterListener(sensor_listener);
 		}
 		UtilsOpenGL.deleteProgram();
+		requireContext().unregisterReceiver(broadcastReceiver);
 	}
 }
