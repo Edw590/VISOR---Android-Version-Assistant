@@ -1,9 +1,11 @@
-package com.edw590.visor_c_a.OpenGL;
+package com.edw590.visor_c_a.AugmentedReality;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;

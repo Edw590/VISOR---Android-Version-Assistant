@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.OpenGL;
+package com.edw590.visor_c_a.AugmentedReality;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

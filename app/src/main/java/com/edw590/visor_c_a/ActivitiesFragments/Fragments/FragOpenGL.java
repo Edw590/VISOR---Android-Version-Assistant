@@ -48,11 +48,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
-import com.edw590.visor_c_a.OpenGL.GyroRotationCorrection;
-import com.edw590.visor_c_a.OpenGL.Objects.Object;
-import com.edw590.visor_c_a.OpenGL.Objects.Rectangle;
-import com.edw590.visor_c_a.OpenGL.OpenCV;
-import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.AugmentedReality.GyroRotationCorrection;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
+import com.edw590.visor_c_a.AugmentedReality.OpenCV;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.R;
 
 import org.opencv.android.JavaCameraView;
@@ -88,10 +88,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private long start_time = System.currentTimeMillis();
 
 	private WebView web_view_youtube = null;
-	private boolean player_ready = false;
-	private long player_ready_time = 0;
-	private long player_unmute_time = System.currentTimeMillis() + 1000000000;
-	private long player_continue_time = System.currentTimeMillis() + 1000000000;
 
 	public FragOpenGL() {
 		/*objects.add(new Parallelepiped(
@@ -206,8 +202,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			@JavascriptInterface
 			public void sendReady() {
 				System.out.println("YouTube: Player is ready");
-				player_ready = true;
-				player_ready_time = System.currentTimeMillis();
 			}
 
 			@JavascriptInterface

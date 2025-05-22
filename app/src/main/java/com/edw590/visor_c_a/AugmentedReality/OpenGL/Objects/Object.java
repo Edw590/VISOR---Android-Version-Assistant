@@ -19,15 +19,15 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.OpenGL.Objects;
+package com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects;
 
 import android.opengl.Matrix;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edw590.visor_c_a.OpenGL.UtilsOpenGL;
-import com.edw590.visor_c_a.OpenGL.Vector;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

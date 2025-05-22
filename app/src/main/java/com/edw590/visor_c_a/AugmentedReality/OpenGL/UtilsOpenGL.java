@@ -19,13 +19,13 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.OpenGL;
+package com.edw590.visor_c_a.AugmentedReality.OpenGL;
 
 import android.opengl.GLES20;
 
 import androidx.annotation.NonNull;
 
-import com.edw590.visor_c_a.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
 
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
