@@ -17,10 +17,10 @@ They say "debug" at the end because they're debug type APKs, meaning you can use
 **NOTE: ignore the "app created for old Android version" warning when installing! That enables me to use system features now locked on newer Android releases!**
 
 ## Test Android versions and devices (in order of use)
-- Oreo 8.1 on a Blackview BV9500 (most used to test - my current phone). This is also the Android version I'm making the app for (can't test it on newer than 8.1 anyway) - though I think most of the app (or everything) works on newer versions due to backwards compatibility, so feel free to install it on newer Android versions.
-- KitKat 4.4.2 on my Wolder miTab Advance tablet
-- Ice Cream Sandwich 4.0.3 on the Android Studio Emulator
-- Lollipop 5.0 on a OnePlus X (the phone with the broken screen that gave reason to the app)
+- \[Every time\] Oreo 8.1 on a Blackview BV9500 (my current phone). This is also the Android version I'm making the app for (can't test it on newer than 8.1 anyway) - though I think most of the app (or everything) works on newer versions due to backwards compatibility, so feel free to install it on newer Android versions.
+- \[Rarely\] KitKat 4.4.2 on my old Wolder miTab Advance tablet
+- \[Rarely\] Jelly Bean 4.1 on an old Acer tablet
+- \[Not anymore\] Lollipop 5.0 on a OnePlus X (the phone with the broken screen that gave reason to the app)
 
 ## Pictures
 Note: these pictures are outdated. Check the video which is more recent.

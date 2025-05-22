@@ -29,19 +29,16 @@ android {
 	Change it to a newer one to test with Play Store standards only.
 	Do NOT put it below API 23, or the app will not be able to check/request run-time permissions!
 
-	Versions for which the app was developed (developing to a version implies testing on that version):
-		- KitKat 4.4.2, API 19 (tablet) [secondary] --> until [still on it]
-		- Lollipop 5.1, API 22 (phone) [rarer] --> until [still on it]
-		- Oreo 8.1, API 27 (phone) [main] --> until [still on it]
+	Version for which the app is being developed (developing to a version implies testing on it): Oreo 8.1 (API 27).
 
-	THIS ALSO MEANS THE APP'S FEATURES ARE ---ONLY--- BEING MADE FOR THE LATEST OF THE ANDROID VERSIONS ABOVE!!!!!
-	The app is only being made to work on the above versions, not caring of newer versions. It may include code for
-	newer versions, but it's optional - it only has to work on the above versions.
+	THIS ALSO MEANS THE APP'S FEATURES ARE ---ONLY--- BEING MADE FOR THE LATEST OF THE ANDROID VERSION ABOVE!!!!!
+	The app is only being made to work on the above version, not caring about newer versions. It may include code for
+	newer versions, but it's optional - it only has to work on the above version.
 	The app is also always being compiled with the newest hidden/internal SDKs available, so it won't let pass errors
 	of non-existent APIs for example, but again, optional - could be compiled with the SDK for the newest version above.
 
-	--> todo THIS MEANS... to update the app to a newer device, ALL code should be checked. AND read the release notes
-	     from the new version to know ALL that changed.
+	--> todo THIS MEANS... to update the app to a newer device, ALL code should be checked (run "Inspect code" on the
+	     "Whole project"). AND read the release notes from the new version to know ALL that changed.
 
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
