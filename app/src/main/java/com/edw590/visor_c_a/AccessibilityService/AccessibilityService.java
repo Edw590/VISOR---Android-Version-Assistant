@@ -46,8 +46,6 @@ public class AccessibilityService extends android.accessibilityservice.Accessibi
 					}
 				}
 				String package_name = event.getPackageName().toString();
-				System.out.println("Package " + package_name + " posted a notification with title: " +
-						title + " and content: " + (text.isEmpty() ? text2 : text));
 
 				Intent broadcast_intent = new Intent(ACTION_NEW_NOTIFICATION);
 				broadcast_intent.putExtra("pkg_name", package_name);
