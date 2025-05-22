@@ -84,13 +84,8 @@ public final class ApplicationClass extends Application {
 
 		// To do exactly when the app's main process starts
 
-		// "Static assertions" here (app can't start if these aren't met)
-		{
-			if (ACD.MAX_SUB_CMDS != CmdsList.CmdRetIds.LOCAL_MAX_SUB_CMDS) {
-				throw new AssertionError("LOCAL_MAX_SUB_CMDS (value of " + CmdsList.CmdRetIds.LOCAL_MAX_SUB_CMDS +
-						") is different than " + ACD.MAX_SUB_CMDS);
-			}
-		}
+		// Assertions here (app can't start if these aren't met)
+		assert ACD.MAX_SUB_CMDS == CmdsList.CmdRetIds.LOCAL_MAX_SUB_CMDS;
 
 		// Apply SecureRandom fixes for devices running Android 4.3 or below
 		PRNGFixes.apply();
@@ -103,12 +98,7 @@ public final class ApplicationClass extends Application {
 		init_nano_time = System.nanoTime();
 
 		// Setup handler for uncaught exceptions
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(@NonNull final Thread t, @NonNull final Throwable e) {
-				handleUncaughtException (t, e);
-			}
-		});
+		Thread.setDefaultUncaughtExceptionHandler(ApplicationClass::handleUncaughtException);
 
 		/////////////////////////////////////////////////////////////
 
