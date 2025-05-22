@@ -1,18 +1,61 @@
 package com.edw590.visor_c_a.AccessibilityService;
 
+import android.app.Notification;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.accessibility.AccessibilityEvent;
 
+import androidx.annotation.RequiresApi;
+
 public class AccessibilityService extends android.accessibilityservice.AccessibilityService {
+
+	private boolean initialized = false;
+
 	@Override
+	@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 	public void onAccessibilityEvent(AccessibilityEvent event) {
-		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		if (!initialized) {
+			return;
+		}
+
 		if (event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-			System.out.println("Package " + event.getPackageName() + " posted a notification: " + event.getText());
+			Parcelable parcelable = event.getParcelableData();
+			if (parcelable instanceof Notification) {
+				Bundle notif_extras = ((Notification) parcelable).extras;
+				String title = "";
+				CharSequence title_chars = notif_extras.getCharSequence(Notification.EXTRA_TITLE);
+				if (title_chars != null) {
+					title = title_chars.toString();
+				}
+				String text = "";
+				CharSequence text_chars = notif_extras.getCharSequence(Notification.EXTRA_TEXT);
+				if (text_chars != null) {
+					text = text_chars.toString();
+				}
+				String text2 = "";
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					CharSequence text2_chars = notif_extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+					if (text2_chars != null) {
+						text2 = text2_chars.toString();
+					}
+				}
+				String package_name = event.getPackageName().toString();
+				System.out.println("Package " + package_name + " posted a notification with title: " +
+						title + " and content: " + (text.isEmpty() ? text2 : text));
+			}
+		}
+	}
+
+	@Override
+	protected void onServiceConnected() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			initialized = true;
 		}
 	}
 
 	@Override
 	public void onInterrupt() {
-		// Empty
+		initialized = false;
 	}
 }
