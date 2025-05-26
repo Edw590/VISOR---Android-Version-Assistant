@@ -90,18 +90,8 @@ public final class UtilsShell {
 	 * <p>Do NOT use this to execute commands saved in some file or whatever. Execute ONLY constants or generated
 	 * strings on the code <em>still from constants</em> - NEVER generate from something that can be gotten outside
 	 * constants. NEVER something that can be saved on the device storage.</p>
-	 * <br>
-	 * <p>Considerations to have:</p>
-	 * <p>- The function will join the list with " && " after each command, so make sure they can be written as
-	 * one-liners.</p>
-	 * <p>- Don't put a new line at the end of each command.</p>
-	 * <p>- Don't add empty commands or just new lines.</p>
-	 * <p>- The return values are byte arrays. To get their printable form, use
-	 * {@link UtilsSWA#bytesToPrintableDATACONV(byte[], boolean)}.</p>
 	 *
-	 * @param attempt_su true to, in case the app has root permissions, call su before the given commands, false
-	 * otherwise (useful to execute commands with or without root allowed without wanting the error
-	 * from calling su to appear on the output stream)
+	 * @param attempt_su true to call su before the given commands, false otherwise
 	 * @param commands_list list of commands to execute
 	 *
 	 * @return an instance of {@link CmdOutput}, and if any error occurs, {@link UtilsSWA#GENERIC_ERR} will be returned
