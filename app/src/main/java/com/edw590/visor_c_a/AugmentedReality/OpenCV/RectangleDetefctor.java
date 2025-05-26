@@ -1,13 +1,32 @@
-package com.edw590.visor_c_a.AugmentedReality;
+/*
+ * Copyright 2021-2025 Edw590
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.edw590.visor_c_a.AugmentedReality.OpenCV;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -19,37 +38,11 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 {
-
-	private float window_width = 0.0f;
-	private float window_height = 0.0f;
-
-	private Mat rgba_frame = null;
+class RectangleDetefctor {
 
 	private Point[][] detected_rects_array = null;
 
-	@Override
-	public void onCameraViewStarted(final int width, final int height) {
-		rgba_frame = new Mat();
-		window_width = width;
-		window_height = height;
-	}
-
-	@Override
-	public void onCameraViewStopped() {
-		rgba_frame.release();
-	}
-
-	@Override
-	@Nullable
-	public Mat onCameraFrame(final CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
-		rgba_frame = cvCameraViewFrame.rgba();
-		detectAndDrawFlatSurfaces(rgba_frame);
-
-		return null;
-	}
-
-	private void detectAndDrawFlatSurfaces(@NonNull final Mat frame) {
+	public void detect(@NonNull final Mat frame) {
 		Mat gray = new Mat();
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_RGBA2GRAY);
 
@@ -100,7 +93,7 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 	}
 
 	@NonNull
-	public Rectangle[] getDetectedRectangles() {
+	Rectangle[] getDetected(final float window_width, final float window_height) {
 		if (detected_rects_array == null) {
 			return new Rectangle[0];
 		}

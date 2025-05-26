@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 
+@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class AccessibilityService extends android.accessibilityservice.AccessibilityService {
 
 	public static final String ACTION_NEW_NOTIFICATION = "AccessSrvc_ACTION_NEW_NOTIFICATION";
@@ -59,7 +60,7 @@ public class AccessibilityService extends android.accessibilityservice.Accessibi
 
 	@Override
 	protected void onServiceConnected() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { // Keep this here - this is called on all versions
 			initialized = true;
 		}
 	}

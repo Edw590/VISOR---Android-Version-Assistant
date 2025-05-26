@@ -61,6 +61,8 @@ public final class UtilsSettings {
 				SettingsSync.loadGenSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
 			}
 		} catch (final Exception e) {
+			e.printStackTrace();
+
 			file_bytes = UtilsFilesDirs.readFileBytes(backup_file);
 			try {
 				if (user_settings) {
@@ -69,9 +71,10 @@ public final class UtilsSettings {
 					SettingsSync.loadGenSettings(UtilsSWA.bytesToPrintableDATACONV(file_bytes, false));
 				}
 			} catch (final Exception e2) {
+				e2.printStackTrace();
+
 				String user_generated = user_settings ? "user" : "generated";
 				System.out.println("Failed to load " + user_generated + " settings. Using empty ones...");
-				e2.printStackTrace();
 
 				return false;
 			}

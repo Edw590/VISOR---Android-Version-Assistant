@@ -113,11 +113,6 @@ public final class ModulesList {
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),
 			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, true),
 
-			// todo Make a new class for libraries? And get them to return on a standard function the supported
-			//  architectures. Then check if the file is present or at least if the library has been loaded by catching
-			//  a Throwable.
-			//new ElementsObj(ACD.ACD.class, "Advanced Commands Detection", TYPE1_LIBRARY, TYPE2_MODULE),
-
 			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, true),
 	};
 	public static final int ELEMENTS_LIST_LENGTH = ELEMENTS_LIST.length;

@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.edw590.visor_c_a.AugmentedReality;
+package com.edw590.visor_c_a.AugmentedReality.OpenCV;
 
 import android.content.Context;
 import android.graphics.Bitmap;

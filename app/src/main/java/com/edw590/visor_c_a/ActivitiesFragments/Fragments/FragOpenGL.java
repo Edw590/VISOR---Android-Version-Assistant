@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -33,19 +34,19 @@ import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -53,7 +54,7 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.AccessibilityService.AccessibilityService;
 import com.edw590.visor_c_a.AugmentedReality.GyroRotationCorrection;
 import com.edw590.visor_c_a.AugmentedReality.NotificationView;
-import com.edw590.visor_c_a.AugmentedReality.OpenCV;
+import com.edw590.visor_c_a.AugmentedReality.OpenCV.OpenCV;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
@@ -72,6 +73,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * <p>Fragment that shows the list of the Values Storage values.</p>
  */
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer {
 
 	/** Hold a reference to our GLSurfaceView. */
@@ -142,6 +144,26 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) { // Keep this here - this is called on all versions
+			AppCompatTextView text_view = new AppCompatTextView(requireContext());
+			text_view.setText("Only available on Android Lollipop 5.0 and above");
+			text_view.setTextSize(20);
+			text_view.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+			text_view.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+			text_view.setGravity(Gravity.CENTER);
+			text_view.setLayoutParams(new FrameLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+			));
+			requireActivity().setContentView(text_view);
+
+			return;
+		}
+
+		hideSystemUI(requireActivity().getWindow().getDecorView());
+
+		requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
 		// Create a FrameLayout to hold the GLSurfaceView and TextView
 		frame_layout = new FrameLayout(requireContext());
 		frame_layout.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
@@ -151,7 +173,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		camera_view.setCvCameraViewListener(open_cv);
 		camera_view.enableView();
 		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		camera_view.setZOrderOnTop(true);
+		//camera_view.setZOrderOnTop(true);
+		camera_view.setMaxFrameSize(1000000000, 1000000000);
 		frame_layout.addView(camera_view);
 
 		// Initialize GLSurfaceView and add to the FrameLayout
@@ -197,262 +220,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		));
 		web_view_youtube.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.transparent));
 		web_view_youtube.getSettings().setJavaScriptEnabled(true);
-		web_view_youtube.getSettings().setDomStorageEnabled(true);
-		web_view_youtube.setWebChromeClient(new WebChromeClient());
-		// Inject the YouTubePlayerBridge
-		web_view_youtube.addJavascriptInterface(new java.lang.Object() {
-			@JavascriptInterface
-			public void sendYouTubeIFrameAPIReady() {
-			}
-
-			@JavascriptInterface
-			public void sendReady() {
-			}
-
-			@JavascriptInterface
-			public void sendStateChange(String state) {
-			}
-
-			@JavascriptInterface
-			public void sendVideoDuration(double duration) {
-			}
-
-			@JavascriptInterface
-			public void sendVideoCurrentTime(double time) {
-			}
-
-			@JavascriptInterface
-			public void sendVideoLoadedFraction(double fraction) {
-			}
-
-			@JavascriptInterface
-			public void sendPlaybackQualityChange(String quality) {
-			}
-
-			@JavascriptInterface
-			public void sendPlaybackRateChange(String rate) {
-			}
-
-			@JavascriptInterface
-			public void sendError(String error) {
-			}
-
-			@JavascriptInterface
-			public void sendApiChange() {
-			}
-
-			@JavascriptInterface
-			public void sendVideoId(String id) {
-			}
-
-		}, "YouTubePlayerBridge");
 		web_view_youtube.loadData(
-				"<!DOCTYPE html>\n" +
-				"<html>\n" +
-				"  <style type=\"text/css\">\n" +
-				"        html, body {\n" +
-				"            height: 100%;\n" +
-				"            width: 100%;\n" +
-				"            margin: 0;\n" +
-				"            padding: 0;\n" +
-				"            background-color: #000000;\n" +
-				"            overflow: hidden;\n" +
-				"            position: fixed;\n" +
-				"        }\n" +
-				"    </style>\n" +
-				"\n" +
-				"  <head>\n" +
-				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">\n" +
-				"    <!-- defer forces the library to execute after the html page is fully parsed. -->\n" +
-				"    <!-- This is needed to avoid race conditions, where the library executes and calls `onYouTubeIframeAPIReady` before the page is fully parsed. -->\n" +
-				"    <!-- See #873 on GitHub -->\n" +
-				"    <script defer src=\"https://www.youtube.com/iframe_api\"></script>\n" +
-				"  </head>\n" +
-				"\n" +
-				"  <body>\n" +
-				"    <div id=\"youTubePlayerDOM\"></div>\n" +
-				"    <button id=\"playBtn\" onclick=\"player.unMute(); player.playVideo();\">Play</button>\n" +
-				"  </body>\n" +
-				"\n" +
-				"  <script type=\"text/javascript\">\n" +
-				"    var UNSTARTED = \"UNSTARTED\";\n" +
-				"    var ENDED = \"ENDED\";\n" +
-				"    var PLAYING = \"PLAYING\";\n" +
-				"    var PAUSED = \"PAUSED\";\n" +
-				"    var BUFFERING = \"BUFFERING\";\n" +
-				"    var CUED = \"CUED\";\n" +
-				"\n" +
-				"    var YouTubePlayerBridge = window.YouTubePlayerBridge;\n" +
-				"    var YouTubePlayerCallbacks = window.YouTubePlayerCallbacks;\n" +
-				"    var player;\n" +
-				"\n" +
-				"    var timerId;\n" +
-				"\n" +
-				"    function onYouTubeIframeAPIReady() {\n" +
-				"\n" +
-				"      YouTubePlayerBridge.sendYouTubeIFrameAPIReady();\n" +
-				"            \n" +
-				"    \tplayer = new YT.Player('youTubePlayerDOM', {\n" +
-				"    \t\t\t\n" +
-				"        height: '100%',\n" +
-				"    \t  width: '100%',\n" +
-				"    \t  videoId: 'tgbNymZ7vqY',\n" +
-				"    \t\t\t\n" +
-				"        events: {\n" +
-				"    \t    onReady: function(event) { YouTubePlayerBridge.sendReady() },\n" +
-				"    \t\t  onStateChange: function(event) { sendPlayerStateChange(event.data) },\n" +
-				"    \t\t  onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },\n" +
-				"    \t\t  onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },\n" +
-				"    \t\t  onError: function(error) { YouTubePlayerBridge.sendError(error.data) },\n" +
-				"    \t\t  onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }\n" +
-				"    \t  },\n" +
-				"\n" +
-				"    \t  playerVars: {\n" +
-						"  autoplay: 1,\n" +
-						"  mute: 1,\n" +
-						"  playsinline: 1,\n" +
-						"  fs: 0,\n" +
-						"  modestbranding: 1,\n" +
-						"  rel: 0,\n" +
-						"  enablejsapi: 1,\n" +
-						"}\n" +
-						"\n" +
-						"      });\n" +
-						"    }\n" +
-						"\n" +
-						"    function sendPlayerStateChange(playerState) {\n" +
-						"      clearTimeout(timerId);\n" +
-						"\n" +
-						"      switch (playerState) {\n" +
-						"        case YT.PlayerState.UNSTARTED:\n" +
-						"          sendStateChange(UNSTARTED);\n" +
-						"          sendVideoIdFromPlaylistIfAvailable(player);\n" +
-						"          return;\n" +
-						"\n" +
-						"        case YT.PlayerState.ENDED:\n" +
-						"          sendStateChange(ENDED);\n" +
-						"          return;\n" +
-						"\n" +
-						"        case YT.PlayerState.PLAYING:\n" +
-						"          sendStateChange(PLAYING);\n" +
-						"\n" +
-						"          startSendCurrentTimeInterval();\n" +
-						"          sendVideoData(player);\n" +
-						"          return;\n" +
-						"\n" +
-						"        case YT.PlayerState.PAUSED:\n" +
-						"          sendStateChange(PAUSED);\n" +
-						"          return;\n" +
-						"\n" +
-						"        case YT.PlayerState.BUFFERING:\n" +
-						"          sendStateChange(BUFFERING);\n" +
-						"          return;\n" +
-						"\n" +
-						"        case YT.PlayerState.CUED:\n" +
-						"          sendStateChange(CUED);\n" +
-						"          return;\n" +
-						"      }\n" +
-						"\n" +
-						"      function sendVideoData(player) {\n" +
-						"        var videoDuration = player.getDuration();\n" +
-						"\n" +
-						"        YouTubePlayerBridge.sendVideoDuration(videoDuration);\n" +
-						"      }\n" +
-						"\n" +
-						"      // This method checks if the player is playing a playlist.\n" +
-						"      // If yes, it sends out the video id of the video being played.\n" +
-						"      function sendVideoIdFromPlaylistIfAvailable(player) {\n" +
-						"        var playlist = player.getPlaylist();\n" +
-						"        if ( typeof playlist !== 'undefined' && Array.isArray(playlist) && playlist.length > 0 ) {\n" +
-						"          var index = player.getPlaylistIndex();\n" +
-						"          var videoId = playlist[index];\n" +
-						"          YouTubePlayerBridge.sendVideoId(videoId);\n" +
-						"        }\n" +
-						"      }\n" +
-						"\n" +
-						"      function sendStateChange(newState) {\n" +
-						"        YouTubePlayerBridge.sendStateChange(newState)\n" +
-						"      }\n" +
-						"\n" +
-						"      function startSendCurrentTimeInterval() {\n" +
-						"        timerId = setInterval(function() {\n" +
-						"          YouTubePlayerBridge.sendVideoCurrentTime( player.getCurrentTime() )\n" +
-						"          YouTubePlayerBridge.sendVideoLoadedFraction( player.getVideoLoadedFraction() )\n" +
-						"        }, 100 );\n" +
-						"      }\n" +
-						"    }\n" +
-						"\n" +
-						"    // JAVA to WEB functions\n" +
-						"\n" +
-						"    function seekTo(startSeconds) {\n" +
-						"      player.seekTo(startSeconds, true);\n" +
-						"    }\n" +
-						"\n" +
-						"    function pauseVideo() {\n" +
-						"      player.pauseVideo();\n" +
-						"    }\n" +
-						"\n" +
-						"    function playVideo() {\n" +
-						"      player.playVideo();\n" +
-						"    }\n" +
-						"\n" +
-						"    function loadVideo(videoId, startSeconds) {\n" +
-						"      player.loadVideoById(videoId, startSeconds);\n" +
-						"      YouTubePlayerBridge.sendVideoId(videoId);\n" +
-						"    }\n" +
-						"\n" +
-						"    function cueVideo(videoId, startSeconds) {\n" +
-						"      player.cueVideoById(videoId, startSeconds);\n" +
-						"      YouTubePlayerBridge.sendVideoId(videoId);\n" +
-						"    }\n" +
-						"\n" +
-						"    function mute() {\n" +
-						"      player.mute();\n" +
-						"    }\n" +
-						"\n" +
-						"    function unMute() {\n" +
-						"      player.unMute();\n" +
-						"    }\n" +
-						"\n" +
-						"    function setVolume(volumePercent) {\n" +
-						"      player.setVolume(volumePercent);\n" +
-						"    }\n" +
-						"\n" +
-						"    function setPlaybackRate(playbackRate) {\n" +
-						"      player.setPlaybackRate(playbackRate);\n" +
-						"    }\n" +
-						"\n" +
-						"    function toggleFullscreen() {\n" +
-						"      player.toggleFullscreen();\n" +
-						"    }\n" +
-						"\n" +
-						"    function nextVideo() {\n" +
-						"      player.nextVideo();\n" +
-						"    }\n" +
-						"\n" +
-						"    function previousVideo() {\n" +
-						"      player.previousVideo();\n" +
-						"    }\n" +
-						"\n" +
-						"    function playVideoAt(index) {\n" +
-						"      player.playVideoAt(index);\n" +
-						"    }\n" +
-						"\n" +
-						"    function setLoop(loop) {\n" +
-						"      player.setLoop(loop);\n" +
-						"    }\n" +
-						"\n" +
-						"    function setShuffle(shuffle) {\n" +
-						"      player.setShuffle(shuffle);\n" +
-						"    }\n" +
-						"\n" +
-						"    function getMuteValue(requestId) {\n" +
-						"      var isMuted = player.isMuted();\n" +
-						"      YouTubePlayerCallbacks.sendBooleanValue(requestId, isMuted);\n" +
-						"    }\n" +
-						"\n" +
-						"  </script>\n" +
-						"</html>\n",
+				"<iframe width=\"100%\" height=\"100%\"\n" +
+					"src=\"https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=0\" frameborder=\"0\" allowfullscreen\n" +
+				"</iframe>",
 				"text/html",
 				"utf-8"
 		);
@@ -513,15 +284,6 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		UtilsOpenGL.setViewMatrix(view_matrix);
 
-		/*for (final Object object : objects) {
-			//object.translateM(0.0f, 0.0f, -0.01f);
-			object.rotateM(0.3f, 1.0f, 0.6f);
-			//object.rotateM(0.0f, 0.0f, 0.6f);
-			//object.scaleM(1.0f, 1.0f, 0.999f);
-
-			object.draw();
-		}*/
-
 		if (System.currentTimeMillis() - last_mov_check > 33) { // 33 ms
 			if (gyro_rotation_correction.getAccelDifference() > 0.75f) {
 				gyro_rotation_correction.saveCurrentAccel();
@@ -564,6 +326,11 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 					web_view_youtube.setLayoutParams(layout_params);
 				});
 			} else {
+				//object.translateM(0.0f, 0.0f, -0.01f);
+				object.rotateM(0.3f, 1.0f, 0.6f);
+				//object.rotateM(0.0f, 0.0f, 0.6f);
+				//object.scaleM(1.0f, 1.0f, 0.999f);
+
 				object.draw();
 			}
 		}
@@ -634,6 +401,23 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 	};
 
+	private void hideSystemUI(@NonNull final View decor_view) {
+		// Set the IMMERSIVE_STICKY flag.
+		// Set the content to appear under the system bars so that the content
+		// doesn't resize when the system bars hide and show.
+		decor_view.setSystemUiVisibility(
+				View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+						| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+						| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+						| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+						| View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+						| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	}
+
+	private void showSystemUI(@NonNull final View decor_view) {
+		decor_view.setSystemUiVisibility(0);
+	}
+
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
@@ -648,5 +432,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 		UtilsOpenGL.deleteProgram();
 		requireContext().unregisterReceiver(broadcastReceiver);
+
+		showSystemUI(requireActivity().getWindow().getDecorView());
 	}
 }
