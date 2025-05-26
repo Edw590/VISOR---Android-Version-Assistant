@@ -78,7 +78,7 @@ public final class UtilsFilesDirs {
 			e.printStackTrace();
 		}
 
-		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path + "'";
+		final String command = "rm -f" + (recursive ? "r" : "") + "'" + path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
@@ -100,7 +100,7 @@ public final class UtilsFilesDirs {
 			e.printStackTrace();
 		}
 
-		final String command = "mkdir -p '" + path + "'";
+		final String command = "mkdir -p '" + path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
@@ -128,7 +128,8 @@ public final class UtilsFilesDirs {
 			e.printStackTrace();
 		}
 
-		final String command = "mv -f '" + src_path + "' '" + dest_path + "'";
+		final String command = "mv -f '" + src_path.gPathToStringConversion() + "' '" +
+				dest_path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
@@ -150,7 +151,7 @@ public final class UtilsFilesDirs {
 			e.printStackTrace();
 		}
 
-		final String command = "ls -l '" + file_path + "'";
+		final String command = "ls -l '" + file_path.gPathToStringConversion() + "'";
 		final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(true, command);
 
 		if (cmdOutput.exit_code != 0) {
@@ -181,7 +182,7 @@ public final class UtilsFilesDirs {
 			}
 		}
 
-		final String command = "cat '" + file_path + "'";
+		final String command = "cat '" + file_path.gPathToStringConversion() + "'";
 
 		// Ignore the warning about the clone. No problem with it. This is a utility method. It won't use the object
 		// for anything other than to return it. Performance gained (imagine it's a big file...).
@@ -230,7 +231,7 @@ public final class UtilsFilesDirs {
 			bytes_data = "\\0" + UtilsSWA.bytesToOctalDATACONV(file_bytes).replace(" ", "\\0"); // 5 * file size
 		}
 
-		final String command = "echo -ne '" + bytes_data + "' > '" + file_path + "'";
+		final String command = "echo -ne '" + bytes_data + "' > '" + file_path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
@@ -257,7 +258,8 @@ public final class UtilsFilesDirs {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			// cp was added on KitKat
-			final String command = "cp -rf '" + src_path + "' '" + dest_path + "'";
+			final String command = "cp -rf '" + src_path.gPathToStringConversion() + "' '" +
+					dest_path.gPathToStringConversion() + "'";
 
 			return UtilsShell.executeShellCmd(true, command).exit_code;
 		} else {
@@ -280,7 +282,8 @@ public final class UtilsFilesDirs {
 	 * @return same as {@link UtilsShell#executeShellCmd(boolean, String)}
 	 */
 	public static int chmodMISSING_SDK_METHOD(@NonNull final GPath path, final int permissions, final boolean recursive) {
-		final String command = "chmod " + permissions + (recursive ? " -R " : " ") + "'" + path + "'";
+		final String command = "chmod " + permissions + (recursive ? " -R " : " ") + "'" +
+				path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
@@ -300,7 +303,7 @@ public final class UtilsFilesDirs {
 			e.printStackTrace();
 		}
 
-		final String command = "ls '" + path + "'";
+		final String command = "ls '" + path.gPathToStringConversion() + "'";
 
 		return UtilsShell.executeShellCmd(true, command).exit_code;
 	}
