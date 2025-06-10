@@ -117,6 +117,9 @@ public final class ApplicationClass extends Application {
 		// Load OpenCV
 		OpenCVLoader.initDebug();
 
+		// Load native-lib
+		System.loadLibrary("native-lib");
+
 		infinity_thread.start();
 
 		UtilsSWA.initializeCommsChannels();

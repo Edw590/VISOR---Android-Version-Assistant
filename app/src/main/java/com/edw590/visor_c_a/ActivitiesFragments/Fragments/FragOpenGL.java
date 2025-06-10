@@ -56,15 +56,16 @@ import com.edw590.visor_c_a.AugmentedReality.GyroRotationCorrection;
 import com.edw590.visor_c_a.AugmentedReality.NotificationView;
 import com.edw590.visor_c_a.AugmentedReality.OpenCV.OpenCV;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Parallelepiped;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
+import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 
 import org.opencv.android.JavaCameraView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -103,10 +104,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				new Vector(0.0f, 0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
 		));*/
-		/*objects.add(new Parallelepiped(
+		objects.add(new Parallelepiped(
 				new Vector(0.0f, 0.0f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
-		));*/
+		));
 		/*objects.add(new Parallelepiped(
 				new Vector(0.3f, -0.5f, -3.0f),
 				1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
@@ -173,8 +174,8 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		camera_view.setCvCameraViewListener(open_cv);
 		camera_view.enableView();
 		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		//camera_view.setZOrderOnTop(true);
-		camera_view.setMaxFrameSize(1000000000, 1000000000);
+		camera_view.setZOrderOnTop(true);
+		camera_view.setMaxFrameSize(320, 240);
 		frame_layout.addView(camera_view);
 
 		// Initialize GLSurfaceView and add to the FrameLayout
@@ -209,7 +210,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		// /////////////////////////////////////////////////////////////////////
 
-		prepareSensors();
+		//prepareSensors();
 
 		Matrix.setIdentityM(view_matrix, 0);
 
@@ -227,7 +228,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				"text/html",
 				"utf-8"
 		);
-		frame_layout.addView(web_view_youtube);
+		//frame_layout.addView(web_view_youtube);
 
 		try {
 			requireContext().registerReceiver(broadcastReceiver,
@@ -282,7 +283,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		UtilsOpenGL.checkGLErrors("glClear");
 
-		UtilsOpenGL.setViewMatrix(view_matrix);
+		/*UtilsOpenGL.setViewMatrix(view_matrix);
 
 		if (System.currentTimeMillis() - last_mov_check > 33) { // 33 ms
 			if (gyro_rotation_correction.getAccelDifference() > 0.75f) {
@@ -299,7 +300,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		}
 		if (objects.isEmpty()) {
 			objects.addAll(Arrays.asList(open_cv.getDetectedRectangles()));
-		}
+		}*/
 
 		for (final Object object : objects) {
 			if (object instanceof Rectangle) {

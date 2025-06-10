@@ -74,6 +74,14 @@ android {
 		multiDexEnabled true // Enable only if really necessary - slower builds, sometimes:
 		// https://developer.android.com/studio/build/multidex#dev-build
 		signingConfig signingConfigs.signingConfig
+
+		externalNativeBuild {
+			cmake {
+				cppFlags "-Os -std=c++11 -fopenmp"
+				cFlags "-Os"
+				arguments "-DANDROID_STL=gnustl_static"
+			}
+		}
 	}
 
 	buildTypes {
@@ -114,6 +122,14 @@ android {
 		checkReleaseBuilds true
 		explainIssues true
 	}
+
+	// Last version of the NDK with gnustl_static support (needed by OpenCV 3.4.16).
+	ndkVersion "17.2.4988734"
+	externalNativeBuild {
+		cmake {
+			path "CMakeLists.txt"
+		}
+	}
 }
 
 dependencies {
@@ -151,6 +167,7 @@ dependencies {
 	implementation files("libs/jutf7-1.0.0.jar")
 	implementation files("libs/pocketsphinx-android-5prealpha-release.aar")
 	implementation files("libs/opencv-3.4.16.aar")
+	implementation files("libs/commons-math3-3.6.1.jar")
 }
 
 ant.importBuild 'assets.xml'

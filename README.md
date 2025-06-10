@@ -125,8 +125,8 @@ To know what you can do, have a look on the Available commands view on the app. 
 ### - To compile the app
 - I'm not sure if other IDEs other than Android Studio can be used to compile an Android app, but that's the one I used. So if you want, use it too.
 - Also, to be able to compile this app, you'll need hidden/internal APIs available on Android Studio, or it will throw errors. I decided to compile this app with those libraries since they allow some interesting and useful things to be used here. Have a look here to download and install those libraries: https://github.com/anggrayudi/android-hidden-api and/or https://github.com/Reginer/aosp-android-jar.
-- Another thing needed to run the app without signing it with my certificate is to go to UtilsMainSrvc and comment the signature/app corruption check on startMainService().
-- I have may also private constants and stuff used on the app (for example MAC addresses, or might have phone numbers), which are in files excluded from Git. Those things must be replaced when compiling the app. Hopefully the variable/constant name should help. If it does not, just tell me and I'll explain it (and improve for next time).
+- For the new Augmented Reality part of VISOR, 2 other things you need are the [OpenCV 3.4.16 Android SDK](https://github.com/opencv/opencv/releases/download/3.4.16/opencv-3.4.16-android-sdk.zip) extracted to the project folder and also NDK v17.2.4988734 downloaded on Android Studio.
+- - You'll probably get a compilation error on line 598 of OpenCV's base.hpp file - just remove the "std::" part from the line and try to compile again. It should work.
 
 Now a small explanation of the app structure:
 - All modules are inside the Modules folder. Each module has a folder of its own and all directly related things to it should be on that folder. All modules must also be registered in the ModulesList.java file.
@@ -140,7 +140,7 @@ Now a small explanation of the app structure:
 Have a look on the "TODO.md" file (note: it's not always updated. But it has some things there).
 
 ### - Project status
-Ongoing, but possibly slowly since I'm a student, so I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
+Ongoing, but possibly slowly. I may not have that much time to work on this (even though I'd love to have more time) - except on Holidays xD.
 
 ### - License
 This project is licensed under Apache 2.0 License - http://www.apache.org/licenses/LICENSE-2.0.
