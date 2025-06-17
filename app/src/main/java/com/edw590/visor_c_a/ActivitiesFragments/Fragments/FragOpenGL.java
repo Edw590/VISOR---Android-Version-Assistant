@@ -258,7 +258,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		float[] projection_matrix = new float[16];
 		Matrix.perspectiveM(projection_matrix, 0, UtilsOpenGL.setFovY(60), UtilsOpenGL.setAspectRatio(width, height),
-				0.1f, 10.0f);
+				0.1f, 100.0f);
 		UtilsOpenGL.setProjectionMatrix(projection_matrix);
 	}
 

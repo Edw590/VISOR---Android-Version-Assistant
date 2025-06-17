@@ -21,7 +21,7 @@
 
 package com.edw590.visor_c_a.AugmentedReality.OpenCV;
 
-import android.util.Log;
+import android.opengl.Matrix;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,8 +29,6 @@ import androidx.annotation.Nullable;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
 
@@ -56,26 +54,6 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 		rgba_frame.release();
 	}
 
-	private static void debugMatrix(float[] m) {
-		// Column-major indices
-		float[] x = { m[0],  m[1],  m[2]  };
-		float[] y = { m[4],  m[5],  m[6]  };
-		float[] z = { m[8],  m[9],  m[10] };
-
-		float lx = length(x), ly = length(y), lz = length(z);
-		float xy = dot(x,y),   yz = dot(y,z),   zx = dot(z,x);
-
-		Log.i("MDBG", String.format("lens: %.3f %.3f %.3f   dots: %.3f %.3f %.3f",
-				lx, ly, lz, xy, yz, zx));
-	}
-
-	private static float length(float[] v){
-		return (float)Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
-	}
-	private static float dot(float[] a,float[] b){
-		return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
-	}
-
 	private native float[] CVTest(long matAddr);
 
 	@Override
@@ -86,72 +64,28 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 		//rectangle_detector.detect(rgba_frame);
 		//hand_detector.detect(rgba_frame);
 
-		float[] pose_matrix = CVTest(rgba_frame.getNativeObjAddr());
+		float[] pose_matrix_cv = CVTest(rgba_frame.getNativeObjAddr());
 
-		if (pose_matrix.length != 0) {
-			double[][] pose = new double[4][4];
-			System.out.println("one posematrix is below========");
-			for (int i = 0; i < pose_matrix.length / 4; i++) {
-				for (int j = 0; j < 4; j++) {
-
-					if (j == 3 && i != 3) {
-						pose[i][j] = pose_matrix[i * 4 + j] * 20; // Scale translation
-					} else {
-						pose[i][j] = pose_matrix[i * 4 + j];
-					}
-					System.out.print(pose[i][j] + "\t ");
-				}
-
-				System.out.print("\n");
+		if (pose_matrix_cv.length != 0) {
+			// 3. Adjust for coordinate system differences (flip Y and Z axes)
+			for (int i = 0; i < 4; i++) {
+				pose_matrix_cv[4 * 1 + i] *= -1; // Flip Y
+				pose_matrix_cv[4 * 2 + i] *= -1; // Flip Z
 			}
 
-			double[][] R = new double[3][3];
-			double[] T = new double[3];
+			// Must invert or the cube will stop showing eventually for some reason
+			float[] tmp1 = new float[16];
+			Matrix.invertM(tmp1, 0, pose_matrix_cv, 0);
 
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					R[i][j] = pose[i][j];
-				}
-			}
-			for (int i = 0; i < 3; i++) {
-				T[i] = pose[i][3];
-			}
-			RealMatrix rotation = new Array2DRowRealMatrix(R);
-			RealMatrix translation = new Array2DRowRealMatrix(T);
+			float[] pose_matrix_gl = new float[16];
+			Matrix.transposeM(pose_matrix_gl, 0, tmp1, 0);
 
-			final double d[][]={
-					{1,0,0},
-					{0,-1,0},
-					{0,0,-1}
-			};
-			RealMatrix rx=new Array2DRowRealMatrix(d);
-			rotation=rx.multiply(rotation);
-			translation=rx.multiply(translation);
-			double R1[][]= rotation.getData();
-			double T1[][]=translation.getData();
+			final float SCALE = 25.0f;
+			pose_matrix_gl[12] *= -SCALE; // tx
+			pose_matrix_gl[13] *= SCALE; // ty
+			pose_matrix_gl[14] *= SCALE; // tz
 
-			float[] model_view_matrix = new float[16];
-			model_view_matrix[0]=(float) R1[0][0];
-			model_view_matrix[1]=(float) R1[1][0];
-			model_view_matrix[2]=(float) R1[2][0];
-			model_view_matrix[3]=0.0f;
-
-			model_view_matrix[4]=(float) R1[0][1];
-			model_view_matrix[5]=(float) R1[1][1];
-			model_view_matrix[6]=(float) R1[2][1];
-			model_view_matrix[7]=0.0f;
-
-			model_view_matrix[8]=(float) R1[0][2];
-			model_view_matrix[9]=(float) R1[1][2];
-			model_view_matrix[10]=(float) R1[2][2];
-			model_view_matrix[11]=0.0f;
-
-			model_view_matrix[12]=(float) T1[0][0];
-			model_view_matrix[13]=(float) T1[1][0];
-			model_view_matrix[14]=(float) T1[2][0];
-			model_view_matrix[15]=1.0f;
-
-			UtilsOpenGL.setViewMatrix(model_view_matrix);
+			UtilsOpenGL.setViewMatrix(pose_matrix_gl);
 		}
 
 		return rgba_frame;

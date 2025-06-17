@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Install manual debug APK" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="adb install -r app/build/outputs/apk/debug/app-debug.apk" />
+  <configuration default="false" name="Install manual debug APK x86" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="$env:ABI_FILTERS=&quot;x86&quot; ; $env:JAVA_HOME=&quot;C:\Users\Edw590\AppData\Local\Programs\Android Studio\jbr&quot; ; ./gradlew assembleDebug &amp;&amp; adb install -r app/build/outputs/apk/debug/app-debug.apk" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
