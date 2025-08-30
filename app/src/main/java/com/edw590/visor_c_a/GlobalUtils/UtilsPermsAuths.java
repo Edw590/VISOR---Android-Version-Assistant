@@ -381,7 +381,8 @@ public final class UtilsPermsAuths {
 	 * <p>Forces enabling Device Administrator authorization to the app.</p>
 	 */
 	public static void forceDeviceAdmin() {
-		final boolean force_all_perms_auths = (boolean) UtilsRegistry.getData(RegistryKeys.K_PERMS_AUTHS_FORCE_ALL, true);
+		// Disabled until the PLS is ready
+		final boolean force_all_perms_auths = false;//UtilsRegistry.getData(RegistryKeys.K_PERMS_AUTHS_FORCE_ALL, true);
 		if (!force_all_perms_auths) {
 			return;
 		}
