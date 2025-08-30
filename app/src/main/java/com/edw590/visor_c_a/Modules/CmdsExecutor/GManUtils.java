@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import GMan.GMan;
+import UtilsSWA.UtilsSWA;
 
 class GManUtils {
 
@@ -44,8 +45,10 @@ class GManUtils {
 
 			boolean add_task = false;
 			if (task.getDate_s() == 0) {
+				// If the task has no date, we add it to the list (it's to be done every day)
 				add_task = true;
-			} else if (task.getDate_s() == -1) {
+			} else {
+				// Else we check the date
 				Calendar task_calendar = Calendar.getInstance();
 				task_calendar.setTimeInMillis(task.getDate_s() * 1000);
 
@@ -97,53 +100,82 @@ class GManUtils {
 				continue;
 			}
 
-			Calendar event_calendar = Calendar.getInstance();
-			event_calendar.setTimeInMillis(event.getStart_time_s() * 1000);
+			long curr_s = System.currentTimeMillis() / 1000;
+
+			long event_end_time_s = event.getStart_time_s() + event.getDuration_min() * 60;
+			if (event_end_time_s < curr_s) {
+				// Event already ended
+				continue;
+			}
+
+			long start_of_day_s = UtilsSWA.getStartOfDayS(curr_s);
+			long end_of_day_s = start_of_day_s + 86400 - 1; // 86400 seconds in a day (24*60*60)
+
+			long start_of_next_day_s = start_of_day_s + 86400;
+			long end_of_next_day_s = start_of_next_day_s + 86400 - 1;
+
+			long start_of_week_s =
+					UtilsSWA.getStartOfDayS(curr_s - (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)) * 86400;
+			long end_of_week_s = start_of_week_s + 7 * 86400 - 1;
+
+			long start_of_next_week_s = start_of_week_s + 7 * 86400;
+			long end_of_next_week_s = start_of_next_week_s + 7 * 86400 - 1;
 
 			boolean add_event = false;
-			Calendar now = Calendar.getInstance();
 			switch (cmd_variant) {
 				case CmdsList.CmdRetIds.RET_31_TODAY:
-					if (event_calendar.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+					if ((event.getStart_time_s() >= start_of_day_s && event.getStart_time_s() <= end_of_day_s) ||
+							(event_end_time_s >= start_of_day_s && event_end_time_s <= end_of_day_s) ||
+							(start_of_day_s >= event.getStart_time_s() && end_of_day_s <= event_end_time_s)) {
 						add_event = true;
 					}
 					break;
 				case CmdsList.CmdRetIds.RET_31_TOMORROW:
-					now.add(Calendar.DAY_OF_YEAR, 1);
-					if (event_calendar.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+					if ((event.getStart_time_s() >= start_of_next_day_s && event.getStart_time_s() <= end_of_next_day_s) ||
+							(event_end_time_s >= start_of_next_day_s && event_end_time_s <= end_of_next_day_s) ||
+							(start_of_next_day_s >= event.getStart_time_s() && end_of_next_day_s <= event_end_time_s)) {
 						add_event = true;
 					}
 					break;
 				case CmdsList.CmdRetIds.RET_31_THIS_WEEK:
-					if (event_calendar.get(Calendar.WEEK_OF_YEAR) == now.get(Calendar.WEEK_OF_YEAR)) {
+					if ((event.getStart_time_s() >= start_of_week_s && event.getStart_time_s() <= end_of_week_s) ||
+							(event_end_time_s >= start_of_week_s && event_end_time_s <= end_of_week_s) ||
+							(start_of_week_s >= event.getStart_time_s() && end_of_week_s <= event_end_time_s)) {
 						add_event = true;
 					}
 					break;
 				case CmdsList.CmdRetIds.RET_31_NEXT_WEEK:
-					int days_until_next_monday = (8 - now.get(Calendar.DAY_OF_WEEK)) % 7;
-					if (days_until_next_monday == 0) {
-						days_until_next_monday = 7;
-					}
-					now.add(Calendar.DAY_OF_YEAR, days_until_next_monday);
-					Calendar next_monday = (Calendar) now.clone();
-					next_monday.add(Calendar.DAY_OF_YEAR, 7);
-					if (event_calendar.after(now) && event_calendar.before(next_monday)) {
+					if ((event.getStart_time_s() >= start_of_next_week_s && event.getStart_time_s() <= end_of_next_week_s) ||
+							(event_end_time_s >= start_of_next_week_s && event_end_time_s <= end_of_next_week_s) ||
+							(start_of_next_week_s >= event.getStart_time_s() && end_of_next_week_s <= event_end_time_s)) {
 						add_event = true;
 					}
 					break;
 			}
 			if (add_event) {
+				Calendar event_calendar = Calendar.getInstance();
+				event_calendar.setTimeInMillis(event.getStart_time_s() * 1000);
+
 				String event_on = "";
 				if (cmd_variant.equals(CmdsList.CmdRetIds.RET_31_THIS_WEEK) ||
 						cmd_variant.equals(CmdsList.CmdRetIds.RET_31_NEXT_WEEK)) {
 					event_on = " on " + event_calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.US);
 				}
-				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.US);
-				sdf.setTimeZone(event_calendar.getTimeZone());
-				speak += event.getSummary() +
-						event_on +
-						" at " + sdf.format(event_calendar.getTime()) +
-						" for " + getEventDuration(event.getDuration_min()) + "; ";
+
+				boolean event_began_today = event.getStart_time_s() >= start_of_day_s &&
+						event.getStart_time_s() <= end_of_day_s;
+				String event_at = "";
+				if (event_began_today) {
+					SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.US);
+					sdf.setTimeZone(event_calendar.getTimeZone());
+					event_at = "at " + sdf.format(event_calendar.getTime());
+				}
+
+				long curr_duration = event.getStart_time_s()/60 + event.getDuration_min() -
+						System.currentTimeMillis()/1000/60;
+
+				speak += event.getSummary() + event_on + " " + event_at + " for " +
+						UtilsSWA.getEventDuration(curr_duration) + "; ";
 			}
 		}
 
@@ -171,64 +203,5 @@ class GManUtils {
 		}
 
 		return speak;
-	}
-
-	@NonNull
-	private static String getEventDuration(final long min) {
-		if (min >= 60) {
-			if (min >= 24 * 60) {
-				if (min >= 7 * 24 * 60) {
-					long weeks = min / (7 * 24 * 60);
-					long days = (min % (7 * 24 * 60)) / (24 * 60);
-					String week_weeks = "weeks";
-					if (weeks == 1) {
-						week_weeks = "week";
-					}
-					String day_days = "days";
-					if (days == 1) {
-						day_days = "day";
-					}
-					if (days > 0) {
-						return String.format(Locale.US, "%d %s and %d %s", weeks, week_weeks, days, day_days);
-					}
-					return String.format(Locale.US, "%d %s", weeks, week_weeks);
-				}
-				long days = min / (24 * 60);
-				long hours = (min % (24 * 60)) / 60;
-				String day_days = "days";
-				if (days == 1) {
-					day_days = "day";
-				}
-				String hour_hours = "hours";
-				if (hours == 1) {
-					hour_hours = "hour";
-				}
-				if (hours > 0) {
-					return String.format(Locale.US, "%d %s and %d %s", days, day_days, hours, hour_hours);
-				}
-				return String.format(Locale.US, "%d %s", days, day_days);
-			}
-			long hours = min / 60;
-			long minutes = min % 60;
-			String hour_hours = "hours";
-			if (hours == 1) {
-				hour_hours = "hour";
-			}
-			String minute_minutes = "minutes";
-			if (minutes == 1) {
-				minute_minutes = "minute";
-			}
-			if (minutes > 0) {
-				return String.format(Locale.US, "%d %s and %d %s", hours, hour_hours, minutes, minute_minutes);
-			}
-			return String.format(Locale.US, "%d %s", hours, hour_hours);
-		}
-
-		String minute_minutes = "minutes";
-		if (min == 1) {
-			minute_minutes = "minute";
-		}
-
-		return String.format(Locale.US, "%d %s", min, minute_minutes);
 	}
 }
