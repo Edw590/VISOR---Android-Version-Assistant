@@ -26,8 +26,6 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -88,6 +86,11 @@ public final class TabHomeSettings extends Fragment {
 		editTxt_server_domain.setText(general_consts.getWebsite_domain());
 		editTxt_server_domain.setSingleLine();
 
+		AppCompatEditText editTxt_server_port = new AppCompatEditText(requireContext());
+		editTxt_server_port.setHint("External server port (empty means default of 3234)");
+		editTxt_server_port.setText(general_consts.getWebsite_port());
+		editTxt_server_port.setInputType(InputType.TYPE_CLASS_NUMBER);
+
 		AppCompatEditText editTxt_server_pw = new AppCompatEditText(requireContext());
 		editTxt_server_pw.setHint("Server password");
 		editTxt_server_pw.setText(general_consts.getWebsite_pw());
@@ -111,6 +114,7 @@ public final class TabHomeSettings extends Fragment {
 			general_consts.setVISOR_email_pw(editTxt_visor_email_pw.getText().toString());
 			general_consts.setUser_email_addr(editTxt_user_email_addr.getText().toString());
 			general_consts.setWebsite_domain(editTxt_server_domain.getText().toString());
+			general_consts.setWebsite_port(editTxt_server_port.getText().toString());
 			general_consts.setWebsite_pw(editTxt_server_pw.getText().toString());
 			general_consts.setWolframAlpha_AppID(editTxt_wolframalpha_appid.getText().toString());
 			general_consts.setPicovoice_API_key(editTxt_picovoice_api_key.getText().toString());
@@ -121,6 +125,7 @@ public final class TabHomeSettings extends Fragment {
 		linearLayout.addView(editTxt_visor_email_pw);
 		linearLayout.addView(editTxt_user_email_addr);
 		linearLayout.addView(editTxt_server_domain);
+		linearLayout.addView(editTxt_server_port);
 		linearLayout.addView(editTxt_server_pw);
 		linearLayout.addView(editTxt_wolframalpha_appid);
 		linearLayout.addView(editTxt_picovoice_api_key);
