@@ -80,7 +80,7 @@ public final class TabRSSAddFeed extends Fragment {
 		btn_add.setText("Add");
 		btn_add.setOnClickListener(v -> {
 			SettingsSync.addFeedRSS(check_enabled.isChecked(), editTxt_name.getText().toString(),
-					editTxt_type.getText().toString(), editTxt_url.getText().toString(),
+					editTxt_url.getText().toString(), editTxt_type.getText().toString(),
 					editTxt_custom_msg_subject.getText().toString());
 
 			Utils.reloadFragment(this);

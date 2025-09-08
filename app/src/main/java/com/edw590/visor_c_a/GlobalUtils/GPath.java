@@ -69,11 +69,11 @@ public final class GPath {
 
 	@NonNull
 	public GPath add2(final boolean describes_dir, @NonNull final Object... sub_paths) {
-		final Object[] new_args = new Object[sub_paths.length + 1];
 		if (sub_paths.length == 0) {
 			return this;
 		}
 
+		final Object[] new_args = new Object[sub_paths.length + 1];
 		System.arraycopy(sub_paths, 0, new_args, 1, sub_paths.length);
 		new_args[0] = gPathToStringConversion();
 		path(describes_dir, new_args);
