@@ -138,7 +138,7 @@ public final class MainSrvc extends Service {
 				Thread.sleep(ModulesManager.CHECK_INTERVAL/2);
 			} catch (final InterruptedException ignored) {
 				// Terminate the app forcefully for the system to restart it.
-				UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+				UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 			}
 		}
 	});

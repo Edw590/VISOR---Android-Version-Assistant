@@ -35,6 +35,7 @@ import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsExecutor;
 import com.edw590.visor_c_a.Modules.ModulesManager.ModulesManager;
 import com.edw590.visor_c_a.Modules.ProtectedLockScr.ProtectedLockScrSrv;
+import com.edw590.visor_c_a.Modules.ScreenRecorder.ScreenRecorder;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.CommandsRecognition;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.SpeechRecognitionCtrl;
@@ -111,6 +112,7 @@ public final class ModulesList {
 			new ElementsObj(PhoneCallsProcessor.class, "Phone Calls Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(SmsMsgsProcessor.class, "SMS Messages Processor", TYPE1_INSTANCE, false),
 			new ElementsObj(AudioRecorder.class, "Audio Recorder", TYPE1_INSTANCE, true),
+			new ElementsObj(ScreenRecorder.class, "Screen Recorder", TYPE1_INSTANCE, true),
 			new ElementsObj(CameraManagement.class, "Camera Manager", TYPE1_INSTANCE, true),
 
 			new ElementsObj(ProtectedLockScrSrv.class, "Protected Lock Screen", TYPE1_SERVICE_SEP_CHK_ONLY, true),
@@ -378,7 +380,7 @@ public final class ModulesList {
 			case (ModulesList.TYPE1_SERVICE_SEP): {
 				if (ModulesList.isElementRunning(element_index)) {
 					final Class<?> element_class = (Class<?>) getElementValue(element_index, ELEMENT_CLASS);
-					UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(element_class));
+					UtilsProcesses.killPID(UtilsProcesses.getRunningServicePID(element_class));
 				}
 
 				break;

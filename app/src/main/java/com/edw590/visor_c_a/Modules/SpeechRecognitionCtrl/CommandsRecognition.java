@@ -203,7 +203,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		}
 		if (stop_now) {
 			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 
 			return START_NOT_STICKY;
 		}
@@ -238,7 +238,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 			stopListening(true);
 			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
 		return START_NOT_STICKY;
@@ -421,7 +421,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 			stopListening(true);
 			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
 		@Override
@@ -487,7 +487,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 			stopListening(true);
 			stopSelf();
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
 		@Override
@@ -550,7 +550,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					// Also don't check the time if the method has no wait time (MAX_VALUE).
 					stopListening(false);
 					stopSelf();
-					UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+					UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 				}
 				try {
 					Thread.sleep(1_000);

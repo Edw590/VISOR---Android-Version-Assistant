@@ -64,6 +64,8 @@
 	<!-- Privileged apps'+ permissions (only by having the app installed in /system/priv-app, or below KitKat, in
 	/system/app) -->
 	<!-- For some of these permissions to show, hidden/internal APIs must be used to compile the app -->
+	<uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"
+		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
 		tools:ignore="ProtectedPermissions" />
 	<uses-permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
@@ -335,6 +337,14 @@
 			<!-- resizeableActivity false so the user can't split the screen while on the PLS (would be a security flaw) -->
 
 		<profileable android:shell="true"/>
+		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActScrCapturePerm"
+			android:noHistory="true"
+			android:permission=""
+			android:exported="false"
+			android:directBootAware="true"
+			android:autoRemoveFromRecents="true"
+			android:excludeFromRecents="true">
+		</activity>
 
 		<!-- Persistence only applies to services in the default application process. If any <service> tag includes an
 		 "android:process" attribute that causes it to run in a separate process, that process will NOT be persistent. -->

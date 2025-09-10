@@ -144,7 +144,7 @@ public final class UtilsSpeechRecognizers {
 	 * <p>Stop the commands speech recognizer synchronously.</p>
 	 */
 	static void stopCommandsRecognizer() {
-		UtilsProcesses.terminatePID(UtilsProcesses.getRunningServicePID(CommandsRecognition.class));
+		UtilsProcesses.killPID(UtilsProcesses.getRunningServicePID(CommandsRecognition.class));
 		UtilsNotifications.cancelNotification(GL_CONSTS.NOTIF_ID_COMMANDS_RECOG_FOREGROUND);
 	}
 

@@ -77,6 +77,10 @@ public final class RegistryKeys {
 	/** Type: boolean. */
 	public static final String K_IS_RECORDING_AUDIO_INTERNALLY = "IS_RECORDING_AUDIO_INTERNALLY";
 
+	// Screen Recorder
+	/** Type: boolean. */
+	public static final String K_IS_RECORDING_SCREEN_INTERNALLY = "IS_RECORDING_SCREEN_INTERNALLY";
+
 	// Flashlight
 	/** Type: boolean. */
 	public static final String K_MAIN_FLASHLIGHT_ENABLED = "MAIN_FLASHLIGHT_ENABLED";
@@ -157,6 +161,10 @@ public final class RegistryKeys {
 		// Audio Recorder
 		UtilsSWA.registerValueREGISTRY(K_IS_RECORDING_AUDIO_INTERNALLY, "Audio Recorder - Recording internally",
 				"Is VISOR recording audio internally?", UtilsSWA.TYPE_BOOL, "", true);
+
+		// Screen Recorder
+		UtilsSWA.registerValueREGISTRY(K_IS_RECORDING_SCREEN_INTERNALLY, "Screen Recorder - Recording internally",
+				"Is VISOR recording the screen internally?", UtilsSWA.TYPE_BOOL, "", true);
 
 		// Flashlight
 		UtilsSWA.registerValueREGISTRY(K_MAIN_FLASHLIGHT_ENABLED, "Camera - Main flashlight enabled (Android 6+)",

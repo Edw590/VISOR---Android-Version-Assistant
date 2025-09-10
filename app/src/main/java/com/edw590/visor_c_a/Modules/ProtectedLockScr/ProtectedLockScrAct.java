@@ -143,7 +143,7 @@ public final class ProtectedLockScrAct extends AppCompatActivity {
 				// restarting for some reason (on miTab Advance and BV9500), so now I'm just killing the PLS PID, but
 				// only after 500ms of calling stopService() (could take a bit for the system to process the call) so
 				// that Android doesn't restart the PLS service.
-				UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+				UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 			}
 		});
 	}

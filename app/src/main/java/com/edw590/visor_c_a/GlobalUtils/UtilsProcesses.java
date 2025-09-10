@@ -60,12 +60,12 @@ public final class UtilsProcesses {
     }
 
     /**
-     * <p>Terminates a PID.</p>
+     * <p>Kills a PID (SIGKILL).</p>
      * <p>If -1 is provided, nothing is done.</p>
      *
      * @param pid PID to terminate
      */
-    public static void terminatePID(final int pid) {
+    public static void killPID(final int pid) {
         if (pid != -1) {
             android.os.Process.killProcess(pid);
         }

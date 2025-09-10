@@ -51,6 +51,8 @@ import com.edw590.visor_c_a.Modules.CameraManager.CameraManagement;
 import com.edw590.visor_c_a.Modules.CameraManager.UtilsCameraManagerBC;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.UtilsCmdsList;
+import com.edw590.visor_c_a.Modules.ScreenRecorder.ScreenRecorder;
+import com.edw590.visor_c_a.Modules.ScreenRecorder.UtilsScreenRecorderBC;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
@@ -844,6 +846,43 @@ public final class CmdsExecutor implements IModuleInst {
 
 							break;
 						}
+						case (CmdsList.CmdRetIds.RET_16_SCREEN_1):
+						case (CmdsList.CmdRetIds.RET_16_SCREEN_2): {
+							if (!only_returning) {
+								if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+									String speak = "Screen recording is not available below Android 5.0 Lollipop.";
+									UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2,
+											GPTComm.SESSION_TYPE_TEMP, false, null);
+
+									continue;
+								}
+
+								if (!(boolean) ModulesList.getElementValue(
+										ModulesList.getElementIndex(ScreenRecorder.class), ModulesList.ELEMENT_SUPPORTED)) {
+									final String speak = "Screen recording is not supported on this device through " +
+											"either hardware or application permissions limitations.";
+									UtilsSpeech2BC.speak(speak, speech_priority, speech_mode2,
+											GPTComm.SESSION_TYPE_TEMP, false, null);
+
+									continue;
+								}
+							}
+
+							// Can only start recording when the commands speech recognition has finished. Not before,
+							// or other things the user might want to say will be ignored (not cool).
+							if (!partial_results) {
+								some_cmd_detected = true;
+								if (only_returning) continue;
+
+								ask_anything_else = false;
+
+								UtilsScreenRecorderBC.recordScreen(true, false);
+
+								previous_cmd = new Command(command, "record audio", null);
+							}
+
+							break;
+						}
 					}
 
 					break;
@@ -917,6 +956,7 @@ public final class CmdsExecutor implements IModuleInst {
 
 					boolean stop_audio = false;
 					boolean stop_video = false;
+					boolean stop_screen = false;
 
 					switch (cmd_variant) {
 						case CmdsList.CmdRetIds.RET_20_AUDIO: {
@@ -929,9 +969,15 @@ public final class CmdsExecutor implements IModuleInst {
 
 							break;
 						}
+						case CmdsList.CmdRetIds.RET_20_SCREEN: {
+							stop_screen = true;
+
+							break;
+						}
 						case CmdsList.CmdRetIds.RET_20_ANY: {
 							stop_audio = true;
 							stop_video = true;
+							stop_screen = true;
 
 							break;
 						}
@@ -945,6 +991,9 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 					if (stop_video) {
 						// todo
+					}
+					if (stop_screen) {
+						UtilsScreenRecorderBC.recordScreen(false, true);
 					}
 
 					previous_cmd = new Command(command, "stop recording media", null);

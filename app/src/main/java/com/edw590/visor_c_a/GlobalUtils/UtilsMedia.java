@@ -42,6 +42,7 @@ public final class UtilsMedia {
 	public static final int PHOTO = 1;
 	public static final int VIDEO = 2;
 	public static final int SCREENSHOT = 3;
+	public static final int SCREENREC = 4;
 	/**
 	 * <p>Returns a {@link File} for the specified media type.</p>
 	 * <br>
@@ -53,6 +54,7 @@ public final class UtilsMedia {
 	 * <p>- {@link #PHOTO} --> for {@code media_type}: photographs</p>
 	 * <p>- {@link #VIDEO} --> for {@code media_type}: video recordings</p>
 	 * <p>- {@link #SCREENSHOT} --> for {@code media_type}: screenshots</p>
+	 * <p>- {@link #SCREENREC} --> for {@code media_type}: screen recordings</p>
 	 * <p><u>---CONSTANTS---</u></p>
 	 *
 	 * @param media_type one of the constants
@@ -79,6 +81,10 @@ public final class UtilsMedia {
 			}
 			case (SCREENSHOT): {
 				file_path.add2(false, "Screenshots", "SCR_" + time_stamp + ".jpg");
+				break;
+			}
+			case (SCREENREC): {
+				file_path.add2(false, "Screen recordings", "SCR_" + time_stamp + ".mp4");
 				break;
 			}
 		}

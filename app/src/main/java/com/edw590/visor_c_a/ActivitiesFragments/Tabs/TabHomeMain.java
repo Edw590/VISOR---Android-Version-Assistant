@@ -22,9 +22,12 @@
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,6 +42,7 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.R;
@@ -52,6 +56,8 @@ import UtilsSWA.UtilsSWA;
  * create an instance of this fragment.
  */
 public final class TabHomeMain extends Fragment {
+
+	private static final int REQUEST_CODE = 1234;
 
 	@Nullable
 	@Override
@@ -116,6 +122,13 @@ public final class TabHomeMain extends Fragment {
 			// Request all missing authorizations
 			final int auths_left = UtilsPermsAuths.checkRequestAuths(UtilsPermsAuths.ALSO_REQUEST);
 			UtilsPermsAuths.warnAuthorizations(auths_left, true);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				// Request screen capture permission
+				MediaProjectionManager media_projection_manager = (MediaProjectionManager) UtilsContext.getContext()
+						.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+				startActivityForResult(media_projection_manager.createScreenCaptureIntent(), REQUEST_CODE);
+			}
 		});
 
 		AppCompatButton btn_device_admin = new AppCompatButton(requireContext());
@@ -129,7 +142,7 @@ public final class TabHomeMain extends Fragment {
 		AppCompatButton btn_force_stop = new AppCompatButton(requireContext());
 		btn_force_stop.setText("Terminate the app");
 		btn_force_stop.setOnClickListener(v -> {
-			UtilsProcesses.terminatePID(UtilsProcesses.getCurrentPID());
+			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		});
 
 		linearLayout.addView(txt_title);

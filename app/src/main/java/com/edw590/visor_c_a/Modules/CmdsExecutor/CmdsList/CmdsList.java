@@ -100,13 +100,16 @@ public final class CmdsList {
 		public static final String RET_15_FRONTAL = ".00002";
 
 		public static final String RET_16_AUDIO_1 = ".00001";
-		public static final String RET_16_AUDIO_2 = ".00003";
+		public static final String RET_16_AUDIO_2 = ".00004";
 		public static final String RET_16_VIDEO_1 = ".00002";
-		public static final String RET_16_VIDEO_2 = ".00004";
+		public static final String RET_16_VIDEO_2 = ".00005";
+		public static final String RET_16_SCREEN_1 = ".00003";
+		public static final String RET_16_SCREEN_2 = ".00006";
 
 		public static final String RET_20_ANY = ".00001";
 		public static final String RET_20_AUDIO = ".00002";
 		public static final String RET_20_VIDEO = ".00003";
+		public static final String RET_20_SCREEN = ".00004";
 
 		public static final String RET_21_PLAY = ".00001";
 		public static final String RET_21_PAUSE = ".00002";
@@ -212,14 +215,14 @@ public final class CmdsList {
 			{CmdIds.CMD_TOGGLE_AIRPLANE_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "airplane mode"},                                                            // 11
 			{CmdIds.CMD_ASK_BATTERY_PERCENT, ACD.CMDi_TYPE_ASK, "", "", "battery percentage/status/level/levels"},                                          // 12
 			{CmdIds.CMD_POWER_SHUT_DOWN, ACD.CMDi_TYPE_SHUT_DOWN, "", "", "device/phone"},                                                                  // 13
-			{CmdIds.CMD_POWER_REBOOT, ACD.CMDi_TYPE_REBOOT, "fast", "fast|"+ACD.ANY_MAIN_WORD+" -fast", "reboot/restart device/phone|device/phone|device/phone recovery|device/phone safe mode|device/phone bootloader"},  // 14
+			{CmdIds.CMD_POWER_REBOOT, ACD.CMDi_TYPE_REBOOT, "fast", "fast|"+ACD.ANY_MAIN_WORD+" -fast", "reboot/restart device/phone|device/phone|device/phone recovery|device/phone safe mode|device/phone bootloader"}, // 14
 			{CmdIds.CMD_TAKE_PHOTO, ACD.CMDi_TYPE_NONE, "take", "", "picture/photo|frontal picture/photo"},                                                 // 15
-			{CmdIds.CMD_RECORD_MEDIA, ACD.CMDi_TYPE_START, "record", "record|record|"+ACD.ANY_MAIN_WORD+" -record", "audio/sound|video/camera|recording audio/sound|recording video/camera"},                              // 16
+			{CmdIds.CMD_RECORD_MEDIA, ACD.CMDi_TYPE_START, "record", "record|record|record|"+ACD.ANY_MAIN_WORD+" -record", "audio/sound|video/camera|screen/display|recording audio/sound|recording video/camera|recording screen/display"}, // 16
 			{CmdIds.CMD_SAY_AGAIN, ACD.CMDi_TYPE_REPEAT_SPEECH, "", "", "again|say|said"},                                                                  // 17
 			// 18 is a dynamic command
 			{CmdIds.CMD_TOGGLE_POWER_SAVER_MODE, ACD.CMDi_TYPE_TURN_ONFF, "", "", "power/battery saver"},                                                   // 19
-			{CmdIds.CMD_STOP_RECORD_MEDIA, ACD.CMDi_TYPE_STOP, "", "", "recording/record|recording/record audio/sound"},                                    // 20
-			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"},          // 21
+			{CmdIds.CMD_STOP_RECORD_MEDIA, ACD.CMDi_TYPE_STOP, "", "", "recording/record|recording/record audio/sound|recording/record video/camera|recording/record screen/display"}, // 20
+			{CmdIds.CMD_CONTROL_MEDIA, ACD.CMDi_TYPE_NONE, "play continue resume pause stop next previous", "play continue resume|pause|stop|next|previous", "media/song/songs/music/audio/musics/video/videos"}, // 21
 			{CmdIds.CMD_STOP_LISTENING, ACD.CMDi_TYPE_STOP, "", "", "listening"},                                                                           // 24
 			{CmdIds.CMD_START_LISTENING, ACD.CMDi_TYPE_START, "", "", "listening"},                                                                         // 25
 			{CmdIds.CMD_TELL_WEATHER, ACD.CMDi_TYPE_ASK, "", "", "weather"},                                                                                // 26
