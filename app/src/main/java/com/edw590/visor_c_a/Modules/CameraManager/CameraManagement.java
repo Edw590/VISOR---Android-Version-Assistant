@@ -152,7 +152,11 @@ public final class CameraManagement implements IModuleInst {
 			assert camera_new != null; // Module supported
 
 			try {
-				main_camera_id = camera_new.getCameraIdList()[0];
+				String[] cameras_ids = camera_new.getCameraIdList();
+				if (cameras_ids.length > 0) {
+					// Already happened on the Watch emulator that the list was empty but the service exists...
+					main_camera_id = cameras_ids[0];
+				}
 			} catch (final AndroidException ignored) {
 			}
 		}
