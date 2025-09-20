@@ -26,7 +26,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,9 +35,6 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
 import com.edw590.visor_c_a.R;
 
-/**
- * <p>Fragment that shows the status of each module of the assistant.</p>
- */
 public final class TabCommunicatorCmdsList extends Fragment {
 
 	@Nullable

@@ -40,9 +40,6 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.R;
 
-/**
- * <p>Fragment that shows the status of each module of the assistant.</p>
- */
 public final class TabModManagerModsStatus extends Fragment {
 
 	View current_view = null;

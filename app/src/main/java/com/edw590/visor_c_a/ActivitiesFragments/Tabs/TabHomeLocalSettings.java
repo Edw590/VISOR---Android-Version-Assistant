@@ -38,11 +38,6 @@ import com.edw590.visor_c_a.R;
 
 import SettingsSync.SettingsSync;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TabHomeLocalSettings#newInstance} factory method to
- * create an instance of this fragment.
- */
 public final class TabHomeLocalSettings extends Fragment {
 
 	@Nullable

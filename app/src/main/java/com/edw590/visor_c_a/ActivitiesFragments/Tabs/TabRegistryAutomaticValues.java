@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,9 +38,6 @@ import com.edw590.visor_c_a.R;
 
 import UtilsSWA.UtilsSWA;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabRegistryAutomaticValues extends Fragment {
 
 	@Nullable

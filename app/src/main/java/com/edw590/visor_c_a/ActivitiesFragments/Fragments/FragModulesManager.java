@@ -37,11 +37,6 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragModulesManager#newInstance} factory method to
- * create an instance of this fragment.
- */
 public final class FragModulesManager extends Fragment {
 
 	@Nullable

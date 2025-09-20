@@ -38,9 +38,6 @@ import com.edw590.visor_c_a.R;
 
 import SettingsSync.SettingsSync;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabRSSAddFeed extends Fragment {
 
 	@Nullable

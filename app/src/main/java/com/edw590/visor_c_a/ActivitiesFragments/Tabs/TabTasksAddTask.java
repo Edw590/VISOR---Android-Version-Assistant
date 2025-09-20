@@ -44,9 +44,6 @@ import java.util.Locale;
 
 import SettingsSync.SettingsSync;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabTasksAddTask extends Fragment {
 
 	@Nullable

@@ -47,9 +47,6 @@ import GPTComm.GPTComm;
 import ModsFileInfo.ModsFileInfo;
 import UtilsSWA.UtilsSWA;
 
-/**
- * <p>Fragment that shows the status of each module of the assistant.</p>
- */
 public final class TabCommunicatorMain extends Fragment {
 
 	AppCompatTextView txt_gpt_comm_state;

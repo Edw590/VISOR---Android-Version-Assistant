@@ -37,9 +37,6 @@ import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.R;
 
-/**
- * <p>The main fragment to be used for development purposes.</p>
- */
 public final class TabSpeechMain extends Fragment {
 
 	@Nullable

@@ -38,9 +38,6 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class FragRSSFeedNotifier extends Fragment {
 
 	@Nullable

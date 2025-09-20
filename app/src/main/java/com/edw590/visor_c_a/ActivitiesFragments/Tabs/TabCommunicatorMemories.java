@@ -39,9 +39,6 @@ import com.edw590.visor_c_a.R;
 import GPTComm.GPTComm;
 import UtilsSWA.UtilsSWA;
 
-/**
- * <p>Fragment that shows the status of each module of the assistant.</p>
- */
 public final class TabCommunicatorMemories extends Fragment {
 
 	@Nullable

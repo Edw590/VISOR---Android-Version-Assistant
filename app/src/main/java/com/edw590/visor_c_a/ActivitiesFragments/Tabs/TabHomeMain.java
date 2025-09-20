@@ -50,11 +50,6 @@ import com.edw590.visor_c_a.R;
 import SettingsSync.SettingsSync;
 import UtilsSWA.UtilsSWA;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TabHomeMain#newInstance} factory method to
- * create an instance of this fragment.
- */
 public final class TabHomeMain extends Fragment {
 
 	private static final int REQUEST_CODE = 1234;

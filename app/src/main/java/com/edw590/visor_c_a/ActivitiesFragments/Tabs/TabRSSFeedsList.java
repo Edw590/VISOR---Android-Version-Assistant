@@ -42,9 +42,6 @@ import java.util.List;
 
 import SettingsSync.SettingsSync;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabRSSFeedsList extends Fragment {
 
 	@Nullable

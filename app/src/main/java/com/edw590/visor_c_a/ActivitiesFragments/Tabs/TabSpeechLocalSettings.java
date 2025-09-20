@@ -35,9 +35,6 @@ import androidx.fragment.app.Fragment;
 import com.edw590.visor_c_a.R;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabSpeechLocalSettings extends Fragment {
 
 	@Nullable

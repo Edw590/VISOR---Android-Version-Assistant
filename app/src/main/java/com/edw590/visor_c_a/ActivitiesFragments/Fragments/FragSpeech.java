@@ -38,9 +38,6 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.R;
 import com.google.android.material.tabs.TabLayout;
 
-/**
- * <p>The main fragment to be used for development purposes.</p>
- */
 public final class FragSpeech extends Fragment {
 
 	@Nullable

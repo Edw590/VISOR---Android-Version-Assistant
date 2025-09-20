@@ -71,9 +71,6 @@ import java.util.Collection;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer {
 

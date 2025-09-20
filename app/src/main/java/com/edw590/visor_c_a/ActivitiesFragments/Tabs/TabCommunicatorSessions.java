@@ -49,10 +49,6 @@ import java.util.List;
 import GPTComm.GPTComm;
 import UtilsSWA.UtilsSWA;
 
-
-/**
- * <p>Fragment that shows the list of the Values Storage values.</p>
- */
 public final class TabCommunicatorSessions extends Fragment {
 
 	final class SessionInfo {

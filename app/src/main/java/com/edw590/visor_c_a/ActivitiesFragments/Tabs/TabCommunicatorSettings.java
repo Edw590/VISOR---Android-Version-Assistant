@@ -47,11 +47,6 @@ import java.util.List;
 import GPTComm.GPTComm;
 import SettingsSync.SettingsSync;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TabCommunicatorSettings#newInstance} factory method to
- * create an instance of this fragment.
- */
 public final class TabCommunicatorSettings extends Fragment {
 
 	@Nullable
