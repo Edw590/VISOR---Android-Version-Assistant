@@ -29,8 +29,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.edw590.visor_c_a.ActivitiesFragments.Tabs.TabModManagerModsStatus;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
@@ -39,10 +37,14 @@ import com.google.android.material.tabs.TabLayout;
 
 public final class FragModulesManager extends Fragment {
 
+	Object[][] tab_fragments = {
+			{new TabModManagerModsStatus(), "Modules status"},
+	};
+
 	@Nullable
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
-								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+							 @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		if (UtilsApp.isRunningOnWatch()) {
 			return inflater.inflate(R.layout.frag_main_watch, container, false);
 		} else {
@@ -56,25 +58,21 @@ public final class FragModulesManager extends Fragment {
 
 		TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
+		Fragment curr_frag = this;
+
 		// Add tabs with titles
-		tabLayout.addTab(tabLayout.newTab().setText("Modules status"));
+		for (final Object[] tab : tab_fragments) {
+			tabLayout.addTab(tabLayout.newTab().setText((String) tab[1]));
+		}
 
 		// Set default fragment when fragment is created
-		replaceFragment(new TabModManagerModsStatus());
+		Utils.replaceFragment(curr_frag, (Fragment) tab_fragments[0][0]);
 
 		// Set up a listener for tab selection events
 		tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
 			public void onTabSelected(final TabLayout.Tab tab) {
-				Fragment selectedFragment;
-				switch (tab.getPosition()) {
-					case 0:
-						selectedFragment = new TabModManagerModsStatus();
-						break;
-					default:
-						return;
-				}
-				replaceFragment(selectedFragment);
+				Utils.replaceFragment(curr_frag, (Fragment) tab_fragments[tab.getPosition()][0]);
 			}
 
 			@Override
@@ -85,12 +83,5 @@ public final class FragModulesManager extends Fragment {
 			public void onTabReselected(final TabLayout.Tab tab) {
 			}
 		});
-	}
-
-	void replaceFragment(final Fragment fragment) {
-		FragmentManager fragmentManager = getChildFragmentManager();
-		FragmentTransaction transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.frame_layout, fragment);
-		transaction.commit();
 	}
 }
