@@ -21,9 +21,7 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,23 +56,15 @@ public final class TabCommunicatorSessions extends Fragment {
 
 	HashMap<String, AppCompatTextView> txtViews_map = new LinkedHashMap<>(50);
 
-	private int padding_px = 0;
-
-	@Override
-	public void onStart() {
-		super.onStart();
-
-		try {
-			infinity_checker.start();
-		} catch (final IllegalThreadStateException ignored) {
-		}
-	}
+	private Thread infinity_checker = null;
 
 	@Override
 	public void onStop() {
 		super.onStop();
 
-		infinity_checker.interrupt();
+		if (infinity_checker != null) {
+			infinity_checker.interrupt();
+		}
 	}
 
 	@Nullable
@@ -88,13 +78,9 @@ public final class TabCommunicatorSessions extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
-
-		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 DP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
-				resources.getDisplayMetrics());
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
 			AppCompatTextView txtView = new AppCompatTextView(requireContext());
@@ -160,6 +146,8 @@ public final class TabCommunicatorSessions extends Fragment {
 
 		// After adding all the values, set the size of the ExpandableListView.
 		Utils.setExpandableListViewSize(expandable_list_view, true);
+
+		createStartInfinityChecker();
 	}
 
 	private List<View> createSessionView(final SessionInfo session_info) {
@@ -196,7 +184,6 @@ public final class TabCommunicatorSessions extends Fragment {
 		});
 
 		AppCompatTextView txtView_history = new AppCompatTextView(requireContext());
-		txtView_history.setPadding(padding_px, padding_px, padding_px, padding_px);
 		txtView_history.setTextIsSelectable(true);
 		txtViews_map.put(session_info.id, txtView_history);
 
@@ -226,71 +213,73 @@ public final class TabCommunicatorSessions extends Fragment {
 		}
 	}
 
-	private final Thread infinity_checker = new Thread(() -> {
-		while (true) {
-			if (UtilsSWA.isCommunicatorConnectedSERVER()) {
-				String sessions_ids_str = GPTComm.getSessionIdsList();
-				if (!sessions_ids_str.isEmpty()) {
-					String[] sessions_ids = sessions_ids_str.split("\\|");
-					for (final String session_id : sessions_ids) {
-						if (session_id.equals("temp") || session_id.equals("dumb")) {
-							continue;
-						}
-
-						String[] session_history = GPTComm.getSessionHistory(session_id).split("\0");
-						String msg_content_str = "";
-						for (final String message : session_history) {
-							String[] message_parts_pipe = message.split("\\|");
-							String[] message_parts_slash = message_parts_pipe[0].split("/");
-
-							String msg_role = message_parts_slash[0];
-							switch (msg_role) {
-								case "assistant": {
-									msg_role = "VISOR";
-
-									break;
-								}
-								case "user": {
-									msg_role = "YOU";
-
-									break;
-								}
-								default: {
-									continue;
-								}
-							}
-
-							if (message_parts_pipe.length < 2 || message_parts_pipe[1].isEmpty()) {
-								// Means no message (so maybe was a "SYSTEM TASK" message - ignore those)
+	void createStartInfinityChecker() {
+		infinity_checker = new Thread(() -> {
+			while (true) {
+				if (UtilsSWA.isCommunicatorConnectedSERVER()) {
+					String sessions_ids_str = GPTComm.getSessionIdsList();
+					if (!sessions_ids_str.isEmpty()) {
+						String[] sessions_ids = sessions_ids_str.split("\\|");
+						for (final String session_id : sessions_ids) {
+							if (session_id.equals("temp") || session_id.equals("dumb")) {
 								continue;
 							}
 
-							long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
-							String msg_content = message_parts_pipe[1];
+							String[] session_history = GPTComm.getSessionHistory(session_id).split("\0");
+							String msg_content_str = "";
+							for (final String message : session_history) {
+								String[] message_parts_pipe = message.split("\\|");
+								String[] message_parts_slash = message_parts_pipe[0].split("/");
 
-							msg_content_str +=
-									"-----------------------------------------------------------------------\n" +
-											"|" + msg_role + "| on " +
-											UtilsTimeDate.getTimeDateStr(msg_timestamp_s) + ":\n" +
-											msg_content + "\n\n";
-						}
-						if (msg_content_str.length() > 2) {
-							msg_content_str = msg_content_str.substring(0, msg_content_str.length() - 2);
-						}
+								String msg_role = message_parts_slash[0];
+								switch (msg_role) {
+									case "assistant": {
+										msg_role = "VISOR";
 
-						AppCompatTextView txtView = txtViews_map.get(session_id);
-						if (txtView != null && !msg_content_str.equals(txtView.toString())) {
-							requireActivity().runOnUiThread(new Runnable1(session_id, msg_content_str));
+										break;
+									}
+									case "user": {
+										msg_role = "YOU";
+
+										break;
+									}
+									default: {
+										continue;
+									}
+								}
+
+								if (message_parts_pipe.length < 2 || message_parts_pipe[1].isEmpty()) {
+									// Means no message (so maybe was a "SYSTEM TASK" message - ignore those)
+									continue;
+								}
+
+								long msg_timestamp_s = Long.parseLong(message_parts_slash[1]);
+								String msg_content = message_parts_pipe[1];
+
+								msg_content_str +=
+										"-----------------------------------------------------------------------\n" +
+												"|" + msg_role + "| on " +
+												UtilsTimeDate.getTimeDateStr(msg_timestamp_s) + ":\n" +
+												msg_content + "\n\n";
+							}
+							if (msg_content_str.length() > 2) {
+								msg_content_str = msg_content_str.substring(0, msg_content_str.length() - 2);
+							}
+
+							AppCompatTextView txtView = txtViews_map.get(session_id);
+							if (txtView != null && !msg_content_str.equals(txtView.toString())) {
+								requireActivity().runOnUiThread(new Runnable1(session_id, msg_content_str));
+							}
 						}
 					}
 				}
-			}
 
-			try {
-				Thread.sleep(5000);
-			} catch (final InterruptedException ignored) {
-				return;
+				try {
+					Thread.sleep(5000);
+				} catch (final InterruptedException ignored) {
+					return;
+				}
 			}
-		}
-	});
+		});
+	}
 }

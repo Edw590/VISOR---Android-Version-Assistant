@@ -56,7 +56,9 @@ public final class TabLocatorLocationsList extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		ExpandableListView expandable_list_view = new ExpandableListView(requireContext());
 		GenericExpandableListAdapter adapter = new GenericExpandableListAdapter(requireContext());

@@ -52,7 +52,9 @@ public final class TabCommunicatorMemories extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		String memories = "[Not connected to the server to get the memories]";
 		if (UtilsSWA.isCommunicatorConnectedSERVER()) {

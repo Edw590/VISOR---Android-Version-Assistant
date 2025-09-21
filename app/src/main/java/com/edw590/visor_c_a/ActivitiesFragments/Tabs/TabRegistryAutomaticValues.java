@@ -21,9 +21,7 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +38,19 @@ import UtilsSWA.UtilsSWA;
 
 public final class TabRegistryAutomaticValues extends Fragment {
 
+	AppCompatTextView textView = null;
+
+	private Thread infinity_checker = null;
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		if (infinity_checker != null) {
+			infinity_checker.interrupt();
+		}
+	}
+
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
@@ -51,18 +62,31 @@ public final class TabRegistryAutomaticValues extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
-		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 SP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0F,
-				resources.getDisplayMetrics());
-
-		AppCompatTextView textView = new AppCompatTextView(requireContext());
-		textView.setText(UtilsSWA.getRegistryTextREGISTRY(1));
-		textView.setPadding(padding_px, padding_px, padding_px, padding_px);
+		textView = new AppCompatTextView(requireContext());
 
 		linearLayout.addView(textView);
+
+		createStartInfinityChecker();
+	}
+
+	void createStartInfinityChecker() {
+		Runnable runnable = () -> {
+			textView.setText(UtilsSWA.getRegistryTextREGISTRY(1));
+		};
+		infinity_checker = new Thread(() -> {
+			while (true) {
+				requireActivity().runOnUiThread(runnable);
+
+				try {
+					Thread.sleep(1000);
+				} catch (final InterruptedException ignored) {
+				}
+			}
+		});
+		infinity_checker.start();
 	}
 }

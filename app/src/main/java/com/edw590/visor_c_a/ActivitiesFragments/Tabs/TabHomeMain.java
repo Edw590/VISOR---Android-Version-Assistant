@@ -58,7 +58,6 @@ public final class TabHomeMain extends Fragment {
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
@@ -66,7 +65,9 @@ public final class TabHomeMain extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		String color_primary = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorPrimary));
@@ -76,7 +77,7 @@ public final class TabHomeMain extends Fragment {
 		AppCompatTextView txt_title = new AppCompatTextView(requireContext());
 		txt_title.setText("V.I.S.O.R. Systems");
 		txt_title.setTextColor(Color.parseColor(color_accent));
-		txt_title.setTextSize(40);
+		txt_title.setTextSize(35);
 		txt_title.setTypeface(null, Typeface.BOLD);
 		txt_title.setGravity(Gravity.CENTER);
 		txt_title.setHeight(200);
@@ -84,10 +85,10 @@ public final class TabHomeMain extends Fragment {
 		AppCompatTextView txt_comm_connected = new AppCompatTextView(requireContext());
 		txt_comm_connected.setTextColor(Color.parseColor(color_primary));
 		txt_comm_connected.setTextSize(20);
-		txt_comm_connected.setPadding(20, 20, 20, 20);
+		txt_comm_connected.setPadding(0, 20, 0, 20);
 
 		AppCompatTextView txt_site_info_exists = new AppCompatTextView(requireContext());
-		txt_site_info_exists.setPadding(20, 20, 20, 20);
+		txt_site_info_exists.setPadding(0, 20, 0, 20);
 
 		String color;
 		String text;

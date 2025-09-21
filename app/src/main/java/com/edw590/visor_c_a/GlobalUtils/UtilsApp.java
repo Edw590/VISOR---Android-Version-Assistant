@@ -254,11 +254,8 @@ public final class UtilsApp {
 		}
 
 		Configuration config = context.getResources().getConfiguration();
-		if ((config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH) {
-			return true;
-		}
 
-		return false;
+		return (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH;
 	}
 
 	/**

@@ -40,21 +40,15 @@ public final class TabSysChkSystemState extends Fragment {
 
 	AppCompatTextView txt_sys_state;
 
-	@Override
-	public void onStart() {
-		super.onStart();
-
-		try {
-			infinity_checker.start();
-		} catch (final IllegalThreadStateException ignored) {
-		}
-	}
+	private Thread infinity_checker = null;
 
 	@Override
 	public void onStop() {
 		super.onStop();
 
-		infinity_checker.interrupt();
+		if (infinity_checker != null) {
+			infinity_checker.interrupt();
+		}
 	}
 
 	@Nullable
@@ -73,11 +67,12 @@ public final class TabSysChkSystemState extends Fragment {
 		txt_sys_state = new AppCompatTextView(requireContext());
 
 		linearLayout.addView(txt_sys_state);
+
+		createStartInfinityChecker();
 	}
 
-	private final Thread infinity_checker = new Thread(new Runnable() {
-		@Override
-		public void run() {
+	void createStartInfinityChecker() {
+		infinity_checker = new Thread(() -> {
 			Runnable runnable = () -> {
 				txt_sys_state.setText(SettingsSync.getDeviceInfoJsonSYSCHK());
 			};
@@ -90,6 +85,7 @@ public final class TabSysChkSystemState extends Fragment {
 					return;
 				}
 			}
-		}
-	});
+		});
+		infinity_checker.start();
+	}
 }

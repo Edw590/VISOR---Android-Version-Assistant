@@ -48,25 +48,24 @@ public final class TabCommunicatorCmdsList extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
-		AppCompatTextView text1 = new AppCompatTextView(requireContext());
-		text1.setText("List of all commands and variations available (optional words in [...] and generic " +
-				"descriptions in (...)):");
-
-		AppCompatTextView text2 = new AppCompatTextView(requireContext());
-		text2.setText("(Note: there is more than one way to say a command, with synonyms and random words in between " +
-				"('switch on the phone's wifi', 'what's the current time', 'terminate the phone call').)");
-
-		linearLayout.addView(text1);
-		linearLayout.addView(text2);
-
+		StringBuilder commands_desc = new StringBuilder(500);
 		for (final String command_desc : CmdsList.CMDS_LIST_description) {
-			final AppCompatTextView textView = new AppCompatTextView(requireContext());
-			textView.setTextIsSelectable(true);
-			textView.setText("--> " + command_desc);
-
-			linearLayout.addView(textView);
+			commands_desc.append("--> ").append(command_desc).append("\n");
 		}
+
+		AppCompatTextView txtView = new AppCompatTextView(requireContext());
+		txtView.setText("List of all commands and variations available (optional words in [...] and generic " +
+				"descriptions in (...)):\n\n" +
+				"" +
+				"(Note: there is more than one way to say a command, with synonyms and random words in between " +
+				"('switch on the phone's wifi', 'what's the current time', 'terminate the phone call').)\n\n" +
+				"" +
+				commands_desc);
+
+		linearLayout.addView(txtView);
 	}
 }

@@ -238,4 +238,17 @@ public class Utils {
 
 		return horizontal_button_bar;
 	}
+
+	/**
+	 * <p>Gets the default padding in pixels.</p>
+	 *
+	 * @param context the context
+	 *
+	 * @return the padding in pixels
+	 */
+	static int getDefaultPadding(@NonNull final Context context) {
+		// 15 SP seems to be enough as margins.
+		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0f,
+				context.getResources().getDisplayMetrics());
+	}
 }

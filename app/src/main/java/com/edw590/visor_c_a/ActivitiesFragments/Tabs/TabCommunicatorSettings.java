@@ -53,7 +53,6 @@ public final class TabCommunicatorSettings extends Fragment {
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
@@ -63,7 +62,9 @@ public final class TabCommunicatorSettings extends Fragment {
 
 		ModsFileInfo.Mod7UserInfo mod_7_user_info = SettingsSync.getMod7InfoUSERSETS();
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatEditText editTxt_server_url = new AppCompatEditText(requireContext());
 		editTxt_server_url.setHint("Ollama URL for use in the server (example: localhost:11434)");

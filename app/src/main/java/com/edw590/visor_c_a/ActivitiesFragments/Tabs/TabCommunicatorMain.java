@@ -21,9 +21,7 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,21 +50,15 @@ public final class TabCommunicatorMain extends Fragment {
 	AppCompatTextView txt_gpt_comm_state;
 	AppCompatTextView txt_response;
 
-	@Override
-	public void onStart() {
-		super.onStart();
-
-		try {
-			infinity_checker.start();
-		} catch (final IllegalThreadStateException ignored) {
-		}
-	}
+	private Thread infinity_checker = null;
 
 	@Override
 	public void onStop() {
 		super.onStop();
 
-		infinity_checker.interrupt();
+		if (infinity_checker != null) {
+			infinity_checker.interrupt();
+		}
 	}
 
 	@Nullable
@@ -80,17 +72,14 @@ public final class TabCommunicatorMain extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
+
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
-		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 DP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
-				resources.getDisplayMetrics());
 
 		txt_gpt_comm_state = new AppCompatTextView(requireContext());
-		txt_gpt_comm_state.setPadding(padding_px, padding_px, padding_px, 0);
 		txt_gpt_comm_state.setText("GPT state: error");
 		txt_gpt_comm_state.setTextIsSelectable(true);
 
@@ -122,7 +111,6 @@ public final class TabCommunicatorMain extends Fragment {
 		});
 
 		txt_response = new AppCompatTextView(requireContext());
-		txt_response.setPadding(padding_px, padding_px, padding_px, padding_px);
 		txt_response.setText("Response");
 		txt_response.setTextIsSelectable(true);
 
@@ -131,11 +119,12 @@ public final class TabCommunicatorMain extends Fragment {
 		linearLayout.addView(btn_listen);
 		linearLayout.addView(btn_send_text);
 		linearLayout.addView(txt_response);
+
+		createStartInfinityChecker();
 	}
 
-	private final Thread infinity_checker = new Thread(new Runnable() {
-		@Override
-		public void run() {
+	void createStartInfinityChecker() {
+		infinity_checker = new Thread(() -> {
 			Runnable runnable = () -> {
 				txt_response.setText(GPTComm.getLastText());
 			};
@@ -188,6 +177,7 @@ public final class TabCommunicatorMain extends Fragment {
 					return;
 				}
 			}
-		}
-	});
+		});
+		infinity_checker.start();
+	}
 }

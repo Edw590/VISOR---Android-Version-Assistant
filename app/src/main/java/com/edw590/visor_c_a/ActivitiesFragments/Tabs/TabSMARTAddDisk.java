@@ -51,7 +51,9 @@ public final class TabSMARTAddDisk extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatEditText editTxt_id = new AppCompatEditText(requireContext());
 		editTxt_id.setHint("Disk ID");

@@ -44,7 +44,6 @@ public final class TabHomeLocalSettings extends Fragment {
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
@@ -54,7 +53,9 @@ public final class TabHomeLocalSettings extends Fragment {
 
 		ModsFileInfo.DeviceSettings device_settings = SettingsSync.getDeviceSettingsGENERAL();
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatEditText editTxt_password = new AppCompatEditText(requireContext());
 		editTxt_password.setHint("Settings encryption password or empty to disable");

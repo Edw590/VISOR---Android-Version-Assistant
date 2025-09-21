@@ -21,11 +21,9 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +45,17 @@ public final class TabModManagerModsStatus extends Fragment {
 	String color_accent;
 	String color_primary;
 
+	private Thread infinity_checker = null;
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		if (infinity_checker != null) {
+			infinity_checker.interrupt();
+		}
+	}
+
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
@@ -65,15 +74,12 @@ public final class TabModManagerModsStatus extends Fragment {
 		color_accent = "#" + Integer.toHexString(ContextCompat.getColor(requireActivity(),
 				R.color.colorAccent));
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = current_view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
-		// Below, convert DP to PX to input on setMargins(), which takes pixels only.
-		// 15 DP seems to be enough as margins.
-		final Resources resources = requireActivity().getResources();
-		final int padding_px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15.0F,
-				resources.getDisplayMetrics());
 
 		for (int module_index = 0; module_index < ModulesList.ELEMENTS_LIST_LENGTH; ++module_index) { // Add a Switch for each module.
 			final boolean is_module = (boolean) ModulesList.getElementValue(module_index, ModulesList.ELEMENT_IS_MODULE);
@@ -86,7 +92,7 @@ public final class TabModManagerModsStatus extends Fragment {
 			switchCompat.setLayoutParams(layoutParams);
 			switchCompat.setTypeface(null, Typeface.BOLD);
 			switchCompat.setTextSize(20.0F);
-			switchCompat.setPadding(padding_px, padding_px, padding_px, padding_px);
+			switchCompat.setPadding(0, 0, 0, padding);
 			switchCompat.setTextIsSelectable(true);
 			switchCompat.setBackgroundColor(Color.WHITE);
 
@@ -113,19 +119,19 @@ public final class TabModManagerModsStatus extends Fragment {
 			linearLayout.addView(switchCompat);
 		}
 
-		// Thread disabled temporarily. Put it stopping after the user leaves this fragment.
-		//infinity_checker.start();
+		createStartInfinityChecker();
 	}
 
-	private final Thread infinity_checker = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			while (true) { // Keep checking the modules' status.
+	void createStartInfinityChecker() {
+		infinity_checker = new Thread(() -> {
+			while (true) { // Keep checking the modules status.
 				for (int module_index = 0; module_index < ModulesList.ELEMENTS_LIST_LENGTH; ++module_index) {
 					final SwitchCompat switchCompat = current_view.findViewById(module_index);
 
 					final boolean module_running = ModulesList.isElementRunning(module_index);
-					switchCompat.setChecked(module_running); // --> "Animators may only be run on Looper threads"
+					requireActivity().runOnUiThread(() -> {
+						switchCompat.setChecked(module_running);
+					});
 					if (module_running) {
 						// If the module is running, color the text green (Accent Color).
 						switchCompat.setTextColor(Color.parseColor(color_accent));
@@ -141,6 +147,7 @@ public final class TabModManagerModsStatus extends Fragment {
 					return;
 				}
 			}
-		}
-	});
+		});
+		infinity_checker.start();
+	}
 }

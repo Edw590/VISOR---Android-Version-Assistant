@@ -52,7 +52,9 @@ public final class TabLocatorAddLocation extends Fragment {
 	public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatCheckBox check_enabled = new AppCompatCheckBox(requireContext());
 		check_enabled.setText("Location enabled");
@@ -76,6 +78,7 @@ public final class TabLocatorAddLocation extends Fragment {
 				"(in seconds)");
 		editTxt_last_detection_s.setSingleLine();
 		editTxt_last_detection_s.setInputType(InputType.TYPE_CLASS_NUMBER);
+		editTxt_last_detection_s.setPadding(padding, padding, padding, padding);
 
 		AppCompatEditText editTxt_max_distance = new AppCompatEditText(requireContext());
 		editTxt_max_distance.setText("0");

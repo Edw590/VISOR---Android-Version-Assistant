@@ -43,7 +43,6 @@ public final class TabLocatorSettings extends Fragment {
 	@Override
 	public View onCreateView(@android.annotation.NonNull final LayoutInflater inflater,
 								   @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.nested_scroll_view, container, false);
 	}
 
@@ -53,7 +52,9 @@ public final class TabLocatorSettings extends Fragment {
 
 		ModsFileInfo.Mod12UserInfo mod_12_user_info = SettingsSync.getMod12InfoUSERSETS();
 
+		int padding = Utils.getDefaultPadding(requireContext());
 		LinearLayout linearLayout = view.findViewById(R.id.nested_scroll_view_linear_layout);
+		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatEditText editTxt_always_with_device = new AppCompatEditText(requireContext());
 		editTxt_always_with_device.setHint("ID of the device always with the user (user's phone for example) or " +
