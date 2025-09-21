@@ -144,6 +144,8 @@ public final class ScreenRecorder implements IModuleInst {
 	 * <p>Method to call instead of calling directly {@link #startRecording()}.</p>
 	 *
 	 * @param start true to start recording, false to stop recording
+	 * @param restart_pocketsphinx in case it's to stop the recorder, true to restart pocketsphinx, false not to restart
+	 * 	 *                         pocketsphinx it. Outside that situation this parameter is ignored.
 	 */
 	void recordScreen(final boolean start, final boolean restart_pocketsphinx) {
 		boolean is_recording = (boolean) UtilsRegistry.getData(RegistryKeys.K_IS_RECORDING_SCREEN_INTERNALLY, true);
@@ -286,8 +288,8 @@ public final class ScreenRecorder implements IModuleInst {
 		media_recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
 		media_recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 		media_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-		media_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-		media_recorder.setVideoEncodingBitRate(2250 * 1000); // Minimum for 1920x1080 according to my HandBrake testings
+		media_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+		media_recorder.setVideoEncodingBitRate(512 * 1000);
 		media_recorder.setVideoFrameRate(30);
 		media_recorder.setVideoSize(res_to_use.x, res_to_use.y);
 		media_recorder.setOutputFile(file_path);
@@ -330,6 +332,8 @@ public final class ScreenRecorder implements IModuleInst {
 				break;
 			}
 		}
+
+		//Falta pôres o áudio opcional --> com os novos intents
 
 		DisplayMetrics metrics = UtilsContext.getContext().getResources().getDisplayMetrics();
 		Point screen = new Point(metrics.widthPixels, metrics.heightPixels);
