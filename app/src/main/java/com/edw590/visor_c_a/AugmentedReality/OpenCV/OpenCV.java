@@ -58,7 +58,7 @@ public final class OpenCV implements CameraBridgeViewBase.CvCameraViewListener2 
 
 	@Override
 	@Nullable
-	public Mat onCameraFrame(final CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
+	public Mat onCameraFrame(@NonNull final CameraBridgeViewBase.CvCameraViewFrame cvCameraViewFrame) {
 		rgba_frame = cvCameraViewFrame.rgba();
 
 		//rectangle_detector.detect(rgba_frame);
