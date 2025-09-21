@@ -1,0 +1,3 @@
+Old: https://github.com/anggrayudi/android-hidden-api
+
+New: https://github.com/Reginer/aosp-android-jar

@@ -144,7 +144,10 @@ public final class BluetoothChecker {
 				break;
 			}
 		}
-		String alias = bluetoothDevice.getAlias();
+		String alias = null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			alias = bluetoothDevice.getAlias();
+		}
 		nearby_devices_bt.add(new ExtDevice(
 				ExtDevice.TYPE_BLUETOOTH,
 				address,
