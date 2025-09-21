@@ -171,7 +171,11 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		camera_view.setCvCameraViewListener(open_cv);
 		camera_view.enableView();
 		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		camera_view.setZOrderOnTop(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+			gl_surface_view.setCompositionOrder(98);
+		} else {
+			gl_surface_view.setZOrderOnTop(true);
+		}
 		camera_view.setMaxFrameSize(320, 240);
 		frame_layout.addView(camera_view);
 
@@ -181,7 +185,11 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		gl_surface_view.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		gl_surface_view.setRenderer(this);
 		gl_surface_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		gl_surface_view.setZOrderOnTop(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+			gl_surface_view.setCompositionOrder(99);
+		} else {
+			gl_surface_view.setZOrderOnTop(true);
+		}
 		frame_layout.addView(gl_surface_view);
 
 		// Create a TextView
