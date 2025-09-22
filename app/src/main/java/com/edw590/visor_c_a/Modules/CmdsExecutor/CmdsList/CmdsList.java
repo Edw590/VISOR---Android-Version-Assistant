@@ -233,36 +233,149 @@ public final class CmdsList {
 	static final int CMDS_LIST_len = CMDS_LIST.length;
 
 	public static final String[] CMDS_LIST_description = {
-			"Turn on/off flashlight/lantern",                                             // 1
-			"(Ask for the time)",                                                         // 2
-			"(Ask for the date)",                                                         // 3
-			"Turn on/off Wi-Fi",                                                          // 4
-			"Turn on/off mobile data",                                                    // 5
-			"Turn on/off bluetooth",                                                      // 6
-			"Answer call",                                                                // 7
-			"End call",                                                                   // 9
-			"Turn on/off speakerphone/speaker/speakers",                                  // 10
-			"Turn on/off airplane mode",                                                  // 11
-			"(Ask for the battery percentage/status/level)",                              // 12
-			"Shut down the device/phone",                                                 // 13
-			"[Fast] reboot the device/phone [into recovery/safe mode/bootloader]",        // 14
-			"Take a [frontal] picture/photo",                                             // 15
-			"Record audio/sound",                                                         // 16
-			"(Ask to repeat what was just said)",                                         // 17
-			"Call (a contact name)",                                                      // 18
-			"Turn on/off the power/battery saver mode",                                   // 19
-			"Stop recording [audio/sound]",                                               // 20
-			"Play/pause/stop/next/previous media (or song, video, etc)",                  // 21
-			"Stop listening (hotword recognizer - useful if VISOR is not a " +            // 24
+			"Turn on/off flashlight/lantern",                                                // 1
+			"(Ask for the time)",                                                            // 2
+			"(Ask for the date)",                                                            // 3
+			"Turn on/off Wi-Fi",                                                             // 4
+			"Turn on/off mobile data",                                                       // 5
+			"Turn on/off bluetooth",                                                         // 6
+			"Answer call",                                                                   // 7
+			"End call",                                                                      // 9
+			"Turn on/off speakerphone/speaker/speakers",                                     // 10
+			"Turn on/off airplane mode",                                                     // 11
+			"(Ask for the battery percentage/status/level)",                                 // 12
+			"Shut down the device/phone",                                                    // 13
+			"[Fast] reboot the device/phone [into recovery/safe mode/bootloader]",           // 14
+			"Take a [frontal] picture/photo",                                                // 15
+			"Record audio/sound",                                                            // 16
+			"(Ask to repeat what was just said)",                                            // 17
+			"Call (a contact name)",                                                         // 18
+			"Turn on/off the power/battery saver mode",                                      // 19
+			"Stop recording [audio/sound]",                                                  // 20
+			"Play/pause/stop/next/previous media (or song, video, etc)",                     // 21
+			"Stop listening (hotword recognizer - useful if VISOR is not a " +               // 24
 					"system app, in which case he'll lock the microphone on himself)",
-			"Start listening (if stopped, to start again - or hold the Power button " +   // 25
+			"Start listening (if stopped, to start again - or hold the Power button " +      // 25
 					"(or Home if VISOR is the device's assistant))",
-			"(Ask for the weather)",                                                      // 26
-			"(Ask for the news)",                                                         // 27
-			"(Say that the user is going to sleep)",                                      // 28
+			"(Ask for the weather)",                                                         // 26
+			"(Ask for the news)",                                                            // 27
+			"(Say that the user is going to sleep)",                                         // 28
 			"(Ask what you have for today/tomorrow/this week/next week - Google Calendar events and tasks (tasks " +
 					"are only retrieved if you ask for today or tomorrow). After asking and if you asked with the server " +
 					"connected (meaning will be the LLM answering), you can then talk normally about your events and tasks " +
-					"with VISOR)",                                                        // 31
+					"with VISOR)",                                                           // 31
 	};
+
+	@NonNull
+	public static DialogMan.Intent[] getIntentList() {
+		DialogMan.Intent intent1 = new DialogMan.Intent();
+		intent1.setAcd_cmd_id(CmdIds.CMD_TOGGLE_FLASHLIGHT);
+		intent1.setTask_name("Toggle the flashlight");
+
+		DialogMan.Intent intent2 = new DialogMan.Intent();
+		intent2.setAcd_cmd_id(CmdIds.CMD_ASK_TIME);
+		intent2.setTask_name("Ask for the time");
+
+		DialogMan.Intent intent3 = new DialogMan.Intent();
+		intent3.setAcd_cmd_id(CmdIds.CMD_ASK_DATE);
+		intent3.setTask_name("Ask for the date");
+
+		DialogMan.Intent intent4 = new DialogMan.Intent();
+		intent4.setAcd_cmd_id(CmdIds.CMD_TOGGLE_WIFI);
+		intent4.setTask_name("Toggle the Wi-Fi");
+
+		DialogMan.Intent intent5 = new DialogMan.Intent();
+		intent5.setAcd_cmd_id(CmdIds.CMD_TOGGLE_MOBILE_DATA);
+		intent5.setTask_name("Toggle the Mobile Data");
+
+		DialogMan.Intent intent6 = new DialogMan.Intent();
+		intent6.setAcd_cmd_id(CmdIds.CMD_TOGGLE_BLUETOOTH);
+		intent6.setTask_name("Toggle the Bluetooth");
+
+		DialogMan.Intent intent7 = new DialogMan.Intent();
+		intent7.setAcd_cmd_id(CmdIds.CMD_ANSWER_CALL);
+		intent7.setTask_name("Answer the call");
+
+		DialogMan.Intent intent9 = new DialogMan.Intent();
+		intent9.setAcd_cmd_id(CmdIds.CMD_END_CALL);
+		intent9.setTask_name("End the call");
+
+		DialogMan.Intent intent10 = new DialogMan.Intent();
+		intent10.setAcd_cmd_id(CmdIds.CMD_TOGGLE_SPEAKERS);
+		intent10.setTask_name("Toggle the speakerphone");
+
+		DialogMan.Intent intent11 = new DialogMan.Intent();
+		intent11.setAcd_cmd_id(CmdIds.CMD_TOGGLE_AIRPLANE_MODE);
+		intent11.setTask_name("Toggle the airplane mode");
+
+		DialogMan.Intent intent12 = new DialogMan.Intent();
+		intent12.setAcd_cmd_id(CmdIds.CMD_ASK_BATTERY_PERCENT);
+		intent12.setTask_name("Ask for the battery percentage");
+
+		DialogMan.Intent intent13 = new DialogMan.Intent();
+		intent13.setAcd_cmd_id(CmdIds.CMD_POWER_SHUT_DOWN);
+		intent13.setTask_name("Shut down the device");
+
+		DialogMan.Intent intent14 = new DialogMan.Intent();
+		intent14.setAcd_cmd_id(CmdIds.CMD_POWER_REBOOT);
+		intent14.setTask_name("Reboot the device");
+
+		DialogMan.Intent intent15 = new DialogMan.Intent();
+		intent15.setAcd_cmd_id(CmdIds.CMD_TAKE_PHOTO);
+		intent15.setTask_name("Take a photo");
+
+		DialogMan.Intent intent16 = new DialogMan.Intent();
+		intent16.setAcd_cmd_id(CmdIds.CMD_RECORD_MEDIA);
+		intent16.setTask_name("Record media");
+
+		DialogMan.Intent intent17 = new DialogMan.Intent();
+		intent17.setAcd_cmd_id(CmdIds.CMD_SAY_AGAIN);
+		intent17.setTask_name("Say again");
+
+		DialogMan.Intent intent18 = new DialogMan.Intent();
+		intent18.setAcd_cmd_id(CmdIds.CMD_CALL_CONTACT);
+		intent18.setTask_name("Call a contact");
+
+		DialogMan.Intent intent19 = new DialogMan.Intent();
+		intent19.setAcd_cmd_id(CmdIds.CMD_TOGGLE_POWER_SAVER_MODE);
+		intent19.setTask_name("Toggle the power saver mode");
+
+		DialogMan.Intent intent20 = new DialogMan.Intent();
+		intent20.setAcd_cmd_id(CmdIds.CMD_STOP_RECORD_MEDIA);
+		intent20.setTask_name("Stop recording media");
+
+		DialogMan.Intent intent21 = new DialogMan.Intent();
+		intent21.setAcd_cmd_id(CmdIds.CMD_CONTROL_MEDIA);
+		intent21.setTask_name("Control media playback");
+
+		DialogMan.Intent intent24 = new DialogMan.Intent();
+		intent24.setAcd_cmd_id(CmdIds.CMD_STOP_LISTENING);
+		intent24.setTask_name("Stop listening");
+
+		DialogMan.Intent intent25 = new DialogMan.Intent();
+		intent25.setAcd_cmd_id(CmdIds.CMD_START_LISTENING);
+		intent25.setTask_name("Start listening");
+
+		DialogMan.Intent intent26 = new DialogMan.Intent();
+		intent26.setAcd_cmd_id(CmdIds.CMD_TELL_WEATHER);
+		intent26.setTask_name("Tell the weather");
+
+		DialogMan.Intent intent27 = new DialogMan.Intent();
+		intent27.setAcd_cmd_id(CmdIds.CMD_TELL_NEWS);
+		intent27.setTask_name("Tell the news");
+
+		DialogMan.Intent intent28 = new DialogMan.Intent();
+		intent28.setAcd_cmd_id(CmdIds.CMD_GONNA_SLEEP);
+		intent28.setTask_name("Gonna sleep");
+
+		DialogMan.Intent intent31 = new DialogMan.Intent();
+		intent31.setAcd_cmd_id(CmdIds.CMD_ASK_EVENTS);
+		intent31.setTask_name("Ask for events");
+
+		return new DialogMan.Intent[] {
+				intent1, intent2, intent3, intent4, intent5, intent6, intent7, intent9, intent10, intent11, intent12,
+				intent13, intent14, intent15, intent16, intent17, intent18, intent19, intent20, intent21, intent24,
+				intent25, intent26, intent27, intent28, intent31
+		};
+	}
 }

@@ -164,8 +164,8 @@ dependencies {
 	/////////////////////
 	// Local files //
 
-	// VISOR's Main Libraries
-	implementation files("libs/MainLibraries.aar")
+	// VISOR Libraries
+	implementation files("libs/VISORLibraries.aar")
 
 	// External
 	implementation files("libs/jutf7-1.0.0.jar")

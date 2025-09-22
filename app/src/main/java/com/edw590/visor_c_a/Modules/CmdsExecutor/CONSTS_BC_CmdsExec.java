@@ -35,7 +35,7 @@ final class CONSTS_BC_CmdsExec {
 	}
 
 	/**
-	 * <p>Executed function: {@link CmdsExecutor#processTask(String, boolean, boolean, boolean)}.</p>
+	 * <p>Executed function: {@link CmdsExecutor#processTask(String, boolean, boolean)}.</p>
 	 * <p>Is broadcast by the class(es): {@link UtilsCmdsExecutorBC}.</p>
 	 * <p>To be received only by the class(es): {@link CmdsExecutor}.</p>
 	 * <p>Extras (ordered parameters):</p>

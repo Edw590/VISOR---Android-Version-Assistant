@@ -108,14 +108,14 @@ class GManUtils {
 				continue;
 			}
 
-			long start_of_day_s = UtilsSWA.getStartOfDayS(curr_s);
+			long start_of_day_s = UtilsSWA.getStartOfDayDATETIME(curr_s);
 			long end_of_day_s = start_of_day_s + 86400 - 1; // 86400 seconds in a day (24*60*60)
 
 			long start_of_next_day_s = start_of_day_s + 86400;
 			long end_of_next_day_s = start_of_next_day_s + 86400 - 1;
 
 			long start_of_week_s =
-					UtilsSWA.getStartOfDayS(curr_s - (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)) * 86400;
+					UtilsSWA.getStartOfDayDATETIME(curr_s - (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1)) * 86400;
 			long end_of_week_s = start_of_week_s + 7 * 86400 - 1;
 
 			long start_of_next_week_s = start_of_week_s + 7 * 86400;
@@ -175,7 +175,7 @@ class GManUtils {
 						System.currentTimeMillis()/1000/60;
 
 				speak += event.getSummary() + event_on + " " + event_at + " for " +
-						UtilsSWA.getEventDuration(curr_duration) + "; ";
+						UtilsSWA.toReadableDurationDATETIME(curr_duration) + "; ";
 			}
 		}
 

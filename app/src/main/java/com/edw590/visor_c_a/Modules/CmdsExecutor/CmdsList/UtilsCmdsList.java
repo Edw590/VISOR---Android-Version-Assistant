@@ -83,6 +83,6 @@ public final class UtilsCmdsList {
 			commands_almost_str[i] = prepareCommandString(CmdsList.CMDS_LIST[i]);
 		}
 
-		return String.join("\\", commands_almost_str);
+		return String.join("\000", commands_almost_str);
 	}
 }

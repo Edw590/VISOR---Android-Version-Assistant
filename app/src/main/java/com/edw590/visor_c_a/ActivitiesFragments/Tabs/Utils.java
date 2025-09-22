@@ -145,7 +145,8 @@ public class Utils {
 	 * @param message the message to show
 	 * @param on_yes the action to perform if the user clicks "yes"
 	 */
-	static void createConfirmationDialog(final Context context, final CharSequence message, final Runnable on_yes) {
+	static void createConfirmationDialog(@NonNull final Context context, @NonNull final CharSequence message,
+										 @NonNull final Runnable on_yes) {
 		new AlertDialog.Builder(context)
 				.setTitle("Confirmation")
 				.setMessage(message)
@@ -162,11 +163,24 @@ public class Utils {
 	 * @param context the context
 	 * @param message the message to show
 	 */
-	static void createErrorDialog(final Context context, final CharSequence message) {
+	static void createErrorDialog(@NonNull final Context context, @NonNull final CharSequence message) {
 		new AlertDialog.Builder(context)
 				.setTitle("Error")
 				.setMessage(message)
 				.setCancelable(true)
+				.show();
+	}
+
+	/**
+	 * <p>Creates an information dialog.</p>
+	 *
+	 * @param context the context
+	 * @param message the message to show
+	 */
+	static void createInfoDialog(@NonNull final Context context, @NonNull final CharSequence message) {
+		new AlertDialog.Builder(context)
+				.setTitle("Information")
+				.setMessage(message)
 				.show();
 	}
 
@@ -225,7 +239,7 @@ public class Utils {
 	 *
 	 * @return the horizontal button bar
 	 */
-	static View createHorizontalButtonBar(@NonNull final Context context, final AppCompatButton... buttons) {
+	static View createHorizontalButtonBar(@NonNull final Context context, @NonNull final AppCompatButton... buttons) {
 		LinearLayout horizontal_button_bar = new LinearLayout(context);
 		horizontal_button_bar.setOrientation(LinearLayout.HORIZONTAL);
 		horizontal_button_bar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -250,5 +264,40 @@ public class Utils {
 		// 15 SP seems to be enough as margins.
 		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0f,
 				context.getResources().getDisplayMetrics());
+	}
+
+	/**
+	 * <p>Creates a form dialog.</p>
+	 *
+	 * @param context the context
+	 * @param form_title the main title of the form
+	 * @param fields_titles the titles of the fields
+	 * @param on_yes the action to perform if the user clicks "yes"
+	 */
+	static void createForm(@NonNull final Context context, @NonNull final CharSequence form_title,
+						   @NonNull final String[] fields_titles, @NonNull final Runnable on_yes) {
+		LinearLayout form_view = new LinearLayout(context);
+		form_view.setOrientation(LinearLayout.VERTICAL);
+		form_view.setPadding(getDefaultPadding(context), getDefaultPadding(context),
+				getDefaultPadding(context), getDefaultPadding(context));
+		for (final String title : fields_titles) {
+			AppCompatTextView textView = new AppCompatTextView(context);
+			textView.setText(title);
+			textView.setPadding(0, 0, 0, getDefaultPadding(context) / 3);
+			form_view.addView(textView);
+			AppCompatEditText editText = new AppCompatEditText(context);
+			editText.setInputType(InputType.TYPE_CLASS_TEXT);
+			editText.setTag(title);
+			editText.setPadding(0, 0, 0, getDefaultPadding(context));
+			form_view.addView(editText);
+		}
+		new AlertDialog.Builder(context).
+				setTitle(form_title).
+				setView(form_view).
+				setPositiveButton(android.R.string.ok, (dialog, which) -> {
+					on_yes.run();
+				}).
+				setNegativeButton(android.R.string.cancel, null).
+				show();
 	}
 }
