@@ -31,6 +31,10 @@
 			android:title="@string/fragCommunicator_title_ACA"
 			android:icon="@drawable/development" />
 		<item
+			android:id="@+id/frag_google_manager"
+			android:title="@string/fragGoogleManager_title_ACA"
+			android:icon="@drawable/development" />
+		<item
 			android:id="@+id/frag_modules_status"
 			android:title="@string/fragModulesStatus_title_ACA"
 			android:icon="@drawable/development" />

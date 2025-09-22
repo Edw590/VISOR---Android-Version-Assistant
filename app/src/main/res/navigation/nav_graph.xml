@@ -75,5 +75,9 @@
 		android:id="@+id/frag_opengl"
 		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragOpenGL"
 		android:label="@string/fragOpenGL_title_ACA" />
+	<fragment
+		android:id="@+id/frag_google_manager"
+		android:name="com.edw590.visor_c_a.ActivitiesFragments.Fragments.FragGoogleManager"
+		android:label="@string/fragGoogleManager_title_ACA" />
 
 </navigation>
