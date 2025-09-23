@@ -61,6 +61,7 @@ import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.R;
 
 import org.opencv.android.JavaCameraView;
@@ -172,9 +173,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		camera_view.enableView();
 		camera_view.getHolder().setFormat(PixelFormat.TRANSPARENT);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-			gl_surface_view.setCompositionOrder(98);
+			camera_view.setCompositionOrder(98);
 		} else {
-			gl_surface_view.setZOrderOnTop(true);
+			camera_view.setZOrderOnTop(true);
 		}
 		camera_view.setMaxFrameSize(320, 240);
 		frame_layout.addView(camera_view);
@@ -388,7 +389,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-FragOpenGL - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-FragOpenGL - " + intent.getAction());
 
 			if (!intent.getAction().equals(AccessibilityService.ACTION_NEW_NOTIFICATION)) {
 				return;
