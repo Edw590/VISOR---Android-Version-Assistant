@@ -30,11 +30,15 @@ import androidx.annotation.Nullable;
 import androidx.multidex.MultiDex;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsSettings;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
+import com.edw590.visor_c_a.Modules.Speech.Speech2;
+import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.github.anrwatchdog.ANRWatchDog;
 
 import org.opencv.android.OpenCVLoader;
 
@@ -97,6 +101,28 @@ public final class ApplicationClass extends Application {
 		init_millis_time = System.currentTimeMillis();
 		init_nano_time = System.nanoTime();
 
+		// One second less than the Android ANR timeout (5 seconds)
+		new ANRWatchDog(4000).setANRListener(error -> {
+			UtilsLogging.logLnDebug("ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇ");
+			String speak = "Application Not Responding detected";
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, Speech2.MODE1_ALWAYS_NOTIFY,
+					UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
+
+			// Stop all VISOR Libraries stuff
+			UtilsSWA.closeCommsChannels();
+			UtilsSWA.stopCommunicatorSERVER();
+			SettingsSync.stopUserSettingsSyncer();
+
+			// Wait more than a second to let the syncer stop (it loops every second).
+			try {
+				Thread.sleep(1500);
+			} catch (final InterruptedException ignored) {
+			}
+
+			// And start everything again
+			initializeVISORLibs();
+		}).start();
+
 		// Setup handler for uncaught exceptions
 		Thread.setDefaultUncaughtExceptionHandler(ApplicationClass::handleUncaughtException);
 
@@ -104,11 +130,11 @@ public final class ApplicationClass extends Application {
 
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 			if (!UtilsSettings.loadSettingsFile(false)) {
-				System.out.println("Failed to load generated settings. Using empty ones...");
+				UtilsLogging.logLnWarning("Failed to load generated settings. Using empty ones...");
 			}
 
 			if (!UtilsSettings.loadSettingsFile(true)) {
-				System.out.println("Failed to load user settings. Using empty ones...");
+				UtilsLogging.logLnWarning("Failed to load user settings. Using empty ones...");
 			}
 
 			settings_files_checked = true;
@@ -122,11 +148,7 @@ public final class ApplicationClass extends Application {
 
 		infinity_thread.start();
 
-		UtilsSWA.initializeCommsChannels();
-
-		GPTComm.startReportingNoModelsOLLAMA();
-		UtilsSWA.startCommunicatorSERVER();
-		SettingsSync.syncUserSettings();
+		initializeVISORLibs();
 
 		// Register keys in the Registry
 		RegistryKeys.registerValues();
@@ -136,6 +158,14 @@ public final class ApplicationClass extends Application {
 		if (!UtilsApp.isDeviceAdmin()) {
 			UtilsPermsAuths.forceDeviceAdmin();
 		}
+	}
+
+	private static void initializeVISORLibs() {
+		UtilsSWA.initializeCommsChannels();
+
+		GPTComm.startReportingNoModelsOLLAMA();
+		UtilsSWA.startCommunicatorSERVER();
+		SettingsSync.syncUserSettings();
 	}
 
 	Thread infinity_thread = new Thread(() -> {
@@ -191,11 +221,11 @@ public final class ApplicationClass extends Application {
 
 		System.exit(1); // kill off the crashed app*/
 
-		System.out.println("1------------- CRITICAL APP ERROR -------------1");
-		System.out.println("Thread: " + thread);
-		System.out.println("Error:");
+		UtilsLogging.logLnError("1------------- CRITICAL APP ERROR -------------1");
+		UtilsLogging.logLnError("Thread: " + thread);
+		UtilsLogging.logLnError("Error:");
 		throwable.printStackTrace();
-		System.out.println("2------------- CRITICAL APP ERROR -------------2");
+		UtilsLogging.logLnError("2------------- CRITICAL APP ERROR -------------2");
 
 		// todo Put it writing some log or whatever here!!!
 		// If you need Context for anything, use getApplicationContext, since this is used before the static one is set.

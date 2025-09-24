@@ -159,6 +159,7 @@ dependencies {
 	// Don't update the Commons IO library! Use 2.7+ for Android 8 on minSdkVersion. Or 2.6 for some Android in-between.
 	// https://commons.apache.org/proper/commons-io/
 	implementation "commons-io:commons-io:2.5"
+	implementation "com.github.anrwatchdog:anrwatchdog:1.4.0"
 
 
 	/////////////////////
