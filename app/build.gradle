@@ -88,6 +88,10 @@ android {
 		}
 	}
 
+	buildFeatures {
+		buildConfig true
+	}
+
 	buildTypes {
 		debug {
 			minifyEnabled false

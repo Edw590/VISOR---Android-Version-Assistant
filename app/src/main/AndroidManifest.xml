@@ -228,8 +228,6 @@
 		<!-- ^^^^ The attributes above but below the blank line are for maximum app security, hopefully -->
 		<!-- requiredForAllUsers must be false, or the app will be installed as system, but can't be run at least
 		 without updates (didn't try with updates) -> ???? todo See why this happens and get it to work -->
-		<!-- extractNativeLibs=false doesn't work below API 23. todo See if there's some way to load from the APK
-		 directly using obscure methods... Or extract manually and reload after extracting and keep checking its SHA. -->
 		<!-- MANAGE_VOICE_KEYPHRASES set as the Application permission is required to be eligible to be an Assistant.
 		 Since it may be required again (or any other), always put a permission attribute on each component to override
 		 the main one - if an override is required. -->

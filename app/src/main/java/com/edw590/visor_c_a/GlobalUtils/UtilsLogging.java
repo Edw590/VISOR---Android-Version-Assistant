@@ -21,7 +21,10 @@
 
 package com.edw590.visor_c_a.GlobalUtils;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
+import com.edw590.visor_c_a.BuildConfig;
 
 import UtilsSWA.UtilsSWA;
 
@@ -33,7 +36,7 @@ public class UtilsLogging {
 	 * @param message The message to log
 	 */
 	public static void logLnError(@NonNull final Object message) {
-		System.out.println("++ E:" + ___8drrd3148796d_Xaf() + message);
+		Log.e("VISOR", "++ E:" + ___8drrd3148796d_Xaf() + message);
 	}
 
 	/**
@@ -42,7 +45,7 @@ public class UtilsLogging {
 	 * @param message The message to log
 	 */
 	public static void logLnWarning(@NonNull final Object message) {
-		System.out.println("++ W:" + ___8drrd3148796d_Xaf() + message);
+		Log.w("VISOR", "++ W:" + ___8drrd3148796d_Xaf() + message);
 	}
 
 	/**
@@ -51,7 +54,9 @@ public class UtilsLogging {
 	 * @param message The message to log
 	 */
 	public static void logLnInfo(@NonNull final Object message) {
-		System.out.println("++ I:" + ___8drrd3148796d_Xaf() + message);
+		if (BuildConfig.DEBUG) {
+			Log.i("VISOR", "++ I:" + ___8drrd3148796d_Xaf() + message);
+		}
 	}
 
 	/**
@@ -60,7 +65,9 @@ public class UtilsLogging {
 	 * @param message The message to log
 	 */
 	public static void logLnDebug(@NonNull final Object message) {
-		System.out.println("++ D:" + ___8drrd3148796d_Xaf() + message);
+		if (BuildConfig.DEBUG) {
+			Log.d("VISOR", "++ D:" + ___8drrd3148796d_Xaf() + message);
+		}
 	}
 
 	/** This methods name is ridiculous on purpose to prevent any other method
