@@ -26,14 +26,11 @@ import android.opengl.GLES20;
 import androidx.annotation.NonNull;
 
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Object;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 
 import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class UtilsOpenGL {
-
-	static final Logger LOGGER_STR = Logger.getLogger("OpenGL");
 
 	public static final int FLOAT_BYTES = 4;
 	public static final int SHORT_BYTES = 2;
@@ -94,14 +91,14 @@ public final class UtilsOpenGL {
 		int position_id = GLES20.glGetAttribLocation(program_id, "a_position");
 		checkGLErrors("glGetAttribLocation 1");
 		if (position_id == -1) {
-			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_position");
+			UtilsLogging.logLnError("Error getting attribute location for a_position");
 
 			return;
 		}
 		int color_id = GLES20.glGetAttribLocation(program_id, "a_color");
 		checkGLErrors("glGetAttribLocation 2");
 		if (color_id == -1) {
-			LOGGER_STR.log(Level.SEVERE, "Error getting attribute location for a_color");
+			UtilsLogging.logLnError("Error getting attribute location for a_color");
 
 			return;
 		}
@@ -109,7 +106,7 @@ public final class UtilsOpenGL {
 		int model_matrix_id = GLES20.glGetUniformLocation(program_id, "u_model");
 		checkGLErrors("glGetUniformLocation 1");
 		if (model_matrix_id == -1) {
-			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_model");
+			UtilsLogging.logLnError("Error getting uniform location for u_model");
 
 			return;
 		}
@@ -117,7 +114,7 @@ public final class UtilsOpenGL {
 		int view_matrix_id = GLES20.glGetUniformLocation(program_id, "u_view");
 		checkGLErrors("glGetUniformLocation 2");
 		if (view_matrix_id == -1) {
-			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_view");
+			UtilsLogging.logLnError("Error getting uniform location for u_view");
 
 			return;
 		}
@@ -125,7 +122,7 @@ public final class UtilsOpenGL {
 		int projection_matrix_id = GLES20.glGetUniformLocation(program_id, "u_projection");
 		checkGLErrors("glGetUniformLocation 2");
 		if (projection_matrix_id == -1) {
-			LOGGER_STR.log(Level.SEVERE, "Error getting uniform location for u_projection");
+			UtilsLogging.logLnError("Error getting uniform location for u_projection");
 
 			return;
 		}
@@ -165,13 +162,13 @@ public final class UtilsOpenGL {
 
 		int vertex_shader_id = compileShader(GLES20.GL_VERTEX_SHADER, Shaders.VERTEX_SHADER_CODE);
 		if (vertex_shader_id == 0) {
-			LOGGER_STR.log(Level.SEVERE, "Error creating vertex shader");
+			UtilsLogging.logLnError("Error creating vertex shader");
 
 			return 0;
 		}
 		int fragment_shader_id = compileShader(GLES20.GL_FRAGMENT_SHADER, Shaders.FRAGMENT_SHADER_CODE);
 		if (fragment_shader_id == 0) {
-			LOGGER_STR.log(Level.SEVERE, "Error creating fragment shader");
+			UtilsLogging.logLnError("Error creating fragment shader");
 			GLES20.glDeleteShader(vertex_shader_id);
 			checkGLErrors("glDeleteShader");
 
@@ -223,7 +220,7 @@ public final class UtilsOpenGL {
 		if (compile_status[0] == GLES20.GL_FALSE) {
 			String error_message = GLES20.glGetShaderInfoLog(shader_id);
 			checkGLErrors("glGetShaderInfoLog");
-			LOGGER_STR.log(Level.SEVERE, "Error compiling shader: " + error_message);
+			UtilsLogging.logLnError("Error compiling shader: " + error_message);
 			GLES20.glDeleteShader(shader_id);
 			checkGLErrors("glDeleteShader");
 
@@ -270,7 +267,7 @@ public final class UtilsOpenGL {
 					break;
 			}
 
-			LOGGER_STR.log(Level.SEVERE, "OpenGL error on \"" + id + "\": " + error_string);
+			UtilsLogging.logLnError("OpenGL error on \"" + id + "\": " + error_string);
 		}
 	}
 }
