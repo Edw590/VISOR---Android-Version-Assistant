@@ -34,6 +34,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
@@ -98,13 +99,13 @@ public final class TabCommunicatorMain extends Fragment {
 			final String inserted_text = editTxt_txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
 			if (inserted_text.startsWith("$ ")) {
 				final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(false, inserted_text.substring(2));
-				System.out.println("----------");
-				System.out.println(cmdOutput.exit_code);
-				System.out.println("-----");
-				System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.output_stream, false));
-				System.out.println("-----");
-				System.out.println(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.error_stream, false));
-				System.out.println("----------");
+				UtilsLogging.logLnDebug("----------");
+				UtilsLogging.logLnDebug(cmdOutput.exit_code);
+				UtilsLogging.logLnDebug("-----");
+				UtilsLogging.logLnDebug(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.output_stream, false));
+				UtilsLogging.logLnDebug("-----");
+				UtilsLogging.logLnDebug(UtilsSWA.bytesToPrintableDATACONV(cmdOutput.error_stream, false));
+				UtilsLogging.logLnDebug("----------");
 			} else {
 				UtilsCmdsExecutorBC.processTask(inserted_text, false, false, false);
 			}

@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsMedia;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
@@ -277,7 +278,7 @@ public final class AudioRecorder implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-AudioRecorder - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

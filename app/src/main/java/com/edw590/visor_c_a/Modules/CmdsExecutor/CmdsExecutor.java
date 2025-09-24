@@ -42,6 +42,7 @@ import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidPower;
 import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidTelephony;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNativeLibs;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 import com.edw590.visor_c_a.GlobalUtils.UtilsTimeDate;
@@ -161,8 +162,8 @@ public final class CmdsExecutor implements IModuleInst {
 		ask_anything_else = true;
 
 		handle_input_result = DialogMan.DialogMan.handleInput(sentence, handle_input_result);
-		System.out.println("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
-		System.out.println(handle_input_result);
+		UtilsLogging.logLnDebug("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
+		UtilsLogging.logLnDebug(handle_input_result);
 		if (handle_input_result == null) {
 			sendToGPT(sentence);
 
@@ -1193,7 +1194,7 @@ public final class CmdsExecutor implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-Executor - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-Executor - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

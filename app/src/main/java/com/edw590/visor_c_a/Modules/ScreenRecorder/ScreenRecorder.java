@@ -49,6 +49,7 @@ import com.edw590.visor_c_a.ActivitiesFragments.Activities.ActScrCapturePerm;
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsMedia;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
@@ -360,7 +361,7 @@ public final class ScreenRecorder implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-ScreenRecorder - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-ScreenRecorder - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

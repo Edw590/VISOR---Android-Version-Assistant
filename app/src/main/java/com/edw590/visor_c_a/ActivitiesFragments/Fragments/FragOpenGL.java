@@ -346,7 +346,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 	private void prepareSensors() {
 		sensor_manager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
 		if (sensor_manager == null) {
-			System.out.println("SensorManager is null");
+			UtilsLogging.logLnWarning("SensorManager is null");
 
 			return;
 		}
@@ -355,7 +355,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		Sensor magnetometer = sensor_manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		Sensor gyroscope = sensor_manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		if (accelerometer == null || magnetometer == null) {
-			System.out.println("Accelerometer and/or Magnetometer not available");
+			UtilsLogging.logLnWarning("Accelerometer and/or Magnetometer not available");
 
 			return;
 		}

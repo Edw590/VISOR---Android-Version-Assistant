@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -144,7 +145,7 @@ public final class SmsMsgsProcessor implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-SmsMsgsProcessor - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-SmsMsgsProcessor - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

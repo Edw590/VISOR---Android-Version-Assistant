@@ -50,6 +50,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsAudio;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
 import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
@@ -465,9 +466,9 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 			final String first_match = matches.get(0).toLowerCase(Locale.ENGLISH);
 
-			System.out.println("--------------------------");
-			System.out.println(matches);
-			System.out.println("--------------------------");
+			UtilsLogging.logLnDebug("--------------------------");
+			UtilsLogging.logLnDebug(matches);
+			UtilsLogging.logLnDebug("--------------------------");
 
 			UtilsCmdsExecutorBC.processTask(first_match, false, false, false);
 
@@ -476,9 +477,9 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			//if (!matches.isEmpty()) {
 			//	if (first_match.length() - 1 > partial_results_last_index && !first_match.equals(total_processed_speech.toString())) {
 			//		process_speech_string = first_match.substring(partial_results_last_index);
-			//		System.out.println("A------------------------A");
-			//		System.out.println(process_speech_string);
-			//		System.out.println("A------------------------A");
+			//		UtilsLogging.logLnDebug("A------------------------A");
+			//		UtilsLogging.logLnDebug(process_speech_string);
+			//		UtilsLogging.logLnDebug("A------------------------A");
 			//		if (!process_speech_string.equals(last_processed_speech)) {
 			//			UtilsCmdsExecutorBC.processTask(first_match.substring(partial_results_last_index), false, false);
 			//		}
@@ -568,7 +569,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-CommandsRecognition - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-CommandsRecognition - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

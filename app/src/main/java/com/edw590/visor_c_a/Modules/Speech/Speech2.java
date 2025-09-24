@@ -51,6 +51,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
 import com.edw590.visor_c_a.ModulesList;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
@@ -1064,16 +1065,16 @@ public final class Speech2 implements IModuleInst {
 
 		@Override
 		public void onStart(final String utteranceId) {
-			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
+			UtilsLogging.logLnDebug("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
 			rightBeforeSpeaking(utteranceId);
-			System.out.println("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
+			UtilsLogging.logLnDebug("^/^/^/^/^/^/^/^/^/^/^/^/^/^/^");
 		}
 
 		@Override
 		public void onDone(final String utteranceId) {
-			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-			System.out.println(utteranceId);
-			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+			UtilsLogging.logLnDebug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+			UtilsLogging.logLnDebug(utteranceId);
+			UtilsLogging.logLnDebug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
 			// If the utterance ID is empty, then it means it was force stopped and it's to be done nothing.
 			// When tts.stop() is called, I think onDone was supposed to be called (I think it's supposed to be always
@@ -1090,9 +1091,9 @@ public final class Speech2 implements IModuleInst {
 		// Up to API 20
 		@Override
 		public void onError(final String utteranceId) {
-			System.out.println("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-			System.out.println(utteranceId);
-			System.out.println("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+			UtilsLogging.logLnDebug("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+			UtilsLogging.logLnDebug(utteranceId);
+			UtilsLogging.logLnDebug("^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
 
 			// The if statement below has the same reason as the reason on onDone for the same if statement. It's a
 			// precaution, since I don't know when there's an error, which of onDone and onError will be called, and if
@@ -1108,9 +1109,9 @@ public final class Speech2 implements IModuleInst {
 		@Override
 		public void onError(final String utteranceId, final int errorCode) {
 			super.onError(utteranceId, errorCode);
-			System.out.println("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
-			System.out.println(errorCode);
-			System.out.println("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
+			UtilsLogging.logLnDebug("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
+			UtilsLogging.logLnDebug(errorCode);
+			UtilsLogging.logLnDebug("^*^*^*^*^*^*^*^*^*^*^*^*^*^*^");
 
 			// The super call up here just calls the other onError() method. So don't do anything here (except printing
 			// the error).
@@ -1133,9 +1134,9 @@ public final class Speech2 implements IModuleInst {
 	 * @param skip_speech same as in {@link #ttsStop(boolean)}
 	 */
 	private void onStop(@NonNull final String utteranceId, final boolean skip_speech) {
-		System.out.println("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
-		System.out.println(utteranceId);
-		System.out.println("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
+		UtilsLogging.logLnDebug("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
+		UtilsLogging.logLnDebug(utteranceId);
+		UtilsLogging.logLnDebug("^+^+^+^+^+^+^+^+^+^+^+^+^+^+^");
 
 		// current_speech_id is already null here - this onStop() is only called from ttsStop(), which empties
 		// current_speech_id by itself. Use utteranceId to get info about the speech that was stopped.
@@ -1291,7 +1292,7 @@ public final class Speech2 implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-Speech2 - " + intent.getAction());
 
 			switch (intent.getAction()) {
 				////////////////// ADD THE ACTIONS TO THE RECEIVER!!!!! //////////////////

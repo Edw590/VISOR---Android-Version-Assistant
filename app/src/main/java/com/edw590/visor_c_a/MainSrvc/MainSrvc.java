@@ -39,6 +39,7 @@ import com.edw590.visor_c_a.GlobalUtils.GL_CONSTS;
 import com.edw590.visor_c_a.GlobalUtils.ObjectClasses;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsNotifications;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsProcesses;
@@ -154,7 +155,7 @@ public final class MainSrvc extends Service {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-MainSrv - " + intent.getAction());
 
 			if (!intent.getAction().equals(CONSTS_BC_Speech.ACTION_READY)) {
 				return;

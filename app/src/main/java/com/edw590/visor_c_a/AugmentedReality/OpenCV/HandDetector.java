@@ -23,6 +23,8 @@ package com.edw590.visor_c_a.AugmentedReality.OpenCV;
 
 import androidx.annotation.NonNull;
 
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfInt4;
@@ -80,7 +82,7 @@ class HandDetector {
 			gesture = "Closed Hand";
 		}
 
-		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-		System.out.println("Gesture: " + gesture);
+		UtilsLogging.logLnDebug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		UtilsLogging.logLnDebug("Gesture: " + gesture);
 	}
 }

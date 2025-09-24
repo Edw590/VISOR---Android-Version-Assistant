@@ -74,7 +74,7 @@ public final class UtilsSettings {
 				e2.printStackTrace();
 
 				String user_generated = user_settings ? "user" : "generated";
-				System.out.println("Failed to load " + user_generated + " settings. Using empty ones...");
+				UtilsLogging.logLnWarning("Failed to load " + user_generated + " settings. Using empty ones...");
 
 				return false;
 			}

@@ -42,6 +42,7 @@ import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsServices;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
@@ -469,7 +470,7 @@ public final class CameraManagement implements IModuleInst {
 				return;
 			}
 
-			System.out.println("PPPPPPPPPPPPPPPPPP-CameraManagement - " + intent.getAction());
+			UtilsLogging.logLnInfo("PPPPPPPPPPPPPPPPPP-CameraManagement - " + intent.getAction());
 
 			final String intent_action = intent.getAction();
 			switch (intent_action) {

@@ -23,6 +23,7 @@ package com.edw590.visor_c_a.Modules.TasksExecutor;
 
 import com.edw590.visor_c_a.GlobalInterfaces.IModuleInst;
 import com.edw590.visor_c_a.GlobalUtils.UtilsGeneral;
+import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.UtilsCmdsExecutorBC;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
@@ -72,7 +73,7 @@ public class TasksExecutor implements IModuleInst {
 				return;
 			}
 
-			System.out.println("Task! --> " + task.getId());
+			UtilsLogging.logLnInfo("Task! --> " + task.getId());
 
 			if (!task.getMessage().isEmpty()) {
 				UtilsSpeech2BC.speak(task.getMessage(), Speech2.PRIORITY_MEDIUM, Speech2.MODE1_ALWAYS_NOTIFY,
