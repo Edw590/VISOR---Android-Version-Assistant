@@ -61,6 +61,7 @@ import com.edw590.visor_c_a.AugmentedReality.OpenGL.Objects.Rectangle;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.UtilsOpenGL;
 import com.edw590.visor_c_a.AugmentedReality.OpenGL.Vector;
 import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
+import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.R;
 
@@ -146,6 +147,22 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.L) { // Keep this here - this is called on all versions
 			AppCompatTextView text_view = new AppCompatTextView(requireContext());
 			text_view.setText("Only available on Android Lollipop 5.0 and above");
+			text_view.setTextSize(20);
+			text_view.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+			text_view.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+			text_view.setGravity(Gravity.CENTER);
+			text_view.setLayoutParams(new FrameLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+			));
+			requireActivity().setContentView(text_view);
+
+			return;
+		}
+
+		if (!UtilsCheckHardwareFeatures.isCameraSupported()) {
+			AppCompatTextView text_view = new AppCompatTextView(requireContext());
+			text_view.setText("Only available on devices with a camera");
 			text_view.setTextSize(20);
 			text_view.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
 			text_view.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
