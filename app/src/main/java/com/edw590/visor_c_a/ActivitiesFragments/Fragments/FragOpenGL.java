@@ -64,6 +64,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsApp;
 import com.edw590.visor_c_a.GlobalUtils.UtilsCheckHardwareFeatures;
 import com.edw590.visor_c_a.GlobalUtils.UtilsLogging;
 import com.edw590.visor_c_a.R;
+import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import org.opencv.android.JavaCameraView;
 
@@ -194,7 +196,9 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 		} else {
 			camera_view.setZOrderOnTop(true);
 		}
-		camera_view.setMaxFrameSize(320, 240);
+		int camera_width = (int) UtilsRegistry.getData(RegistryKeys.K_AR_CAM_MAX_WIDTH, true);
+		int camera_height = (int) UtilsRegistry.getData(RegistryKeys.K_AR_CAM_MAX_HEIGHT, true);
+		camera_view.setMaxFrameSize(camera_width, camera_height);
 		frame_layout.addView(camera_view);
 
 		// Initialize GLSurfaceView and add to the FrameLayout

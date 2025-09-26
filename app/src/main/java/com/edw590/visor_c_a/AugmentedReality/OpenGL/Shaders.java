@@ -21,7 +21,7 @@
 
 package com.edw590.visor_c_a.AugmentedReality.OpenGL;
 
-public final class Shaders {
+final class Shaders {
 
 	static final String VERTEX_SHADER_CODE =
 					"attribute vec3 a_position;" +

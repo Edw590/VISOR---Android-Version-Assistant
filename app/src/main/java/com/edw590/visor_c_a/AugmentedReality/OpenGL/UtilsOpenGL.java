@@ -204,7 +204,7 @@ public final class UtilsOpenGL {
 	 *
 	 * @return the shader ID
 	 */
-	public static int compileShader(final int type, @NonNull final String shader_code) {
+	private static int compileShader(final int type, @NonNull final String shader_code) {
 		clearGLErrors();
 
 		int shader_id = GLES20.glCreateShader(type);

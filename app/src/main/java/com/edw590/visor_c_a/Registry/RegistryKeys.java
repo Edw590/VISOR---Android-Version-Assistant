@@ -114,6 +114,12 @@ public final class RegistryKeys {
 	/** Type: boolean. */
 	public static final String K_PERMS_AUTHS_FORCE_ALL = SETTINGS_PREFIX + "PERMS_AUTHS_KEEP_FORCING";
 
+	// Augmented Reality
+	/** Type: int. */
+	public static final String K_AR_CAM_MAX_WIDTH = SETTINGS_PREFIX + "AR_CAM_MAX_WIDTH";
+	/** Type: int. */
+	public static final String K_AR_CAM_MAX_HEIGHT = SETTINGS_PREFIX + "AR_CAM_MAX_HEIGHT";
+
 	// Note: if the value is not being updated, remove it from the list
 
 	/**
@@ -201,6 +207,11 @@ public final class RegistryKeys {
 		UtilsSWA.registerValueREGISTRY(K_PERMS_AUTHS_FORCE_ALL, "Permissions and authorizations - Force all",
 				"Keep forcing all app permissions and authorizations", UtilsSWA.TYPE_BOOL, "false", false);
 
+		// Augmented Reality
+		UtilsSWA.registerValueREGISTRY(K_AR_CAM_MAX_WIDTH, "Augmented Reality - Camera width",
+				"The maximum width of the camera", UtilsSWA.TYPE_INT, "320", false);
+		UtilsSWA.registerValueREGISTRY(K_AR_CAM_MAX_HEIGHT, "Augmented Reality - Camera height",
+				"The maximum height of the camera", UtilsSWA.TYPE_INT, "240", false);
 
 		/////////////////////////////////////////////
 		// Clean the registry
