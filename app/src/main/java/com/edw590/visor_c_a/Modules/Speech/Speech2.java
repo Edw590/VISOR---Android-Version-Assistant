@@ -167,6 +167,7 @@ public final class Speech2 implements IModuleInst {
 	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
 	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.
 	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
+	private static final boolean RUNNING_ON_WATCH = UtilsApp.isRunningOnWatch();
 	static {
 		if (UtilsApp.isRunningOnWatch()) {
 			// On the Galaxy Watch 5 Pro, VISOR was only speaking if on CRITICAL priority. So now all streams are ALARM
@@ -831,7 +832,8 @@ public final class Speech2 implements IModuleInst {
 				setResetWillChangeVolume(true);
 
 				audioManager.setStreamVolume(curr_speech.getAudioStream(), actual_new_volume,
-						AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+						AudioManager.FLAG_FIXED_VOLUME | AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE |
+								(RUNNING_ON_WATCH ? 0 : AudioManager.FLAG_SHOW_UI));
 			}
 		} else {
 			if ((curr_speech.getMode() & MODE2_BYPASS_NO_SND) != 0) {
@@ -866,7 +868,8 @@ public final class Speech2 implements IModuleInst {
 					setResetWillChangeVolume(true);
 
 					audioManager.setStreamVolume(curr_speech.getAudioStream(), actual_new_volume,
-							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+							AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE |
+									(RUNNING_ON_WATCH ? 0 : AudioManager.FLAG_SHOW_UI));
 				}
 			}
 		}
@@ -913,12 +916,14 @@ public final class Speech2 implements IModuleInst {
 				if (audioManager.getStreamVolume(volumeDndState.audio_stream) != volumeDndState.old_volume) {
 					try {
 						audioManager.setStreamVolume(volumeDndState.audio_stream, volumeDndState.old_volume,
-								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE |
+										(RUNNING_ON_WATCH ? 0 : AudioManager.FLAG_SHOW_UI));
 					} catch (final SecurityException ignored) {
 						// Toggles DND, so I guess that would be because the volume is 0, maybe. If I'm right, then
 						// I just need to increase 1 to put it one level above, which would be out of DND.
 						audioManager.setStreamVolume(volumeDndState.audio_stream, volumeDndState.old_volume + 1,
-								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE | AudioManager.FLAG_SHOW_UI);
+								AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE |
+										(RUNNING_ON_WATCH ? 0 : AudioManager.FLAG_SHOW_UI));
 					}
 				}
 			}
