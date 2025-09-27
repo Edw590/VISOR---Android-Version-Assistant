@@ -210,6 +210,7 @@
 		android:killAfterRestore="true"
 		android:restoreAnyVersion="true"
 		android:supportsRtl="true"
+		android:pageSizeCompat="enabled"
 
 		android:cantSaveState="false"
 		android:allowClearUserData="true"
@@ -270,6 +271,8 @@
 			android:excludeFromRecents="true">
 		</activity>
 		<activity android:name="com.edw590.visor_c_a.ActivitiesFragments.Activities.ActAssist"
+			android:label="Listen..."
+			android:icon="@mipmap/app_logo_listen"
 			android:noHistory="true"
 			android:permission=""
 			android:exported="true"
@@ -277,6 +280,11 @@
 			android:autoRemoveFromRecents="true"
 			android:excludeFromRecents="true"
 			android:theme="@android:style/Theme.NoDisplay">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
 			<intent-filter>
 				<action android:name="android.intent.action.SEARCH_LONG_PRESS"/>
 				<category android:name="android.intent.category.DEFAULT"/>
