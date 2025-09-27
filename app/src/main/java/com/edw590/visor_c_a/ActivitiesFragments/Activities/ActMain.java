@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 
@@ -68,7 +69,11 @@ public final class ActMain extends AppCompatActivity {
 		if (!generalConsts.getPin().isEmpty()) {
 			setContentView(R.layout.nested_scroll_view);
 
+			int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15.0f,
+					getResources().getDisplayMetrics());
+
 			LinearLayout linear_layout = findViewById(R.id.nested_scroll_view_linear_layout);
+			linear_layout.setPadding(padding, padding, padding, padding);
 
 			String color_accent = "#" + Integer.toHexString(ContextCompat.getColor(this, R.color.colorAccent));
 
