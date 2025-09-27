@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -420,7 +421,9 @@ public final class Speech2 implements IModuleInst {
 	 */
 	private void addSpeechToNotif(final String txt_to_speak) {
 		if (UtilsApp.isRunningOnTV() || UtilsApp.isRunningOnWatch()) {
-			Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
+			new Handler(Looper.getMainLooper()).post(() -> {
+				Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
+			});
 
 			return;
 		}
