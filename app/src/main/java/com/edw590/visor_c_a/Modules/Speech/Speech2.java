@@ -141,7 +141,6 @@ public final class Speech2 implements IModuleInst {
 	private boolean user_changed_volume = false;
 	private boolean focus_volume_dnd_done = false;
 
-	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
 	// SYSTEM_ENFORCED so we can't the change the volume: "Yeah, it will always play at max volume since this stream is
 	// intended mainly for camera shutter sounds in markets where they have legal requirements saying that
 	// people shouldn't be able to mute/attenuate the shutter sound and go around taking photos of other people
@@ -150,8 +149,8 @@ public final class Speech2 implements IModuleInst {
 	// above is applied (said in another comment).
 	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
 	// system-dependent, and ALARM seems to always have high priority, possibly.
-	private static final int AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_NOTIFICATION;
-	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_NOTIFICATION;
+	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
+	private static final int AUD_STREAM_PRIORITY_HIGH;
 	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
 	// Also don't change to MUSIC, for the same reason.
 	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
@@ -164,9 +163,21 @@ public final class Speech2 implements IModuleInst {
 	// EDIT 2: Changed to NOTIFICATION because of tablets. They might not use RING (miTab Advance doesn't). I can't
 	// change it manually, but the app still speaks. With NOTIFICATION, I guess it should work everywhere (there are
 	// always notifications). Alarms exist too anyways and the music stream too, of course. So all cool, I think.
-	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
+	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS;
 	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
 	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.
+	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
+	static {
+		if (UtilsApp.isRunningOnWatch()) {
+			// On the Galaxy Watch 5 Pro, VISOR was only speaking if on CRITICAL priority. So now all streams are ALARM
+			// on watches.
+			AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_ALARM;
+			AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_ALARM;
+		} else {
+			AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_NOTIFICATION;
+			AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_NOTIFICATION;
+		}
+	}
 
 	AudioAttributes audioAttributes = null; // No problem in being null since it will only be used if TTS is initialized
 	                                        // correctly - and if it did, then audioAttributes was initialized decently.
@@ -1056,6 +1067,7 @@ public final class Speech2 implements IModuleInst {
 			}
 
 			if ((curr_speech.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
+				UtilsLogging.logLnDebug("Always notify mode, adding speech to notif");
 				addSpeechToNotif(curr_speech.getText());
 			}
 		}
