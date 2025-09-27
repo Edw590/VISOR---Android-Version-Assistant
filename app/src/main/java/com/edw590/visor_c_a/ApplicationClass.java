@@ -35,8 +35,6 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsSettings;
 import com.edw590.visor_c_a.MainSrvc.UtilsMainSrvc;
 import com.edw590.visor_c_a.Modules.CmdsExecutor.CmdsList.CmdsList;
-import com.edw590.visor_c_a.Modules.Speech.Speech2;
-import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.github.anrwatchdog.ANRWatchDog;
 
@@ -104,9 +102,6 @@ public final class ApplicationClass extends Application {
 		// One second less than the Android ANR timeout (5 seconds)
 		new ANRWatchDog(4000).setANRListener(error -> {
 			UtilsLogging.logLnDebug("ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇ");
-			String speak = "Application Not Responding detected";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_LOW, Speech2.MODE1_ALWAYS_NOTIFY,
-					UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 
 			// Stop all VISOR Libraries stuff
 			UtilsSWA.closeCommsChannels();
@@ -128,6 +123,12 @@ public final class ApplicationClass extends Application {
 
 		/////////////////////////////////////////////////////////////
 
+		// Load OpenCV
+		OpenCVLoader.initDebug();
+
+		// Load native-lib
+		System.loadLibrary("native-lib");
+
 		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 			if (!UtilsSettings.loadSettingsFile(false)) {
 				UtilsLogging.logLnWarning("Failed to load generated settings. Using empty ones...");
@@ -139,12 +140,6 @@ public final class ApplicationClass extends Application {
 
 			settings_files_checked = true;
 		}
-
-		// Load OpenCV
-		OpenCVLoader.initDebug();
-
-		// Load native-lib
-		System.loadLibrary("native-lib");
 
 		infinity_thread.start();
 
