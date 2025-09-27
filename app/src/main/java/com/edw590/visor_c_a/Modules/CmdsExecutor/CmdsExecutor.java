@@ -1139,8 +1139,13 @@ public final class CmdsExecutor implements IModuleInst {
 		}*/
 	}
 
-	private void sendToGPT(final String txt_to_send) {
-		/*if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
+	/**
+	 * <p>Send text to the GPT.</p>
+	 *
+	 * @param txt_to_send The text to send.
+	 */
+	private static void sendToGPT(final String txt_to_send) {
+		if (!UtilsSWA.isCommunicatorConnectedSERVER()) {
 			String speak = "GPT unavailable. Not connected to the server.";
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 
@@ -1168,7 +1173,7 @@ public final class CmdsExecutor implements IModuleInst {
 		}
 		if (!speak.isEmpty() && !txt_to_send.equals("/stop")) {
 			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
-		}*/
+		}
 	}
 
 
