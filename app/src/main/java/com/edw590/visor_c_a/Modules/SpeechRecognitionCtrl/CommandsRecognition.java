@@ -117,14 +117,17 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// that (or not, but 1.5 seconds == 2 seconds in this case of 1 second sleep).
 			// PS: these times are now also including user action and method action delay, not just probable good frozen
 			// timings.
-			put(ON_START_COMMAND_STR, 3_000L); // 3 seconds to call onReadyForSpeech() after starting the service
-			put(ON_READY_FOR_SPEECH_STR, 5_000L); // Waits for user speech to begin - give people some time (this is
-			// also decided by the recognizer itself - if it sees there's no speech, it will call onEndOfSpeech() (or
-			// onError(), I think, not sure anymore))
-			put(ON_BEGINNING_OF_SPEECH_STR, Long.MAX_VALUE); // Speech duration - as long as the user wants. If there's
-			// no one actually talking, let the recognizer decide that. I hasn't froze so far on onBeginningOfSpeech().
-			put(ON_END_OF_SPEECH_STR, 3_000L); // Time since speech ending until results are gotten - Internet
-			// connection doesn't take more than 3 seconds...
+
+			// 3 seconds to call onReadyForSpeech() after starting the service
+			put(ON_START_COMMAND_STR, UtilsApp.isRunningOnWatch() ? 6_000L : 3_000L);
+			// Waits for user speech to begin - give people some time (this is also decided by the recognizer itself -
+			// if it sees there's no speech, it will call onEndOfSpeech() (or onError(), I think, not sure anymore))
+			put(ON_READY_FOR_SPEECH_STR, 5_000L);
+			// Speech duration - as long as the user wants. If there's no one actually talking, let the recognizer
+			// decide that. It hasn't froze so far on onBeginningOfSpeech().
+			put(ON_BEGINNING_OF_SPEECH_STR, Long.MAX_VALUE);
+			// Time since speech ending until results are gotten - Internet connection doesn't take more than 3 seconds...
+			put(ON_END_OF_SPEECH_STR, UtilsApp.isRunningOnWatch() ? 5_000L : 3_000L);
 		}
 	};
 
@@ -198,12 +201,18 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		if (intent != null) {
 			if (intent.hasExtra(CONSTS_SpeechRecog.EXTRA_TIME_START)) {
 				// Must have been called 1 second ago at most - else it was the system restarting it or something.
-				stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0) + 1000 < System.currentTimeMillis();
+				// EDIT: now 2 seconds. On the Watch the service was being killed right below.
+				int max_delay = 1_000;
+				if (UtilsApp.isRunningOnWatch()) {
+					max_delay = 5_000;
+				}
+				stop_now = intent.getLongExtra(CONSTS_SpeechRecog.EXTRA_TIME_START, 0) + max_delay < System.currentTimeMillis();
 			}
 			partial_results = intent.getBooleanExtra(CONSTS_SpeechRecog.EXTRA_PARTIAL_RESULTS, false);
 		}
 		if (stop_now) {
 			stopSelf();
+			UtilsLogging.logLnDebug("Killing CommandsRecognition because it was restarted by the system");
 			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 
 			return START_NOT_STICKY;
@@ -235,10 +244,11 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// Else, if the microphone doesn't stop being busy, means it's in use elsewhere (recording, in a call, who
 			// knows), so warn about it and don't do anything.
 			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
 
 			stopListening(true);
 			stopSelf();
+			UtilsLogging.logLnInfo("Killing CommandsRecognition because the microphone is busy");
 			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
@@ -420,8 +430,21 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			}
 			is_listening = false;
 
+			// Note: the error codes come from the SpeechRecognizer class.
+
+			if (error == SpeechRecognizer.ERROR_NO_MATCH) {
+				String speak = "Sorry, I couldn't understand what you said.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false,
+						null);
+			} else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+				String speak = "You didn't say anything.";
+				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false,
+						null);
+			}
+
 			stopListening(true);
 			stopSelf();
+			UtilsLogging.logLnError("CommandsRecognition onError: " + error);
 			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
@@ -488,6 +511,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 
 			stopListening(true);
 			stopSelf();
+			UtilsLogging.logLnDebug("Killing CommandsRecognition after onResults");
 			UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 		}
 
@@ -551,6 +575,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 					// Also don't check the time if the method has no wait time (MAX_VALUE).
 					stopListening(false);
 					stopSelf();
+					UtilsLogging.logLnWarning("Killing CommandsRecognition because it froze on method " + last_method_called);
 					UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 				}
 				try {
