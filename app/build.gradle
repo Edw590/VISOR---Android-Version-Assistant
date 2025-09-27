@@ -110,7 +110,7 @@ android {
 
 	packagingOptions {
 		jniLibs {
-			useLegacyPackaging = false
+			useLegacyPackaging = true
 		}
 		dex {
 			useLegacyPackaging = false
