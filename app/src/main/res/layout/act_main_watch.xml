@@ -43,7 +43,7 @@
 				android:id="@+id/toolbar"
 				android:layout_width="match_parent"
 				android:layout_height="30sp"
-				android:paddingStart="30sp"
+				android:paddingStart="40sp"
 				android:background="@color/colorPrimary"
 				app:layout_constraintTop_toTopOf="parent"
 				app:title="Test string"
