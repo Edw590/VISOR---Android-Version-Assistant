@@ -56,7 +56,7 @@ public final class TabGManActiveCals extends Fragment {
 		linearLayout.setPadding(padding, padding, padding, padding);
 
 		AppCompatTextView txt_description = new AppCompatTextView(requireContext());
-		txt_description.setText("List of calendar associated with the Google account:");
+		txt_description.setText("List of calendars associated with the Google account:");
 
 		AppCompatTextView txt_not_connected = new AppCompatTextView(requireContext());
 		txt_not_connected.setText("[Not connected to the server to get the calendars]");

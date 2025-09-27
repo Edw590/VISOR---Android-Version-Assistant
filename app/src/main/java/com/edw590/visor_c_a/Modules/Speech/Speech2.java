@@ -169,7 +169,7 @@ public final class Speech2 implements IModuleInst {
 	private static final int AUD_STREAM_HEADPHONES = AudioManager.STREAM_MUSIC;
 	private static final boolean RUNNING_ON_WATCH = UtilsApp.isRunningOnWatch();
 	static {
-		if (UtilsApp.isRunningOnWatch()) {
+		if (RUNNING_ON_WATCH) {
 			// On the Galaxy Watch 5 Pro, VISOR was only speaking if on CRITICAL priority. So now all streams are ALARM
 			// on watches.
 			AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_ALARM;
@@ -432,7 +432,7 @@ public final class Speech2 implements IModuleInst {
 	 * @param txt_to_speak the text of the speech
 	 */
 	private void addSpeechToNotif(final String txt_to_speak) {
-		if (UtilsApp.isRunningOnTV() || UtilsApp.isRunningOnWatch()) {
+		if (RUNNING_ON_WATCH || UtilsApp.isRunningOnTV()) {
 			new Handler(Looper.getMainLooper()).post(() -> {
 				Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
 			});
@@ -1040,16 +1040,7 @@ public final class Speech2 implements IModuleInst {
 			return;
 		}
 
-		boolean skip_speaking = false;
-
-		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
-		// CRITICAL speech (except if it's to bypass a no-sound mode).
-		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-			skip_speaking = (curr_speech.getPriority() != PRIORITY_CRITICAL &&
-					(curr_speech.getMode() & MODE2_BYPASS_NO_SND) == 0);
-		}
-
-		if (skip_speaking) {
+		if (shouldSkipSpeaking(curr_speech)) {
 			new Thread(TasksList.removeTask(curr_speech.getTaskID()).runnable).start();
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
 					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, curr_speech.getID()));
@@ -1076,6 +1067,33 @@ public final class Speech2 implements IModuleInst {
 				addSpeechToNotif(curr_speech.getText());
 			}
 		}
+	}
+
+	/**
+	 * <p>Checks if the speech should be skipped because of the ringer mode and Do Not Disturb mode.</p>
+	 *
+	 * @param curr_speech the speech to check
+	 *
+	 * @return true if the speech should be skipped, false otherwise
+	 */
+	private boolean shouldSkipSpeaking(final Speech curr_speech) {
+		boolean skip_speaking = false;
+
+		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a
+		// CRITICAL speech (except if it's to bypass a no-sound mode).
+		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
+			skip_speaking = (curr_speech.getPriority() != PRIORITY_CRITICAL &&
+					(curr_speech.getMode() & MODE2_BYPASS_NO_SND) == 0);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				int filter = notificationManager.getCurrentInterruptionFilter();
+				boolean dnd_active = (filter == NotificationManager.INTERRUPTION_FILTER_NONE ||
+						filter == NotificationManager.INTERRUPTION_FILTER_PRIORITY);
+				if (dnd_active) {
+					skip_speaking = true;
+				}
+			}
+		}
+		return skip_speaking;
 	}
 
 	/**
