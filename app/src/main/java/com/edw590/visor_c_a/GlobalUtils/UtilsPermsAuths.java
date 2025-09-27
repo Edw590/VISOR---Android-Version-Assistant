@@ -222,32 +222,32 @@ public final class UtilsPermsAuths {
 			what_to_do = CHECK_ONLY;
 		}
 
-		// todo Finish and test this. Not sure what to do about the VOICE_-ones. Find an action for them.
-		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-			final String assist_package = Settings.Secure.getString(context.getContentResolver(),
-					Settings.Secure.ASSISTANT);
-			if (!package_name.equals(assist_package)) {
-				if (what_to_do == ALSO_FORCE) {
-					// todo Missing forcing the authorization here
-				} else {
-					++missing_authorizations;
+		final String assist_package = Settings.Secure.getString(context.getContentResolver(),
+				Settings.Secure.ASSISTANT);
+		if (assist_package != null && !assist_package.contains(package_name)) {
+			if (what_to_do == ALSO_FORCE) {
+				// todo Missing forcing the authorization here
+			} else {
+				++missing_authorizations;
 
-					if (what_to_do == ALSO_REQUEST) {
-						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-							UtilsContext.startActivity(new Intent(Intent.ACTION_ASSIST));
-							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
-							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_COMMAND));
-						} else {
-							final Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+				if (what_to_do == ALSO_REQUEST) {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						final Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						UtilsContext.startActivity(intent);
+					} else {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+							final Intent intent = new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS);
 							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-							UtilsContext.startActivity(intent);
-							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
-							UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_COMMAND));
+							UtilsContext.startActivity(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
 						}
+						UtilsContext.startActivity(new Intent(Intent.ACTION_ASSIST));
 					}
+					UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_ASSIST));
+					UtilsContext.startActivity(new Intent(Intent.ACTION_VOICE_COMMAND));
 				}
 			}
-		}*/
+		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// Check if the DND management policy access has been granted for the app and if not, open the settings
