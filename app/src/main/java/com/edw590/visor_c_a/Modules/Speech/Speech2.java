@@ -118,6 +118,7 @@ public final class Speech2 implements IModuleInst {
 	private NotificationCompat.Builder speeches_notif_builder = null;
 	// Leave the lists below static! This way, if the module is restarted, the lists are kept intact.
 	static final ArrayList<String> speech_notif_speeches = new ArrayList<>(10);
+	static final ArrayList<String> speech_toast_speeches = new ArrayList<>(10);
 
 	TextToSpeech tts = null;
 	String current_speech_id = "";
@@ -150,7 +151,6 @@ public final class Speech2 implements IModuleInst {
 	// EDIT 2: It's now on ALARM, which I think might be better than SYSTEM_ENFORCED since this one may be
 	// system-dependent, and ALARM seems to always have high priority, possibly.
 	private static final int AUD_STREAM_PRIORITY_CRITICAL = AudioManager.STREAM_ALARM;
-	private static final int AUD_STREAM_PRIORITY_HIGH;
 	// Do not change the HIGH priority to SYSTEM - or it won't play while there's an incoming call.
 	// Also don't change to MUSIC, for the same reason.
 	// NOTIFICATION doesn't always work. At minimum, on an incoming call, at least sometimes, the volume can't be set.
@@ -163,6 +163,7 @@ public final class Speech2 implements IModuleInst {
 	// EDIT 2: Changed to NOTIFICATION because of tablets. They might not use RING (miTab Advance doesn't). I can't
 	// change it manually, but the app still speaks. With NOTIFICATION, I guess it should work everywhere (there are
 	// always notifications). Alarms exist too anyways and the music stream too, of course. So all cool, I think.
+	private static final int AUD_STREAM_PRIORITY_HIGH;
 	private static final int AUD_STREAM_PRIORITY_OTHERS_SPEAKERS;
 	// With other types, the audio may play on both speakers and headphones, and others, only on speakers. MUSIC plays
 	// on either speakers or headphones, depending on if headphones are connected or not, and doesn't play on both.
@@ -170,8 +171,8 @@ public final class Speech2 implements IModuleInst {
 	private static final boolean RUNNING_ON_WATCH = UtilsApp.isRunningOnWatch();
 	static {
 		if (RUNNING_ON_WATCH) {
-			// On the Galaxy Watch 5 Pro, VISOR was only speaking if on CRITICAL priority. So now all streams are ALARM
-			// on watches.
+			// On the Galaxy Watch 5 Pro, VISOR was only speaking if on CRITICAL priority. Seems it doesn't have the
+			// NOTIFICATION stream... (or RING) - VISOR doesn't speak on those streams at least.
 			AUD_STREAM_PRIORITY_HIGH = AudioManager.STREAM_ALARM;
 			AUD_STREAM_PRIORITY_OTHERS_SPEAKERS = AudioManager.STREAM_ALARM;
 		} else {
@@ -205,7 +206,8 @@ public final class Speech2 implements IModuleInst {
 		// communication, and it's this module that takes care of it).
 		// EDIT: and there will be no restarts --> as long as the module is correctly programmed. But it must be on a
 		// thread... Can't be all in the same thread! Especially all this stuff to process the speeches.
-		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread);
+		return UtilsGeneral.isThreadWorking(main_handlerThread) && UtilsGeneral.isThreadWorking(infinity_thread) &&
+				UtilsGeneral.isThreadWorking(infinity_thread2);
 	}
 	@Override
 	public void destroy() {
@@ -214,6 +216,9 @@ public final class Speech2 implements IModuleInst {
 		} catch (final IllegalArgumentException ignored) {
 		}
 		UtilsGeneral.quitHandlerThread(main_handlerThread);
+
+		infinity_thread.interrupt();
+		infinity_thread2.interrupt();
 
 		SpeechQueue.SpeechQueue.clearQueue();
 
@@ -272,6 +277,7 @@ public final class Speech2 implements IModuleInst {
 		initializeTts(true);
 
 		infinity_thread.start();
+		infinity_thread2.start();
 	}
 
 	private final Thread infinity_thread = new Thread(() -> {
@@ -292,6 +298,31 @@ public final class Speech2 implements IModuleInst {
 			// work if sent from the UI thread, which apparently is the thread of the broadcast receiver, because they
 			// work there.
 			UtilsSpeech2BC.speak(speak, PRIORITY_USER_ACTION, MODE_DEFAULT, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
+		}
+	});
+
+	private final Thread infinity_thread2 = new Thread(() -> {
+		while (true) {
+			synchronized (speech_toast_speeches) {
+				while (!speech_toast_speeches.isEmpty()) {
+					new Handler(Looper.getMainLooper()).post(() -> {
+						Toast.makeText(UtilsContext.getContext(), speech_toast_speeches.get(0), Toast.LENGTH_LONG).show();
+						speech_toast_speeches.remove(0);
+					});
+
+					// Wait the Toast duration before showing the next one. Else an exception may happen about multiple
+					// Toasts at the same time and not all will be displayed.
+					try {
+						Thread.sleep(4000);
+					} catch (final InterruptedException ignored) {
+					}
+				}
+			}
+
+			try {
+				Thread.sleep(1000);
+			} catch (final InterruptedException ignored) {
+			}
 		}
 	});
 
@@ -432,11 +463,15 @@ public final class Speech2 implements IModuleInst {
 	 * @param txt_to_speak the text of the speech
 	 */
 	private void addSpeechToNotif(final String txt_to_speak) {
+		boolean ret_value = false;
 		if (RUNNING_ON_WATCH || UtilsApp.isRunningOnTV()) {
-			new Handler(Looper.getMainLooper()).post(() -> {
-				Toast.makeText(UtilsContext.getContext(), txt_to_speak, Toast.LENGTH_LONG).show();
-			});
+			synchronized (speech_toast_speeches) {
+				speech_toast_speeches.add(txt_to_speak);
+			}
 
+			// Don't return here. Let the speeches go to notifications if the device supports them.
+			// EDIT: the watch won't let me expand the notification to see all the speeches. I doubt a TV will either.
+			// So return here again.
 			return;
 		}
 
@@ -1063,7 +1098,6 @@ public final class Speech2 implements IModuleInst {
 			}
 
 			if ((curr_speech.getMode() & MODE1_ALWAYS_NOTIFY) != 0) {
-				UtilsLogging.logLnDebug("Always notify mode, adding speech to notif");
 				addSpeechToNotif(curr_speech.getText());
 			}
 		}
@@ -1093,6 +1127,7 @@ public final class Speech2 implements IModuleInst {
 				}
 			}
 		}
+
 		return skip_speaking;
 	}
 
