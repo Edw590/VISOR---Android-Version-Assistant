@@ -244,7 +244,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// Else, if the microphone doesn't stop being busy, means it's in use elsewhere (recording, in a call, who
 			// knows), so warn about it and don't do anything.
 			final String speak = "Resources are busy";
-			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 
 			stopListening(true);
 			stopSelf();

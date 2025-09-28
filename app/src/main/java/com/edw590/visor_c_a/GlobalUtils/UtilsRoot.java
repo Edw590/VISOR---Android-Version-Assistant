@@ -54,7 +54,7 @@ public final class UtilsRoot {
         } else {
             final String speak = "Attention! Root access was denied or is not available on this device! Some " +
                     "features may not be available!";
-            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, GPTComm.SESSION_TYPE_TEMP, false, null);
+            UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_HIGH, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
         }
     }
 }
