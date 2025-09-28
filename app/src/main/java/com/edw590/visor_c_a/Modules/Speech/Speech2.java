@@ -1076,6 +1076,9 @@ public final class Speech2 implements IModuleInst {
 		}
 
 		if (shouldSkipSpeaking(curr_speech)) {
+			// Skip the speech right away. Useful on watches which are slower.
+			skipCurrentSpeech();
+
 			new Thread(TasksList.removeTask(curr_speech.getTaskID()).runnable).start();
 			UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_Speech.ACTION_AFTER_SPEAK_ID).
 					putExtra(CONSTS_BC_Speech.EXTRA_AFTER_SPEAK_ID_1, curr_speech.getID()));
@@ -1084,8 +1087,6 @@ public final class Speech2 implements IModuleInst {
 				// Notify the speech before skipping it (don't skip the notification).
 				addSpeechToNotif(curr_speech.getText());
 			}
-
-			skipCurrentSpeech();
 		} else {
 			// If it's to speak, prepare the app to speak.
 			if (!focus_volume_dnd_done) {
