@@ -87,7 +87,7 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 	float[] view_matrix = new float[16];
 	SensorManager sensor_manager = null;
-	GyroRotationCorrection gyro_rotation_correction = new GyroRotationCorrection();
+	GyroRotationCorrection gyro_rotation_correction = null;
 
 	private final OpenCV open_cv = new OpenCV();
 
@@ -237,9 +237,13 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 
 		// /////////////////////////////////////////////////////////////////////
 
+		gyro_rotation_correction = new GyroRotationCorrection(requireActivity().getWindowManager().getDefaultDisplay().
+				getRotation());
+
 		//prepareSensors();
 
 		Matrix.setIdentityM(view_matrix, 0);
+		UtilsOpenGL.setViewMatrix(view_matrix);
 
 		web_view_youtube = new WebView(requireContext());
 		web_view_youtube.setLayoutParams(new FrameLayout.LayoutParams(

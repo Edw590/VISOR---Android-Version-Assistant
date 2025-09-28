@@ -32,6 +32,17 @@ import androidx.annotation.Nullable;
 import java.util.Arrays;
 
 public final class GyroRotationCorrection {
+
+	private static class Axes {
+		final int axis_x;
+		final int axis_y;
+
+		Axes(final int axis_x, final int axis_y) {
+			this.axis_x = axis_x;
+			this.axis_y = axis_y;
+		}
+	}
+
 	private static final float GYRO_DRIFT_THRESHOLD = (float) Math.toRadians(3);
 
 	private static final float ACCEL_THRESHOLD = 0.5f;
@@ -68,6 +79,34 @@ public final class GyroRotationCorrection {
 
 	// Save this when the device is still
 	float[] saved_accel = new float[3];
+
+	private final Axes axes;
+
+	public GyroRotationCorrection(final int screen_rotation) {
+		// We want world->display mapping where “X to the right” and “Y up”
+		// remain consistent with the current screen orientation.
+		switch (screen_rotation) {
+			case android.view.Surface.ROTATION_0:
+				// Natural portrait: no change
+				axes = new Axes(SensorManager.AXIS_X, SensorManager.AXIS_Y);
+				break;
+			case android.view.Surface.ROTATION_90:
+				// Landscape: device X becomes screen Y, device Y becomes -screen X
+				axes = new Axes(SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X);
+				break;
+			case android.view.Surface.ROTATION_180:
+				// Upside-down portrait
+				axes = new Axes(SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y);
+				break;
+			case android.view.Surface.ROTATION_270:
+				// Reverse landscape: device X becomes -screen Y, device Y becomes screen X
+				axes = new Axes(SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_X);
+				break;
+			default:
+				axes = new Axes(SensorManager.AXIS_X, SensorManager.AXIS_Y);
+				break;
+		}
+	}
 
 	// Call this to save the current position
 	public void saveCurrentAccel() {
@@ -173,15 +212,23 @@ public final class GyroRotationCorrection {
 		// gyro_rotation_matrix is your rotation from gyro integration
 		// acc_mag_matrix is the one from accelerometer + magnetometer
 
+		// Remap acc/mag to display frame
+		float[] acc_mag_disp = new float[9];
+		SensorManager.remapCoordinateSystem(acc_mag_matrix, axes.axis_x, axes.axis_y, acc_mag_disp);
+
 		if (!gyro_in_use) {
 			// If gyro is not in use (maybe not available on the device, or just no data yet), just use the
-			// acc_mag_matrix.
-			return acc_mag_matrix;
+			// acc_mag_disp.
+			return acc_mag_disp;
 		}
 
+		// Remap the current gyro-integrated matrix to display frame (work on a copy)
+		float[] gyro_disp = new float[9];
+		SensorManager.remapCoordinateSystem(gyro_rotation_matrix, axes.axis_x, axes.axis_y, gyro_disp);
+
 		// Convert both matrices to quaternions
-		float[] gyro_quat = rotationMatrixToQuaternion(gyro_rotation_matrix);
-		float[] acc_mag_quat = rotationMatrixToQuaternion(acc_mag_matrix);
+		float[] gyro_quat = rotationMatrixToQuaternion(gyro_disp);
+		float[] acc_mag_quat = rotationMatrixToQuaternion(acc_mag_disp);
 
 		// Compute angle difference (in radians) between the two quaternions
 		float angle_diff = quaternionAngleDifference(gyro_quat, acc_mag_quat);
@@ -191,7 +238,7 @@ public final class GyroRotationCorrection {
 			System.arraycopy(acc_mag_matrix, 0, gyro_rotation_matrix, 0, 9);
 		}
 
-		return gyro_rotation_matrix;
+		return gyro_disp;
 	}
 
 	private boolean isPhoneStill(@NonNull final float[] accel, @NonNull final float[] magnet) {
@@ -281,7 +328,7 @@ public final class GyroRotationCorrection {
 		float trace = R[0] + R[4] + R[8];
 
 		if (trace > 0) {
-			float s = (float) Math.sqrt(trace + 1.0f) * 2f;
+			float s = (float) Math.sqrt(trace + 1.0f) * 2.0f;
 			quat[3] = 0.25f * s;
 			quat[0] = (R[7] - R[5]) / s;
 			quat[1] = (R[2] - R[6]) / s;
