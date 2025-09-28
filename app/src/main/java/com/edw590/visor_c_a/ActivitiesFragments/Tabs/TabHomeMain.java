@@ -21,6 +21,7 @@
 
 package com.edw590.visor_c_a.ActivitiesFragments.Tabs;
 
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -130,9 +131,13 @@ public final class TabHomeMain extends Fragment {
 		AppCompatButton btn_device_admin = new AppCompatButton(requireContext());
 		btn_device_admin.setText("Open the Device Admins list");
 		btn_device_admin.setOnClickListener(v -> {
-			startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
-					"com.android.settings.DeviceAdminSettings")));
-			// Didn't find any constants for these 2 strings above
+			try {
+				startActivity(new Intent().setComponent(new ComponentName("com.android.settings",
+						"com.android.settings.DeviceAdminSettings")));
+				// Didn't find any constants for these 2 strings above
+			} catch (final ActivityNotFoundException ignored) {
+				// On the watch this activity doesn't exist
+			}
 		});
 
 		AppCompatButton btn_force_stop = new AppCompatButton(requireContext());
