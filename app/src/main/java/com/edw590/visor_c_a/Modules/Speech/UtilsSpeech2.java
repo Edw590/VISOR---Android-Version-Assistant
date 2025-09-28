@@ -21,8 +21,10 @@
 
 package com.edw590.visor_c_a.Modules.Speech;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Build;
 
 import com.edw590.visor_c_a.GlobalUtils.UtilsContext;
 import com.edw590.visor_c_a.Modules.SpeechRecognitionCtrl.UtilsSpeechRecognizersBC;
@@ -47,8 +49,8 @@ public final class UtilsSpeech2 {
 	}
 
 	/**
-	 * <p>Use this right after calling {@link UtilsSpeech2BC#speak(String, int, int, boolean, Runnable)} to know if VISOR
-	 * <em>might</em> actually speak (means the ringer mode is in NORMAL - that's what is checked here).</p>
+	 * <p>Use this right after calling {@link UtilsSpeech2BC#speak(String, int, int, String, boolean, Runnable)} to know
+	 * if VISOR <em>might</em> actually speak (means the conditions for speaking are met - that's what is checked here).</p>
 	 * <p>"Might" because if he'll speak or not is checked right before the speech takes place, this is just an
 	 * approximation (and that's why it should be called right after the broadcast function - to give a bit of time).</p>
 	 *
@@ -60,6 +62,22 @@ public final class UtilsSpeech2 {
 			return false;
 		}
 
-		return audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL;
+		if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
+			return false;
+		}
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			NotificationManager notificationManager = (NotificationManager) UtilsContext.getSystemService(Context.NOTIFICATION_SERVICE);
+			if (notificationManager == null) {
+				return true;
+			}
+			int filter = notificationManager.getCurrentInterruptionFilter();
+			boolean dnd_active = (filter == NotificationManager.INTERRUPTION_FILTER_NONE ||
+					filter == NotificationManager.INTERRUPTION_FILTER_PRIORITY);
+
+			return !dnd_active;
+		}
+
+		return true;
 	}
 }

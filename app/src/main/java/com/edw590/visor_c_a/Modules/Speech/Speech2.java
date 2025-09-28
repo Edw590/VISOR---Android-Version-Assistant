@@ -1112,6 +1112,8 @@ public final class Speech2 implements IModuleInst {
 	 * @return true if the speech should be skipped, false otherwise
 	 */
 	private boolean shouldSkipSpeaking(final Speech curr_speech) {
+		// KEEP THIS SYNCED WITH UtilsSpeech2.mightSpeak()!!!!!
+
 		boolean skip_speaking = false;
 
 		// Check the ringer mode, which must be NORMAL, otherwise the assistant will not speak - unless the speech is a

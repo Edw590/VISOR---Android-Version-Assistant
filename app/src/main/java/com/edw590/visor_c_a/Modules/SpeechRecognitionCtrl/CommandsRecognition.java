@@ -277,12 +277,13 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		frozen_methods_checker.start();
 
 		// After starting the thread - without the thread, this can stay working forever without being working, and if
-		// a problem occurred while starting it, the controller will restart t
+		// a problem occurred while starting it, the controller will restart it.
 		UtilsApp.sendInternalBroadcast(new Intent(CONSTS_BC_SpeechRecog.ACTION_CMDS_RECOG_STARTING));
 
 		wait = true;
 		// Don't notify about the speech if there was no sound - there's already a notification.
-		listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION, Speech2.MODE1_NO_NOTIF,
+		listening_speech_id = UtilsSpeech2BC.speak("Listening...", Speech2.PRIORITY_USER_ACTION,
+				UtilsApp.isRunningOnWatch() || UtilsApp.isRunningOnTV() ? Speech2.MODE_DEFAULT : Speech2.MODE1_NO_NOTIF,
 				UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 		visor_spoke = UtilsSpeech2.mightSpeak();
 
