@@ -1,0 +1,6 @@
+If you need the VISOR Libraries AAR package, you need to compile them from 
+source from this repository: https://github.com/Edw590/VISOR---A-Voice-Assistant.
+
+The reason is that I kept updating them every now and then, and currently the 
+repository has 1+ GB, which is ridiculous for at least this app. So I removed 
+the file and now whoever wants the library has to compile it from source.
