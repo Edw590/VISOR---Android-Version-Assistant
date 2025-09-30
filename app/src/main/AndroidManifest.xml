@@ -279,7 +279,9 @@
 			android:directBootAware="true"
 			android:autoRemoveFromRecents="true"
 			android:excludeFromRecents="true"
+			android:launchMode="singleInstance"
 			android:theme="@android:style/Theme.NoDisplay">
+			<!-- singleInstance so that even if another activity of the app is on top, this one will have priority -->
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 

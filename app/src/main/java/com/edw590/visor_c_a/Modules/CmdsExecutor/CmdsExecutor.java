@@ -162,8 +162,6 @@ public final class CmdsExecutor implements IModuleInst {
 		ask_anything_else = true;
 
 		handle_input_result = DialogMan.DialogMan.handleInput(sentence, handle_input_result);
-		UtilsLogging.logLnDebug("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
-		UtilsLogging.logLnDebug(handle_input_result);
 		if (handle_input_result == null) {
 			sendToGPT(sentence);
 
@@ -971,15 +969,16 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
 						String[] weather_locs = OICComm.getWeatherLocationsList().split("\\|");
+
+						if (!data_was_enabled) {
+							UtilsAndroidConnectivity.setMobileDataEnabled(false);
+						}
+						if (!wifi_was_enabled) {
+							UtilsAndroidConnectivity.setWifiEnabled(false);
+						}
+
 						for (final String weather_loc : weather_locs) {
 							final ModsFileInfo.Weather weather = OICComm.getWeather(weather_loc);
-
-							if (!data_was_enabled) {
-								UtilsAndroidConnectivity.setMobileDataEnabled(false);
-							}
-							if (!wifi_was_enabled) {
-								UtilsAndroidConnectivity.setWifiEnabled(false);
-							}
 
 							if (weather == null) {
 								UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the weather information.",
@@ -1031,15 +1030,16 @@ public final class CmdsExecutor implements IModuleInst {
 					}
 					if (UtilsSWA.waitForNetwork(10)) {
 						String[] news_locs = OICComm.getNewsLocationsList().split("\\|");
+
+						if (!data_was_enabled) {
+							UtilsAndroidConnectivity.setMobileDataEnabled(false);
+						}
+						if (!wifi_was_enabled) {
+							UtilsAndroidConnectivity.setWifiEnabled(false);
+						}
+
 						for (final String news_loc : news_locs) {
 							final ModsFileInfo.News news = OICComm.getNews(news_loc);
-
-							if (!data_was_enabled) {
-								UtilsAndroidConnectivity.setMobileDataEnabled(false);
-							}
-							if (!wifi_was_enabled) {
-								UtilsAndroidConnectivity.setWifiEnabled(false);
-							}
 
 							if (news == null) {
 								UtilsSpeech2BC.speak("I'm sorry Sir, but I couldn't get the news information.",
