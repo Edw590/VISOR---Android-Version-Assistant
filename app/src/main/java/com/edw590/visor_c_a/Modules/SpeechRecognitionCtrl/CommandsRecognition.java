@@ -63,10 +63,7 @@ import com.edw590.visor_c_a.ModulesList;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-
-import GPTComm.GPTComm;
 
 /**
  * <p>This class activates the available commands speech recognizer and broadcasts the results.</p>
@@ -431,17 +428,60 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			}
 			is_listening = false;
 
-			// Note: the error codes come from the SpeechRecognizer class.
-
-			if (error == SpeechRecognizer.ERROR_NO_MATCH) {
-				String speak = "Sorry, I couldn't understand what you said.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false,
-						null);
-			} else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-				String speak = "You didn't say anything.";
-				UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false,
-						null);
+			final String speak;
+			switch (error) {
+				case SpeechRecognizer.ERROR_AUDIO:
+					speak = "There was an audio recording error while using the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_CANNOT_CHECK_SUPPORT:
+					speak = "The speech recognizer service does not allow to check for support.";
+					break;
+				case SpeechRecognizer.ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS:
+					speak = "The speech recognizer service does not allow to listen to download events.";
+					break;
+				case SpeechRecognizer.ERROR_CLIENT:
+					speak = "There was a client error with the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+					speak = "The speech recognizer doesn't appear to have the required permissions.";
+					break;
+				case SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED:
+					speak = "The selected speech recognizer language is not supported by the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE:
+					speak = "The selected speech recognizer language is supported but is currently unavailable.";
+					break;
+				case SpeechRecognizer.ERROR_NETWORK:
+					speak = "There was a network error while using the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+					speak = "The network operation timed out while using the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_NO_MATCH:
+					speak = "Sorry, I couldn't understand what you said.";
+					break;
+				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+					speak = "The speech recognizer service is busy right now.";
+					break;
+				case SpeechRecognizer.ERROR_SERVER:
+					speak = "There was a server error while using the speech recognizer.";
+					break;
+				case SpeechRecognizer.ERROR_SERVER_DISCONNECTED:
+					speak = "The connection to the speech recognizer server was lost. The speech recognizer might " +
+							"have crashed.";
+					break;
+				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+					speak = "You didn't say anything.";
+					break;
+				case SpeechRecognizer.ERROR_TOO_MANY_REQUESTS:
+					speak = "The speech recognizer service is receiving too many requests. Please wait a while before " +
+							"trying again.";
+					break;
+				default:
+					speak = "There was an unknown error while using the speech recognizer.";
+					break;
 			}
+			UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE, false, null);
 
 			stopListening(true);
 			stopSelf();
@@ -453,7 +493,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		public void onPartialResults(final Bundle partialResults) {
 			//if (partial_results) {
 			//	ArrayList<String> matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-			//	final String match = matches.get(0).toLowerCase(Locale.ENGLISH);
+			//	final String match = matches.get(0);
 
 			//	if (!match.equals(last_processed_speech) && match.length() - 1 > partial_results_last_index) {
 			//		process_speech_string = match.substring(partial_results_last_index);
@@ -488,7 +528,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 				return;
 			}
 
-			final String first_match = matches.get(0).toLowerCase(Locale.ENGLISH);
+			final String first_match = matches.get(0);
 
 			UtilsLogging.logLnDebug("--------------------------");
 			UtilsLogging.logLnDebug(matches);
@@ -566,18 +606,23 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 		@Override
 		public void run() {
 			while (last_method_called != -1) {
-				if (last_method_called_when == 0) {
-					continue;
-				}
+				if (last_method_called_when != 0) {
+					Long wait_time = last_methods_called_map.get(last_method_called);
+					if (wait_time != null && wait_time != Long.MAX_VALUE &&
+							System.currentTimeMillis() >= last_method_called_when + wait_time) {
+						// If the recognizer got frozen, stop listening.
+						// Also don't check the time if the method has no wait time (MAX_VALUE).
+						String speak = "There was a problem with the speech recognizer: frozen on method " +
+								last_method_called;
+						UtilsSpeech2BC.speak(speak, Speech2.PRIORITY_USER_ACTION, 0, UtilsSpeech2BC.SESSION_TYPE_NONE,
+								false, null);
+						stopListening(false);
+						stopSelf();
+						UtilsLogging.logLnWarning("Killing CommandsRecognition because it froze on method " + last_method_called);
+						UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
 
-				if (last_methods_called_map.get(last_method_called) != Long.MAX_VALUE &&
-						System.currentTimeMillis() >= last_method_called_when + last_methods_called_map.get(last_method_called)) {
-					// If the recognizer got frozen, stop listening.
-					// Also don't check the time if the method has no wait time (MAX_VALUE).
-					stopListening(false);
-					stopSelf();
-					UtilsLogging.logLnWarning("Killing CommandsRecognition because it froze on method " + last_method_called);
-					UtilsProcesses.killPID(UtilsProcesses.getCurrentPID());
+						return;
+					}
 				}
 				try {
 					Thread.sleep(1_000);

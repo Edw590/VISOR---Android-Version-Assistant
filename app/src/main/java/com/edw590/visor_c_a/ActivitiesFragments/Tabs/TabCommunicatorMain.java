@@ -96,7 +96,7 @@ public final class TabCommunicatorMain extends Fragment {
 		AppCompatButton btn_send_text = new AppCompatButton(requireContext());
 		btn_send_text.setText("Send text");
 		btn_send_text.setOnClickListener(v -> {
-			final String inserted_text = editTxt_txt_to_send.getText().toString().toLowerCase(Locale.ENGLISH);
+			final String inserted_text = editTxt_txt_to_send.getText().toString();
 			if (inserted_text.startsWith("$ ")) {
 				final UtilsShell.CmdOutput cmdOutput = UtilsShell.executeShellCmd(false, inserted_text.substring(2));
 				UtilsLogging.logLnDebug("----------");

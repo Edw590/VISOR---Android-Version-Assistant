@@ -52,29 +52,6 @@ public final class UtilsGeneral {
 	private UtilsGeneral() {
 	}
 
-	private static final String[] hashes_APU_lib_files = {
-			// All SHA-512
-			"BF3EFA298679FEAC228A3AA3EB3D1ED75F433C1B3CEA09734B41D381FAA3590B0E5506AC1F1464F73E0039F8DD1F923944758EB59173A1B8E52151E9CFB54CE3", // x86_64
-			"BBEEC2B13E697BE92E96E0DDCAD4BCE9FF818CA379B697E42478F29FFFD62245A97DEE7A2D0AA6545BC095D4FED52E98EAB483C2AFDA9554E4327A9DAF494680", // x86
-			"75FE7F3A6490767C013D1EBD77048ECBC3E38A21834C89C4EEE904EBD14A3EECB7547CBA93DF356154F77F50D9F2E5F54090A487D074825BB0AA55F84540129A", // armeabi-v7a
-			"8BBF14C19BD72EAF5F9E8E48780F3D1778323B60BA5C95455FFB2935E1AA87533D4B8862F01E3A445EADD2EFBFC13FD9DCCA18D2001674098EA30DD948DCD374", // arm64-v8a
-	};
-
-	/**
-	 * <p>Checks if the Advanced Commands Detection module is available.</p>
-	 * <p>It does so by checking if the ACD library file is available on the device.</p>
-	 *
-	 * @return true if it is available for use (ACD library file on the device and on a correct folder), false otherwise
-	 */
-	public static boolean isACDAvailable() {
-		if (!UtilsNativeLibs.isPrimaryNativeLibAvailable(UtilsNativeLibs.ACD_LIB_NAME)) {
-			return false;
-		}
-
-		return UtilsCryptoHashing.fileMatchesHash(UtilsNativeLibs.getPrimaryNativeLibsPath() + "/" +
-				UtilsNativeLibs.ACD_LIB_NAME, hashes_APU_lib_files);
-	}
-
 	/**
 	 * <p>Check if an accessory with speakers (like earphones, headphones, headsets...) are connected.</p>
 	 *
