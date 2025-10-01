@@ -53,21 +53,29 @@ public final class BluetoothChecker {
 	@Nullable BluetoothA2dp bluetoothA2dp = null;
 
 	boolean enabled_by_visor = false;
-	static final long DISCOVER_BT_EACH = (long) (5.0 * 60000.0); // 5 minutes
-	static final long DISCOVER_BT_EACH_PS = DISCOVER_BT_EACH << 2; // 5 * 4 = 20 minutes
-	long waiting_time = DISCOVER_BT_EACH;
-	long last_check_when = 0;
+	static final long DISCOVER_BT_EACH_MS = (long) (5.0 * 60000.0); // 5 minutes
+	static final long DISCOVER_BT_EACH_PS_MS = DISCOVER_BT_EACH_MS << 2; // 5 * 4 = 20 minutes
+	long waiting_time_ms = DISCOVER_BT_EACH_MS;
+	long last_check_when_ms = 0;
 
 	int attempts = 0;
 
 	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
+	/**
+	 * <p>Enables or disables Bluetooth.</p>
+	 *
+	 * @param enable true to enable, false to disable
+	 */
 	void setBluetoothEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setBluetoothEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
+	/**
+	 * <p>Initializes the Bluetooth adapter and BLE scanner (if available).</p>
+	 */
 	void startBluetooth() {
 		if (bluetooth_adapter != null) {
 			bluetooth_adapter.getProfileProxy(UtilsContext.getContext(), serviceListener, BluetoothProfile.HEADSET);
@@ -86,8 +94,11 @@ public final class BluetoothChecker {
 		}
 	}
 
+	/**
+	 * <p>In case Bluetooth is disabled, enables it; on the next check, if it's enabled, starts a discovery.</p>
+	 */
 	void checkBluetooth() {
-		if (System.currentTimeMillis() >= last_check_when + waiting_time && bluetooth_adapter != null) {
+		if (System.currentTimeMillis() >= last_check_when_ms + waiting_time_ms && bluetooth_adapter != null) {
 			if (bluetooth_adapter.isEnabled()) {
 				enabled_by_visor = false;
 				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)) {
@@ -99,29 +110,40 @@ public final class BluetoothChecker {
 		}
 	}
 
+	/**
+	 * <p>Changes the waiting time between Bluetooth discoveries based on power saver mode.</p>
+	 *
+	 * @param enabled true if power saver is enabled, false otherwise
+	 */
 	void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
-			waiting_time = DISCOVER_BT_EACH_PS;
+			waiting_time_ms = DISCOVER_BT_EACH_PS_MS;
 		} else {
-			waiting_time = DISCOVER_BT_EACH;
+			waiting_time_ms = DISCOVER_BT_EACH_MS;
 		}
 	}
 
+	/**
+	 * <p>Called when a Bluetooth discovery starts.</p>
+	 */
 	void discoveryStarted() {
 		// Don't forget other apps can start the discovery...
 		// In that case, use that advantage and don't start it for another period of time. Just listen to
 		// the broadcasts.
-		last_check_when = System.currentTimeMillis();
+		last_check_when_ms = System.currentTimeMillis();
 
 		nearby_devices_bt.clear();
 	}
 
+	/**
+	 * <p>Called when a Bluetooth discovery finishes.</p>
+	 */
 	void discoveryFinished() {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
 		// start the countdown as soon as the discovery started, and should be as soon as it finishes.
-		last_check_when = System.currentTimeMillis();
+		last_check_when_ms = System.currentTimeMillis();
 
 		if (enabled_by_visor) {
 			// If Bluetooth was not enabled when the discovery started, disable it again.
@@ -129,6 +151,11 @@ public final class BluetoothChecker {
 		}
 	}
 
+	/**
+	 * <p>Called when a Bluetooth device is found during a discovery.</p>
+	 *
+	 * @param intent the Intent received from the broadcast
+	 */
 	static void deviceFound(final Intent intent) {
 		long time_detection = System.currentTimeMillis();
 		BluetoothDevice bluetoothDevice =	intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -159,6 +186,11 @@ public final class BluetoothChecker {
 		);
 	}
 
+	/**
+	 * <p>Handles changes in Bluetooth state.</p>
+	 *
+	 * @param intent the intent containing the new Bluetooth state
+	 */
 	void bluetoothStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
@@ -189,7 +221,7 @@ public final class BluetoothChecker {
 			//}
 
 			if (bluetooth_adapter.startDiscovery()) {
-				last_check_when = System.currentTimeMillis();
+				last_check_when_ms = System.currentTimeMillis();
 			}
 		} else if (bluetooth_state == BluetoothAdapter.STATE_TURNING_OFF ||
 				bluetooth_state == BluetoothAdapter.STATE_OFF) {
@@ -197,6 +229,11 @@ public final class BluetoothChecker {
 		}
 	}
 
+	/**
+	 * <p>Handles changes in Bluetooth connection state.</p>
+	 *
+	 * @param intent the intent containing the new connection state
+	 */
 	void connectionStateChanged(final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
@@ -217,7 +254,7 @@ public final class BluetoothChecker {
 		}
 	}
 
-	BluetoothProfile.ServiceListener serviceListener = new BluetoothProfile.ServiceListener() {
+	private final BluetoothProfile.ServiceListener serviceListener = new BluetoothProfile.ServiceListener() {
 		@Override
 		public void onServiceConnected(final int profile, final BluetoothProfile proxy) {
 			switch (profile) {

@@ -49,23 +49,33 @@ public final class WifiChecker {
 			UtilsNetwork.getWifiManager() : null;
 
 	boolean enabled_by_visor = false;
-	static final long SCAN_WIFI_EACH = (long) (2.5 * 60000.0); // 2.5 minutes
-	static final long SCAN_WIFI_EACH_PS = SCAN_WIFI_EACH << 2; // 2.5 * 4 = 10 minutes
-	long waiting_time = SCAN_WIFI_EACH;
-	long last_check_when = 0;
+	static final long SCAN_WIFI_EACH_MS = (long) (2.5 * 60000.0); // 2.5 minutes
+	static final long SCAN_WIFI_EACH_PS_MS = SCAN_WIFI_EACH_MS << 2; // 2.5 * 4 = 10 minutes
+	long waiting_time_ms = SCAN_WIFI_EACH_MS;
+	long last_check_when_ms = 0;
 
 	int attempts = 0;
 
 	public static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
 
+	/**
+	 * <p>Enables or disables Wi-Fi.</p>
+	 *
+	 * @param enable true to enable, false to disable
+	 */
 	void setWifiEnabled(final boolean enable) {
 		if (UtilsAndroidConnectivity.setWifiEnabled(enable) == UtilsShell.ErrCodes.NO_ERR) {
 			enabled_by_visor = enable;
 		}
 	}
 
-	void checkWifi() {
-		if (System.currentTimeMillis() >= last_check_when + waiting_time && wifi_manager != null) {
+	/**
+	 * <p>Checks if Wi-Fi is enabled, and if not, enables it and starts a scan.</p>
+	 *
+	 * @param ignore_ap true to ignore if the AP is enabled (else it won't enable the Wi-Fi), false otherwise
+	 */
+	void checkWifi(final boolean ignore_ap) {
+		if (System.currentTimeMillis() >= last_check_when_ms + waiting_time_ms && wifi_manager != null) {
 			if (wifi_manager.isWifiEnabled()) {
 				enabled_by_visor = false;
 				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -73,26 +83,43 @@ public final class WifiChecker {
 				}
 			} else {
 				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-					setWifiEnabled(true);
+					if (ignore_ap || !wifi_manager.isWifiApEnabled()) {
+						setWifiEnabled(true);
+					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * <p>Changes the waiting time between Wi-Fi scans based on power saver mode.</p>
+	 *
+	 * @param enabled true if power saver is enabled, false otherwise
+	 */
 	void powerSaverChanged(final boolean enabled) {
 		if (enabled) {
-			waiting_time = SCAN_WIFI_EACH_PS;
+			waiting_time_ms = SCAN_WIFI_EACH_PS_MS;
 		} else {
-			waiting_time = SCAN_WIFI_EACH;
+			waiting_time_ms = SCAN_WIFI_EACH_MS;
 		}
 	}
 
+	/**
+	 * <p>Updates the distance to the router based on the new RSSI value.</p>
+	 *
+	 * @param intent the intent containing the new RSSI value
+	 */
 	static void rssiChanged(final Intent intent) {
 		UtilsRegistry.setData(RegistryKeys.K_DIST_ROUTER, UtilsSWA.
 				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 						UtilsSWA.DEFAULT_TX_POWER), true);
 	}
 
+	/**
+	 * <p>Handles changes in Wi-Fi state.</p>
+	 *
+	 * @param intent the intent containing the new Wi-Fi state
+	 */
 	void wifiStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
@@ -109,6 +136,11 @@ public final class WifiChecker {
 		}
 	}
 
+	/**
+	 * <p>Handles the availability of scan results.</p>
+	 *
+	 * @param intent the intent indicating that scan results are available
+	 */
 	void scanResultsAvailable(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
@@ -169,10 +201,15 @@ public final class WifiChecker {
 			}
 
 			// After we got the results successfully
-			last_check_when = System.currentTimeMillis();
+			last_check_when_ms = System.currentTimeMillis();
 		}
 	}
 
+	/**
+	 * <p>Handles changes in network state.</p>
+	 *
+	 * @param intent the intent containing the new network state
+	 */
 	void networkStateChanged(final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 

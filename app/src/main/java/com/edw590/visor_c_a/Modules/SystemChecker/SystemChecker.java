@@ -50,12 +50,11 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.Modules.Speech.Speech2;
 import com.edw590.visor_c_a.Modules.Speech.UtilsSpeech2BC;
 import com.edw590.visor_c_a.ModulesList;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.ConcurrentModificationException;
 
-import GPTComm.GPTComm;
 import SCLink.SCLink;
 
 public final class SystemChecker implements IModuleInst {
@@ -218,7 +217,7 @@ public final class SystemChecker implements IModuleInst {
 				bluetooth_checker.checkBluetooth();
 
 				// Wi-Fi
-				wifi_checker.checkWifi();
+				wifi_checker.checkWifi(false);
 			}
 
 			times++;
