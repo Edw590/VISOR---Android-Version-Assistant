@@ -27,6 +27,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
@@ -39,6 +40,7 @@ import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -106,7 +108,7 @@ final class WifiChecker {
 	 *
 	 * @param intent the intent containing the new RSSI value
 	 */
-	static void rssiChanged(final Intent intent) {
+	static void rssiChanged(@NonNull final Intent intent) {
 		UtilsRegistry.setData(RegistryKeys.K_DIST_ROUTER, UtilsSWA.
 				getRealDistanceRssiLOCRELATIVE(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -1),
 						UtilsSWA.DEFAULT_TX_POWER), true);
@@ -117,7 +119,7 @@ final class WifiChecker {
 	 *
 	 * @param intent the intent containing the new Wi-Fi state
 	 */
-	void wifiStateChanged(final Intent intent) {
+	void wifiStateChanged(@NonNull final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 
@@ -138,7 +140,7 @@ final class WifiChecker {
 	 *
 	 * @param intent the intent indicating that scan results are available
 	 */
-	void scanResultsAvailable(final Intent intent) {
+	void scanResultsAvailable(@NonNull final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		if (!intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, true)) {
@@ -151,30 +153,16 @@ final class WifiChecker {
 			return;
 		}
 
-		nearby_aps_wifi.clear();
-
+		Collection<ExtDevice> found_aps = new ArrayList<>(64);
 		for (final ScanResult scanResult : wifi_manager.getScanResults()) {
-			long time_detection = System.currentTimeMillis();
-
-			String address = scanResult.BSSID.toUpperCase(Locale.getDefault());
-
-			int nearby_aps_wifi_size = nearby_aps_wifi.size();
-			for (int i = 0; i < nearby_aps_wifi_size; ++i) {
-				ExtDevice device = nearby_aps_wifi.get(i);
-				if (device.type == ExtDevice.TYPE_BLUETOOTH && device.address.equals(address)) {
-					nearby_aps_wifi.remove(i);
-
-					break;
-				}
-			}
 			Boolean untrusted = (Boolean) UtilsReflection.getFieldValue(scanResult, "untrusted");
 			if (untrusted == null) {
 				untrusted = false;
 			}
-			nearby_aps_wifi.add(new ExtDevice(
+			found_aps.add(new ExtDevice(
 					ExtDevice.TYPE_WIFI,
-					address,
-					time_detection,
+					scanResult.BSSID.toUpperCase(Locale.getDefault()),
+					System.currentTimeMillis(),
 					scanResult.level,
 					scanResult.SSID,
 					scanResult.SSID,
@@ -182,7 +170,7 @@ final class WifiChecker {
 			);
 		}
 
-		if (nearby_aps_wifi.isEmpty() && attempts < 5) {
+		if (found_aps.isEmpty() && attempts < 5) {
 			// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
 			// something (has happened. Networks in range and nothing returned).
 			attempts++;
@@ -194,6 +182,9 @@ final class WifiChecker {
 			}
 		} else {
 			attempts = 0;
+
+			nearby_aps_wifi.clear();
+			nearby_aps_wifi.addAll(found_aps);
 
 			if (enabled_by_visor) {
 				setWifiEnabled(false);
@@ -209,7 +200,7 @@ final class WifiChecker {
 	 *
 	 * @param intent the intent containing the new network state
 	 */
-	void networkStateChanged(final Intent intent) {
+	void networkStateChanged(@NonNull final Intent intent) {
 		assert wifi_manager != null; // Change in Wi-Fi connection, so it's not null.
 
 		NetworkInfo.State state = ((NetworkInfo) intent.

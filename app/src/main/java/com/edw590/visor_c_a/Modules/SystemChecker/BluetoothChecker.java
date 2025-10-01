@@ -31,6 +31,7 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Intent;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.edw590.visor_c_a.GlobalUtils.AndroidSystem.UtilsAndroidConnectivity;
@@ -39,6 +40,7 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,6 +63,7 @@ final class BluetoothChecker {
 	int attempts = 0;
 
 	static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
+	final Collection<ExtDevice> found_devices = new ArrayList<>(64);
 
 	/**
 	 * <p>Enables or disables Bluetooth.</p>
@@ -131,7 +134,7 @@ final class BluetoothChecker {
 		// the broadcasts.
 		last_check_when_ms = System.currentTimeMillis();
 
-		nearby_devices_bt.clear();
+		found_devices.clear();
 	}
 
 	/**
@@ -139,6 +142,9 @@ final class BluetoothChecker {
 	 */
 	void discoveryFinished() {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
+
+		nearby_devices_bt.clear();
+		nearby_devices_bt.addAll(found_devices);
 
 		// Again, as soon as the discovery stops, reset the count. If it's not reset, the assistant will
 		// start the countdown as soon as the discovery started, and should be as soon as it finishes.
@@ -155,30 +161,18 @@ final class BluetoothChecker {
 	 *
 	 * @param intent the Intent received from the broadcast
 	 */
-	static void deviceFound(final Intent intent) {
-		long time_detection = System.currentTimeMillis();
-		BluetoothDevice bluetoothDevice =	intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-		short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MAX_VALUE);
+	void deviceFound(@NonNull final Intent intent) {
+		BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-		String address = bluetoothDevice.getAddress().toUpperCase(Locale.getDefault());
-		int nearby_devices_size = nearby_devices_bt.size();
-		for (int i = 0; i < nearby_devices_size; ++i) {
-			ExtDevice device = nearby_devices_bt.get(i);
-			if (device.type == ExtDevice.TYPE_BLUETOOTH && device.address.equals(address)) {
-				nearby_devices_bt.remove(i);
-
-				break;
-			}
-		}
 		String alias = null;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 			alias = bluetoothDevice.getAlias();
 		}
-		nearby_devices_bt.add(new ExtDevice(
+		found_devices.add(new ExtDevice(
 				ExtDevice.TYPE_BLUETOOTH,
-				address,
-				time_detection,
-				rssi,
+				bluetoothDevice.getAddress().toUpperCase(Locale.getDefault()),
+				System.currentTimeMillis(),
+				intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MAX_VALUE),
 				bluetoothDevice.getName(),
 				alias == null ? "null" : alias,
 				bluetoothDevice.getBondState() == BluetoothDevice.BOND_BONDED)
@@ -190,7 +184,7 @@ final class BluetoothChecker {
 	 *
 	 * @param intent the intent containing the new Bluetooth state
 	 */
-	void bluetoothStateChanged(final Intent intent) {
+	void bluetoothStateChanged(@NonNull final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int bluetooth_state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
@@ -233,7 +227,7 @@ final class BluetoothChecker {
 	 *
 	 * @param intent the intent containing the new connection state
 	 */
-	void connectionStateChanged(final Intent intent) {
+	void connectionStateChanged(@NonNull final Intent intent) {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
