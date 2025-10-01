@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
 import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
-public final class PowerChecker {
+final class PowerChecker {
 	class BatteryInfo {
 		int battery_percentage = -1;
 		boolean battery_present = false;

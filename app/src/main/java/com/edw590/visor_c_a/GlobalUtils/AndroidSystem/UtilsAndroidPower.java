@@ -317,7 +317,7 @@ public final class UtilsAndroidPower {
 	}
 
 	/**
-	 * <p>Set the screen brightness.</p>
+	 * <p>Get the screen brightness.</p>
 	 *
 	 * @return the screen brightness percentage
 	 */

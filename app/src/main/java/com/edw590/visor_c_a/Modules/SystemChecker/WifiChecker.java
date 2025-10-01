@@ -44,7 +44,7 @@ import java.util.Locale;
 
 import UtilsSWA.UtilsSWA;
 
-public final class WifiChecker {
+final class WifiChecker {
 	@Nullable final WifiManager wifi_manager = UtilsCheckHardwareFeatures.isWifiSupported() ?
 			UtilsNetwork.getWifiManager() : null;
 
@@ -56,7 +56,7 @@ public final class WifiChecker {
 
 	int attempts = 0;
 
-	public static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
+	static final List<ExtDevice> nearby_aps_wifi = new ArrayList<>(64);
 
 	/**
 	 * <p>Enables or disables Wi-Fi.</p>
@@ -70,19 +70,16 @@ public final class WifiChecker {
 	}
 
 	/**
-	 * <p>Checks if Wi-Fi is enabled, and if not, enables it and starts a scan.</p>
+	 * <p>In case Wi-Fi is disabled, enables it; on the next check, if it's enabled, starts a scan.</p>
 	 *
 	 * @param ignore_ap true to ignore if the AP is enabled (else it won't enable the Wi-Fi), false otherwise
 	 */
 	void checkWifi(final boolean ignore_ap) {
 		if (System.currentTimeMillis() >= last_check_when_ms + waiting_time_ms && wifi_manager != null) {
-			if (wifi_manager.isWifiEnabled()) {
-				enabled_by_visor = false;
-				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+			if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+				if (wifi_manager.isWifiEnabled()) {
 					wifi_manager.startScan();
-				}
-			} else {
-				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+				} else {
 					if (ignore_ap || !wifi_manager.isWifiApEnabled()) {
 						setWifiEnabled(true);
 					}
@@ -148,61 +145,63 @@ public final class WifiChecker {
 			return;
 		}
 
-		nearby_aps_wifi.clear();
-
 		// Checking again for the permission (aside from before calling startScan()) because the request may
 		// have been done externally in the meantime, and we just go on the ride and use the results.
-		if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-			for (final ScanResult scanResult : wifi_manager.getScanResults()) {
-				long time_detection = System.currentTimeMillis();
-
-				String address = scanResult.BSSID.toUpperCase(Locale.getDefault());
-
-				int nearby_aps_wifi_size = nearby_aps_wifi.size();
-				for (int i = 0; i < nearby_aps_wifi_size; ++i) {
-					ExtDevice device = nearby_aps_wifi.get(i);
-					if (device.type == ExtDevice.TYPE_BLUETOOTH && device.address.equals(address)) {
-						nearby_aps_wifi.remove(i);
-
-						break;
-					}
-				}
-				Boolean untrusted = (Boolean) UtilsReflection.getFieldValue(scanResult, "untrusted");
-				if (untrusted == null) {
-					untrusted = false;
-				}
-				nearby_aps_wifi.add(new ExtDevice(
-						ExtDevice.TYPE_WIFI,
-						address,
-						time_detection,
-						scanResult.level,
-						scanResult.SSID,
-						scanResult.SSID,
-						!untrusted)
-				);
-			}
-
-			if (nearby_aps_wifi.isEmpty() && attempts < 5) {
-				// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
-				// something (has happened. Networks in range and nothing returned).
-				attempts++;
-				wifi_manager.startScan();
-
-				try {
-					Thread.sleep(1000);
-				} catch (final InterruptedException ignored) {
-				}
-			} else {
-				attempts = 0;
-
-				if (enabled_by_visor) {
-					setWifiEnabled(false);
-				}
-			}
-
-			// After we got the results successfully
-			last_check_when_ms = System.currentTimeMillis();
+		if (!UtilsPermsAuths.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+			return;
 		}
+
+		nearby_aps_wifi.clear();
+
+		for (final ScanResult scanResult : wifi_manager.getScanResults()) {
+			long time_detection = System.currentTimeMillis();
+
+			String address = scanResult.BSSID.toUpperCase(Locale.getDefault());
+
+			int nearby_aps_wifi_size = nearby_aps_wifi.size();
+			for (int i = 0; i < nearby_aps_wifi_size; ++i) {
+				ExtDevice device = nearby_aps_wifi.get(i);
+				if (device.type == ExtDevice.TYPE_BLUETOOTH && device.address.equals(address)) {
+					nearby_aps_wifi.remove(i);
+
+					break;
+				}
+			}
+			Boolean untrusted = (Boolean) UtilsReflection.getFieldValue(scanResult, "untrusted");
+			if (untrusted == null) {
+				untrusted = false;
+			}
+			nearby_aps_wifi.add(new ExtDevice(
+					ExtDevice.TYPE_WIFI,
+					address,
+					time_detection,
+					scanResult.level,
+					scanResult.SSID,
+					scanResult.SSID,
+					!untrusted)
+			);
+		}
+
+		if (nearby_aps_wifi.isEmpty() && attempts < 5) {
+			// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
+			// something (has happened. Networks in range and nothing returned).
+			attempts++;
+			wifi_manager.startScan();
+
+			try {
+				Thread.sleep(1000);
+			} catch (final InterruptedException ignored) {
+			}
+		} else {
+			attempts = 0;
+
+			if (enabled_by_visor) {
+				setWifiEnabled(false);
+			}
+		}
+
+		// After we got the results successfully
+		last_check_when_ms = System.currentTimeMillis();
 	}
 
 	/**

@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public final class BluetoothChecker {
+final class BluetoothChecker {
 	// This below can be null if there's no Bluetooth adapter or there was some error, so Nullable for NPE warnings
 	@Nullable final BluetoothAdapter bluetooth_adapter = BluetoothAdapter.getDefaultAdapter();
 	// This one can be null if there's no BLE on the device or there was some error, so NPE warnings are useful
@@ -60,7 +60,7 @@ public final class BluetoothChecker {
 
 	int attempts = 0;
 
-	public static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
+	static final List<ExtDevice> nearby_devices_bt = new ArrayList<>(64);
 
 	/**
 	 * <p>Enables or disables Bluetooth.</p>
@@ -99,13 +99,12 @@ public final class BluetoothChecker {
 	 */
 	void checkBluetooth() {
 		if (System.currentTimeMillis() >= last_check_when_ms + waiting_time_ms && bluetooth_adapter != null) {
-			if (bluetooth_adapter.isEnabled()) {
-				enabled_by_visor = false;
-				if (UtilsPermsAuths.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || UtilsPermsAuths.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+				if (bluetooth_adapter.isEnabled()) {
 					bluetooth_adapter.startDiscovery();
+				} else {
+					setBluetoothEnabled(true);
 				}
-			} else {
-				setBluetoothEnabled(true);
 			}
 		}
 	}
@@ -238,7 +237,6 @@ public final class BluetoothChecker {
 		assert bluetooth_adapter != null; // Won't be null if the *adapter's* state changed...
 
 		int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
-		BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 		if (state == BluetoothAdapter.STATE_CONNECTING || state == BluetoothAdapter.STATE_CONNECTED) {
 			if (enabled_by_visor) {
 				// If a device is at minimum attempting to connect, turn the adapter off instantly.
@@ -246,7 +244,7 @@ public final class BluetoothChecker {
 				// connect in the first place explained in ACTION_STATE_CHANGED's case.
 				// EDIT: it's now attempting to disconnect the device. Doesn't work on Oreo 8.1, but
 				// maybe it works in some other version(s).
-				// EDIT 2: removed it. on BV9500 it's not being fast enough and the headset connected a few
+				// EDIT 2: removed it. On BV9500 it's not being fast enough and the headset connected a few
 				// times. Back to instant-disable. The API says it must be in the connected state to
 				// actually disconnect() anyway.
 				setBluetoothEnabled(false);

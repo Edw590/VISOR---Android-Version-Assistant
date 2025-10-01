@@ -29,8 +29,8 @@ import androidx.annotation.NonNull;
  * <p>The class to instantiate for each detected device (external devices).</p>
  */
 public final class ExtDevice {
-	public static final int TYPE_BLUETOOTH = 0;
-	public static final int TYPE_WIFI = 1;
+	static final int TYPE_BLUETOOTH = 0;
+	static final int TYPE_WIFI = 1;
 
 	/** Type of the device (one of the {@code TYPE_} constants). */
 	public final int type;
@@ -38,17 +38,17 @@ public final class ExtDevice {
 	@NonNull public final String address;
 
 	/** Milliseconds at the time of detection. */
-	public long last_detection;
+	long last_detection;
 	/** RSSI value of the device (like the Bluetooth RSSI or the WiFi RSSI). */
-	public int rssi;
+	int rssi;
 	/** Name of the device (like the Bluetooth device name or the WiFi network SSID). */
-	@NonNull public String name;
+	@NonNull String name;
 	/** In case of Bluetooth, return value of {@link BluetoothDevice#getAlias()}, in other cases where this doesn't
 	 * apply, the same as the {@code name} parameter. */
-	@NonNull public String given_name;
+	@NonNull String given_name;
 	/** True if the 2 devices related (like bond in Bluetooth or saved network in case of Wi-Fi device), false
 	 * otherwise. */
-	public boolean is_linked;
+	boolean is_linked;
 
 	/**
 	 * .
