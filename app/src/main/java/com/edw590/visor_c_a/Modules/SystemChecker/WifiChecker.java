@@ -36,8 +36,8 @@ import com.edw590.visor_c_a.GlobalUtils.UtilsNetwork;
 import com.edw590.visor_c_a.GlobalUtils.UtilsPermsAuths;
 import com.edw590.visor_c_a.GlobalUtils.UtilsReflection;
 import com.edw590.visor_c_a.GlobalUtils.UtilsShell;
-import com.edw590.visor_c_a.Registry.UtilsRegistry;
 import com.edw590.visor_c_a.Registry.RegistryKeys;
+import com.edw590.visor_c_a.Registry.UtilsRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -170,29 +170,23 @@ final class WifiChecker {
 			);
 		}
 
+		if (enabled_by_visor) {
+			setWifiEnabled(false);
+		}
+
 		if (found_aps.isEmpty() && attempts < 5) {
 			// In case we didn't get any results, try at most 5 times to be sure it wasn't an internal error or
 			// something (has happened. Networks in range and nothing returned).
 			attempts++;
-			wifi_manager.startScan();
-
-			try {
-				Thread.sleep(1000);
-			} catch (final InterruptedException ignored) {
-			}
 		} else {
 			attempts = 0;
 
 			nearby_aps_wifi.clear();
 			nearby_aps_wifi.addAll(found_aps);
 
-			if (enabled_by_visor) {
-				setWifiEnabled(false);
-			}
+			// After we got the results successfully
+			last_check_when_ms = System.currentTimeMillis();
 		}
-
-		// After we got the results successfully
-		last_check_when_ms = System.currentTimeMillis();
 	}
 
 	/**
