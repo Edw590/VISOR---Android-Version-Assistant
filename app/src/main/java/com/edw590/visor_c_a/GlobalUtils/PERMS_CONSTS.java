@@ -49,6 +49,7 @@ public final class PERMS_CONSTS {
 			{Manifest.permission.ANSWER_PHONE_CALLS, String.valueOf(Build.VERSION_CODES.O)},
 			{Manifest.permission.CALL_PHONE, String.valueOf(Build.VERSION_CODES.BASE)},
 			{Manifest.permission.BLUETOOTH_CONNECT, String.valueOf(Build.VERSION_CODES.S)},
+			{Manifest.permission.BLUETOOTH_SCAN, String.valueOf(Build.VERSION_CODES.S)},
 	};
 	private static final String[][] dev_perms_list = {
 			// Only from Jelly Bean 4.2 this permission began being of development type, and hence can only be granted
