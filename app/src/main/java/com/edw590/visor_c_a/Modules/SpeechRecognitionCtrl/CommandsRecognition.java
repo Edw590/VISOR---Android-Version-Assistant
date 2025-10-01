@@ -116,7 +116,7 @@ public final class CommandsRecognition extends Service implements IModuleSrv {
 			// timings.
 
 			// 3 seconds to call onReadyForSpeech() after starting the service
-			put(ON_START_COMMAND_STR, UtilsApp.isRunningOnWatch() ? 6_000L : 3_000L);
+			put(ON_START_COMMAND_STR, UtilsApp.isRunningOnWatch() ? 10_000L : 3_000L);
 			// Waits for user speech to begin - give people some time (this is also decided by the recognizer itself -
 			// if it sees there's no speech, it will call onEndOfSpeech() (or onError(), I think, not sure anymore))
 			put(ON_READY_FOR_SPEECH_STR, 5_000L);
