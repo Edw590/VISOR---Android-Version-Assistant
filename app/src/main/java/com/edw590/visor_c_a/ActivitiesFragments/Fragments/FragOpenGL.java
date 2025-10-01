@@ -463,7 +463,10 @@ public final class FragOpenGL extends Fragment implements GLSurfaceView.Renderer
 			sensor_manager.unregisterListener(sensor_listener);
 		}
 		UtilsOpenGL.deleteProgram();
-		requireContext().unregisterReceiver(broadcastReceiver);
+		try {
+			requireContext().unregisterReceiver(broadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 
 		showSystemUI(requireActivity().getWindow().getDecorView());
 	}

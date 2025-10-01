@@ -183,7 +183,10 @@ public final class ProtectedLockScrSrv extends Service implements IModuleSrv {
 	public void onDestroy() {
 		super.onDestroy();
 
-		unregisterReceiver(localBroadcastReceiver);
+		try {
+			unregisterReceiver(localBroadcastReceiver);
+		} catch (final IllegalArgumentException ignored) {
+		}
 	}
 
 	@Override
