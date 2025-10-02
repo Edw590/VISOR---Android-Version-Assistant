@@ -82,7 +82,7 @@ public final class TabRegistryAutomaticValues extends Fragment {
 				requireActivity().runOnUiThread(runnable);
 
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(5000);
 				} catch (final InterruptedException ignored) {
 				}
 			}
