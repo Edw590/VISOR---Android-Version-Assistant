@@ -212,11 +212,13 @@ public final class SystemChecker implements IModuleInst {
 			// Or there are also no broadcast delays if the function call is right here.
 			UtilsRegistry.setData(RegistryKeys.K_CURR_NETWORK_TYPE, UtilsNetwork.getCurrentNetworkType(), false);
 
-			// Bluetooth
-			bluetooth_checker.checkBluetooth();
+			if (!UtilsApp.isRunningOnWatch()) {
+				// Bluetooth
+				bluetooth_checker.checkBluetooth();
 
-			// Wi-Fi
-			wifi_checker.checkWifi(false);
+				// Wi-Fi
+				wifi_checker.checkWifi(false);
+			}
 
 			times++;
 

@@ -52,7 +52,7 @@ final class WifiChecker {
 
 	boolean enabled_by_visor = false;
 	static final long SCAN_WIFI_EACH_MS = (long) (2.5 * 60000.0); // 2.5 minutes
-	static final long SCAN_WIFI_EACH_PS_MS = SCAN_WIFI_EACH_MS << 2; // 2.5 * 4 = 10 minutes
+	static final long SCAN_WIFI_EACH_PS_MS = SCAN_WIFI_EACH_MS * 4; // 2.5 * 4 = 10 minutes
 	long waiting_time_ms = SCAN_WIFI_EACH_MS;
 	long last_check_when_ms = 0;
 

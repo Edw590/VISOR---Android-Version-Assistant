@@ -56,7 +56,7 @@ final class BluetoothChecker {
 
 	boolean enabled_by_visor = false;
 	static final long DISCOVER_BT_EACH_MS = (long) (5.0 * 60000.0); // 5 minutes
-	static final long DISCOVER_BT_EACH_PS_MS = DISCOVER_BT_EACH_MS << 2; // 5 * 4 = 20 minutes
+	static final long DISCOVER_BT_EACH_PS_MS = DISCOVER_BT_EACH_MS * 4; // 5 * 4 = 20 minutes
 	long waiting_time_ms = DISCOVER_BT_EACH_MS;
 	long last_check_when_ms = 0;
 
