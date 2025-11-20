@@ -62,10 +62,10 @@
 			android:id="@+id/frag_online_info_chk"
 			android:title="@string/fragOnlineInfoChk_title_ACA"
 			android:icon="@drawable/development" />
-		<!--item
+		<item
 			android:id="@+id/frag_system_checker"
 			android:title="@string/fragSystemChecker_title_ACA"
-			android:icon="@drawable/development" /-->
+			android:icon="@drawable/development" />
 		<item
 			android:id="@+id/frag_smart_checker"
 			android:title="@string/fragSMARTChecker_title_ACA"
